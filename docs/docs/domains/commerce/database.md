@@ -8,34 +8,36 @@ source_conversation_id: 6a933931-27f8-83ea-9df3-b054d2bca5fe
 
 # Commerce 数据库 · Schema V1
 
-Commerce Schema V1 正式定稿为 **16 张业务表**。会话要求：表级与字段级设计一并冻结，后续除非新需求，不再随意加字段或万能表，进入文档 + PostgreSQL migration 阶段。
+Commerce Schema V1 定稿为 **16 张业务表**。本会话后续完成一次「全域审计后的确认性修订」（Final Audited Contract）：**主体模型与 16 张表保持不变，不新增、不删除、不拆分、不合并**；本轮只把跨 Domain 契约、部分枚举与不变量正式落定。
 
-## 状态：逻辑模型 `frozen`，部分物理约定 `designing`
+## 状态：逻辑模型与 Commerce 物理约定 `frozen`（经审计确认）
 
 | 层面 | 状态 | 说明 |
 | --- | --- | --- |
-| 表清单、字段语义、可空性、默认值、CHECK/UNIQUE、索引意图、状态枚举、业务规则、删除策略 | `frozen` | 可直接作为实现依据 |
-| **主键类型（UUID vs `bigint identity`）** | `designing` | 会话用 `uuid`，与全局规范第 3 条及 D-055/ADR-015 冲突，提交主会话裁决 |
-| **跨域引用是否建 FK** | `designing` | 会话主张「跨域只存 ID 不建 FK」，与全局规范第 11/12 条及 Chat 复合 FK 现状冲突，提交主会话裁决 |
-| `business_id` / `user_id` / `conversation_id` / `image_asset_id` 的物理类型 | `designing` | 依赖上两项裁决（若定 bigint 则这些跨域列需相应改型） |
+| 表清单、字段语义、可空性、默认值、CHECK/UNIQUE、域内 FK、索引意图、状态枚举、业务规则、删除策略 | `frozen` | 可直接作为实现依据 |
+| **Commerce 自身主键 `id uuid PRIMARY KEY`** | `frozen` | 审计明确保持 UUID 主键，不改回 bigint |
+| **跨 Domain 引用 = 对方对外暴露的 logical/public UUID，禁止引用他域内部 BIGINT PK；Commerce→Identity/Social/Chat/Rewards/Media 不建 physical FK** | `frozen` | 审计正式确立为域契约（不是遗漏） |
+| `business_type` 枚举 | `frozen` | 本轮 `reward_grant` → **`reward_delivery`**（见 §11） |
+| 全项目主键类型与跨域 FK 的统一口径 | `frozen` | 已由 [ADR-018](../../adr/ADR-018-global-database-design-principles-final.md)「全局数据库设计原则最终版」裁定：混合主键合法（BIGINT 域保留 BIGINT、Commerce/Trust 保留 UUID）；跨域一律 stable logical UUID、禁止 physical 跨域 FK。Commerce 的 `uuid` 主键与跨域 logical UUID 写法**合规**，不再视为冲突 |
 
-> 本文下方 DDL 忠实保留会话 V1 原稿（UUID 主键、跨域不建 FK）。**在主会话就上述物理约定裁决前，不得直接把本 DDL 复制执行**，也不得据此改动全局规范或其他四个已用 `bigint identity` 的域。裁决方向参照 [Chat 的 ADR-015](../../adr/ADR-015-chat-naming-and-sql-adjudication.md)「物理偏差回归全局规范」。
+> 本文下方 DDL 是该会话原稿并按审计修订（`reward_grant`→`reward_delivery`）。Commerce 域自身的物理约定已经冻结；**跨域 physical FK 的缺失是 [ADR-018](../../adr/ADR-018-global-database-design-principles-final.md) 确立的正式契约**，不要当作漏建去「补 FK」。
 
-## 统一数据库原则（会话版）
+## 统一数据库原则（审计确认版）
 
 ```text
-主键            uuid（与全局规范冲突，见上表 designing）
+主键            id uuid PRIMARY KEY（Commerce 内所有实体，审计确认）
+跨域引用        存对方 logical/public UUID（user_id/conversation_id/asset_id/…），不建 physical FK，禁止引用他域内部 BIGINT PK
+第三方 Provider ID   继续用 provider 原始字符串 varchar(191)（provider_payment_id / _transaction_id / _event_id / _refund_id）
 时间            timestamptz
 真钱金额        bigint amount_minor + currency varchar(3)
 Coins           bigint，不使用 currency='COIN'
 状态            varchar + CHECK，不使用 PostgreSQL ENUM（与全局规范一致）
 扩展字段        jsonb，仅用于非核心扩展
-域内关联        FK
-跨域关联        会话用「只存 UUID，不建 FK」（与全局规范冲突，见上表 designing）
+域内关联        真实 physical FK，ON DELETE RESTRICT / NO ACTION，交易链不级联
 交易事实        原则上不物理删除
-Ledger          append-only
+Ledger          append-only，只 INSERT
 历史价格/权益    Snapshot
-所有资产变化    必须经过 Wallet + Ledger
+所有资产变化    必须经过 Wallet + Ledger（同一事务，强制不变量）
 ```
 
 ## 模块与表清单
@@ -167,7 +169,7 @@ CREATE INDEX idx_commerce_gifts_active_sort
 ON commerce_gifts (sort_order, id) WHERE status = 'active';
 ```
 
-`image_asset_id` 是 Media/Asset 域的逻辑引用（是否建 FK 取决于上表 `designing` 裁决）。
+`image_asset_id` 是 Media/Asset 域对外暴露的 logical/public UUID：只保存该引用，**不建 Media physical FK，也不复制 storage provider/bucket/object_key/mime/宽高/cdn 等底层字段**（Commerce 只知道「哪个 Asset」，不知道「Asset 存在哪里」）。
 
 ---
 
@@ -215,7 +217,7 @@ CREATE INDEX idx_commerce_orders_pending_expiry ON commerce_orders (expires_at)
     WHERE status = 'pending_payment' AND expires_at IS NOT NULL;
 ```
 
-`user_id` 是用户域逻辑引用（会话不建跨域 FK，见 `designing`）。
+`user_id` 是用户域对外暴露的 logical/public UUID，**不建 Identity physical FK**（禁止引用 `identity.users` 内部 BIGINT PK）。
 
 ### 6. `commerce_order_items`
 
@@ -438,7 +440,7 @@ CREATE TABLE commerce_wallet_ledger (
     CONSTRAINT ck_commerce_wallet_ledger_after CHECK (balance_after >= 0),
     CONSTRAINT ck_commerce_wallet_ledger_balance CHECK (balance_after = balance_before + amount),
     CONSTRAINT ck_commerce_wallet_ledger_business_type
-        CHECK (business_type IN ('order_fulfillment','reward_grant','gift_send','wallet_adjustment','wallet_reversal','refund_recovery')),
+        CHECK (business_type IN ('order_fulfillment','reward_delivery','gift_send','wallet_adjustment','wallet_reversal','refund_recovery')),
     CONSTRAINT ck_commerce_wallet_ledger_metadata CHECK (jsonb_typeof(metadata) = 'object')
 );
 
@@ -446,7 +448,7 @@ CREATE INDEX idx_commerce_wallet_ledger_wallet ON commerce_wallet_ledger (wallet
 CREATE INDEX idx_commerce_wallet_ledger_user ON commerce_wallet_ledger (user_id, created_at DESC, id DESC);
 ```
 
-正式原则：只 `INSERT`，正常业务不 `UPDATE`、不 `DELETE`。`reward_grant.business_id` 引用 Reward 域 UUID（是否建 FK 与 `business_id` 物理类型取决于 `designing` 裁决）。会话曾考虑用 `business_ref varchar(128)` 替代 `business_id uuid` 以避免依赖他域主键类型，最终倾向保留 `business_id uuid` 并「全项目统一 UUID」——该前提与全局基线冲突，见「与全局 SQL 规范的关系」。
+正式原则：只 `INSERT`，正常业务不 `UPDATE`、不 `DELETE`（可进一步用数据库角色权限禁止应用账号 `UPDATE/DELETE`，不因此新增表）。`business_id` 是**多态 logical UUID**：域内来源指向本域表（`order_fulfillment/gift_send/wallet_adjustment/wallet_reversal/refund_recovery`），跨域来源 `reward_delivery` 指向 Rewards 域 `RewardDelivery` 的 logical UUID；**`business_id` 本身不建 physical FK，这是契约不是遗漏**，来源唯一性与幂等由 `UNIQUE(wallet_id, business_type, business_id)` 保证。审计将 `reward_grant` 正式改名为 `reward_delivery`（契约枚举修订，不增删表）。
 
 ### 12. `commerce_wallet_adjustments`
 
@@ -555,7 +557,7 @@ CREATE INDEX idx_commerce_gift_sends_conversation ON commerce_gift_sends (conver
 CREATE INDEX idx_commerce_gift_sends_gift ON commerce_gift_sends (gift_id, created_at DESC);
 ```
 
-`conversation_id`、`sender_user_id`、`receiver_user_id`、`gift_image_asset_id_snapshot` 均为跨域/基础设施逻辑引用（是否建 FK 取决于 `designing` 裁决）。赠礼事务必须一次提交：`GiftSend + Wallet debit + Ledger + Outbox GiftSent`。
+`conversation_id`、`sender_user_id`、`receiver_user_id`、`gift_image_asset_id_snapshot` 均为他域/基础设施对外暴露的 logical/public UUID，**一律不建 physical FK**。`commerce_gift_sends` 是全系统礼物转移/消费的**唯一 authoritative fact**：Social/Chat 不得再建第二份 canonical gift-send 表，Chat 展示礼物时最多引用 `gift_send_id` logical UUID 或查询组合，不复制交易事实。本表内的 `gift_code_snapshot / gift_name_snapshot / gift_image_asset_id_snapshot / unit_coin_cost / quantity / total_coin_cost` 正是 authoritative 交易快照，继续保留。赠礼事务必须一次提交：`GiftSend + Wallet debit + Ledger + Outbox GiftSent`。
 
 ---
 
@@ -675,17 +677,32 @@ commerce_wallet_adjustments / _reversals ──→ Wallet / Ledger
 ❌ commerce_creator_earnings / _withdrawals / _settlements
 ```
 
-## 与全局 SQL 规范的关系
+## 与全局 SQL 规范的关系（审计后）
 
-| 项 | 全局规范（D-007）/ 已冻结域 | Commerce V1 会话版 | 结论 |
+| 项 | 全局规范（D-007）/ 已冻结域 | Commerce 最终确认版 | 结论 |
 | --- | --- | --- | --- |
 | 表名 | 复数 | `commerce_*` 复数 | 一致 |
 | 状态/枚举 | `varchar + CHECK`，不用 ENUM | `varchar + CHECK` | 一致 |
-| 金额 | `amount_minor bigint`，禁 float | 真钱 `amount_minor`，Coins `bigint` 且不用 `currency='COIN'` | 一致（且更严格地区分法币/虚拟币） |
+| 金额 | `amount_minor bigint`，禁 float | 真钱 `amount_minor`，Coins `bigint` 且不用 `currency='COIN'` | 一致 |
 | JSONB | 仅存动态数据 | metadata / payload / fulfillment_payload | 一致 |
-| **主键** | `bigint generated always as identity`（第 3 条）；Chat 经 ADR-015 已回归 identity | 会话用 `uuid PRIMARY KEY`，并假设「全项目一直用 UUID」 | **冲突，`designing`，提交主会话裁决**（该前提与 D-007/D-055/ADR-015 及四域实际基线不符） |
-| **跨域外键** | 第 11/12 条保留并允许跨 Schema FK；Chat 已用 `(conversation_id,user_id)` 复合 FK | 会话主张「跨域只存 ID 不建 FK」 | **冲突，`designing`，提交主会话裁决** |
-| 域内 FK | 保留 | 域内 FK 完整保留 | 一致 |
+| 域内 FK | 保留 | 域内 physical FK 全保留，`ON DELETE RESTRICT` | 一致 |
 | 物理删除 | 按业务决定 | 交易表不物理删除；Ledger/Adjustment/Reversal 不可改删 | 一致 |
+| **Commerce 主键** | 早期第 3 条 `bigint identity`；Chat 经 ADR-015 用 `bigint identity` | 审计确认 `id uuid PRIMARY KEY` 保持 | **合规**：[ADR-018](../../adr/ADR-018-global-database-design-principles-final.md) 确立混合主键合法，Commerce 保留 UUID、不做迁移 |
+| **跨域引用** | 早期第 11/12 条允许跨 Schema FK；Social/Chat 现存跨域 BIGINT physical FK 示例 | 审计确认：跨域只存 logical/public UUID、**不建 physical FK**，禁止引用他域内部 BIGINT PK | **合规**：与 [ADR-018](../../adr/ADR-018-global-database-design-principles-final.md)「跨域 logical UUID、无 physical FK」一致；Chat/Social 现存跨域 FK 属 ADR-018 的机械性修订范围 |
 
-**上述两项物理冲突不影响已 `frozen` 的表清单、字段语义、约束意图、状态枚举与业务规则；不得据此把 16 表模型整体降级为 `designing`，也不得在未裁决前把本 DDL 直接落成 migration。** 裁决记录见 [ADR-016](../../adr/ADR-016-commerce-money-and-append-only-ledger.md)、[未决事项](../../governance/open-questions.md)。
+**要点：** 本次全域审计已把 Commerce 自身的物理约定（UUID 主键 + 跨域 logical UUID + 无 physical FK）正式冻结。项目级层面，[ADR-018](../../adr/ADR-018-global-database-design-principles-final.md)「全局数据库设计原则最终版」已裁定：**混合主键合法**（早期 BIGINT 域保留 BIGINT，Commerce/Trust 等保留 UUID，不做无业务价值的主键迁移），**跨域一律 stable logical UUID 且不建 physical 跨域 FK**。因此 Commerce 的写法与全局规范一致，不再是冲突；早期 Chat/Social 文档里出现的跨 Schema BIGINT FK 示例属 ADR-018 待做的「机械性修订」范围（改存 logical UUID、删 physical FK），由主架构会话统一推进，Commerce 无需改动。裁决与速查见 [ADR-018](../../adr/ADR-018-global-database-design-principles-final.md)、[PostgreSQL 总规范](../../architecture/database.md)。
+
+## 审计确认的跨域契约与不变量（Final Audited Contract）
+
+主体 16 表不变，本轮正式确立/收紧以下规则：
+
+- **跨域 ID 契约**：`user_id / sender_user_id / receiver_user_id / conversation_id / image_asset_id / gift_image_asset_id_snapshot / operator_id / requested_by_id / business_id(跨域)` 全部是他域**对外稳定的 logical/public UUID**；即使 Identity/Chat/Social 内部用 BIGINT，Commerce 也只持有其对外 UUID。第三方 Provider 的 `provider_payment_id / provider_transaction_id / provider_event_id / provider_refund_id` 不在此列，继续用 provider 原始字符串 `varchar(191)`。
+- **FK 契约**：域内 physical FK 全保留（见各表 DDL）；Commerce→Identity/Social/Chat/Rewards/Media/Operations **明确不建 physical FK**。
+- **`business_type` 枚举修订**：`reward_grant` → `reward_delivery`；`RewardDelivery` 是唯一奖励发放来源。
+- **Rewards 边界**：Rewards 只提出「RewardDelivery X 应向用户 U 发放 N Coins」，**不得 `UPDATE commerce.wallets` 或 `INSERT commerce.wallet_ledger`**；资产记账必须由 Commerce Application Service 执行。authoritative ownership：Coins/Wallet/Ledger/Payment/Refund → Commerce；奖励规则/资格/发放生命周期 → Rewards。
+- **Gift 边界**：`commerce.gift_sends` 是全系统唯一 canonical 礼物事实；Chat/Social 不建第二套 gift 交易表，展示时引用 `gift_send_id` logical UUID。
+- **Media 边界**：只存 `image_asset_id` logical UUID，不复制 storage 元数据。
+- **受控冗余保留**：`order_fulfillments.order_id`、`refunds.order_id` 均可由上游推导但**保留**，只补应用层一致性 `fulfillment.order_id = fulfillment.order_item.order_id`、`refund.order_id = refund.payment.order_id`；`wallet_ledger/wallet_adjustments/wallet_reversals/refund_recoveries.user_id` 保留并强制 `record.user_id = wallet.user_id`。不为消除冗余而改结构。
+- **原子性不变量（强制）**：任何资产变化必须 `BEGIN → lock wallet（SELECT … FOR UPDATE）→ 校验业务/幂等 → 计算 before/after → INSERT ledger → UPDATE wallet → 更新对应业务事实 → COMMIT`，否则全部 rollback；`GiftSend/OrderFulfillment/RewardDelivery/Adjustment/Reversal/RefundRecovery` 与 Wallet+Ledger 必须同事务。
+- **幂等与不变量（全部保留）**：payment provider event 幂等（`UNIQUE(provider, provider_event_id)`，无稳定 id 时 Provider Adapter 必须生成可重复计算的稳定幂等标识，不得因 `provider_event_id IS NULL` 放弃 webhook 幂等）；provider transaction 唯一；Wallet 单用户唯一；`balance >= 0`、`balance_after = balance_before + amount`（后台管理员也不得制造负余额）；Ledger append-only；`UNIQUE(original_ledger_entry_id)` Reversal 不可重复、不支持 partial reversal；金额一律 `bigint` minor units。
+- **配置生命周期**：products/gifts `draft/active/inactive/archived`，product_prices `active/inactive/archived`，`coin_packs` 无独立 status（生命周期随 `products.status`）；不因他域用 `enabled/retired` 就为统一风格重命名。

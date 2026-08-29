@@ -63,8 +63,10 @@ Commerce Domain
 - **所有资产变化统一入口。** 不出现 `GiftService`/`RewardService`/`PaymentService` 各自 `UPDATE wallet`；一律经 `WalletService`（`credit/debit/reverse` 或 `applyEntry`）在单事务内锁钱包、校验余额、写 Ledger、更新余额。`Ledger.user_id` 必须与 `Wallet.user_id` 一致。
 - **历史靠 Snapshot，不靠当前配置。** `OrderItem` 与 `GiftSend` 必须保存下单/送礼当时的价格、名称、类型等快照；Catalog 改名改价不得回算历史记录。
 - **Adjustment vs Reversal 语义不同。** `Adjustment` 是没有自然业务来源时的人工/系统主动账务纠正凭证（可正可负，如客服补偿 +60、误发回收 −900）；`Reversal` 是针对**某一笔已存在 Ledger** 的反向冲正，金额必须是原流水的相反数，不能冲正一个 Reversal，一笔原流水最多冲正一次，V1 不支持部分冲正。二者都只保存成功事实（本地事务，无 status）。绝不允许管理员直接 `UPDATE commerce_wallets`。
-- **Ledger `business_type` 收口为六个完整业务名**（不使用 `purchase`/`reward` 等模糊名）：`order_fulfillment`、`reward_grant`、`gift_send`、`wallet_adjustment`、`wallet_reversal`、`refund_recovery`。
-- **Reward 是独立域，Commerce 不建 `commerce_rewards`。** Reward 域决定「为什么奖励、奖励多少、是否满足条件」，最终资产发放写入 Commerce Wallet/Ledger（`business_type = reward_grant`，`business_id` 指向 Reward 域的发放记录）；Commerce 只负责把这笔奖励资产安全记账，不拥有奖励规则。
+- **Ledger `business_type` 收口为六个完整业务名**（不使用 `purchase`/`reward` 等模糊名；审计后 `reward_grant` 正式改为 `reward_delivery`）：`order_fulfillment`、`reward_delivery`、`gift_send`、`wallet_adjustment`、`wallet_reversal`、`refund_recovery`。
+- **Reward 是独立域，Commerce 不建 `commerce_rewards`。** Reward 域决定「为什么奖励、奖励多少、是否满足条件」，并通过 **`RewardDelivery` 请求 Commerce 发放资产**——Rewards **不得直接 `UPDATE commerce.wallets` 或 `INSERT commerce.wallet_ledger`**，真正记账由 Commerce 在同事务内完成，Ledger 以 `business_type = reward_delivery`、`business_id` 逻辑引用 `RewardDelivery` 的 UUID（不建 FK）。authoritative ownership：Coins/Wallet/Ledger/Payment/Refund 归 Commerce，奖励规则与发放生命周期归 Rewards。
+- **`commerce_gift_sends` 是全系统礼物转移/消费的唯一 authoritative fact。** Social/Chat 不得再建第二份 canonical gift-send 表；Chat 若要展示礼物，最多保存/引用 `gift_send_id` logical UUID 或查询组合，不复制可独立演化的交易事实（sender/receiver/gift/quantity/coin_cost/快照等只以 Commerce 为准）。
+- **跨域引用统一为 logical/public UUID。** `user_id`、`conversation_id`、`image_asset_id`、`operator_id`、跨域 `business_id` 等都只存对方对外暴露的稳定 UUID，**禁止引用其他域内部 BIGINT PK**，且**不建跨域 physical FK**；第三方 Provider 的原始字符串 ID（`provider_payment_id` 等）除外，继续用 `varchar(191)`。
 - **GiftSend 只有成功/冲正。** 余额不足、礼物下架、关系不允许等直接事务失败、不落库；只有真实成功赠礼才 INSERT，状态 `succeeded`，正式冲正后 `reversed`。送礼事务必须一次提交：`GiftSend + Wallet debit + Ledger + Outbox GiftSent`。
 - **Refund 与 RefundRecovery 绝不合并。** Refund 回答「外部真钱退款是否成功」，RefundRecovery 回答「已发给用户的虚拟资产是否回收成功」。系统允许真实异常状态并存（如 `Payment refunded` 但 `RefundRecovery failed`），这不是不一致。V1 产品规则：Coin Pack 只支持全额退款（表结构允许未来部分退款），Service 保证累计退款 ≤ 原 Payment。
 - **两套金额严格分开。** 真钱用 `amount_minor bigint + currency varchar(3)`；Coins 用 `bigint`（`coin_amount`/`coin_cost`/`amount`），**不使用 `currency='COIN'`**——Coin 不是法币，不塞进同一 monetary amount 模型。
@@ -108,9 +110,9 @@ commerce_reward*（Reward 属独立域）
 - 礼物接收者能否获得积分、兑换或收益为 `deferred`，**不得预设为 Creator Economy**。
 - Chat 侧如何展示送礼结果（GiftSent 消费、是否落 Chat 消息）为 `deferred`，见 D-014/D-054 与 [Chat 域](../chat/index.md)。
 
-## 与全局数据库规范的关系（重要，见 ADR-016 / 未决事项）
+## 与全局数据库规范的关系（审计后，见 ADR-016 / 未决事项）
 
-Commerce V1 的 DDL 由会话以 **UUID 主键 + 跨域不建 FK** 的形式给出，并假设「整个项目一直采用 UUID」。这与本项目的既有冻结基线**冲突**：全局 PostgreSQL 规范第 3 条要求 `bigint generated always as identity` 主键（D-007），且 Chat 已在 ADR-015 / D-055 明确「主键回归 identity」、Identity/Learning/Social/Chat 四域实际都用 `bigint identity`。因此：
+Commerce 主体模型经「全域审计后的确认性修订」再次确认：**16 张表与业务规则不变**，并把域内物理约定正式冻结为 **`id uuid PRIMARY KEY` + 跨域只存 logical/public UUID、不建 physical FK**。
 
-- 上述**业务模型、模块、16 表清单、语义、状态机、业务规则均 `frozen`**；
-- **物理表示（主键类型、跨域是否建 FK、`business_id` 类型）标记为 `designing`，提交主架构会话统一裁决**，本文档与 [Commerce 数据库](database.md) 不擅自把它改成 UUID 也不擅自改回 bigint。详见 [未决事项](../../governance/open-questions.md) 与 [ADR-016](../../adr/ADR-016-commerce-money-and-append-only-ledger.md)。
+- 上述**业务模型、模块、16 表清单、语义、状态机、业务规则、跨域契约均 `frozen`**（本轮审计把原先标 `designing` 的「主键类型 / 跨域是否建 FK / `business_id` 类型」在 Commerce 域内确认为定稿，方向是保留 UUID、跨域无 physical FK）。
+- **项目级口径已由 [ADR-018](../../adr/ADR-018-global-database-design-principles-final.md)「全局数据库设计原则最终版」裁定**：混合主键合法（早期 BIGINT 域保留 BIGINT，Commerce/Trust 保留 UUID），跨域一律 stable logical UUID、不建 physical 跨域 FK。因此 Commerce 写法**合规**，不再是冲突；早期 Chat/Social 里的跨 Schema BIGINT FK 属 ADR-018 的机械性修订范围，由主架构会话推进，Commerce 不改动。详见 [ADR-018](../../adr/ADR-018-global-database-design-principles-final.md)、[未决事项](../../governance/open-questions.md)。

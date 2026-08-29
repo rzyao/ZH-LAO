@@ -17,10 +17,11 @@ Commerce Domain 第一阶段设计（会话 `6a933931…`）需要确定：产�
 4. **所有资产变化经统一入口。** 一律通过 `WalletService` 的单事务 `applyEntry/credit/debit/reverse`，禁止各业务 Service 直接 `UPDATE wallet`，禁止管理员直接改余额。
 5. **Adjustment 与 Reversal 分离。** Adjustment 是无自然业务来源的人工/系统纠正凭证；Reversal 是针对某一笔既有 Ledger 的反向冲正，二者语义与审计链不同。
 6. **历史用 Snapshot 固化。** `OrderItem`、`GiftSend` 保存当时的价格/名称/类型，历史交易不依赖可变的 Catalog 当前配置。
-7. **Reward 是独立域，不落入 Commerce 表。** Reward 决定「是否奖励、奖励多少、由什么规则触发」，最终资产写入 Commerce 钱包，Ledger 以 `business_type = reward_grant` 逻辑引用 Reward 域发放记录；Commerce 不实现奖励规则。
+7. **Reward 是独立域，不落入 Commerce 表。** Reward 决定「是否奖励、奖励多少、由什么规则触发」，通过 **`RewardDelivery` 请求 Commerce 发放资产**；Rewards **不得直接 `UPDATE commerce.wallets` / `INSERT commerce.wallet_ledger`**，记账由 Commerce 同事务完成，Ledger 以 `business_type = reward_delivery` 逻辑引用 `RewardDelivery` UUID（不建 FK）。Commerce 不实现奖励规则。（审计把早期的 `reward_grant` 正式改名 `reward_delivery`。）
 8. **拒绝万能交易表。** 不建 `commerce_transactions` / `commerce_wallet_transactions`，Order、Payment、GiftSend、Refund 各为独立业务事实。
 9. **V1 冻结 16 张业务表**（Catalog 4 / Ordering 3 / Payment 2 / Wallet 4 / Gifting 1 / Refund 2），会员、Subscription、Entitlement、促销、优惠券、提现、结算、多资产/冻结余额、Creator Earnings 等**明确延后**，不预留表。
-10. **物理表示待统一裁决。** 会话以 `uuid` 主键、跨域不建 FK 给出 DDL，并假设「全项目一直采用 UUID」；这与全局 PostgreSQL 规范第 3 条（`bigint identity`，D-007）及 Chat 在 ADR-015 的「主键回归 identity」裁决冲突。本 ADR 只冻结上述**领域与账务模型**，主键类型与跨域 FK 策略**不在此决定**，交由主架构会话统一裁决（见未决事项）。
+10. **礼物唯一权威。** `commerce.gift_sends` 是全系统礼物转移/消费的唯一 canonical fact；Social/Chat 不建第二套 gift 交易表，Chat 展示最多引用 `gift_send_id` logical UUID，不复制交易事实。
+11. **跨域引用契约定为 logical/public UUID（本会话全域审计确认）。** Commerce 自身保留 `id uuid PRIMARY KEY`；所有引用他域的字段只存对方对外暴露的 logical/public UUID，**禁止引用他域内部 BIGINT PK，且 Commerce→Identity/Social/Chat/Rewards/Media 不建 physical FK**（域内仍保留 physical FK）。审计已把 Commerce 域内这套物理约定正式冻结；**全项目层面的统一口径随后由 [ADR-018](ADR-018-global-database-design-principles-final.md)「全局数据库设计原则最终版」裁定**——混合主键合法（BIGINT 域保留 BIGINT、Commerce/Trust 保留 UUID），跨域一律 stable logical UUID、禁止 physical 跨域 FK，同一业务事实单一 authoritative owner。故 Commerce 写法合规、不再是冲突；早期 Chat/Social 现存跨域 BIGINT FK 属 ADR-018 的机械性修订范围，不在本 ADR 处理。
 
 ## 原因
 
@@ -31,7 +32,7 @@ Commerce Domain 第一阶段设计（会话 `6a933931…`）需要确定：产�
 
 ## 影响
 
-- Commerce V1 的 16 表业务/逻辑设计冻结，可进入实现；但 DDL 中的 UUID 主键与「跨域不建 FK」在裁决前不得直接落成 migration，也不得据此改动其他四个已用 `bigint identity` 的域或全局规范。
+- Commerce V1 的 16 表业务/逻辑设计 + 域内物理约定（`id uuid PK`、跨域 logical UUID、无 cross-domain physical FK）已经本会话全域审计**确认冻结**，可进入 migration。唯一仍开放的是**跨域层面的项目级统一口径**（与全局规范第 3/11/12 条、Chat ADR-015、Social 现存跨域 BIGINT FK 相反）；在其裁决前不改动其他已冻结域，也不因全局未统一而回退 Commerce。
 - 送礼闭环依赖 Outbox（`GiftSent`）可靠通知 Chat；Chat 侧展示集成仍 `deferred`（D-014 / D-054）。
 - Entitlement 中心继续作为能力判定模型（ADR-005），其落表延后到后续 Commerce 修订。
 
