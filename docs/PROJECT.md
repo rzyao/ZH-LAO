@@ -13,6 +13,7 @@
 - 实时推送不独立成域：Chat 发布领域事件，WebSocket/App Push 由基础设施负责。
 - Commerce 独占「钱与虚拟资产」事实，采用虚拟币钱包 + 只追加账本；Social/Chat 不处理资金，Chat 送礼只展示。
 - 代码定义能力，Feature Flag 决定开放，运营配置决定规则。
+- Rewards 只做奖励决定与幂等发放编排（V1：奖励计划/规则版本/可信事件/奖励决定/发放，5 张表），资产入账由 Commerce 执行；三层职责：源域定事实、Rewards 定奖励、Commerce 执行。
 
 ## 文档地图
 
@@ -40,8 +41,8 @@
 | Community | `deferred` | 首期动态事实已归 Social；独立社区能力延期 |
 | Chat | `frozen` | 7 张表定稿 `frozen`；物理 DDL（跨域用户 FK、Media FK、`public_id` 生成算法、Outbox 物理表）`designing`，用例字段契约 `designing` |
 | Commerce | `frozen`（V1） | 16 张业务表 `frozen`；物理约定（UUID 主键 / 跨域 FK）与全局规范冲突，`designing` 待主会话裁决；会员/Subscription/Entitlement 落表 `deferred` |
-| Rewards | `baseline` | `designing` |
-| Trust & Safety | `baseline` | `designing` |
+| Rewards | `frozen` | `frozen`：5 张表（programs/rules/events/grants/deliveries）字段级定稿；项目级 Outbox 统一、Manual Grant、非 Coin 资产延期 |
+| Trust & Safety | `baseline` | 治理链路 6 表逻辑模型 `baseline`（本会话定稿）；`uuid` 主键/跨域不建 FK 与全局规范冲突，`designing` 待主会话裁决（D-092）；真人认证 Verification 子域 `designing` |
 | Operations | `baseline` | `designing` |
 | Platform | `baseline` | `designing` |
 

@@ -63,6 +63,8 @@ export default defineConfig({
           { text: 'Commerce', link: '/domains/commerce/' },
           { text: 'Commerce · 数据库总览', link: '/domains/commerce/database' },
           { text: 'Rewards', link: '/domains/rewards/' },
+          { text: 'Rewards · 应用服务与事件', link: '/domains/rewards/application-and-events' },
+          { text: 'Rewards · 数据库总览', link: '/domains/rewards/database' },
           { text: 'Trust & Safety', link: '/domains/trust/' },
           { text: 'Operations', link: '/domains/operations/' },
           { text: 'Platform', link: '/domains/platform/' }
@@ -95,7 +97,8 @@ export default defineConfig({
           { text: 'ADR-013 已读游标而非 Receipt 表', link: '/adr/ADR-013-read-state-as-cursor-not-receipt-table' },
           { text: 'ADR-014 不新增 Notification 域', link: '/adr/ADR-014-no-notification-domain-events-outbox-infra' },
           { text: 'ADR-015 Chat 命名与 SQL 规范裁决', link: '/adr/ADR-015-chat-naming-and-sql-adjudication' },
-          { text: 'ADR-016 Commerce 资金与只追加账本', link: '/adr/ADR-016-commerce-money-and-append-only-ledger' }
+          { text: 'ADR-016 Commerce 资金与只追加账本', link: '/adr/ADR-016-commerce-money-and-append-only-ledger' },
+          { text: 'ADR-017 Rewards 边界与事件驱动发放', link: '/adr/ADR-017-rewards-boundary-and-event-driven-grant' }
         ]
       }
     ],

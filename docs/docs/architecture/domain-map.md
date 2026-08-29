@@ -15,8 +15,8 @@ last_updated: 2026-08-30
 | Community | 未来独立社区能力及其规则（当前不拥有首期 `social_*` 动态表） | Social 的 Profile/关系/首期公开动态事实 |
 | Chat | 会话实体与 Direct 身份、成员与已读游标、消息身份与会话内顺序、文本内容、图片资源引用、用户侧会话状态（置顶/免打扰/隐藏/清空）、撤回事实、聊天领域事件发布 | 媒体文件存储与 URL、礼物交易与资产变化、推送与 WebSocket 传输实现、社交关系与匹配状态、翻译结果存储 |
 | Commerce | 商品、价格、会员、权益、订单、支付、退款、礼物和虚拟资产账本 | 贡献评分 |
-| Rewards | 贡献事件、评分规则、得分记录、奖励和活动 | 订单、支付、权益消费判定 |
-| Trust & Safety | 真人认证、审核案件、内容处置、跨域限制、封禁、申诉 | 用户根状态、`social_blocks` 当前关系事实 |
+| Rewards | 奖励计划/活动与生命周期、规则版本、接收其他域可信事件、奖励决定（Grant）、幂等发放编排（V1 奖励资产 Coin 经 Commerce 入账） | 钱包/余额/账本、调整/冲正/退款、礼物/订单/支付、计分/积分/任务/徽章（V1）、反向查询其他域验证事实、权益消费判定 |
+| Trust & Safety | 真人认证、审核案件、证据、审核决定、内容处置指令、跨域限制、封禁、申诉（只产生治理处置与处置历史，经领域事件由属主域执行） | 用户根状态、`social_blocks` 当前关系事实、被审核业务对象正文 |
 | Operations | 运营人员、RBAC、工作队列、内容/用户运营、数据看板 | 各业务实体所有权 |
 | Platform | Feature Flag、产品配置、地区规则、媒体、通知、版本和审计基础设施 | 具体业务规则的执行 |
 
@@ -40,9 +40,10 @@ last_updated: 2026-08-30
 | Commerce | Product / Membership / Entitlement | Product, Price, MembershipPlan, Subscription, EntitlementDefinition, UserEntitlement |
 | Commerce | Order / Payment / Refund | Order, OrderItem, Payment, PaymentTransaction, Refund |
 | Commerce | Gift / Wallet | Gift, GiftTransaction, Wallet, WalletTransaction |
-| Rewards | Contribution / Scoring / Reward / Campaign | ContributionEvent, ContributionRule, ScoreRecord, RewardDefinition, RewardGrant, RewardCampaign |
-| Trust & Safety | Verification / Review / Report | VerificationCase, VerificationMedia, ReviewTask, ReviewDecision, Report |
-| Trust & Safety | Moderation / Ban / Block / Appeal | ModerationCase, ModerationAction, Restriction, Ban, UserBlock, Appeal |
+| Rewards | Program / Rule / Event / Grant / Delivery | RewardProgram, RewardRule, RewardEvent, RewardGrant, RewardDelivery |
+| Trust & Safety | Report / Moderation / Evidence / Decision / Enforcement / Appeal（治理链路 6 表，`baseline`） | Report, ModerationCase, ModerationEvidence, ModerationDecision, EnforcementAction, Appeal |
+| Trust & Safety | Verification（真人认证，本会话未重新设计，`designing`） | VerificationCase, VerificationMedia |
+| Trust & Safety | _旧实体名 `ReviewTask`/`ReviewDecision`/`ModerationAction`/`Restriction`/`Ban`/`UserBlock` 已被 6 表模型取代（`superseded`）；`UserBlock` 归 Social（`social_blocks`，D-034）_ | — |
 | Operations | Staff / RBAC / Workbench | StaffAccount, Role, Permission, StaffRole, WorkQueue, WorkAssignment |
 | Operations | Content Ops / User Ops / Analytics | ContentPublishTask, UserOperation, MetricDefinition, Dashboard |
 | Platform | Feature / Config / Region | FeatureFlag, FeatureRule, ConfigItem, ConfigVersion, Region, RegionPolicy |
@@ -58,6 +59,7 @@ User → SocialProfile → Follow → Mutual Follow → Match → Conversation �
 SocialProfile → SocialPost → Like / Comment
 User → Verification
 Commerce / Rewards / Promotion → Entitlement
+Learning / Social / Identity → RewardEvent → RewardRule → RewardGrant → RewardDelivery → Commerce → Wallet（V1）
 ```
 
 - 首期公开动态、点赞、评论和举报入口属于 Social；Community 不重复拥有这些事实表。
@@ -67,3 +69,5 @@ Commerce / Rewards / Promotion → Entitlement
 - Chat 的 Conversation 与 Social Match 解耦：Match 授予聊天权限，会话身份由用户对唯一确定；取消关注、解除匹配、重新互关都不改变会话身份，历史消息仍然存在。
 - 聊天权限在发送时由 `canChat()` 读取 Social 与 Trust & Safety 暴露的事实判断；Chat 表不保存 `match_id`、`follow_id` 或 relationship status。完整契约见 [Chat 应用服务与事件](../domains/chat/application-and-events.md)。
 - 实时推送不形成独立业务域：Chat 在事务提交后发布领域事件，WebSocket/App Push 由 Application/Infrastructure 负责。主方案已明确否决为推送临时新增 Notification Domain。
+- Rewards 与 Commerce 的边界：Rewards 只产生奖励决定（Grant）与幂等发放（Delivery），资产入账（V1 奖励资产 Coin）由 Commerce 执行；跨域引用（`grant_no`、`source_reference_id`、`idempotency_key` 等）一律是逻辑业务引用，Rewards 表不建跨域 FK。完整契约见 [Rewards 应用服务与事件](../domains/rewards/application-and-events.md)。
+- Trust & Safety 的域边界（设计 Trust & Safety 会话）：Trust 只拥有举报→审核案件→证据→决定→处置→申诉的治理事实，只引用跨域对象稳定逻辑 ID（`subject_type + subject_id`），不建跨域 FK、不持有被审核业务对象正文；`content_remove` / `social_post_restrict` / `chat_send_restrict` 等处置经领域事件由 Social / Chat 自行变更自身状态，Trust 不直接 `UPDATE` 他域。完整契约见 [Trust & Safety 域](../domains/trust/index.md) 与 [Trust 数据库](../domains/trust/database.md)。

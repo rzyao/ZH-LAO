@@ -53,13 +53,20 @@ Promotion ─────┘
 
 这样中国用户购买会员、老挝用户通过有效贡献获得奖励时，可以得到完全相同的权益，业务功能不关心来源。
 
+> V1 说明：Rewards 奖励以 Coin 写入 Commerce 资产账户，不走 Entitlement；「Rewards → User Entitlement」方向不变，但 Entitlement 落表与权益型奖励（会员天数、Follow 额度、曝光等）延后到真实需求出现（见 [未决事项](../governance/open-questions.md)）。
+
 ## Contribution 与 Rewards
 
-贡献候选包括真人认证、资料完善、每日活跃、收到关注、有效 Match、回复、有效聊天、优质动态和社区互动。
+Rewards 采用「事件 → 规则 → 奖励决定 → 幂等发放」链路（[Rewards 域](../domains/rewards/index.md) V1 已定稿 5 张表）。早期草案的「贡献计分（Contribution/Scoring + ScoreRecord）」模型已被取代（`superseded`）：V1 不建计分、积分、任务或成长系统。
 
 ```text
-Contribution Event × Rule/Weight × Condition × Cap
-→ Score → Reward Rule → Reward → Entitlement
+源域可信事件（LEARNING_DAILY_GOAL_COMPLETED / PROFILE_COMPLETED / INVITE_SUCCEEDED …）
+→ reward_events → reward_rules（条件/限额/奖励额，按版本管理）
+→ reward_grants（奖励决定）→ reward_deliveries（幂等发放）
+→ Commerce 资产入账（V1 奖励资产仅 Coin）
 ```
 
-权重、条件和上限由运营配置。具体分值仅为 `illustrative`，不能写死；尤其不能只按消息数量奖励，避免刷消息。
+- 分层职责：源域决定「事实是否发生」，Rewards 决定「是否值得奖励」，Commerce 决定「资产如何入账」。Rewards 不维护钱包/账本，不创建退款/调账/冲正。
+- V1 奖励资产仅 `COIN`（经 Commerce 钱包入账）；会员天数、Follow 额度、曝光等权益型奖励以及 POINT/EXP/BADGE/GIFT/COUPON 资产均**延后**，待真实需求出现再设计（仍遵守 Entitlement 中心的原有方向）。
+- 候选奖励场景（每日签到、完成学习目标、连续学习、完善资料、首次发布动态、邀请用户、运营/节日活动、新用户奖励等）为 `illustrative` 示例，最终以 `reward_rules` 配置为准；尤其禁止只按消息数量奖励，避免刷量。
+- 奖励事件必须来自可信内部 Domain（consumer），禁止 C 端直接上报事件或后台手动发币（Manual Reward Grant V1 不实现）。

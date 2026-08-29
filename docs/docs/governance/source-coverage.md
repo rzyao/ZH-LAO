@@ -76,3 +76,35 @@ last_updated: 2026-08-30
 | 金额与两套单位 | 真钱 amount_minor+currency，Coins bigint，不用 currency='COIN' | [Commerce 数据库](../domains/commerce/database.md)、D-072 |
 | 总体收口审查 | 状态机分列、删除策略、跨表应用层规则、明确不建表清单 | [Commerce 数据库](../domains/commerce/database.md)、D-074~D-076 |
 | 全局规范差异（本会话新增冲突） | UUID 主键、跨域不建 FK 两项物理约定与 D-007/D-055/ADR-015 及四域基线冲突，提交主会话裁决 | [Commerce 数据库](../domains/commerce/database.md)「与全局 SQL 规范的关系」、[未决事项](open-questions.md)、D-077/D-078 |
+
+## “设计奖励域”会话
+
+来源：分享 `https://chatgpt.com/share/6a933fa4-8d30-83ea-a28f-5d8c39fb5fac`（标题「设计奖励域」，共 32 条消息）。会话以「Rewards Domain 最终定稿清单（5 张表）」收尾。正文已导出至 `_session/shares/6a933fa4-8d30-83ea-a28f-5d8c39fb5fac/`。
+
+| 会话阶段 | 已覆盖内容 | 文档 |
+| --- | --- | --- |
+| Rewards 边界与三层职责 | 源 Domain 定事实、Rewards 定奖励、Commerce 执行入账；不碰 Wallet/Ledger、不创建 Refund/Adjustment/Reversal、不负责 Gift | [Rewards](../domains/rewards/index.md)、[ADR-017](../adr/ADR-017-rewards-boundary-and-event-driven-grant.md) |
+| 5 张表定稿 | programs/rules/events/grants/deliveries 的字段、可空性、默认值、FK/UNIQUE/CHECK/INDEX、状态枚举、删除规则；event_id NOT NULL 修正 | [Rewards 数据库](../domains/rewards/database.md) |
+| 状态机与流程 | 标准奖励流程、Event/Rule/Grant/Delivery 状态机、PROCESSED/IGNORED 区分、崩溃恢复与任务租约 | [Rewards 应用服务与事件](../domains/rewards/application-and-events.md) |
+| 时间规则 | 一律用 `event.occurred_at`、产品业务时区、晚到事件匹配历史有效 Rule 版本、RETIRED 可处理历史窗口迟到事件、PAUSED 只拦其后新事件 | [Rewards 应用服务与事件](../domains/rewards/application-and-events.md) |
+| 幂等与并发 | 三级幂等（event/grant/delivery）、`pg_advisory_xact_lock`、`dedupe_key` 生成策略、不建 Counter 表 | [Rewards 数据库](../domains/rewards/database.md)、[Rewards 应用服务与事件](../domains/rewards/application-and-events.md) |
+| 事务边界 | Grant+Delivery 同一本地事务、禁止跨域大事务、Commerce 调用在提交后异步执行、超时 → RETRY_WAIT 复用原幂等键 | [Rewards 应用服务与事件](../domains/rewards/application-and-events.md) |
+| Commerce 合同 | `creditAsset` 参数与返回 `target_reference_id`、Port/Adapter、禁止 SQL JOIN 跨域 | [Rewards 应用服务与事件](../domains/rewards/application-and-events.md) |
+| Admin/API/Service | 后台 API、Domain/Application Service、Policy、错误码、后台权限、日志/指标、C 端 `GET /api/me/rewards` | [Rewards 应用服务与事件](../domains/rewards/application-and-events.md) |
+| 明确不建 / 延期 | 13 类表不建、无 claim、Manual Grant 不做、权益型奖励与新资产延后、Outbox 项目级统一延后 | [Rewards](../domains/rewards/index.md)、[未决事项](open-questions.md) |
+| 与全局 SQL 规范 | `bigint identity` 主键与全局规范一致；本域不建跨域 FK 与 Commerce 会话倾向一致，但全局政策仍待裁决（D-077/D-078） | [Rewards 数据库](../domains/rewards/database.md)「与全局 SQL 规范的关系」 |
+| 与旧模型关系 | 早期 Contribution/Scoring（ScoreRecord 计分）模型被 5 表模型取代 | [设计台账](design-register.md) D-017 `superseded` |
+
+## "设计 Trust & Safety Domain"会话
+
+来源：分享 `https://chatgpt.com/share/6a93401c-51bc-83ea-aa6e-ac314a5af8c8`（标题「设计安全治理域」，共 28 条消息）。用户以「继续设计 Trust & Safety Domain。请承接之前已经确定的整体架构和数据库设计原则。不能越过域边界」开场，并连续以「依次完成所有表的设计」「做一次最终审计定稿」推进且未反对，会话以「Trust & Safety Domain 可以正式冻结」收尾。正文已导出至 `docs/sources/chatgpt_share_6a93401c/`。
+
+| 会话阶段 | 已覆盖内容 | 文档 |
+| --- | --- | --- |
+| 总体原则承袭 | 分域、跨域只引用不侵入、UUID+域内FK+跨域逻辑ID（与全局规范冲突，D-092）、varchar+CHECK、timestamptz、核心事实不可变、无 Trigger | [数据库规范](../architecture/database.md)、[Trust 数据库](../domains/trust/database.md) |
+| Trust 域边界 | 只拥有举报→审核→证据→决定→处置→申诉链路；不拥有资料/动态/关注/会话/消息/订单/礼物/奖励；不直改他域（T&S-12） | [Domain Map](../architecture/domain-map.md)、[Trust 域](../domains/trust/index.md) |
+| 6 表逻辑模型 | reports/moderation_cases/moderation_evidence/moderation_decisions/enforcement_actions/appeals 字段、约束、索引、状态枚举 | [Trust 数据库](../domains/trust/database.md) |
+| 最终审计定稿 | 删/改 12 处（reports 不可变、evidence 类型/来源拆开、decision 去重复时间、enforcement active→applied、加 cancelled、细化社交/聊天限制、appeal_id 保留处罚修改史） | [Trust 数据库](../domains/trust/database.md)、[设计台账](design-register.md) D-090/D-091 |
+| 统一 subject 协议 | subject_type+subject_id 稳定公共类型，不建跨域 FK | [Trust 数据库](../domains/trust/database.md)、[设计台账](design-register.md) D-093 |
+| 域边界事件 | 处置经领域事件由 Social/Chat 执行 | [Trust 域](../domains/trust/index.md)、[设计台账](design-register.md) D-095 |
+| 真人认证未设计 | Verification 子域本会话未重新设计；旧实体 superseded | [Trust 域](../domains/trust/index.md)、[设计台账](design-register.md) D-094 |

@@ -1,14 +1,14 @@
 ---
 status: baseline
 last_updated: 2026-08-30
-source_conversation: 数据库域设计；继续设计社交资料；设计聊天领域；设计 Commerce Domain
-source_conversation_id: 6a92f0c0-90b4-83ea-a43d-cccb1ef2666d；6a931551-8a30-83e9-8caf-60e529abce68；6a9319c2-2204-83ea-9341-7a57757a3082；6a933931-27f8-83ea-9df3-b054d2bca5fe
-source_share_url: https://chatgpt.com/share/6a9329e5-9f28-83ea-8eb1-f85be6e414fa；https://chatgpt.com/share/6a933931-27f8-83ea-9df3-b054d2bca5fe
+source_conversation: 数据库域设计；继续设计社交资料；设计聊天领域；设计 Commerce Domain；设计奖励域；设计 Trust & Safety Domain
+source_conversation_id: 6a92f0c0-90b4-83ea-a43d-cccb1ef2666d；6a931551-8a30-83e9-8caf-60e529abce68；6a9319c2-2204-83ea-9341-7a57757a3082；6a933931-27f8-83ea-9df3-b054d2bca5fe；6a93401c-51bc-83ea-aa6e-ac314a5af8c8
+source_share_url: https://chatgpt.com/share/6a9329e5-9f28-83ea-8eb1-f85be6e414fa；https://chatgpt.com/share/6a933931-27f8-83ea-9df3-b054d2bca5fe；https://chatgpt.com/share/6a933fa4-8d30-83ea-a28f-5d8c39fb5fac；https://chatgpt.com/share/6a93401c-51bc-83ea-aa6e-ac314a5af8c8
 ---
 
 # 设计决策台账
 
-来源：ChatGPT 会话“数据库域设计”“继续设计社交资料”“设计聊天领域”“设计 Commerce Domain”。用户明确选择，以及方案提出后以“继续/继续下一步”推进且未反对，均视为当前基线。
+来源：ChatGPT 会话“数据库域设计”“继续设计社交资料”“设计聊天领域”“设计 Commerce Domain”“设计奖励域”。用户明确选择，以及方案提出后以“继续/继续下一步”推进且未反对，均视为当前基线。
 
 | ID | 结论 | 状态 | 事实源 | 备注 |
 | --- | --- | --- | --- | --- |
@@ -28,7 +28,7 @@ source_share_url: https://chatgpt.com/share/6a9329e5-9f28-83ea-8eb1-f85be6e414fa
 | D-014 | 礼物交易归 Commerce；Chat 与礼物的集成属 `deferred`，当前 Chat 域不存在 `GiftMessageReference`、GIFT 消息类型、`chat_message_gift` 或 `sendGiftMessage()`；未来若设计，由 Commerce 定义集成模型 | `baseline` | [Commerce](../domains/commerce/index.md) | 支持多入口送礼；Chat 侧集成方式未定 |
 | D-015 | Commerce/Rewards 通过 Entitlement 统一授予能力 | `baseline` | [ADR-005](../adr/ADR-005-entitlement-centered-authorization.md) | 不使用 is_vip |
 | D-016 | 推荐采用硬筛选 + 可配置解释性评分 | `baseline` | [功能开放](../product/feature-rollout.md) | 不做 ML 推荐 |
-| D-017 | Rewards 使用贡献事件、规则、条件、上限和奖励 | `baseline` | [Rewards](../domains/rewards/index.md) | 示例分值 illustrative |
+| D-017 | Rewards 使用贡献事件、规则、条件、上限和奖励 | `superseded` | [Rewards](../domains/rewards/index.md) | 旧「Contribution/Scoring 计分模型」被 D-079~D-088 取代 |
 | D-018 | Learning 知识分语言，课程/练习/进度统一 | `baseline` | [Learning 模型](../domains/learning/model.md) | 不强求语言学对称 |
 | D-019 | Learning 使用 Content Registry | `baseline` | [ADR-004](../adr/ADR-004-learning-content-registry.md) | 禁止万能多态 FK |
 | D-020 | Learning 第一版 43 张必建表与可选 question_reviews | `frozen` | [Learning 数据库](../domains/learning/database.md) | 会话口述 44，最终表名去重后为 43 |
@@ -90,5 +90,22 @@ source_share_url: https://chatgpt.com/share/6a9329e5-9f28-83ea-8eb1-f85be6e414fa
 | D-076 | Commerce V1 冻结为 16 张业务表（Catalog4/Ordering3/Payment2/Wallet4/Gifting1/Refund2）；`system_outbox_events` 属基础设施不计入 | `frozen` | [Commerce 数据库](../domains/commerce/database.md) | 送礼依赖 Outbox `GiftSent` 通知 Chat |
 | D-077 | **冲突，待主会话裁决**：Commerce 会话 DDL 用 `uuid` 主键并假设「全项目一直用 UUID」，与 D-007 规范第 3 条、D-055/ADR-015「主键回归 identity」及 Identity/Learning/Social/Chat 四域实际 `bigint identity` 冲突 | `designing` | [Commerce 数据库](../domains/commerce/database.md)「与全局 SQL 规范的关系」、[未决事项](open-questions.md) | 文档维护不擅自改 UUID 也不擅自改回 bigint；不改全局规范/其他域 |
 | D-078 | **冲突，待主会话裁决**：Commerce 会话主张「跨域只存 ID 不建 FK」（user_id/conversation_id/image_asset_id/business_id/operator_id），与规范第 11/12 条及 Chat 已用 `(conversation_id,user_id)` 复合 FK 现状冲突；若定 bigint 则这些跨域列需改型 | `designing` | [Commerce 数据库](../domains/commerce/database.md)、[未决事项](open-questions.md) | 域内 FK 保留不受影响 |
+| D-079 | 三层职责边界冻结：源 Domain 定事实、Rewards 定奖励、Commerce 执行资产入账；Rewards 不碰钱包/Ledger，不创建 Refund/Adjustment/Reversal，不反向查询源域验证事实 | `frozen` | [ADR-017](../adr/ADR-017-rewards-boundary-and-event-driven-grant.md)、[Rewards](../domains/rewards/index.md) | 「设计奖励域」会话 |
+| D-080 | Rewards V1 冻结 5 张表（programs/rules/events/grants/deliveries），字段级定稿；`reward_grants.event_id` NOT NULL（所有 Grant 必有事件来源）；明确不建 counters/claims/points/tasks/badges/levels 等 13 类表 | `frozen` | [Rewards 数据库](../domains/rewards/database.md) | 取代早期 ContributionEvent/ScoreRecord/RewardDefinition/RewardCampaign 草案 |
+| D-081 | V1 奖励资产仅 `COIN`（`reward_type` CHECK）；`reward_amount > 0` 无负奖励；1 Grant = 1 奖励资产 = 1 Delivery（V1）；权益型奖励与 POINT/EXP/BADGE/GIFT/COUPON 延后 | `frozen` | [Rewards 数据库](../domains/rewards/database.md) | 扣回资产只能走 Commerce |
+| D-082 | 三级幂等：Event `UNIQUE(source_domain, source_event_id)`；Grant `UNIQUE(dedupe_key)` + `UNIQUE(rule_id,event_id,user_id)`；Delivery `UNIQUE(idempotency_key)`（恒为 `reward:{grant_no}`）；`max_grants>1` 用 `pg_advisory_xact_lock`，不建 Counter 表 | `frozen` | [Rewards 数据库](../domains/rewards/database.md)、[Rewards 应用服务与事件](../domains/rewards/application-and-events.md) | 并发上限防「同时 COUNT=0 却双发」 |
+| D-083 | 时间规则：所有奖励周期与 Rule 匹配用 `event.occurred_at`（业务实际时间），绝不用 `created_at/granted_at`；默认产品业务时区；晚到事件匹配发生时有效的 Rule Version；`RETIRED` 版本仍可处理其历史窗口内迟到事件；`PAUSED` 只拦「暂停之后」的新事件，已有 Grant 继续发放 | `frozen` | [Rewards 应用服务与事件](../domains/rewards/application-and-events.md) | 禁止 `WHERE status='ACTIVE'` 简单选规则 |
+| D-084 | 事务边界：Grant 与 Delivery 同一 Rewards 本地事务创建；禁止跨 Domain 大事务；调用 Commerce 必须在提交后由 Delivery Worker 异步执行；`timeout` → `RETRY_WAIT` 并用**原** `idempotency_key` 重试 | `frozen` | [Rewards 应用服务与事件](../domains/rewards/application-and-events.md) | 超时 ≠ 发放失败 |
+| D-085 | Rule 版本化：ACTIVE 后核心配置（触发事件/奖励类型/金额/条件/限额/生效时间）不可原地修改，只能新建 Version；`(program_id, rule_key)` 同一时刻最多一个 ACTIVE/PAUSED 版本；版本有效区间不允许重叠（应用层事务内保证，不引 GiST/EXCLUDE） | `frozen` | [Rewards 数据库](../domains/rewards/database.md) | 历史 Grant 永远可追溯 |
+| D-086 | VOID 规则：仅「未成功发放」可 `Grant VOIDED + Delivery CANCELLED`（同一事务）；Delivery `PROCESSING` 禁止 VOID；已 `SUCCEEDED` 只能走 Commerce Adjustment/Reversal；「作废奖励」与「扣回资产」是两个业务决定，不同按钮隐式联动 | `frozen` | [Rewards 应用服务与事件](../domains/rewards/application-and-events.md) | 错误码 `REWARD_ALREADY_DELIVERED` |
+| D-087 | 入口与后台边界：`reward_events` 只来自可信内部 consumer，禁止 C 端/公网 `POST events`、`POST grants`（Manual Grant V1 不实现）、`claim`（不建 `reward_claims`）；后台 4 模块（计划/规则/记录/发放异常）；VOID/RETRY 高风险权限分离；重试必须复用原幂等键 | `frozen` | [Rewards 应用服务与事件](../domains/rewards/application-and-events.md) | 防止客户端伪造事件 |
+| D-088 | 删除规则：`reward_events/grants/deliveries` 永不普通 DELETE；Program/Rule 仅 `DRAFT` 未使用可删，生效后走 ENDED/ARCHIVED/RETIRED；历史 FK 一律 `ON DELETE RESTRICT` | `frozen` | [Rewards 数据库](../domains/rewards/database.md) | 生产历史可追溯 |
+| D-089 | Outbox 与延期项：项目级 Outbox 统一方式待所有域设计结束确定；Rewards 若发布 `REWARD_GRANTED/REWARD_DELIVERED` 用 `rewards.outbox_events`（基础设施表，不计入 5 表）；权益型奖励、Manual Reward Grant、按用户时区奖励、新资产生态延后 | `deferred` | [Rewards 数据库](../domains/rewards/database.md)、[未决事项](open-questions.md) | 不提前造规划 |
+| D-090 | Trust & Safety 治理链路 6 表（reports/moderation_cases/moderation_evidence/moderation_decisions/enforcement_actions/appeals）逻辑模型本会话审计定稿；用户未反对，会话结论为「可以正式冻结」 | `baseline` | [Trust 数据库](../domains/trust/database.md)、[Trust 域](../domains/trust/index.md) | 取代旧 ReviewTask/ReviewDecision/ModerationAction/Restriction/Ban 实体名（D-094） |
+| D-091 | Trust 6 表审计修正（相对首版）：reports 删 status/updated_at 改不可变；cases 加 cancellation_code 及相关 CHECK；evidence 移除 user_submission、source 加 appellant、sha256 改 varchar+CHECK、加 appeal_id 与严格 payload CHECK；decisions 去 created_at 并加强 result/policy/actor CHECK；enforcement active→applied、加 cancelled、action_type 细化、加 appeal_id 与 ended_at/status_reason_code、加 permanent_action_expiry 等 CHECK；appeals 去 created_at、resolved_at→closed_at、加 decision_appellant_unique 与 lifecycle/time_order CHECK | `baseline` | [Trust 数据库](../domains/trust/database.md) | 属非破坏性收紧，未引入新表 |
+| D-092 | **冲突，待主会话裁决**：Trust 6 表采用 `uuid` 主键 + 只保留域内物理 FK + 跨域只存逻辑 ID 不建 FK，与 Commerce V1 写法一致，与 D-007 第 3/11/12 条（bigint identity + 保留/允许跨 Schema FK）冲突；本会话进一步确认该冲突为项目级普遍现象 | `designing` | [Trust 数据库](../domains/trust/database.md)「与全局 PostgreSQL 规范的关系」、[数据库规范](../architecture/database.md)、[未决事项](open-questions.md) | 延用 D-077/D-078；裁决前 Trust DDL 不得直接落 migration，不改全局规范/其他域 |
+| D-093 | Trust 统一审核目标协议 `subject_type + subject_id`（稳定公共类型 user/social_profile/social_post/social_post_image/chat_message/conversation），不建跨域 FK；`subject_type` 是领域协议非表名 | `baseline` | [Trust 数据库](../domains/trust/database.md)、[Domain Map](../architecture/domain-map.md) | 与 T&S-03 一致 |
+| D-094 | 真人认证（Verification）子域本会话未重新设计；旧实体 VerificationCase/VerificationMedia 仍为 `designing`；旧 ReviewTask/ReviewDecision/ModerationAction/Restriction/Ban/UserBlock 被 6 表模型取代（`superseded`）；UserBlock 归 Social（`social_blocks`，D-034） | `designing` / `superseded` | [Trust 域](../domains/trust/index.md)、[Domain Map](../architecture/domain-map.md) | 真人认证表细节待后续会话 |
+| D-095 | Trust 不直改 identity/social/chat/commerce/rewards；处置（content_remove/social_post_restrict/chat_send_restrict 等）经领域事件由属主域执行（T&S-12） | `baseline` | [Trust 域](../domains/trust/index.md)、[Domain Map](../architecture/domain-map.md) | 域边界原则 |
 
 新增主会话结论时，先更新本台账，再更新唯一事实源和覆盖清单。

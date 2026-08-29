@@ -34,9 +34,20 @@ last_updated: 2026-08-30
   - 全局 PostgreSQL 规范第 3 条要求 `bigint generated always as identity` 主键，D-055/ADR-015 已就 Chat 裁决「主键回归 identity」，Identity/Learning/Social/Chat 四域实际均为 `bigint identity`。
   - 但 Commerce V1 会话以 `uuid` 主键给出 DDL，并假设「整个项目一直采用 UUID」——该前提与既有基线不符。
   - 同时 Commerce 主张「跨域只存 ID 不建 FK」（`user_id`/`conversation_id`/`image_asset_id`/`business_id`/`operator_id`），与规范第 11/12 条及 Chat 已用的 `(conversation_id, user_id)` 复合 FK 现状冲突。
-  - **需主架构会话裁决**：全项目统一 `bigint identity` 还是统一 UUID？跨域引用建不建物理 FK？裁决后同步 Commerce DDL 的主键与跨域列类型（D-077/D-078）。裁决前不得把 Commerce DDL 直接落 migration，也不得据此改动其他域或全局规范。
-- Rewards：贡献事件、评分规则、条件、上限、奖励发放的具体表与字段；贡献分值/权重仍为 `illustrative`；Reward 如何经 `reward_grant` 写入 Commerce 钱包的发放记录主键与幂等（与上项 PK 裁决联动）。
-- Trust & Safety/Operations/Platform：审核与限制状态机、RBAC、配置优先级、审计和媒体生命周期。
+  - **需主架构会话裁决**：全项目统一 `bigint identity` 还是统一 UUID？跨域引用建不建物理 FK？裁决后同步 Commerce DDL 的主键与跨域列类型（D-077/D-078）。**Trust 6 表同样采用 `uuid` 主键 + 跨域只存逻辑 ID 不建 FK（D-092），与 Commerce 一致，一并待裁决。** 裁决前不得把 Commerce / Trust DDL 直接落 migration，也不得据此改动其他域或全局规范。
+- Rewards（V1 已定稿，见 [Rewards 数据库](../domains/rewards/database.md)；剩余为延期与联动项）：
+  - 项目级 Outbox 统一方式待所有域设计结束确定；Rewards 若发布 `REWARD_GRANTED/REWARD_DELIVERED` 用 `rewards.outbox_events`（基础设施表，不计入 5 张核心业务表）。
+  - Commerce 侧 `reward_grant` 入账记录/发放确认的具体物理实现仍随 D-077/D-078 全局裁决联动；Rewards→Commerce 合同（`source_domain=REWARDS`、`source_reference_id=grant_no`、`idempotency_key=reward:{grant_no}`）已冻结，不受影响。
+  - 权益型奖励（会员天数、Follow 额度、曝光、Entitlement 落表）与 POINT/EXP/BADGE/GIFT/COUPON 等新奖励资产，待真实产品需求出现再设计（D-075/D-081/D-089）。
+  - Manual Reward Grant（后台手动发 Coin）V1 不实现；未来若需运营批量奖励，走「产生可信 Reward Event → 正常链路」或另行设计受控命令，不开放万能发币入口（D-087）。
+  - 按用户所在时区奖励：V1 统一使用产品业务时区（D-083），按用户时区扩展延后。
+  - Event 消费/发放的 Worker 批量大小、租约超时、重试间隔具体值是实现参数，未逐项定稿。
+- Trust & Safety：
+  - 治理链路 6 表逻辑模型已 `baseline`（D-090/D-091），但物理约定（`uuid` 主键 + 跨域只存逻辑 ID 不建 FK）与全局 PostgreSQL 规范第 3/11/12 条冲突，仍 `designing`，待主会话裁决（D-092，与 Commerce 的 D-077/D-078 为同一议题）。裁决前不得把 Trust DDL 直接落 migration。
+  - 真人认证（Verification）子域本会话未重新设计，旧实体 `VerificationCase`/`VerificationMedia` 仍为 `designing`，表细节待后续会话（D-094）。
+- Operations：运营人员、RBAC、工作队列、内容/用户运营、数据看板的状态机与字段仍 `designing`。
+- Platform：Feature Flag、产品配置优先级、地区规则、媒体生命周期、通知与审计基础设施的物理模型仍 `designing`。
+- 一级域命名：**用户原始请求列出 `Messaging`，但本项目已通过 ADR-015 将「Chat」定为唯一正式命名（`messaging` 名称已废弃，见 [Chat 域](../domains/chat/index.md)）。** 当前文档一律使用 `Chat`；若主会话希望改回 `Messaging`，需重新裁决命名并联动 PROJECT.md、Domain Map、数据库规范与目录。
 - 前端、后端具体技术栈，API 风格、任务队列、部署与发布方案。
 
 未决项只能由主架构会话决定；文档维护阶段不得自行填充。
