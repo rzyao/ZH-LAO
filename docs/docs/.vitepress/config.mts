@@ -5,7 +5,6 @@ export default defineConfig({
   description: '中老双语学习与跨语言社交应用设计文档系统',
   lang: 'zh-CN',
   base: '/',
-  outDir: process.env.VP_OUTDIR || '.vitepress/dist',
   ignoreDeadLinks: false,
   themeConfig: {
     nav: [
@@ -17,6 +16,13 @@ export default defineConfig({
       { text: 'ADR', link: '/adr/' }
     ],
     sidebar: [
+      {
+        text: '使用指南',
+        items: [
+          { text: '阅读与维护文档', link: '/guide/getting-started' },
+          { text: '常见问题', link: '/guide/faq' }
+        ]
+      },
       {
         text: '产品',
         items: [
@@ -42,8 +48,10 @@ export default defineConfig({
           { text: 'Identity', link: '/domains/identity/' },
           { text: 'Identity 流程', link: '/domains/identity/flows' },
           { text: 'Identity 数据库', link: '/domains/identity/database' },
+          { text: 'Identity 业务模型', link: '/domains/identity/model' },
           { text: 'Learning', link: '/domains/learning/' },
           { text: 'Learning 表总览', link: '/domains/learning/database' },
+          { text: 'Learning 业务模型', link: '/domains/learning/model' },
           { text: 'Learning · Knowledge', link: '/domains/learning/knowledge' },
           { text: 'Learning · Curriculum', link: '/domains/learning/curriculum' },
           { text: 'Learning · Practice', link: '/domains/learning/practice' },
@@ -56,6 +64,7 @@ export default defineConfig({
           { text: 'Social · 动态与举报', link: '/domains/social/community-content' },
           { text: 'Social · 数据库总览', link: '/domains/social/database' },
           { text: 'Community', link: '/domains/community/' },
+          { text: 'Community · 数据库待设计', link: '/domains/community/database' },
           { text: 'Chat', link: '/domains/chat/' },
           { text: 'Chat · 会话模型', link: '/domains/chat/conversation' },
           { text: 'Chat · 消息模型', link: '/domains/chat/message' },
@@ -67,6 +76,7 @@ export default defineConfig({
           { text: 'Rewards · 应用服务与事件', link: '/domains/rewards/application-and-events' },
           { text: 'Rewards · 数据库总览', link: '/domains/rewards/database' },
           { text: 'Trust & Safety', link: '/domains/trust/' },
+          { text: 'Trust & Safety · 数据库总览', link: '/domains/trust/database' },
           { text: 'Operations', link: '/domains/operations/' },
           { text: 'Operations · 数据库总览', link: '/domains/operations/database' },
           { text: 'Platform', link: '/domains/platform/' },

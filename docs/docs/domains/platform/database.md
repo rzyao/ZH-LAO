@@ -714,7 +714,7 @@ Infrastructure 不因为服务于整个产品就自动成为 Platform Domain 的
 - 归属：共享技术基础设施能力，**不是新的 Platform 业务子域，不增加第七张业务表**；它是 Social / Chat / Commerce / Learning 等域所用 `asset_id` 的最终 authoritative technical owner。
 - 负责 Asset 的技术事实：`asset_id UUID`（业务域使用的稳定逻辑标识）；storage provider（S3 / Cloudflare R2 / OSS / 本地兼容对象存储，属基础设施实现）；storage location（`bucket`、`object_key`，必要时 storage region）；content metadata（`mime_type`、`size_bytes`、`checksum`、`width`、`height`、`duration` 等按媒体类型保存）；Asset 自身生命周期（如 uploading / available / deleted / purged，具体状态枚举在 Media Infrastructure 落地时单独定稿，`designing`）。
 - 业务 Domain 只保存 `asset_id UUID`（社交资料照片、聊天图片消息、礼物图片、学习音频等），不重复保存 `storage_provider` / `bucket` / `object_key` / `storage_url` / 内部存储路径 / `checksum` / object metadata——否则更换 S3→R2、迁移 bucket、调整 CDN 时会迫使所有业务域同时改数据。
-- Media Infrastructure 不拥有业务语义：Social Photo 排序、头像主图、消息发送状态、礼物商品语义、审核决定（“这张图是否通过安全审核”归 Trust & Safety，“是否用户头像”归 Social，“属于哪条消息”归 Chat）。不能因为所有业务都用文件就把业务关系迁入 Media Infrastructure。
+- Media Infrastructure 不拥有业务语义：Social Photo 的业务排序、Profile Photo 是否主图、Chat Message 的发送状态、Gift 的商品语义、Moderation Decision、举报状态、用户社交资料（“这张图是否通过安全审核”归 Trust & Safety，“是否用户头像”归 Social，“属于哪条消息”归 Chat）。不能因为所有业务都用文件就把业务关系迁入 Media Infrastructure。
 
 ## 最终架构冻结
 
@@ -738,23 +738,27 @@ Platform / Shared Infrastructure（不计入六表）
 
 ## 最终不可违反规则
 
+以下 17 条与「全域审计最终修正版」逐条对应：
+
 1. **PLATFORM-01** Platform Domain 永远保持当前六张业务表，除非未来有新的正式领域设计决策。
-2. **PLATFORM-02** `feature_flags.key` 唯一、稳定、不复用；能明确找到业务 owner 的配置不得进入 `runtime_configs`（Business Rule ≠ Platform Config）。
+2. **PLATFORM-02** `feature_flags.key` 唯一、稳定、不复用。
 3. **PLATFORM-03** `inactive` / `retired` Feature Flag 的 `default_enabled` 必须为 `false`，最终 effective result 必须为 `false`。
-4. **PLATFORM-04** Feature Flag 已使用后不物理删除；`retired` 为终态。
+4. **PLATFORM-04** Feature Flag 已使用后不物理删除。
 5. **PLATFORM-05** Feature Flag Override 是 Current State，可以 DELETE。
-6. **PLATFORM-06** Override 的 Flag / Region 属 Platform Domain 内部引用，继续使用真实 FK + `ON DELETE RESTRICT`。
-7. **PLATFORM-07** `runtime_configs` V1 只有 Current State Config；不得宣称支持 versioning / publish versions / rollback，直到数据库存在真正的版本模型。
-8. **PLATFORM-08** Runtime Config 进入正式使用后通过 `retired` 退役，key 不复用；不存密码、Token、Secret、Private Key。
-9. **PLATFORM-09** App Version 一旦正式发布，保留发布历史，不物理删除；只描述客户端兼容与升级策略，不负责发布包和部署系统。
-10. **PLATFORM-10** Announcement 一旦正式发布，原则上保留历史，通过 `retired` / `ends_at` 控制展示；只是平台广播内容，不拥有用户消息、Push、营销 Campaign、已读状态。
-11. **PLATFORM-11** `platform.regions` 是 Platform 自己的产品运营区域定义，不是全系统 Geography Domain，不建 GIS / 行政区划。
-12. **PLATFORM-12** 其他 Domain 不因 country / region 属性建立数据库 FK 到 `platform.regions`；跨域只使用稳定 logical code / UUID（V1 可直接使用 `region_code`）。
-13. **PLATFORM-13** 后台 Operator 信息（`created_by` / `updated_by` / `published_by` / `disabled_by`）不写进 Platform；“谁进行了操作”由 Operations Domain 负责。
-14. **PLATFORM-14** `system_outbox_events` 是统一共享技术基础设施，只有一套，不按 Domain 分表，不计入 Platform 六张业务表。
+6. **PLATFORM-06** Override 的 Flag / Region 属于 Platform Domain 内部引用，继续使用真实 FK + `ON DELETE RESTRICT`。
+7. **PLATFORM-07** `runtime_configs` V1 只有 Current State Config。不得宣称支持 versioning / publish versions / rollback，直到数据库存在真正的版本模型。
+8. **PLATFORM-08** Runtime Config 进入正式使用后通过 `retired` 退役，key 不复用。
+9. **PLATFORM-09** App Version 一旦正式发布，保留发布历史，不物理删除。
+10. **PLATFORM-10** Announcement 一旦正式发布，原则上保留历史，通过 `retired` / `ends_at` 控制展示。
+11. **PLATFORM-11** `platform.regions` 是 Platform 自己的产品运营区域定义，不是全系统 Geography Domain。
+12. **PLATFORM-12** 其他 Domain 不因 country / region 属性建立数据库 FK 到 `platform.regions`。跨域只使用稳定 logical code / UUID，V1 可直接使用 `region_code`。
+13. **PLATFORM-13** `system_outbox_events` 是统一共享技术基础设施。只有一套，不按 Domain 分表。
+14. **PLATFORM-14** `system_outbox_events` 不计入 Platform Domain 六张业务表。
 15. **PLATFORM-15** Media / Asset 是共享技术基础设施，是所有 `asset_id` 的 authoritative technical owner。
-16. **PLATFORM-16** Social / Chat / Commerce / Learning 等 Domain 只保存 `asset_id UUID`，不得重复保存底层 storage provider / bucket / object key。
-17. **PLATFORM-17** Feature Flag 不得代替领域状态机（产品能力是否开放 ≠ 某业务实体当前状态）；删除策略分类：状态化退役（flag/config/region）、当前关系可 DELETE（override）、保留历史（app version/published announcement）、append-oriented + retention（infrastructure event/audit）。
+16. **PLATFORM-16** Social / Chat / Commerce 等 Domain 只保存 `asset_id UUID`，不得重复保存底层 storage provider / bucket / object key。
+17. **PLATFORM-17** 删除策略分类：Feature Flag / Runtime Config / Region 状态化退役；Override 当前关系可 DELETE；App Version / Published Announcement 保留历史；Infrastructure Event / Audit 按 append-oriented + retention policy。
+
+会话早期的域边界规则 P1–P9（Platform 只拥有跨域运行控制数据、可归属业务域的配置回该域、Feature Flag 不代替领域状态机、Platform 只引用不改他域状态、Operations 管理但不拥有 Platform 数据、App Version 不承担部署职责、Announcement 不演化为 Messaging/Notification/营销、Region 不建 GIS、Runtime Config 不是业务规则仓库）继续有效，见 [Platform 域](index.md)与各表章节（含禁止存密钥、operator 审计字段不进 Platform 等）。
 
 ## `designing` 项（待后续定稿）
 

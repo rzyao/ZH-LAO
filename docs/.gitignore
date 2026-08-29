@@ -2,4 +2,8 @@ node_modules
 .DS_Store
 dist
 .vitepress/dist
+**/.vitepress/dist-verify*/
+**/.vitepress/dist-build/
 .vitepress/cache
+**/_exports/
+**/_session/
