@@ -19,8 +19,17 @@ Chat Domain 设计过程中出现了两套命名与三类 SQL 规范偏差，主
 2. **表名保留 `chat_*` 单数含前缀**，与全局「复数」规范不同，但登记为**已裁决的正式例外**：该域由会话逐表定稿，表名与其结论逐字一致，且 `chat_` 前缀与 Schema 名 `chat` 一致，无语义冲突。
 3. **枚举回归全局规范**：状态/类型一律 `varchar(32)` + CHECK（如 `'active'`/`'closed'`、`'text'`/`'image'`），弃用 `smallint`。
 4. **主键回归全局规范**：`bigint generated always as identity primary key`，弃用显式 `BIGINT PRIMARY KEY`。
-5. **补 `public_id`**：`chat_conversation` 与 `chat_message` 均加 `public_id varchar(32) NOT NULL UNIQUE`；API 对外只暴露 `public_id`，不暴露连续 `id`。
-6. **逻辑模型 `frozen`，物理 DDL 仍 `designing`**：跨域用户 FK 目标表、Media FK、`chat_direct_conversation.created_at` 是否保留、`public_id` 生成算法、Outbox 物理表属于未定稿项，补齐前不得直接复制 DDL 执行。
+5. **补 `public_id`**：`chat_conversation` 与 `chat_message` 均加 `public_id NOT NULL UNIQUE`；API 对外只暴露 `public_id`，不暴露连续 `id`。
+6. **逻辑模型 `frozen`，物理 DDL 局部 `designing`**：跨域用户 FK、Media FK、`chat_direct_conversation.created_at`、`public_id` 类型等已由「全域审计后的最终修正版」解决（跨域统一 logical UUID 无物理 FK、`public_id = UUID`、direct 三列）；剩余 Outbox 物理表与 UUID 分配实现属于未定稿项，补齐前不得直接复制 DDL 执行。
+
+## 修订记录（2026-08-30）
+
+Chat 会话结尾「全域审计后的最终修正版」（分享 `https://chatgpt.com/share/6a9329e5-9f28-83ea-8eb1-f85be6e414fa`，消息 [64] 指令 + [71] 产出）对本 ADR 的**唯一实质修订**：
+
+- 第 5 条 `public_id` 类型由早期 `varchar(32)` 修订为 **UUID**（应用层生成，创建后不可变），与全局最终版 [ADR-018](ADR-018-global-database-design-principles-final.md)「跨域 logical/public ID 统一 UUID」一致。
+- 第 6 条未定稿项清单相应消解：跨域用户 ID / Media `asset_id` 统一为 logical UUID 且不建跨域物理 FK；`chat_direct_conversation` 定稿为三列（不保留 `created_at`）。
+
+本 ADR 其余裁决（命名 Chat、`chat_*` 表名例外、`varchar(32)+CHECK` 枚举、`bigint identity` 主键）不变。审计最终修正版 DDL 中 `type`/`status` 以 `smallint` 表达，属会话早期风格，本项目按第 3 条统一为 `varchar(32)+CHECK`，枚举语义等价。
 
 ## 原因
 

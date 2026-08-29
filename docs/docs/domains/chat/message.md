@@ -26,10 +26,10 @@ chat_message                 消息身份、顺序、发送者、生命周期
 
 | 字段 | 类型 | Null | 默认/约束 | 说明 |
 | --- | --- | --- | --- | --- |
-| `id` | `bigint generated always as identity` | 否 | PK | 内部消息 ID |
-| `public_id` | `varchar(32)` | 否 | UNIQUE | 对外消息 ID；生成格式待定 |
+| `id` | `bigint generated always as identity` | 否 | PK | 内部消息 ID（Chat 内部使用，不对外） |
+| `public_id` | `uuid` | 否 | UNIQUE | 对外/跨域消息 ID；应用层生成，创建后不可修改 |
 | `conversation_id` | `bigint` | 否 | FK → `chat_conversation(id)` | 所属会话 |
-| `sender_user_id` | `bigint` | 否 | — | 发送者 |
+| `sender_user_id` | `uuid` | 否 | — | 发送者（Identity logical UUID，不建跨域 FK） |
 | `client_message_id` | `uuid` | 否 | 与 sender 组成 UNIQUE | 客户端幂等键 |
 | `seq` | `bigint` | 否 | CHECK `> 0`；与 conversation 组成 UNIQUE | 会话内严格递增顺序 |
 | `type` | `varchar(32)` | 否 | CHECK `IN ('text','image')` | 消息业务类型 |
@@ -77,7 +77,7 @@ MessageStatus  'normal' | 'recalled'
 | 字段 | 职责 | 用于 |
 | --- | --- | --- |
 | `id` | 全局识别这一条消息 | 内部关联、举报、审核、日志追踪 |
-| `public_id` | 对外暴露的消息身份 | API、客户端引用，避免暴露连续 ID |
+| `public_id` | 对外/跨域暴露的消息身份（UUID） | API、事件、跨域引用，避免暴露连续 BIGINT ID |
 | `seq` | 这条消息在会话中排第几 | 排序、分页、同步、未读、断点续传 |
 
 不依赖 `created_at` 做严格顺序：极短时间内并发写入可能撞时间戳，重试、导入数据、多节点都会导致顺序不稳定。
@@ -115,6 +115,8 @@ WHERE sender_user_id = :sender AND client_message_id = :client_message_id;
 ### `sender_user_id`
 
 虽然可以从 member 知道谁是成员，但无法知道具体哪一个成员发了这条消息，因此必须由消息自身持有。业务约束「sender 必须是当前 conversation 的 member」已由上面的复合 FK 在数据库层保证。
+
+`sender_user_id` 保存 **Identity logical UUID**，不建跨域物理 FK（全域审计最终修正版，见 [数据库总览](database.md) 的「跨域边界」）。
 
 ### `reply_to_message_id`
 
@@ -158,7 +160,7 @@ WHERE sender_user_id = :sender AND client_message_id = :client_message_id;
 | 字段 | 类型 | Null | 默认/约束 | 说明 |
 | --- | --- | --- | --- | --- |
 | `message_id` | `bigint` | 否 | PK 组成部分；FK → `chat_message(id)` | 所属消息 |
-| `asset_id` | `bigint` | 否 | 与 message_id 组成 UNIQUE | 引用统一 Media/Asset 能力 |
+| `asset_id` | `uuid` | 否 | 与 message_id 组成 UNIQUE | 引用统一 Media/Asset 能力（Media/Asset logical UUID，不建跨域 FK） |
 | `position` | `smallint` | 否 | CHECK `>= 0` | 展示顺序，从 0 开始 |
 
 ```sql

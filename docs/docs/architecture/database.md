@@ -59,7 +59,7 @@ commerce  rewards   trust   operations platform
 | `identity` | `frozen` | 核心四表 SQL 级 `frozen`；OTP/Session/Device 已确认字段，未确认类型逐字段 `designing` |
 | `learning` | `frozen` | 43 张必建表、核心字段与约束已冻结；跨域 Media FK 与内容发布机制局部待定。 |
 | `social` | `frozen` | 20 张首期表已冻结；公开内容字段局部 `designing`。 |
-| `chat` | `frozen` | Chat 第一阶段 7 张表定稿；物理 DDL（跨域用户 FK 目标表、Media FK、`public_id` 生成算法）为 `designing`；逻辑模型符合全局最终版（`bigint identity` 内部 PK + `public_id uuid` logical ID） |
+| `chat` | `frozen` | Chat 第一阶段 7 张表定稿；「全域审计后的最终修正版」已把跨域用户 / Media 引用统一为 logical UUID（无跨域物理 FK）、`public_id` 定为 UUID；剩余物理 DDL（Outbox 物理表、UUID 分配实现）为 `designing`；逻辑模型与跨域契约均符合全局最终版（`bigint identity` 内部 PK + `public_id uuid` logical ID） |
 | `commerce` | `frozen`（V1） | 16 张业务表 `frozen`；物理约定（`uuid` 主键 + 跨域只存 logical UUID 不建物理 FK）**符合全局最终版（ADR-018），compliant**；会员/Subscription/Entitlement 落表 `deferred` |
 | `trust` | `frozen`（治理链路 6 表） | 6 表逻辑模型 `frozen`；`uuid` 主键 + 跨域只存 logical UUID 不建物理 FK **符合全局最终版（ADR-018），compliant**；真人认证 Verification `designing` |
 | `rewards` | `frozen` | 5 张表（programs/rules/events/grants/deliveries）字段级 `frozen`；审计确认跨域引用统一 `uuid` logical reference、不建独立 outbox（统一 `system_outbox_events`），符合全局最终版（ADR-018）；权益型奖励/Manual Grant/非 Coin 资产延后 |
@@ -86,4 +86,4 @@ Commerce V1 与 Trust 6 表采用「`uuid` 主键 + 跨域只存 logical UUID �
 
 ## `public_id` 适用范围
 
-本页「当前预期使用 `public_id` 的对象包括 User、Post、Conversation、Message、Order」已落实：`chat_conversation` 与 `chat_message` 均带有 `public_id varchar(32) NOT NULL UNIQUE`。生成算法与各实体前缀仍为 `designing`。
+本页「当前预期使用 `public_id` 的对象包括 User、Post、Conversation、Message、Order」已落实：`chat_conversation` 与 `chat_message` 均带有 `public_id uuid NOT NULL UNIQUE`（Chat 会话「全域审计后的最终修正版」将早期 `varchar(32)` 定为 UUID，应用层生成）。各实体 `public_id` 的生成/分配实现仍为 `designing`。

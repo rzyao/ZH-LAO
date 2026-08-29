@@ -27,26 +27,21 @@ chat_conversation_user_state   用户自己的聊天列表/UI 状态（user pref
 
 | 字段 | 类型 | Null | 默认/约束 | 说明 |
 | --- | --- | --- | --- | --- |
-| `id` | `bigint generated always as identity` | 否 | PK | 内部会话 ID |
-| `public_id` | `varchar(32)` | 否 | UNIQUE | 对外会话 ID；生成格式待定 |
+| `id` | `bigint generated always as identity` | 否 | PK | 内部会话 ID（Chat 内部使用，不对外） |
+| `public_id` | `uuid` | 否 | UNIQUE | 对外/跨域会话 ID；应用层生成，创建后不可修改 |
 | `type` | `varchar(32)` | 否 | CHECK `IN ('direct')` | 会话类型 |
 | `status` | `varchar(32)` | 否 | CHECK `IN ('active','closed')` | 会话整体状态 |
 | `last_message_seq` | `bigint` | 否 | DEFAULT `0`；CHECK `>= 0` | 会话内消息水位，同时用于分配下一条 seq |
-| `last_message_id` | `bigint` | 是 | — | 查询冗余指针，**不加 FK** |
+| `last_message_id` | `bigint` | 是 | FK → `chat_message(id)`（在 message 建表后追加） | 查询冗余指针；chat_message 与 chat_conversation 的双向引用因追加顺序而可行 |
 | `last_message_at` | `timestamptz` | 是 | — | 聊天列表排序依据 |
 | `created_at` | `timestamptz` | 否 | DEFAULT `now()` | 创建时间 |
 | `updated_at` | `timestamptz` | 否 | DEFAULT `now()` | 更新时间 |
 
 一致性约束：
 
-```sql
-CONSTRAINT ck_chat_conversation_last_message
-CHECK (
-    (last_message_seq = 0 AND last_message_id IS NULL AND last_message_at IS NULL)
-    OR
-    (last_message_seq > 0 AND last_message_id IS NOT NULL AND last_message_at IS NOT NULL)
-);
-```
+- `type` CHECK `IN ('direct')`、`status` CHECK `IN ('active','closed')`、`last_message_seq >= 0`。
+- **全域审计最终修正版已移除** `last_message_seq / last_message_id / last_message_at` 的组合 CHECK：该 CHECK 与「先原子分配 seq、再插消息、最后更新 last_message 指针」的正常事务流程冲突，三项一致性改由同一 application transaction 保证（见 [数据库总览](database.md) 的 Application-Level Invariants）。
+- `last_message_id` 在 `chat_message` 建表后追加 FK → `chat_message(id)`，避免建表顺序上的循环依赖。
 
 ### 枚举语义
 
@@ -79,7 +74,7 @@ CHECK (
 
 `source of truth = chat_message`。三个字段都是查询冗余；即使异步更新短暂不一致也不会破坏聊天记录。
 
-`last_message_id` **保留但不加 FK**，避免与 `chat_message → chat_conversation` 形成双向依赖。
+全域审计最终修正版决定：`last_message_id` 在 `chat_message` 建表后追加 FK → `chat_message(id)`（它是 Chat 内部引用，允许真实 FK；通过追加顺序避免建表循环依赖）。但以下规则无法靠 FK 完整保证，属 application-level invariant（见 [数据库总览](database.md)）：`last_message_id` 指向的 message 必须属于当前 conversation，且 `message.seq = last_message_seq`。
 
 **撤回最后一条消息后，不把 `last_message_id` 回退到上一条。** 最后一条消息仍然是那条被撤回的消息，只是展示为「对方撤回了一条消息」。管理员移除同理，由展示层决定摘要，不重算上一条。
 
@@ -110,20 +105,22 @@ chat_conversation_user_state × 2
 | 字段 | 类型 | Null | 默认/约束 | 说明 |
 | --- | --- | --- | --- | --- |
 | `conversation_id` | `bigint` | 否 | PK；FK → `chat_conversation(id)` | 一对一引用会话 |
-| `user_low_id` | `bigint` | 否 | — | `min(userA, userB)` |
-| `user_high_id` | `bigint` | 否 | CHECK `user_low_id < user_high_id` | `max(userA, userB)` |
+| `user_low_id` | `uuid` | 否 | — | `min(userA_uuid, userB_uuid)`；Identity logical UUID，不建跨域 FK |
+| `user_high_id` | `uuid` | 否 | CHECK `user_low_id < user_high_id` | `max(userA_uuid, userB_uuid)`；Identity logical UUID，不建跨域 FK |
 
 ```sql
 CONSTRAINT uq_chat_direct_users UNIQUE (user_low_id, user_high_id);
 ```
 
-统一规则：`user_low_id = min(userA, userB)`，`user_high_id = max(userA, userB)`。因此数据库直接保证三件事：
+统一规则：`user_low_id = min(userA_uuid, userB_uuid)`，`user_high_id = max(userA_uuid, userB_uuid)`（以 Identity logical UUID 做 canonical ordering）。因此数据库直接保证三件事：
 
 ```text
 A-B 与 B-A 等价
 一个用户不能和自己建立 Direct Conversation
 同一用户对不能创建第二个 Direct Conversation
 ```
+
+`user_low_id / user_high_id` 保存 Identity logical UUID，**不建立 Identity 物理 FK**（全域审计最终修正版，见 [数据库总览](database.md) 的「跨域边界」）。
 
 ### Direct 成员集合不变量（`frozen`）
 
@@ -138,6 +135,7 @@ A-B 与 B-A 等价
 - 成员**只能**通过 `getOrCreateDirectConversation()` 创建，不存在通用的 `addMember()` 入口；非 Direct 会话类型出现之前不得提供该能力。
 - 不为此引入数据库触发器或复杂 CHECK——代价不值得。由应用服务在同一事务内创建两条 member，并由**集成测试**覆盖该不变量。
 - 真正的关键唯一性（`A+B` 只有一个 conversation）已由 `UNIQUE(user_low_id, user_high_id)` 在数据库层保证。
+- 全域审计最终修正版将其明确为 **application-level cross-row invariant**：每个 `chat_direct_conversation` 必须恰好有两个 member，且必须严格等于 `{user_low_id, user_high_id}`；Direct Conversation 禁止暴露普通 `addMember()` / `removeMember()` API，它不是可变成员集合（见 [数据库总览](database.md) Application-Level Invariants #3~#6）。
 
 ### 关键决策
 
@@ -146,7 +144,7 @@ A-B 与 B-A 等价
 - **不存 `initiator_user_id`。** 会话身份是 `A ↔ B`，不是 `A → B`；「谁先发起」有多种定义，应由消息或事件判断。
 - **不存 `status`。** 状态由 `chat_conversation.status` 统一管理；subtype 表重复状态会导致「哪个才是真状态」的歧义。
 - **不存 `deleted_at`。** 生命周期统一由 `chat_conversation` 管理。
-- **是否保留 `created_at` 未最终裁决**（`designing`）。会话倾向的定稿版本只有三列，因为它是 Conversation 的 Direct subtype，不是独立生命周期实体；`chat_conversation.created_at` 已经存在。
+- **不保留 `created_at`。** 全域审计最终修正版为三列（conversation_id / user_low_id / user_high_id）。它是 Conversation 的 Direct subtype，不是独立生命周期实体；`chat_conversation.created_at` 已经存在。
 
 ### 创建算法：`getOrCreateDirectConversation`
 
@@ -169,7 +167,7 @@ normalize(A, B) → low = min(A,B), high = max(A,B)
 | 字段 | 类型 | Null | 默认/约束 | 说明 |
 | --- | --- | --- | --- | --- |
 | `conversation_id` | `bigint` | 否 | PK 组成部分；FK → `chat_conversation(id)` | 会话 |
-| `user_id` | `bigint` | 否 | PK 组成部分 | 成员用户 ID |
+| `user_id` | `uuid` | 否 | PK 组成部分 | 成员用户 ID（Identity logical UUID，不建跨域 FK） |
 | `joined_at` | `timestamptz` | 否 | DEFAULT `now()` | 成为成员的时间 |
 | `last_read_seq` | `bigint` | 否 | DEFAULT `0`；CHECK `>= 0` | 已读游标，**核心字段** |
 | `last_read_at` | `timestamptz` | 是 | — | 最近一次推进已读位置的时间（审计/同步/排障） |
@@ -215,7 +213,7 @@ CREATE INDEX idx_chat_member_user
 | 字段 | 类型 | Null | 默认/约束 | 说明 |
 | --- | --- | --- | --- | --- |
 | `conversation_id` | `bigint` | 否 | PK 组成部分 | 会话 |
-| `user_id` | `bigint` | 否 | PK 组成部分 | 用户 |
+| `user_id` | `uuid` | 否 | PK 组成部分 | 用户（Identity logical UUID，不建跨域 FK） |
 | `hidden_at` | `timestamptz` | 是 | — | 从自己的聊天列表隐藏 |
 | `cleared_before_seq` | `bigint` | 否 | DEFAULT `0`；CHECK `>= 0` | 该 seq 及以前的历史消息对该用户不再展示 |
 | `is_pinned` | `boolean` | 否 | DEFAULT `false` | 是否置顶 |

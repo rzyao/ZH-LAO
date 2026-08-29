@@ -11,7 +11,7 @@ source_share_url: https://chatgpt.com/share/6a9329e5-9f28-83ea-8eb1-f85be6e414fa
 
 Chat Domain 负责**会话与消息本身**。它不维护社交关系，不持有媒体文件，不记账，也不实现推送通道。
 
-来源：ChatGPT 会话「设计聊天领域」。会话结束时主架构方已明确「Chat Domain 第一阶段所有表正式定稿，原则上不再改核心结构」。
+来源：ChatGPT 会话「设计聊天领域」。会话先以「把 Chat Domain 所有表定稿」收尾（主架构方明确「原则上不再改核心结构」）；随后主架构方又追加「全域审计后的最终修正版」（消息 [64] 指令 + [71] 产出）：`public_id` 定为 UUID、跨域引用统一 logical UUID（无跨域物理 FK）、移除 `last_message` 组合 CHECK、`last_message_id` 补 FK、37 条 application-level invariants。本文档以最终修正版为准。
 
 来源标识说明：`source_conversation_id` 是 ChatGPT 内部会话 ID，与本项目其他会话的记录方式一致；`source_share_url` 是唯一仍可访问的分享副本。以内部会话 ID 直接拼出的分享链接当前返回 `Conversation has been deleted`，不可作为回溯依据。
 
@@ -128,7 +128,8 @@ pinConversation                 muteConversation
 | --- | --- |
 | 领域边界与业务模型 | `frozen` |
 | 7 张表的字段语义、约束、索引意图、业务规则 | `frozen` |
-| 物理 DDL（ID 生成之外的跨域 FK、Media FK、Outbox 物理表） | `designing`（见[数据库总览](database.md)） |
+| 跨域契约（public_id UUID、跨域 logical UUID、无跨域物理 FK） | `frozen`（全域审计最终修正版） |
+| 物理 DDL（Outbox 物理表、UUID 分配实现） | `designing`（见[数据库总览](database.md)） |
 | 应用服务用例与事件的字段级规格 | `designing` |
 | 上述未来扩展 | `deferred` |
 

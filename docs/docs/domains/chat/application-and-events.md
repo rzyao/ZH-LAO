@@ -18,7 +18,7 @@ source_conversation_id: 6a9319c2-2204-83ea-9341-7a57757a3082
 | `canChat()` 权限契约 | `frozen` |
 | `listConversations` 过滤条件 | `frozen` |
 | 三个领域事件与发布时机 | `baseline` |
-| Outbox 机制 | `baseline`（项目级基础设施，不在 Chat Schema 定稿） |
+| Outbox 机制 | `baseline`（命名已裁决为全系统唯一 `system_outbox_events`，物理字段 `designing`；不算 Chat Schema 业务表） |
 | 各用例的请求/响应字段、错误码、分页契约 | `designing`（主方案尚未逐项展开） |
 
 ---
@@ -221,11 +221,9 @@ LIMIT 100;
 
 partial index 让扫描不会不断扫过已发布的大量历史事件。
 
-**命名未定**：候选为 `system_outbox_event` 或基础设施 schema 下的 `infra_outbox_event`。等统一设计项目级事件可靠投递机制时决定，当前**先设计机制，不急着定死成 Chat 专属表**，也不把它算进 Chat Schema。
+**命名已裁决**（全局最终版 [ADR-018](../adr/ADR-018-global-database-design-principles-final.md)，台账 D-117 / D-127）：统一为全系统**唯一一套** `system_outbox_events`（Platform Infrastructure，`source_domain` 区分来源，不按域分表，不算 Chat Schema 业务表）。上文示例中的 `<infra>_outbox_event` 仅为机制示意。剩余为其物理字段、索引与 retention 参数（`designing`）；在定稿前 `MessageCreated` 等事件没有持久化保障，实现时不得假设事件一定可达。
 
 对当前架构不需要 Kafka/RabbitMQ，PostgreSQL 足够。
-
-**实施依赖**：Chat 的可靠投递依赖这张物理表落地。在它定稿前，`MessageCreated` 等事件没有持久化保障，实现时不得假设事件一定可达。
 
 ---
 
