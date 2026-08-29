@@ -9,6 +9,8 @@ last_updated: 2026-08-30
 
 ## “数据库域设计 / 继续设计社交资料”会话
 
+来源：父会话「数据库域设计」（内部 ID `6a92f0c0-90b4-83ea-a43d-cccb1ef2666d`，覆盖产品战略至 Learning）；其延续「设计社交资料」（Social Domain 全部设计）分享 `https://chatgpt.com/share/6a9356bb-36bc-83ea-a835-5551dfb2afc7`，共 52 条消息，正文已导出至 `docs/sources/chatgpt_share_6a9356bb/`。会话包含两次定稿：原始收尾审查（20 表）与「全域审计修正版定稿」（消息 [45] 指令 + [52] 产出，19 表最终版）；另有「在新会话设计 Chat Domain 的提示词」回合（消息 [40]+[44]，其承载的规则已由 Chat 会话正式定稿覆盖）。
+
 | 会话阶段 | 已覆盖内容 | 文档 |
 | --- | --- | --- |
 | 产品战略问答 | 用户目标、规模、平台、市场、指标、运营约束 | [产品定位](../product/product-overview.md) |
@@ -30,7 +32,9 @@ last_updated: 2026-08-30
 | Social Profile | 唯一公开资料、照片、兴趣、语言、Prompt、审核可见性、软删除和 partial unique index | [Social 资料](../domains/social/profile.md) |
 | Social Preferences / Discovery | 多选偏好、零记录不限、双向硬兼容、实时候选、Exposure | [Social 发现](../domains/social/discovery-and-relationships.md) |
 | Social Relationships | 直接 Follow、互关 Match、取消关注结束历史、Block 与免费聊天边界 | [Social 关系](../domains/social/discovery-and-relationships.md) |
-| Social 收尾审查 | 20 首期表、首期不建表、内容/互动/举报边界与缓存原则 | [Social 数据库](../domains/social/database.md)、[Social 动态](../domains/social/community-content.md) |
+| Social 收尾审查 | 20 首期表、首期不建表、内容/互动/举报边界与缓存原则（后被修正版定稿调整为 19 表） | [Social 数据库](../domains/social/database.md)、[Social 动态](../domains/social/community-content.md) |
+| 全域审计修正版定稿（[45]→[52]） | 删 `social_reports`（19 表）；六实体 `public_id` UUID；`user_id`/`media_id` 跨域 logical UUID、零跨域物理 FK；照片/Prompt active partial UNIQUE；Match active partial UNIQUE + 历史保留；单母语 partial UNIQUE；Post/Media/Like/Comment 四表完整字段规格（`visibility` 等）；Exposure 无永久唯一 + 三方向索引 + 90 天 retention；跨表 invariant 归 Application/Domain Service；25 条最终不可违反规则 | [Social 数据库](../domains/social/database.md)、[Social 资料](../domains/social/profile.md)、[Social 发现](../domains/social/discovery-and-relationships.md)、[Social 动态](../domains/social/community-content.md)、[设计台账](design-register.md) D-135~D-138 |
+| Chat 域设计提示词回合（[40]+[44]） | 承接规则清单（匹配后聊天永久免费、`paused` 不影响 Match、礼物跨域暂不设计、Media/Notification/Moderation 不进 Chat）——后续均由「设计聊天领域」会话正式定稿 | [Chat](../domains/chat/index.md)、[ADR-011](../adr/ADR-011-chat-conversation-identity-and-direct-uniqueness.md) |
 | 明确延期内容 | 支付、礼物兑换、技术栈和未完成字段 | [未决事项](open-questions.md) |
 
 ## “数据库域设计”会话（全局规范修订）

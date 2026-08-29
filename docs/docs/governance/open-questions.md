@@ -19,7 +19,7 @@ last_updated: 2026-08-30
 
 - Learning：媒体引用的最终物理形态（Media/Asset 归 Platform Infrastructure，业务域只存 `asset_id` UUID，跨域不建 FK——ADR-018；Learning 各 `*_media_id` 字段的落地方式待 Media Infrastructure 定稿）、内容发布/版本系统的完整模型、TTS/翻译的运营额度与限流参数；TTS 路由配置（如 `tts.zh.default_provider`）按 PLATFORM-02 属 Learning 自有运营参数，不进 `platform.runtime_configs`，落表待设计（D-129）；`question_reviews` 是否在首期后启用。
 - Identity：OTP/Session/Device 的未确认类型与约束，Refresh Token 轮换，Session 状态，设备安装唯一范围，`avatar_media_id` FK。
-- Social：公开动态/评论/举报的字段、状态枚举、可见性、图片上限、删除和 Feed 策略；资料关闭后恢复或重建的产品规则。
+- Social（19 表「全域审计修正版定稿」已落盘，见 [Social 数据库](../domains/social/database.md) 与台账 D-135~D-138）：**已解决（不再列 designing）**——公开动态/评论的完整字段规格与 `visibility`、图片上限（照片 6 / 动态 9）、删除策略、Feed 索引、跨域 logical UUID 契约（六实体 `public_id`，`user_id`/`media_id` 跨域 UUID 无物理 FK）、Exposure 90 天 retention。剩余：资料关闭后恢复或重建的产品规则。
 - Community：已正式并入 Social（全局最终版 ADR-018），不再独立成域；未来若真需独立社区能力再评估（首期动态事实已归 Social）。
 - Chat（「全域审计后的最终修正版」已落盘，见 [Chat 数据库](../domains/chat/database.md) 与台账 D-130~D-134）：
   - **已解决（不再列 designing）**：跨域用户身份改为 Identity `logical UUID`（无跨域物理 FK）；`chat_message_image.asset_id` 改为 Media/Asset `logical UUID`（无跨域 FK，仅待 Media Infrastructure 物理表定稿后核对存在性）；`chat_direct_conversation` 定稿为三列（不保留 `created_at`）；`public_id` 定为 UUID（应用层生成，无前缀）。

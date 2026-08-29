@@ -5,7 +5,7 @@ last_updated: 2026-08-30
 
 # Social 域
 
-Social 负责用户的社交身份、交友偏好、发现、关系建立、社交内容和公开互动。第一阶段模型已冻结为 **19 张事实表**（原 20 张，`social_reports` 已由 Trust 会话删除，举报事实统一归 `trust.reports`，见 [D-115](../../governance/design-register.md)）；推荐缓存、访客等不是首期表。
+Social 负责用户的社交身份、交友偏好、发现、关系建立、社交内容和公开互动。第一阶段模型已冻结为 **19 张事实表**（原 20 张，`social_reports` 已由 Trust 会话删除，举报事实统一归 `trust.reports`，见 [D-115](../../governance/design-register.md)）；「全域审计修正版定稿」（[D-135~D-138](../../governance/design-register.md)）确认主体模型不变，并统一跨域 logical UUID 契约（六实体 `public_id`、`user_id`/`media_id` 跨域 UUID 无物理 FK）。推荐缓存、访客等不是首期表。
 
 ## 业务闭环
 
@@ -27,7 +27,7 @@ Social 负责用户的社交身份、交友偏好、发现、关系建立、社�
 - [资料与展示内容](profile.md)：Profile、照片、兴趣、语言、Prompt。
 - [偏好、发现与关系](discovery-and-relationships.md)：偏好、Exposure、Follow、Match、Block。
 - [动态、互动与举报](community-content.md)：Post、媒体、点赞、评论、举报。
-- [数据库总览](database.md)：20 表清单、索引意图、跨域边界和明确不建的模型。
+- [数据库总览](database.md)：19 表清单、跨域 ID 契约、索引意图、retention 和明确不建的模型。
 
 ## 不负责
 

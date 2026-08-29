@@ -30,7 +30,7 @@ last_updated: 2026-08-30
 | Learning | Course / Practice / Progress | Course, Unit, Lesson, LessonItem, Exercise, Question, Option, Answer, LearningProgress, LessonProgress, PracticeAttempt |
 | Learning | Dictionary / Pronunciation / Translation | DictionaryEntry, Meaning, Example, Pronunciation, AudioAsset, TranslationRequest, TranslationResult |
 | Social | Social Profile / Discovery | SocialProfile, SocialPhoto, Interest, SocialLanguage, Prompt, Preference, DiscoveryExposure |
-| Social | Follow / Match / Safety | Follow, Match, SocialBlock, Report |
+| Social | Follow / Match / Safety | Follow, Match, SocialBlock（~~Report~~ 已删除：举报事实唯一归 `trust.reports`，D-115/D-135） |
 | Social | Public Content / Interaction | SocialPost, SocialPostMedia, SocialPostLike, SocialPostComment |
 | Chat | Conversation | Conversation, DirectConversation, ConversationMember, ConversationUserState |
 | Chat | Message / Content | Message, TextMessage, ImageMessage |
@@ -63,7 +63,7 @@ Learning / Social / Identity → RewardEvent → RewardRule → RewardGrant → 
 
 - 首期公开动态、点赞、评论和举报入口属于 Social；**Community 不再作为独立 Domain**，其能力已并入 Social，不重复拥有这些事实表（全局最终版 [ADR-018](../adr/ADR-018-global-database-design-principles-final.md)）。
 - Match 是双向 Follow 的业务结果，由应用服务创建，不由数据库触发器隐式生成。
-- `social_blocks` 是 Social 的用户主动 Block 关系（Social relationship fact）；Trust & Safety 的 `enforcement_actions` 是平台处罚事实（Ban / Suspend / Restrict），可跨域限制 Discover、Follow、公开互动和 Chat。**`social_blocks ≠ enforcement_actions`，两者永不合并、不互为实现**（D-034）。
+- `social_blocks` 是 Social 的用户主动 Block 关系（Social relationship fact）；Trust & Safety 的 `enforcement_actions` 是平台处罚事实（Ban / Suspend / Restrict），可跨域限制 Discover、Follow、公开互动和 Chat。**`social_blocks ≠ enforcement_actions`，两者永不合并、不互为实现**（D-034，正式冻结于 D-116）。
 - Gift 交易属于 Commerce。**Chat 与礼物的集成属 `deferred`，当前不存在 `GiftMessageReference` 或任何 Chat 侧礼物实体；**领域边界原则仍然成立——礼物交易真相属于 Commerce，Chat 最多只消费已完成的送礼结果，但该原则在集成被正式设计前不产生任何 Chat 实体或字段。
 - Chat 的 Conversation 与 Social Match 解耦：Match 授予聊天权限，会话身份由用户对唯一确定；取消关注、解除匹配、重新互关都不改变会话身份，历史消息仍然存在。
 - 聊天权限在发送时由 `canChat()` 读取 Social 与 Trust & Safety 暴露的事实判断；Chat 表不保存 `match_id`、`follow_id` 或 relationship status。完整契约见 [Chat 应用服务与事件](../domains/chat/application-and-events.md)。

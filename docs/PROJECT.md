@@ -42,7 +42,7 @@
 | --- | --- | --- |
 | Identity | `frozen` | `frozen`：7 张表；部分辅助表字段类型仍按字段级 `designing` 标注 |
 | Learning | `frozen` | 43 张必建表与核心字段规格 `frozen`；跨域 Media FK、发布机制和运营参数局部 `designing` |
-| Social | `frozen` | 19 张首期表（原 20 张，`social_reports` 已删除、举报事实统一归 `trust.reports`，D-115）；资料、偏好、发现和关系字段 `frozen`，公开内容字段局部 `designing` |
+| Social | `frozen` | 19 张首期表「全域审计修正版定稿」字段级 `frozen`（原 20 张，`social_reports` 已删除、举报事实统一归 `trust.reports`，D-115/D-135~D-138）；跨域契约 compliant：六实体 `public_id UUID`、`user_id`/`media_id` 跨域 logical UUID 零物理 FK（与 ADR-018 一致）；资料关闭后恢复规则 `designing` |
 | Community | `merged` | 已正式并入 Social（全局最终版 ADR-018），不再独立成域；独立社区能力未来再评估 |
 | Chat | `frozen` | 7 张表定稿 `frozen`；「全域审计最终修正版」已落盘（public_id UUID、跨域 logical UUID 无物理 FK、37 条 invariants，D-130~D-134）；剩余物理 DDL（Outbox 物理表、UUID 分配实现）`designing`，用例字段契约 `designing` |
 | Commerce | `frozen`（V1） | 16 张业务表 `frozen`；物理约定（UUID 主键 + 跨域只存 logical UUID 不建物理 FK）符合全局最终版 ADR-018，compliant；会员/Subscription/Entitlement 落表 `deferred` |
