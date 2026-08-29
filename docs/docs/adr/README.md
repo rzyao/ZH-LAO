@@ -12,5 +12,9 @@
 | [ADR-008](ADR-008-practice-definition-and-answer-data.md) | Practice 定义与答案数据 | `frozen` |
 | [ADR-009](ADR-009-learning-history-and-current-state.md) | Learning 历史与当前状态 | `frozen` |
 | [ADR-010](ADR-010-social-profile-discovery-and-relationships.md) | Social 资料、发现与关系 | `frozen` |
+| [ADR-011](ADR-011-chat-conversation-identity-and-direct-uniqueness.md) | Chat 会话身份与 Direct 用户对唯一 | `frozen` |
+| [ADR-012](ADR-012-message-seq-ordering-and-idempotency.md) | 会话内 `seq` 排序与发送幂等 | `frozen` |
+| [ADR-013](ADR-013-read-state-as-cursor-not-receipt-table.md) | 已读游标而非 Receipt 表 | `frozen` |
+| [ADR-014](ADR-014-no-notification-domain-events-outbox-infra.md) | 不新增 Notification 域，事件走 Outbox | `baseline` |
 
 ADR 记录长期取舍；字段和业务规格仍以对应领域文档为唯一事实源。

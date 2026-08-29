@@ -11,6 +11,8 @@ last_updated: 2026-08-30
 - 具体支付渠道与中老两侧支付接入。
 - 游客云同步、`platform.installations` 和注册时 Guest Data Migration。
 - 未来是否拆分 Messaging/Media；只有真实负载需要时评估。
+- Chat 第一阶段明确不建：`chat_message_gift`、`chat_message_receipt`、`chat_delivery_receipt`、`chat_message_user_state`（单条仅自己删除非必需）、`chat_message_reaction`、`chat_group` / `chat_group_member`、`chat_message_translation`、`chat_message_attachment`。以后有明确需求通过新增表扩展。
+- 独立 Notification Domain：只有在真正设计推送通知、系统通知、营销通知和设备 token 时才评估；当前归 Application/Infrastructure。
 
 ## designing
 
@@ -18,7 +20,16 @@ last_updated: 2026-08-30
 - Identity：OTP/Session/Device 的未确认类型与约束，Refresh Token 轮换，Session 状态，设备安装唯一范围，`avatar_media_id` FK。
 - Social：公开动态/评论/举报的字段、状态枚举、可见性、图片上限、删除和 Feed 策略；资料关闭后恢复或重建的产品规则。
 - Community：独立 Community 能力的业务边界和是否启动（首期动态事实已归 Social）。
-- Messaging：消息内容模型、回执、撤回、翻译和保留策略。
+- Messaging：
+  - 表名前缀（复数无前缀 vs 单数 `chat_` 前缀）、枚举类型（`varchar(32)` vs `smallint`）、主键生成方式（identity vs 显式 BIGINT）与[数据库总规范](../architecture/database.md)的差异裁决。
+  - `chat_direct_conversation` 是否保留 `created_at`。
+  - 跨域用户身份 FK 的目标表（`identity.users` 或最终命名）。
+  - `chat_message_image.asset_id` 指向 Platform Media 的具体 FK（等 Media 表定稿）。
+  - 全局用户 ID 与 Chat 内部 `id` 的生成算法。
+  - 应用服务用例的请求/响应字段契约、错误码、分页游标与鉴权细节。
+  - Outbox 的最终表名与项目级统一方式（`system_outbox_event` / `infra_outbox_event`）。
+  - 语音消息与聊天翻译是否进入首期：产品定位表列出语音/翻译/语音转文字，但 Chat 数据库首期只到 `TEXT`/`IMAGE`，需主会话确认是收缩产品范围还是延后数据库建模。
+  - 消息保留策略与用户注销后的匿名化规则（属 Account/Privacy/Compliance，Chat 已确定不物理删除）。
 - Commerce/Rewards：订单与支付状态机、账本、权益有效期、防刷和规则版本。
 - Trust & Safety/Operations/Platform：审核与限制状态机、RBAC、配置优先级、审计和媒体生命周期。
 - 前端、后端具体技术栈，API 风格、任务队列、部署与发布方案。

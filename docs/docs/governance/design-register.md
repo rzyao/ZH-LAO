@@ -1,13 +1,13 @@
 ---
 status: baseline
 last_updated: 2026-08-30
-source_conversation: 数据库域设计；继续设计社交资料
-source_conversation_id: 6a92f0c0-90b4-83ea-a43d-cccb1ef2666d；6a931551-8a30-83e9-8caf-60e529abce68
+source_conversation: 数据库域设计；继续设计社交资料；设计聊天领域
+source_conversation_id: 6a92f0c0-90b4-83ea-a43d-cccb1ef2666d；6a931551-8a30-83e9-8caf-60e529abce68；6a9329e5-9f28-83ea-8eb1-f85be6e414fa
 ---
 
 # 设计决策台账
 
-来源：ChatGPT 会话“数据库域设计”。用户明确选择，以及方案提出后以“继续/继续下一步”推进且未反对，均视为当前基线。
+来源：ChatGPT 会话“数据库域设计”“继续设计社交资料”“设计聊天领域”。用户明确选择，以及方案提出后以“继续/继续下一步”推进且未反对，均视为当前基线。
 
 | ID | 结论 | 状态 | 事实源 | 备注 |
 | --- | --- | --- | --- | --- |
@@ -47,5 +47,25 @@ source_conversation_id: 6a92f0c0-90b4-83ea-a43d-cccb1ef2666d；6a931551-8a30-83e
 | D-034 | `social_blocks` 为 Social 当前用户 Block 关系 | `frozen` | [Social 关系](../domains/social/discovery-and-relationships.md) | Trust & Safety 保留 restriction、审核和处罚所有权 |
 | D-035 | 首期公开动态/互动/举报入口归 Social | `baseline` | [Social 动态](../domains/social/community-content.md) | 具体字段仍 `designing`；先前 Community 所有权被取代 |
 | D-036 | 首期不建访客、收藏、关注请求、Candidate、事件或统计缓存表 | `frozen` | [Social 数据库](../domains/social/database.md) | `social_profile_stats` 仅未来缓存概念 |
+| D-037 | Chat 只负责会话与消息，不维护社交关系与 Match 状态机 | `frozen` | [Messaging](../domains/messaging/README.md) | 发送时按业务策略判断权限 |
+| D-038 | 同一用户对全生命周期只有一个 Direct Conversation | `frozen` | [ADR-011](../adr/ADR-011-chat-conversation-identity-and-direct-uniqueness.md) | `UNIQUE(user_low_id, user_high_id)` |
+| D-039 | 共享会话状态与用户个人会话状态分离 | `frozen` | [会话模型](../domains/messaging/conversation.md) | member 与 user_state 不合并 |
+| D-040 | conversation 不建 `created_by`/`last_activity_at`/`message_count`/`metadata JSONB`/`deleted_at` | `frozen` | [会话模型](../domains/messaging/conversation.md) | 语义模糊或当前无需求 |
+| D-041 | `last_message_id/seq/at` 是派生查询状态，`last_message_id` 不加 FK | `frozen` | [会话模型](../domains/messaging/conversation.md) | 避免与 message 双向依赖 |
+| D-042 | member 不保留 `status` 与 `left_at` | `frozen` | [会话模型](../domains/messaging/conversation.md) | 当前无真实成员生命周期 |
+| D-043 | 已读使用 `last_read_seq` 游标，未读数为派生值 | `frozen` | [ADR-013](../adr/ADR-013-read-state-as-cursor-not-receipt-table.md) | 不建 receipt/delivery 表 |
+| D-044 | 消息按 `seq` 排序，`seq` 在事务内由 `last_message_seq` 原子分配 | `frozen` | [ADR-012](../adr/ADR-012-message-seq-ordering-and-idempotency.md) | 不依赖 `created_at` |
+| D-045 | `client_message_id UUID` + `UNIQUE(sender_user_id, client_message_id)` 幂等 | `frozen` | [ADR-012](../adr/ADR-012-message-seq-ordering-and-idempotency.md) | 唯一冲突视为 idempotent success |
+| D-046 | 消息主体与内容 subtype 分离；首期 `type` 仅 `1=TEXT`、`2=IMAGE` | `frozen` | [消息模型](../domains/messaging/message.md) | 应用服务保证 subtype 一致 |
+| D-047 | 一条 IMAGE message 支持多图，Chat 只存 `asset_id` 引用 Media | `frozen` | [消息模型](../domains/messaging/message.md) | 不存 URL/宽高/MIME，不建 `chat_attachment` |
+| D-048 | 撤回只改 `status` 与 `recalled_at`，保留原始内容；不保留 `recalled_by_user_id` | `frozen` | [消息模型](../domains/messaging/message.md) | 当前只能撤回自己发送的消息 |
+| D-049 | 清空聊天记录使用 `cleared_before_seq` 可见边界，并同步推进 `last_read_seq` | `frozen` | [会话模型](../domains/messaging/conversation.md) | 不逐条写隐藏，不删除消息 |
+| D-050 | 隐藏会话用 `hidden_at` 而非 `deleted_at`；收到新消息或再次参与时恢复 | `frozen` | [会话模型](../domains/messaging/conversation.md) | 数据库命名表达真实语义 |
+| D-051 | `last_message_id IS NULL` 的空 conversation 不进入聊天列表 | `frozen` | [会话模型](../domains/messaging/conversation.md) | 允许提前 get-or-create |
+| D-052 | 不新增 Notification 域；通知与实时分发归 Application/Infrastructure | `baseline` | [ADR-014](../adr/ADR-014-no-notification-domain-events-outbox-infra.md) | 用户明确否决临时扩域 |
+| D-053 | 领域事件在事务提交后由 Outbox 可靠投递 | `baseline` | [应用服务与事件](../domains/messaging/application-and-events.md) | outbox 不算 Chat 核心业务表 |
+| D-054 | 礼物从 Chat 第一阶段移除 | `deferred` | [消息模型](../domains/messaging/message.md) | 等 Commerce 设计礼物体系时再定义集成 |
+| D-055 | Chat 表名前缀、枚举类型、主键生成方式与全局 SQL 规范存在差异 | `designing` | [Messaging 数据库](../domains/messaging/database.md) | 由主架构会话裁决，文档不自行统一 |
+| D-056 | 产品首期含语音/翻译，但 Chat 数据库首期只到 TEXT/IMAGE | `designing` | [产品定位](../product/product-overview.md)、[消息模型](../domains/messaging/message.md) | 由主架构会话裁决 |
 
 新增主会话结论时，先更新本台账，再更新唯一事实源和覆盖清单。

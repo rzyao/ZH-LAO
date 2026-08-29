@@ -56,6 +56,10 @@ export default defineConfig({
           { text: 'Social · 数据库总览', link: '/domains/social/database' },
           { text: 'Community', link: '/domains/community/' },
           { text: 'Messaging', link: '/domains/messaging/' },
+          { text: 'Messaging · 会话模型', link: '/domains/messaging/conversation' },
+          { text: 'Messaging · 消息模型', link: '/domains/messaging/message' },
+          { text: 'Messaging · 应用服务与事件', link: '/domains/messaging/application-and-events' },
+          { text: 'Messaging · 数据库总览', link: '/domains/messaging/database' },
           { text: 'Commerce', link: '/domains/commerce/' },
           { text: 'Rewards', link: '/domains/rewards/' },
           { text: 'Trust & Safety', link: '/domains/trust/' },
@@ -83,8 +87,12 @@ export default defineConfig({
           { text: 'ADR-006 Learning Content 生命周期', link: '/adr/ADR-006-learning-content-lifecycle' },
           { text: 'ADR-007 统一课程分层', link: '/adr/ADR-007-unified-curriculum-hierarchy' },
           { text: 'ADR-008 Practice 答案数据', link: '/adr/ADR-008-practice-definition-and-answer-data' },
-          { text: 'ADR-009 Learning 状态模型', link: '/adr/ADR-009-learning-history-and-current-state' }
-          ,{ text: 'ADR-010 Social 资料与发现模型', link: '/adr/ADR-010-social-profile-discovery-and-relationships' }
+          { text: 'ADR-009 Learning 状态模型', link: '/adr/ADR-009-learning-history-and-current-state' },
+          { text: 'ADR-010 Social 资料与发现模型', link: '/adr/ADR-010-social-profile-discovery-and-relationships' },
+          { text: 'ADR-011 Chat 会话身份与 Direct 唯一', link: '/adr/ADR-011-chat-conversation-identity-and-direct-uniqueness' },
+          { text: 'ADR-012 消息 seq 与发送幂等', link: '/adr/ADR-012-message-seq-ordering-and-idempotency' },
+          { text: 'ADR-013 已读游标而非 Receipt 表', link: '/adr/ADR-013-read-state-as-cursor-not-receipt-table' },
+          { text: 'ADR-014 不新增 Notification 域', link: '/adr/ADR-014-no-notification-domain-events-outbox-infra' }
         ]
       }
     ],

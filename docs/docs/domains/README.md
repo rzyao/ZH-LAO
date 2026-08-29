@@ -6,7 +6,7 @@
 | Learning | `frozen` | 43 张必建表 `frozen` / 跨域 Media 与运营细节局部 `designing` | [Learning](learning/README.md) |
 | Social | `frozen` | 20 张首期表；公开内容字段局部 `designing` | [Social](social/README.md) |
 | Community | `deferred` | `deferred` | [Community](community/README.md) |
-| Messaging | `baseline` | `designing` | [Messaging](messaging/README.md) |
+| Messaging | `frozen` | 7 张表 `frozen`；表名/枚举/主键风格待裁决，用例字段契约 `designing` | [Messaging](messaging/README.md) |
 | Commerce | `baseline` | `designing` | [Commerce](commerce/README.md) |
 | Rewards | `baseline` | `designing` | [Rewards](rewards/README.md) |
 | Trust & Safety | `baseline` | `designing` | [Trust & Safety](trust/README.md) |

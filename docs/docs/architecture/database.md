@@ -53,6 +53,20 @@ commerce  rewards   trust   operations platform
 | --- | --- | --- |
 | `identity` | `frozen` | 核心四表 SQL 级 `frozen`；OTP/Session/Device 已确认字段，未确认类型逐字段 `designing` |
 | `learning` | `frozen` | 43 张必建表、核心字段与约束已冻结；跨域 Media FK 与内容发布机制局部待定。 |
-| 其余八个 | `baseline` | `designing`，不得从实体名自动生成表 |
+| `social` | `frozen` | 20 张首期表已冻结；公开内容字段局部 `designing`。 |
+| `messaging` | `frozen` | Chat 第一阶段 7 张表定稿；表名前缀、枚举类型、主键生成方式与本页规范的差异为 `designing`。 |
+| 其余六个 | `baseline` | `designing`，不得从实体名自动生成表 |
 
-详见 [Identity 数据库](../domains/identity/database.md) 与 [Learning 数据库](../domains/learning/database.md)。
+详见 [Identity 数据库](../domains/identity/database.md)、[Learning 数据库](../domains/learning/database.md)、[Social 数据库](../domains/social/database.md) 与 [Messaging 数据库](../domains/messaging/database.md)。
+
+## 已知规范偏差
+
+`messaging` Schema 在会话设计中出现了三处与本页十二项规范的偏差，**由主架构会话裁决，文档维护阶段不自行统一**：
+
+| 项 | 本页规范 | Messaging 会话用法 |
+| --- | --- | --- |
+| 表名 | 复数 | 单数且带域前缀（`chat_conversation`） |
+| 状态/枚举 | `varchar(32)` + CHECK | `smallint` + CHECK |
+| 主键 | `bigint generated always as identity` | `BIGINT PRIMARY KEY` |
+
+偏差只影响上述三项；Messaging 的字段语义、约束、索引意图与业务规则均已 `frozen`，不得因命名与类型差异整体降级。完整清单见 [Messaging 数据库](../domains/messaging/database.md) 的「与全局 SQL 规范的差异」一节。

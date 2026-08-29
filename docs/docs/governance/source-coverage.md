@@ -3,7 +3,11 @@ status: baseline
 last_updated: 2026-08-30
 ---
 
-# “数据库域设计”会话覆盖清单
+# 会话覆盖清单
+
+覆盖标准不是逐字复制对话，而是每条有效产品规则、边界、实体、字段、约束、反例和延期项都有唯一事实源。
+
+## “数据库域设计 / 继续设计社交资料”会话
 
 | 会话阶段 | 已覆盖内容 | 文档 |
 | --- | --- | --- |
@@ -29,4 +33,25 @@ last_updated: 2026-08-30
 | Social 收尾审查 | 20 首期表、首期不建表、内容/互动/举报边界与缓存原则 | [Social 数据库](../domains/social/database.md)、[Social 动态](../domains/social/community-content.md) |
 | 明确延期内容 | 支付、礼物兑换、技术栈和未完成字段 | [未决事项](open-questions.md) |
 
-覆盖标准不是逐字复制对话，而是每条有效产品规则、边界、实体、字段、约束、反例和延期项都有唯一事实源。
+## “设计聊天领域”会话
+
+来源：`6a9329e5-9f28-83ea-8eb1-f85be6e414fa`，共 58 条消息、19 个有效助手回合。会话以“把 Chat Domain 所有表定稿”收尾。
+
+| 会话阶段 | 已覆盖内容 | 文档 |
+| --- | --- | --- |
+| Chat 领域边界与定位 | 只负责会话与消息；不维护社交关系、不持有媒体、不记账、不实现推送 | [Messaging](../domains/messaging/README.md) |
+| `chat_conversation` | 极简聚合根、type/status 枚举、明确不存在的字段、生命周期、CLOSED 语义 | [会话模型](../domains/messaging/conversation.md) |
+| `chat_direct_conversation` | low/high canonical ordering、用户对唯一、不存 match_id/initiator/status、getOrCreate 算法 | [会话模型](../domains/messaging/conversation.md)、[ADR-011](../adr/ADR-011-chat-conversation-identity-and-direct-uniqueness.md) |
+| `chat_conversation_member` | 成员真相、last_read_seq 单调游标、不建 status/left_at/unread_count、Block 不进 member | [会话模型](../domains/messaging/conversation.md)、[ADR-013](../adr/ADR-013-read-state-as-cursor-not-receipt-table.md) |
+| `chat_message` | id 与 seq 双职责、sender 复合 FK、type/status 枚举、reply、撤回、client_message_id 幂等 | [消息模型](../domains/messaging/message.md)、[ADR-012](../adr/ADR-012-message-seq-ordering-and-idempotency.md) |
+| 消息内容与附件体系 | text/image subtype、多图、asset_id 引用 Media、上传与事务分离、subtype 一致性责任 | [消息模型](../domains/messaging/message.md) |
+| 礼物范围收缩 | 用户明确“先不设计礼物，礼物以后在设计” | [消息模型](../domains/messaging/message.md)、[未决事项](open-questions.md) |
+| 撤回/删除/隐藏/清空 | 四件事区分、cleared_before_seq 可见边界、hidden_at 命名、隐藏恢复规则 | [会话模型](../domains/messaging/conversation.md)、[消息模型](../domains/messaging/message.md) |
+| 已读与未读 | 游标模型、GREATEST 更新、markRead 校验、不建 receipt/delivery 表 | [ADR-013](../adr/ADR-013-read-state-as-cursor-not-receipt-table.md) |
+| 聊天列表查询模型 | last_message_* 派生字段、置顶排序、空会话不进列表、未读聚合、摘要不落库 | [会话模型](../domains/messaging/conversation.md) |
+| 发送事务与并发 | 十步事务、seq 原子分配、幂等优先、服务器时间、TOCTOU 取舍、多图全有或全无 | [消息模型](../domains/messaging/message.md) |
+| 不新建 Notification 域 | 用户明确否决临时扩域；推送归基础设施 | [ADR-014](../adr/ADR-014-no-notification-domain-events-outbox-infra.md) |
+| 领域事件与 Outbox | 三个事件、提交后发布、outbox 同事务、partial index、命名待统一 | [应用服务与事件](../domains/messaging/application-and-events.md) |
+| 索引设计 | 两条主动索引、UNIQUE 自带索引、明确不建的四个索引 | [Messaging 数据库](../domains/messaging/database.md) |
+| 总审查与定稿 | 7 张表定稿、删除 member.status、新增 sender member 复合 FK、明确不建表清单 | [Messaging 数据库](../domains/messaging/database.md) |
+| 全局规范差异 | 表名、枚举类型、主键生成方式三处偏差提交主会话裁决 | [Messaging 数据库](../domains/messaging/database.md)、[未决事项](open-questions.md) |
