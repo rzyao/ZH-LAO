@@ -221,7 +221,7 @@ LIMIT 100;
 
 partial index 让扫描不会不断扫过已发布的大量历史事件。
 
-**命名已裁决**（全局最终版 [ADR-018](../adr/ADR-018-global-database-design-principles-final.md)，台账 D-117 / D-127）：统一为全系统**唯一一套** `system_outbox_events`（Platform Infrastructure，`source_domain` 区分来源，不按域分表，不算 Chat Schema 业务表）。上文示例中的 `<infra>_outbox_event` 仅为机制示意。剩余为其物理字段、索引与 retention 参数（`designing`）；在定稿前 `MessageCreated` 等事件没有持久化保障，实现时不得假设事件一定可达。
+**命名已裁决**（全局最终版 [ADR-018](../../adr/ADR-018-global-database-design-principles-final.md)，台账 D-117 / D-127）：统一为全系统**唯一一套** `system_outbox_events`（Platform Infrastructure，`source_domain` 区分来源，不按域分表，不算 Chat Schema 业务表）。上文示例中的 `<infra>_outbox_event` 仅为机制示意。剩余为其物理字段、索引与 retention 参数（`designing`）；在定稿前 `MessageCreated` 等事件没有持久化保障，实现时不得假设事件一定可达。
 
 对当前架构不需要 Kafka/RabbitMQ，PostgreSQL 足够。
 

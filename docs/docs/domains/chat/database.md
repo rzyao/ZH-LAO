@@ -22,7 +22,7 @@ Chat Schema 第一阶段正式定稿为 **7 张表**。主方案已明确「这�
 | 层面 | 状态 | 说明 |
 | --- | --- | --- |
 | 实体、字段语义、约束意图、索引意图、业务规则 | `frozen` | 可直接作为实现依据 |
-| 跨域契约（public_id UUID、跨域 logical UUID、无跨域物理 FK） | `frozen`（Chat 会话结尾「全域审计后的最终修正版」，消息 [64] 指令 + [71] 产出） | 与全局最终版 [ADR-018](../adr/ADR-018-global-database-design-principles-final.md) 一致 |
+| 跨域契约（public_id UUID、跨域 logical UUID、无跨域物理 FK） | `frozen`（Chat 会话结尾「全域审计后的最终修正版」，消息 [64] 指令 + [71] 产出） | 与全局最终版 [ADR-018](../../adr/ADR-018-global-database-design-principles-final.md) 一致 |
 | 物理 DDL | `designing` | 下表列出尚未定稿的物理项，**在补齐前不应直接复制执行** |
 
 已被「全域审计后的最终修正版」解决的物理项（不再列入 designing）：
@@ -31,7 +31,7 @@ Chat Schema 第一阶段正式定稿为 **7 张表**。主方案已明确「这�
 | --- | --- |
 | 跨域用户身份 | `user_id` / `user_low_id` / `user_high_id` / `sender_user_id` 一律保存 **Identity logical UUID**，不建跨域物理 FK |
 | Media 引用 | `chat_message_image.asset_id` 保存 **Media/Asset logical UUID**，不建跨域物理 FK |
-| `public_id` | `chat_conversation` 与 `chat_message` 的 `public_id` 定为 **UUID**（应用层生成），取代早期 `varchar(32)` 口径（[ADR-015](../adr/ADR-015-chat-naming-and-sql-adjudication.md) 该项被本审计 supersede） |
+| `public_id` | `chat_conversation` 与 `chat_message` 的 `public_id` 定为 **UUID**（应用层生成），取代早期 `varchar(32)` 口径（[ADR-015](../../adr/ADR-015-chat-naming-and-sql-adjudication.md) 该项被本审计 supersede） |
 | `chat_direct_conversation.created_at` | 最终修正版为三列（conversation_id / user_low_id / user_high_id），不保留 |
 | `chat_conversation.last_message_id` | 在 `chat_message` 建表后追加 FK → `chat_message(id)`；**移除** `last_message_seq / id / at` 组合 CHECK |
 
@@ -289,9 +289,9 @@ chat_message_image       (message_id, asset_id)
 | 项 | 全局规范 | Chat 现状 | 结论 |
 | --- | --- | --- | --- |
 | 表名 | 复数 | `chat_*` 单数带前缀 | **已裁决例外**：域与 Schema 已统一为 `chat`，`chat_` 前缀与 Schema 名一致；表名与会话定稿逐字保持 |
-| 状态/枚举 | `varchar(32)` + CHECK | `varchar(32)` + CHECK | 已回归规范（全域审计最终修正版 DDL 中 `type`/`status` 以 `smallint` 表达，属会话早期风格；本项目按 [ADR-015](../adr/ADR-015-chat-naming-and-sql-adjudication.md) 统一为 `varchar(32)+CHECK`，枚举语义等价） |
+| 状态/枚举 | `varchar(32)` + CHECK | `varchar(32)` + CHECK | 已回归规范（全域审计最终修正版 DDL 中 `type`/`status` 以 `smallint` 表达，属会话早期风格；本项目按 [ADR-015](../../adr/ADR-015-chat-naming-and-sql-adjudication.md) 统一为 `varchar(32)+CHECK`，枚举语义等价） |
 | 主键 | `bigint generated always as identity` | `bigint generated always as identity` | 已回归规范 |
-| `public_id` | 跨域 logical/public ID 统一 **UUID**（[ADR-018](../adr/ADR-018-global-database-design-principles-final.md)） | `chat_conversation`、`chat_message` 均为 `public_id UUID NOT NULL UNIQUE` | 已回归规范（全域审计最终修正版将早期 `varchar(32)` 定为 `UUID`，应用层生成） |
+| `public_id` | 跨域 logical/public ID 统一 **UUID**（[ADR-018](../../adr/ADR-018-global-database-design-principles-final.md)） | `chat_conversation`、`chat_message` 均为 `public_id UUID NOT NULL UNIQUE` | 已回归规范（全域审计最终修正版将早期 `varchar(32)` 定为 `UUID`，应用层生成） |
 | 跨域 ID | 跨域只存 logical UUID，禁止跨域物理 FK | `user_id`/`sender_user_id`/`asset_id` 均存 logical UUID，无跨域 FK | 已回归规范（Chat 会话「全域审计后的最终修正版」） |
 
 剩余物理差异（非规范冲突，属未定稿项）见本节开头的「状态」表：Outbox 物理表与 UUID 分配实现。
