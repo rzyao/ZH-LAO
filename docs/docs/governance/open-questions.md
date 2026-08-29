@@ -21,11 +21,8 @@ last_updated: 2026-08-30
 - Identity：OTP/Session/Device 的未确认类型与约束，Refresh Token 轮换，Session 状态，设备安装唯一范围，`avatar_media_id` FK。
 - Social：公开动态/评论/举报的字段、状态枚举、可见性、图片上限、删除和 Feed 策略；资料关闭后恢复或重建的产品规则。
 - Community：已正式并入 Social（全局最终版 ADR-018），不再独立成域；未来若真需独立社区能力再评估（首期动态事实已归 Social）。
-- Chat：
-  - 跨域用户身份 FK 的目标表（`identity.users` 或最终命名）。
-  - `chat_message_image.asset_id` 指向 Media / Asset Infrastructure 的引用形态：业务域只存 `asset_id` UUID、不建跨域 FK（ADR-018 / PLATFORM-16），待 Media Infrastructure 物理表定稿后核对。
-  - `chat_direct_conversation` 是否保留 `created_at`（会话倾向的定稿版本只有三列）。
-  - `public_id` 生成算法与各实体前缀（User/Conversation/Message 等；`usr_xxx` 仅为 illustrative）。
+- Chat（「全域审计后的最终修正版」已落盘，见 [Chat 数据库](../domains/chat/database.md) 与台账 D-130~D-134）：
+  - **已解决（不再列 designing）**：跨域用户身份改为 Identity `logical UUID`（无跨域物理 FK）；`chat_message_image.asset_id` 改为 Media/Asset `logical UUID`（无跨域 FK，仅待 Media Infrastructure 物理表定稿后核对存在性）；`chat_direct_conversation` 定稿为三列（不保留 `created_at`）；`public_id` 定为 UUID（应用层生成，无前缀）。
   - 应用服务用例的请求/响应字段契约、错误码、分页游标与鉴权细节。
   - Outbox 已裁决为全系统唯一一套 `system_outbox_events`（Platform Infrastructure，D-117/D-127）；剩余为其物理字段、索引与 retention 参数（`designing`）。
   - 语音消息与聊天翻译是否进入首期：产品定位表列出语音/翻译/语音转文字，但 Chat 数据库首期只到 `TEXT`/`IMAGE`，需主会话确认是收缩产品范围还是延后数据库建模（D-056）。

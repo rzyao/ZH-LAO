@@ -10,6 +10,7 @@
 - 后端采用模块化单体；一个 PostgreSQL 实例、一个主库、九个业务 Schema（无 community Schema；Platform Infrastructure 含 outbox/asset 不计入业务 Schema）。
 - 一级域（9 个业务域）：Identity、Learning、Social、Chat、Commerce、Rewards、Trust & Safety、Operations、Platform；Community 能力已并入 Social，Notification 不作为独立域（全局最终版 ADR-018）。
 - Chat 与社交关系解耦：会话身份由用户对唯一确定，取消关注或重新互关不改变会话。
+- Chat 全域审计最终修正版（D-130~D-134）：`public_id` 定为 UUID（内部 BIGINT `id` 不对外）、跨域引用统一 logical UUID 且无跨域物理 FK、37 条 application-level invariants 定稿。
 - 实时推送不独立成域：Chat 发布领域事件，WebSocket/App Push 由基础设施负责。
 - Commerce 独占「钱与虚拟资产」事实，采用虚拟币钱包 + 只追加账本；Social/Chat 不处理资金，Chat 送礼只展示。
 - 代码定义能力，Feature Flag 决定开放，运营配置决定规则。
@@ -43,7 +44,7 @@
 | Learning | `frozen` | 43 张必建表与核心字段规格 `frozen`；跨域 Media FK、发布机制和运营参数局部 `designing` |
 | Social | `frozen` | 19 张首期表（原 20 张，`social_reports` 已删除、举报事实统一归 `trust.reports`，D-115）；资料、偏好、发现和关系字段 `frozen`，公开内容字段局部 `designing` |
 | Community | `merged` | 已正式并入 Social（全局最终版 ADR-018），不再独立成域；独立社区能力未来再评估 |
-| Chat | `frozen` | 7 张表定稿 `frozen`；物理 DDL（跨域用户 FK、Media FK、`public_id` 生成算法、Outbox 物理表）`designing`，用例字段契约 `designing` |
+| Chat | `frozen` | 7 张表定稿 `frozen`；「全域审计最终修正版」已落盘（public_id UUID、跨域 logical UUID 无物理 FK、37 条 invariants，D-130~D-134）；剩余物理 DDL（Outbox 物理表、UUID 分配实现）`designing`，用例字段契约 `designing` |
 | Commerce | `frozen`（V1） | 16 张业务表 `frozen`；物理约定（UUID 主键 + 跨域只存 logical UUID 不建物理 FK）符合全局最终版 ADR-018，compliant；会员/Subscription/Entitlement 落表 `deferred` |
 | Rewards | `frozen` | `frozen`：5 张表字段级定稿；审计确认跨域引用统一 `uuid` logical reference、Outbox 统一 `system_outbox_events`（D-096）；Manual Grant、非 Coin 资产延期 |
 | Trust & Safety | `frozen`（治理链路 6 表） | 6 表逻辑模型 `frozen`（全域审计最终确认定稿）；`uuid` 主键 + 跨域只存 logical UUID 不建物理 FK 符合全局最终版 ADR-018，compliant（D-092）；`trust.reports` 为全系统唯一举报事实源、subject 三元组、Operations 逻辑 ID、统一 Outbox（D-113~D-117）；真人认证 Verification 子域 `designing` |
