@@ -29,4 +29,4 @@ date: 2026-08-30
 - 清空聊天记录时必须同步推进 `last_read_seq`，否则会出现「消息看不到但 badge 还显示未读」。
 - 隐藏会话不推进已读；`hidden_at` 与 `last_read_seq` 完全独立。
 - 未来企业客服、强审计或逐条送达时间需求出现时，再设计 `chat_message_receipt`。
-- 字段级规格见 [会话模型](../domains/messaging/conversation.md)。
+- 字段级规格见 [会话模型](../domains/chat/conversation.md)。

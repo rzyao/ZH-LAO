@@ -55,11 +55,11 @@ export default defineConfig({
           { text: 'Social · 动态与举报', link: '/domains/social/community-content' },
           { text: 'Social · 数据库总览', link: '/domains/social/database' },
           { text: 'Community', link: '/domains/community/' },
-          { text: 'Messaging', link: '/domains/messaging/' },
-          { text: 'Messaging · 会话模型', link: '/domains/messaging/conversation' },
-          { text: 'Messaging · 消息模型', link: '/domains/messaging/message' },
-          { text: 'Messaging · 应用服务与事件', link: '/domains/messaging/application-and-events' },
-          { text: 'Messaging · 数据库总览', link: '/domains/messaging/database' },
+          { text: 'Chat', link: '/domains/chat/' },
+          { text: 'Chat · 会话模型', link: '/domains/chat/conversation' },
+          { text: 'Chat · 消息模型', link: '/domains/chat/message' },
+          { text: 'Chat · 应用服务与事件', link: '/domains/chat/application-and-events' },
+          { text: 'Chat · 数据库总览', link: '/domains/chat/database' },
           { text: 'Commerce', link: '/domains/commerce/' },
           { text: 'Rewards', link: '/domains/rewards/' },
           { text: 'Trust & Safety', link: '/domains/trust/' },
@@ -92,7 +92,8 @@ export default defineConfig({
           { text: 'ADR-011 Chat 会话身份与 Direct 唯一', link: '/adr/ADR-011-chat-conversation-identity-and-direct-uniqueness' },
           { text: 'ADR-012 消息 seq 与发送幂等', link: '/adr/ADR-012-message-seq-ordering-and-idempotency' },
           { text: 'ADR-013 已读游标而非 Receipt 表', link: '/adr/ADR-013-read-state-as-cursor-not-receipt-table' },
-          { text: 'ADR-014 不新增 Notification 域', link: '/adr/ADR-014-no-notification-domain-events-outbox-infra' }
+          { text: 'ADR-014 不新增 Notification 域', link: '/adr/ADR-014-no-notification-domain-events-outbox-infra' },
+          { text: 'ADR-015 Chat 命名与 SQL 规范裁决', link: '/adr/ADR-015-chat-naming-and-sql-adjudication' }
         ]
       }
     ],

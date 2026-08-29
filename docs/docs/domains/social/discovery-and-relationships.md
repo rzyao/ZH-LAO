@@ -40,12 +40,12 @@ social_discovery_exposures (
 
 `social_matches` 保存二元关系历史：`id` identity PK、两个 profile FK、`status`（当前匹配与结束状态）、`matched_at`、`ended_at` 和审计。服务层将 pair 规范化（低 ID 在前）并以当前有效 pair 的 partial unique index 防止重复；互关时建立、取消任何一方 Follow 时结束，但绝不删除历史。Match 永远两人，不建成员表，不存 `conversation_id/last_message_at/unread_count`。
 
-`social_blocks` 保存单向 Block 的事实（blocker 与 blocked profile 的 pair、时间；pair 主键并禁止自 Block）。生效后服务层在 Discover、Follow、公共互动和 Messaging 发送入口统一拒绝双方新动作。它不删除历史 Follow/Match/消息；当前表由 Social 维护，Trust & Safety 拥有跨域 restriction、处罚、申诉及完整执法历史。
+`social_blocks` 保存单向 Block 的事实（blocker 与 blocked profile 的 pair、时间；pair 主键并禁止自 Block）。生效后服务层在 Discover、Follow、公共互动和 Chat 发送入口统一拒绝双方新动作。它不删除历史 Follow/Match/消息；当前表由 Social 维护，Trust & Safety 拥有跨域 restriction、处罚、申诉及完整执法历史。
 
 ## 生命周期规则
 
 - `paused`：只退出普通 Discovery，既有 Match 与聊天继续。
 - `closed`：关闭 Social 功能，不等同于账号注销或物理删除；未来是否恢复原资料仍为 deferred。
-- Match 后聊天免费，聊天建立方式/Conversation 生命周期留给 Messaging 规格。
+- Match 后聊天免费，聊天建立方式/Conversation 生命周期留给 Chat 规格。
 - 推荐可使用共同兴趣、语言互补、完整度、社交活跃度、新用户适度加权和小范围随机扰动作可配置软排序；没有持久候选真相、模型训练数据或算法分数表。语言互补是强信号而不是资格门槛。
 - 普通 Discovery 排除已有任一 Follow；关系 UI 必须另提供“我关注的、关注我的、已匹配”入口，均由 Follow/Match 查询得出，不建新表。

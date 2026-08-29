@@ -32,4 +32,4 @@ RETURNING last_message_seq;
 - 消息主体、内容 subtype、会话水位必须在同一事务写入，多图消息必须全有或全无。
 - 发送者自己的 `last_read_seq` 在发送成功后自动推进，使游标始终表示「已处理到的最新会话位置」。
 - 未来大型群聊出现行锁热点时，再评估分布式 sequence allocator、Snowflake ordering 或 Kafka partition offset。
-- 字段级规格见 [消息模型](../domains/messaging/message.md)。
+- 字段级规格见 [消息模型](../domains/chat/message.md)。

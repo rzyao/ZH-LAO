@@ -31,4 +31,4 @@ Social Relationship 表达「为什么两个人可以聊天」，Chat Conversati
 - 取消关注、解除匹配、拉黑、隐藏聊天、清空记录、用户注销都不能删除或关闭 conversation；只有真正的系统级处置才使用 `CLOSED`。
 - 聊天列表不展示 `last_message_id IS NULL` 的空会话，因此可以提前 get-or-create 而不制造空白条目。
 - 未来群聊通过新增 `chat_group_conversation` 等 subtype 表扩展，不推翻当前模型。
-- 字段级规格见 [会话模型](../domains/messaging/conversation.md)。
+- 字段级规格见 [会话模型](../domains/chat/conversation.md)。

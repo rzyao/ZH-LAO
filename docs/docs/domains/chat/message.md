@@ -1,8 +1,9 @@
 ---
 status: frozen
 last_updated: 2026-08-30
-schema: messaging
+schema: chat
 source: 设计聊天领域
+source_conversation_id: 6a9319c2-2204-83ea-9341-7a57757a3082
 ---
 
 # 消息模型
@@ -15,7 +16,9 @@ chat_message                 消息身份、顺序、发送者、生命周期
     └── chat_message_image   IMAGE 消息实际内容（引用 Platform Media）
 ```
 
-核心原则：**消息主体与消息内容分离；消息不物理删除；撤回不删除原记录；排序不依赖 `created_at`；礼物消息只引用 Commerce 结果，不承载交易真相。**
+核心原则：**消息主体与消息内容分离；消息不物理删除；撤回不删除原记录；排序不依赖 `created_at`。**
+
+礼物集成属 `deferred`，本域当前不存在 GIFT 消息类型、`chat_message_gift` 表或 `sendGiftMessage()` 用例。
 
 ---
 
@@ -23,13 +26,14 @@ chat_message                 消息身份、顺序、发送者、生命周期
 
 | 字段 | 类型 | Null | 默认/约束 | 说明 |
 | --- | --- | --- | --- | --- |
-| `id` | `bigint` | 否 | PK | 全局消息身份 |
+| `id` | `bigint generated always as identity` | 否 | PK | 内部消息 ID |
+| `public_id` | `varchar(32)` | 否 | UNIQUE | 对外消息 ID；生成格式待定 |
 | `conversation_id` | `bigint` | 否 | FK → `chat_conversation(id)` | 所属会话 |
 | `sender_user_id` | `bigint` | 否 | — | 发送者 |
 | `client_message_id` | `uuid` | 否 | 与 sender 组成 UNIQUE | 客户端幂等键 |
 | `seq` | `bigint` | 否 | CHECK `> 0`；与 conversation 组成 UNIQUE | 会话内严格递增顺序 |
-| `type` | `smallint` | 否 | CHECK `IN (1, 2)` | 消息业务类型 |
-| `status` | `smallint` | 否 | CHECK `IN (1, 2)` | 消息生命周期状态 |
+| `type` | `varchar(32)` | 否 | CHECK `IN ('text','image')` | 消息业务类型 |
+| `status` | `varchar(32)` | 否 | CHECK `IN ('normal','recalled')` | 消息生命周期状态 |
 | `reply_to_message_id` | `bigint` | 是 | FK → `chat_message(id)` | 引用/回复目标 |
 | `recalled_at` | `timestamptz` | 是 | — | 撤回时间 |
 | `created_at` | `timestamptz` | 否 | DEFAULT `now()` | 服务器时间 |
@@ -41,13 +45,13 @@ CONSTRAINT fk_chat_message_sender_member
     FOREIGN KEY (conversation_id, sender_user_id)
     REFERENCES chat_conversation_member(conversation_id, user_id);
 
-CONSTRAINT uq_chat_message_seq      UNIQUE (conversation_id, seq);
+CONSTRAINT uq_chat_message_seq       UNIQUE (conversation_id, seq);
 CONSTRAINT uq_chat_message_client_id UNIQUE (sender_user_id, client_message_id);
 
 CONSTRAINT ck_chat_message_recall CHECK (
-    (status = 1 AND recalled_at IS NULL)
+    (status = 'normal'   AND recalled_at IS NULL)
     OR
-    (status = 2 AND recalled_at IS NOT NULL)
+    (status = 'recalled' AND recalled_at IS NOT NULL)
 );
 ```
 
@@ -56,26 +60,24 @@ CONSTRAINT ck_chat_message_recall CHECK (
 ### 枚举
 
 ```text
-MessageType
-1 = TEXT
-2 = IMAGE
-
-MessageStatus
-1 = NORMAL
-2 = RECALLED
+MessageType    'text'  |  'image'
+MessageStatus  'normal' | 'recalled'
 ```
 
-`type` 表示**消息业务类型，不是 MIME 类型**；JPEG/PNG/WebP 都是 `IMAGE`，具体 MIME 在媒体资源里。
+`type` 表示**消息业务类型，不是 MIME 类型**；JPEG/PNG/WebP 都是 `'image'`，具体 MIME 在媒体资源里。
 
-`status` **不等于** `sending / sent / delivered / read`。`DELIVERED / READ` 是针对接收方的状态，不是消息本身唯一状态。客户端的 `sending / failed` 属于客户端瞬态状态，不写数据库；`chat_message` 一旦创建成功即代表服务器已正式接受。是否已读由 `chat_conversation_member.last_read_seq` 推导。
+`status` **不等于** `sending / sent / delivered / read`。`delivered / read` 是针对接收方的状态，不是消息本身唯一状态。客户端的 `sending / failed` 属于客户端瞬态状态，不写数据库；`chat_message` 一旦创建成功即代表服务器已正式接受。是否已读由 `chat_conversation_member.last_read_seq` 推导。
 
-暂时没有 `GIFT / VOICE / VIDEO / FILE / STICKER / LOCATION`。未来 `REMOVED` 若用于审核强制屏蔽违规内容可再增加，但**用户自己删除某条消息不能把 status 改成 REMOVED**，因为对方仍可能看到。
+未来 `'removed'` 若用于审核强制屏蔽违规内容可再增加，但**用户自己删除某条消息不能把 status 改成 removed**，因为对方仍可能看到。
+
+**当前没有 `'gift'`、`'voice'`、`'video'`、`'file'`、`'sticker'`、`'location'`。** 语音与翻译是否进入首期由主方案裁决；在那之前 `'text'` 与 `'image'` 是唯一合法的 MessageType。
 
 ### `id` 与 `seq` 为什么都需要
 
 | 字段 | 职责 | 用于 |
 | --- | --- | --- |
-| `id` | 全局识别这一条消息 | API、`reply_to_message_id`、举报、审核、礼物关联、日志追踪 |
+| `id` | 全局识别这一条消息 | 内部关联、举报、审核、日志追踪 |
+| `public_id` | 对外暴露的消息身份 | API、客户端引用，避免暴露连续 ID |
 | `seq` | 这条消息在会话中排第几 | 排序、分页、同步、未读、断点续传 |
 
 不依赖 `created_at` 做严格顺序：极短时间内并发写入可能撞时间戳，重试、导入数据、多节点都会导致顺序不稳定。
@@ -88,7 +90,7 @@ MessageStatus
 UPDATE chat_conversation
 SET last_message_seq = last_message_seq + 1
 WHERE id = :conversation_id
-  AND status = 1
+  AND status = 'active'
 RETURNING last_message_seq;
 ```
 
@@ -101,7 +103,7 @@ RETURNING last_message_seq;
 聊天极易出现「用户点发送 → 网络超时 → 客户端不知道成功没有 → 再次发送」。客户端生成 UUID，服务端先查：
 
 ```sql
-SELECT id, conversation_id, seq
+SELECT id, public_id, conversation_id, seq
 FROM chat_message
 WHERE sender_user_id = :sender AND client_message_id = :client_message_id;
 ```
@@ -134,6 +136,7 @@ WHERE sender_user_id = :sender AND client_message_id = :client_message_id;
 | `recalled_by_user_id` | 当前只能撤回自己发送的消息，`recalled_by_user_id` 恒等于 `sender_user_id`；未来管理员强制撤回属于另一种语义，再增加 `removed_by` / `moderation_action_id` |
 | `is_delivered` / `websocket_sent` / `push_sent` | 传输状态，不是消息业务事实 |
 | `content` / `image_url` / `gift_id` 等 | 会让 90% 字段为 NULL；内容应下沉到 subtype 表 |
+| `gift_send_id` / 任何礼物字段 | 礼物集成 `deferred`，不预留 |
 
 ---
 
@@ -146,7 +149,7 @@ WHERE sender_user_id = :sender AND client_message_id = :client_message_id;
 
 - 用 `text` 而非 `varchar(n)`：消息长度属于产品规则，未来调整概率高，PostgreSQL `TEXT` 无性能劣势；最大长度（例如 2000 Unicode 字符）由应用层控制，改限制不需要迁数据库。
 - CHECK 使用 `btrim` 而非 `length(text) > 0`，纯空格消息也应被挡住。
-- **不增加 `translated_text`、`language`、`pinyin`、`lao_translation`。** 本产品同时有语言学习属性，更要把「聊天原文」与「翻译结果」分开：`chat_message_text.text = immutable original content`，翻译是派生数据，未来可单独建 `chat_message_translation` 或交给 Learning/Translation 能力。
+- **不增加 `translated_text`、`language`、`pinyin`、`lao_translation`。** 本产品同时有语言学习属性，更要把「聊天原文」与「翻译结果」分开：`chat_message_text.text = immutable original content`，翻译是派生数据；未来若支持聊天翻译，应单独建模，属 `deferred`。
 
 ---
 
@@ -200,9 +203,11 @@ Chat 事务：验证 asset 可使用 + 创建 message + 创建 chat_message_imag
 
 数据库保证结构完整性，应用服务保证 subtype 一致性。
 
-- 所有发送操作必须经过明确命令 `sendTextMessage()` / `sendImageMessage()` / `sendGiftMessage()`，而不是 `createMessage(type, payload)`。
+- 所有发送操作必须经过明确命令 `sendTextMessage()` / `sendImageMessage()`，而不是 `createMessage(type, payload)`。
 - 每个操作在同一事务里 `insert chat_message` + `insert subtype row(s)` + `commit`。
-- 不写复杂 trigger 保证「type = TEXT 必须存在 chat_message_text 且不能同时存在 chat_message_image」。
+- 不写复杂 trigger 保证「type = 'text' 必须存在 chat_message_text 且不能同时存在 chat_message_image」。
+
+**当前只有两个发送命令。礼物集成 `deferred`，不存在 `sendGiftMessage()`。**
 
 ---
 
@@ -211,9 +216,9 @@ Chat 事务：验证 asset 可使用 + 创建 message + 创建 chat_message_imag
 统一抽象为 `SendMessage`，内部按类型分支。一个数据库事务内完成：
 
 ```text
-1. 校验 conversation 存在且为 ACTIVE
-2. 校验 sender 是该 conversation member
-3. 校验当前业务关系允许发送消息
+1. 校验 conversation 存在且 status = 'active'
+2. 执行 canChat(sender, recipient) 权限契约
+3. 校验 sender 是该 conversation member
 4. 校验 client_message_id 幂等
 5. 原子分配新的 seq
 6. 插入 chat_message
@@ -228,13 +233,7 @@ Chat 事务：验证 asset 可使用 + 创建 message + 创建 chat_message_imag
 
 ### 权限检查与边界
 
-发送前必须确认「当前 sender 是否允许给 recipient 发消息」，但**不要让数据库做 `chat_message → FK social_match`**。应用层通过聊天权限策略读取 Social 暴露的关系状态：
-
-```text
-ChatApplicationService
-    ├── 聊天权限策略：canChat(A, B)
-    └── ChatRepository.send(...)
-```
+发送前必须确认「当前 sender 是否允许给 recipient 发消息」，但**不要让数据库做 `chat_message → FK social_match`**。应用层通过 `canChat()` 读取 Social 与 Trust & Safety 暴露的事实，完整契约见[应用服务与事件](application-and-events.md)的「canChat 权限契约」一节。
 
 模块化单体下这个检查可以发生在同一次业务请求中，但不要把 Social 表结构硬编码进 Chat Repository。
 
@@ -253,14 +252,15 @@ ChatApplicationService
 ## 撤回
 
 ```text
-chat_message.status = RECALLED(2)
+chat_message.status = 'recalled'
 chat_message.recalled_at = now()
 ```
 
 - **不 DELETE，不覆盖成「消息已撤回」文本。** 原始 `chat_message_text` / `chat_message_image` 全部保留，供审核、举报、安全审计、纠纷处理取证。
-- 客户端根据 `status = RECALLED` 显示「对方撤回了一条消息」。
+- 客户端根据 `status = 'recalled'` 显示「对方撤回了一条消息」。
 - **只能撤回自己发送的消息**，属业务规则，不需要数据库 trigger。
 - 撤回最后一条消息不回退 `chat_conversation.last_message_id`。
+- **撤回不是独立实体。** 不建 `chat_message_recall` 表，也不存在 `MessageRecall` 实体——撤回就是消息自身的生命周期状态。
 
 ---
 
@@ -268,11 +268,12 @@ chat_message.recalled_at = now()
 
 | 不建 | 原因 |
 | --- | --- |
-| `chat_message_user_state` | 单条「仅自己删除」目前不是必需功能；「清空聊天记录」由 `cleared_before_seq` 支持 |
+| `chat_message_gift` / `sendGiftMessage()` / `GiftMessageReference` | 礼物集成 `deferred`；礼物交易真相属 Commerce，但 Chat 侧集成方式尚未设计 |
 | `chat_message_receipt` | 已读用 `last_read_seq` 游标即可，1 对 1 私聊不需要逐条记录，不值得承受写放大 |
 | `chat_delivery_receipt` | 送达状态第一阶段不做，会引入 device/push/websocket/multi-device 复杂度 |
+| `chat_message_recall` | 撤回是 `chat_message` 的状态，不是独立实体 |
 | `chat_message_reaction` | 没有确定需求 |
-| `chat_message_gift` | 礼物从第一阶段范围移除，等 Commerce 设计礼物体系时再回来定义集成方式 |
-| `chat_message_translation` | 翻译是原始消息之上的派生能力，不混进聊天事实 |
+| `chat_message_translation` | 翻译是原始消息之上的派生能力；是否进入首期由主方案裁决 |
+| `chat_message_user_state` | 单条「仅自己删除」目前不是必需功能；「清空聊天记录」由 `cleared_before_seq` 支持 |
 | `chat_message_attachment` | Chat 不自己建附件主资源表，直接引用 `asset_id` |
 | `chat_group` / `chat_group_member` | 当前只有 Direct |

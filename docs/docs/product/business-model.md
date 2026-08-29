@@ -37,7 +37,7 @@ Community 形成另一条关系入口：发布内容 → 曝光 → 关注 → �
 
 ### 虚拟礼物
 
-礼物可以从聊天、主页或动态触发，但商品、购买、赠送、接收和资产变化都归 Commerce；Messaging 只记录 Gift Message Reference。
+礼物可以从聊天、主页或动态触发，但商品、定价、购买、赠送、接收和资产变化全部归 Commerce；Chat 侧如何展示送礼结果属于 `deferred`，当前 Chat 域不存在 GIFT 消息类型、`chat_message_gift` 表或 `GiftMessageReference` 实体。
 
 礼物接收者能否获得积分、兑换或收益属于 `deferred`，不得预设为 Creator Economy。
 

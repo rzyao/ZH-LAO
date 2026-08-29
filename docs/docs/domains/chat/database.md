@@ -1,13 +1,14 @@
 ---
 status: frozen
 last_updated: 2026-08-30
-schema: messaging
+schema: chat
 source: 设计聊天领域
+source_conversation_id: 6a9319c2-2204-83ea-9341-7a57757a3082
 ---
 
-# Messaging 数据库总览
+# Chat 数据库总览
 
-Messaging Schema 第一阶段正式定稿为 **7 张表**。主会话已明确「这版之后原则上不再改核心结构，后续增加礼物、群聊、逐条删除、Reaction 等，通过新增表扩展，而不是推翻当前模型」。
+Chat Schema 第一阶段正式定稿为 **7 张表**。主方案已明确「这版之后原则上不再改核心结构，后续增加礼物、群聊、逐条删除、Reaction 等，通过新增表扩展，而不是推翻当前模型」。
 
 | 组 | 表 | 规格 |
 | --- | --- | --- |
@@ -16,28 +17,49 @@ Messaging Schema 第一阶段正式定稿为 **7 张表**。主会话已明确�
 | 消息 | `chat_message` | [消息模型](message.md) |
 | 消息内容 | `chat_message_text`、`chat_message_image` | [消息模型](message.md) |
 
-## 完整 DDL（按依赖顺序）
+## 状态：逻辑模型 `frozen`，物理 DDL `designing`
 
-主会话约定：`user_id`、`user_low_id`、`user_high_id` 的跨域用户表 FK 先不写，因为全局用户身份主表的最终命名需与整个项目保持一致；Chat Domain 内部的 FK 则全部明确。
+| 层面 | 状态 | 说明 |
+| --- | --- | --- |
+| 实体、字段语义、约束意图、索引意图、业务规则 | `frozen` | 可直接作为实现依据 |
+| 物理 DDL | `designing` | 下表列出尚未定稿的物理项，**在补齐前不应直接复制执行** |
+
+未定稿的物理项：
+
+| 项 | 说明 |
+| --- | --- |
+| 跨域用户 FK | `user_id` / `user_low_id` / `user_high_id` 的目标表（`identity.users` 或最终命名）未定 |
+| Media FK | `chat_message_image.asset_id` → Platform Media 的 FK，等 Media 表定稿后补 |
+| `chat_direct_conversation.created_at` | 会话倾向不保留；最终由 migration 阶段裁决 |
+| `public_id` 生成 | 长度已定为 `varchar(32)`，生成算法与各实体前缀未定 |
+| Outbox 物理表 | 属项目级基础设施设计，不在本 Schema 内定稿 |
+
+因此本节标题为**逻辑 DDL**：结构与约束已定稿，物理落地前需补上表项目。
+
+## 逻辑 DDL（按依赖顺序）
 
 ```sql
 -- 1. Conversation
 CREATE TABLE chat_conversation (
-    id                BIGINT PRIMARY KEY,
+    id                  BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    public_id           VARCHAR(32) NOT NULL UNIQUE,
 
-    type              SMALLINT NOT NULL,
-    status            SMALLINT NOT NULL,
+    type                VARCHAR(32) NOT NULL,
+    status              VARCHAR(32) NOT NULL,
 
-    last_message_seq  BIGINT NOT NULL DEFAULT 0,
-    last_message_id   BIGINT NULL,
-    last_message_at   TIMESTAMPTZ NULL,
+    last_message_seq    BIGINT NOT NULL DEFAULT 0,
+    last_message_id     BIGINT NULL,
+    last_message_at     TIMESTAMPTZ NULL,
 
-    created_at        TIMESTAMPTZ NOT NULL DEFAULT now(),
-    updated_at        TIMESTAMPTZ NOT NULL DEFAULT now(),
+    created_at          TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at          TIMESTAMPTZ NOT NULL DEFAULT now(),
 
-    CONSTRAINT ck_chat_conversation_type            CHECK (type IN (1)),
-    CONSTRAINT ck_chat_conversation_status          CHECK (status IN (1, 2)),
-    CONSTRAINT ck_chat_conversation_last_message_seq CHECK (last_message_seq >= 0),
+    CONSTRAINT ck_chat_conversation_type
+        CHECK (type IN ('direct')),
+    CONSTRAINT ck_chat_conversation_status
+        CHECK (status IN ('active', 'closed')),
+    CONSTRAINT ck_chat_conversation_last_message_seq
+        CHECK (last_message_seq >= 0),
     CONSTRAINT ck_chat_conversation_last_message CHECK (
         (last_message_seq = 0 AND last_message_id IS NULL AND last_message_at IS NULL)
         OR
@@ -121,7 +143,8 @@ CREATE INDEX idx_chat_conversation_user_state_user
 
 -- 5. Message
 CREATE TABLE chat_message (
-    id                    BIGINT PRIMARY KEY,
+    id                    BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    public_id             VARCHAR(32) NOT NULL UNIQUE,
 
     conversation_id       BIGINT NOT NULL,
     sender_user_id        BIGINT NOT NULL,
@@ -130,8 +153,8 @@ CREATE TABLE chat_message (
 
     seq                   BIGINT NOT NULL,
 
-    type                  SMALLINT NOT NULL,
-    status                SMALLINT NOT NULL,
+    type                  VARCHAR(32) NOT NULL,
+    status                VARCHAR(32) NOT NULL,
 
     reply_to_message_id   BIGINT NULL,
 
@@ -153,12 +176,12 @@ CREATE TABLE chat_message (
     CONSTRAINT uq_chat_message_client_id UNIQUE (sender_user_id, client_message_id),
 
     CONSTRAINT ck_chat_message_seq  CHECK (seq > 0),
-    CONSTRAINT ck_chat_message_type CHECK (type IN (1, 2)),
-    CONSTRAINT ck_chat_message_status CHECK (status IN (1, 2)),
+    CONSTRAINT ck_chat_message_type CHECK (type IN ('text', 'image')),
+    CONSTRAINT ck_chat_message_status CHECK (status IN ('normal', 'recalled')),
     CONSTRAINT ck_chat_message_recall CHECK (
-        (status = 1 AND recalled_at IS NULL)
+        (status = 'normal' AND recalled_at IS NULL)
         OR
-        (status = 2 AND recalled_at IS NOT NULL)
+        (status = 'recalled' AND recalled_at IS NOT NULL)
     )
 );
 
@@ -194,10 +217,10 @@ CREATE TABLE chat_message_image (
 
 | 枚举 | 值 |
 | --- | --- |
-| `ConversationType` | `1 = DIRECT` |
-| `ConversationStatus` | `1 = ACTIVE`、`2 = CLOSED` |
-| `MessageType` | `1 = TEXT`、`2 = IMAGE` |
-| `MessageStatus` | `1 = NORMAL`、`2 = RECALLED` |
+| `ConversationType` | `'direct'` |
+| `ConversationStatus` | `'active'`、`'closed'` |
+| `MessageType` | `'text'`、`'image'` |
+| `MessageStatus` | `'normal'`、`'recalled'` |
 
 ## 索引意图
 
@@ -231,42 +254,37 @@ chat_message_image       (message_id, asset_id)
 
 原则：**只给已经明确存在的查询加索引，不做「也许以后会用」的索引。**
 
+`public_id UNIQUE` 会额外产生唯一索引；若未来确认 API 完全不按 `public_id` 反查，可再评估，但当前按全局规范保留。
+
 ## 明确不建的表
 
 正式锁定：
 
 ```text
-❌ chat_message_user_state    单条「仅自己删除」非必需
+❌ chat_message_gift          礼物集成 deferred
 ❌ chat_message_receipt       已读用 last_read_seq 游标
 ❌ chat_delivery_receipt      送达状态第一阶段不做
+❌ chat_message_recall        撤回是 chat_message 的状态，不是实体
 ❌ chat_message_reaction      无确定需求
-❌ chat_message_gift          礼物从第一阶段移除
+❌ chat_message_user_state    单条「仅自己删除」非必需
+❌ chat_message_translation   翻译是否进入首期待主方案裁决
+❌ chat_message_attachment    Chat 不自建附件主资源表
 ❌ chat_group                 当前只有 Direct
 ❌ chat_group_member          当前只有 Direct
-❌ chat_message_translation   翻译是派生能力
-❌ chat_message_attachment    Chat 不自建附件主资源表
-❌ chat_outbox_event          属后续项目级基础设施设计，不算 Chat 核心业务表
+❌ chat_outbox_event          属项目级基础设施设计，不在本 Schema 定稿
 ```
 
-以后有明确需求再加，通过新增表扩展而不是推翻当前模型。
+同时明确不存在的领域实体：`MessageReceipt`、`MessageRecall`、`MessageTranslation`、`GiftMessageReference`。
 
-## 与全局 SQL 规范的差异（`designing`）
+## 与全局 SQL 规范的关系
 
-主会话在 Chat Domain 设计中使用的 SQL 风格与[数据库总规范](../../architecture/database.md)已确立的十二项规则存在三处偏差。**文档维护会话不自行裁决，全部提交主架构会话决定**，在决定前按下列方式记录：
-
-| 项 | 全局规范 | Chat 会话用法 | 状态 |
+| 项 | 全局规范 | Chat 现状 | 结论 |
 | --- | --- | --- | --- |
-| 表名 | 复数，且 Identity/Learning 不带域前缀（`users`、`courses`），Social 带前缀（`social_profiles`） | 单数且带域前缀：`chat_conversation`、`chat_message` | `designing` |
-| 状态/枚举类型 | `varchar(32)` + CHECK（Identity 使用 `'active'/'disabled'/'closed'`） | `smallint` + CHECK（`1 = ACTIVE`） | `designing` |
-| 主键 | `bigint generated always as identity primary key` | `BIGINT PRIMARY KEY`（未声明 identity，ID 生成方式未定） | `designing` |
+| 表名 | 复数 | `chat_*` 单数带前缀 | **已裁决例外**：域与 Schema 已统一为 `chat`，`chat_` 前缀与 Schema 名一致；表名与会话定稿逐字保持 |
+| 状态/枚举 | `varchar(32)` + CHECK | `varchar(32)` + CHECK | 已回归规范 |
+| 主键 | `bigint generated always as identity` | `bigint generated always as identity` | 已回归规范 |
+| `public_id` | User、Post、Conversation、Message、Order 需要 | `chat_conversation`、`chat_message` 均已具备 | 已回归规范 |
 
-附带影响：
+剩余物理差异（非规范冲突，属未定稿项）见本节开头的「状态」表：跨域用户 FK、Media FK、`chat_direct_conversation.created_at`、`public_id` 生成算法、Outbox 物理表。
 
-- 表名落在 `messaging` Schema 后是否应为 `messaging.conversations` 而非 `messaging.chat_conversation`，取决于主会话对前缀的统一裁决。
-- `chat_direct_conversation` 与主会话推荐版本之间是否保留 `created_at`，属 migration 阶段可复核项（`designing`）。
-- 跨域用户身份 FK 的目标表（`identity.users` 或最终命名）待全局用户主表定稿后补齐（`designing`）。
-- `chat_message_image.asset_id` 指向 Platform Media 的具体 FK 等 Media 表定稿后再补（`designing`）。
-
-上表之外的字段、类型、约束、索引与业务规则均为 `frozen`。**不得因上述命名与类型差异，把已定稿的 7 张表整体降级为 `designing`。**
-
-裁决后应同步更新本页 DDL、[数据库总规范](../../architecture/database.md)与[设计台账](../../governance/design-register.md)。
+**这些未定稿项不影响已 `frozen` 的字段语义、约束意图与业务规则，不得据此把七表模型整体降级为 `designing`。**

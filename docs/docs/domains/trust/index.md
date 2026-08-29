@@ -25,7 +25,7 @@ Social Profile + Verification Media → Verification Case
 
 首期人工审核；后续演进为 AI 辅助，再到自动审核与人工复核。自动化不改变 Verification 业务边界。
 
-Account Status 与 Capability Restriction 分离：用户可保持 `active`，但被禁止聊天、进入社交、发布动态或 Follow。用户主动 Block 的当前关系事实为 Social 的 `social_blocks`；Trust & Safety 的 Restriction/Moderation 可跨域限制 Discover、Follow、公开互动和 Messaging，并保留完整处置历史。
+Account Status 与 Capability Restriction 分离：用户可保持 `active`，但被禁止聊天、进入社交、发布动态或 Follow。用户主动 Block 的当前关系事实为 Social 的 `social_blocks`；Trust & Safety 的 Restriction/Moderation 可跨域限制 Discover、Follow、公开互动和 Chat，并保留完整处置历史。
 
 ## 数据库状态
 

@@ -1,8 +1,9 @@
 ---
 status: frozen
 last_updated: 2026-08-30
-schema: messaging
+schema: chat
 source: 设计聊天领域
+source_conversation_id: 6a9319c2-2204-83ea-9341-7a57757a3082
 ---
 
 # 会话模型
@@ -26,9 +27,10 @@ chat_conversation_user_state   用户自己的聊天列表/UI 状态（user pref
 
 | 字段 | 类型 | Null | 默认/约束 | 说明 |
 | --- | --- | --- | --- | --- |
-| `id` | `bigint` | 否 | PK | 会话 ID |
-| `type` | `smallint` | 否 | CHECK `IN (1)` | `1 = DIRECT` |
-| `status` | `smallint` | 否 | CHECK `IN (1, 2)` | `1 = ACTIVE`、`2 = CLOSED` |
+| `id` | `bigint generated always as identity` | 否 | PK | 内部会话 ID |
+| `public_id` | `varchar(32)` | 否 | UNIQUE | 对外会话 ID；生成格式待定 |
+| `type` | `varchar(32)` | 否 | CHECK `IN ('direct')` | 会话类型 |
+| `status` | `varchar(32)` | 否 | CHECK `IN ('active','closed')` | 会话整体状态 |
 | `last_message_seq` | `bigint` | 否 | DEFAULT `0`；CHECK `>= 0` | 会话内消息水位，同时用于分配下一条 seq |
 | `last_message_id` | `bigint` | 是 | — | 查询冗余指针，**不加 FK** |
 | `last_message_at` | `timestamptz` | 是 | — | 聊天列表排序依据 |
@@ -48,11 +50,11 @@ CHECK (
 
 ### 枚举语义
 
-`ConversationType`：`1 = DIRECT`。未来可扩 `GROUP / SYSTEM / CUSTOMER_SERVICE`，但当前 CHECK 只允许 DIRECT，等真正支持时再放宽。
+`ConversationType`：`'direct'`。未来可扩 `'group'`、`'system'`、`'customer_service'`，但当前 CHECK 只允许 `'direct'`，等真正支持时再放宽。
 
-`ConversationStatus`：`1 = ACTIVE`、`2 = CLOSED`。`CLOSED` 是**非常强的系统级状态**，只用于后台永久关闭异常会话、系统迁移废弃、严重违规导致整个会话不可继续使用。
+`ConversationStatus`：`'active'`、`'closed'`。`'closed'` 是**非常强的系统级状态**，只用于后台永久关闭异常会话、系统迁移废弃、严重违规导致整个会话不可继续使用。
 
-以下行为都**不能**把 conversation 置为 CLOSED，也**不能**删除 conversation：
+以下行为都**不能**把 conversation 置为 closed，也**不能**删除 conversation：
 
 ```text
 取消关注      解除匹配      拉黑
@@ -120,8 +122,22 @@ CONSTRAINT uq_chat_direct_users UNIQUE (user_low_id, user_high_id);
 ```text
 A-B 与 B-A 等价
 一个用户不能和自己建立 Direct Conversation
-同一对用户不能创建第二个 Direct Conversation
+同一用户对不能创建第二个 Direct Conversation
 ```
+
+### Direct 成员集合不变量（`frozen`）
+
+数据库层目前只保证用户对唯一，**并不能**阻止一个 Direct conversation 出现第三个 member，也不能保证 member 恰好就是 low/high 两人。因此正式冻结下列领域不变量：
+
+> **对 `type = 'direct'` 的 conversation，`chat_conversation_member` 必须恰好包含两条记录，且其 `user_id` 集合必须恰好等于 `{user_low_id, user_high_id}`。**
+>
+> 记作：`DirectConversationMembers = {user_low_id, user_high_id}`
+
+执行约定：
+
+- 成员**只能**通过 `getOrCreateDirectConversation()` 创建，不存在通用的 `addMember()` 入口；非 Direct 会话类型出现之前不得提供该能力。
+- 不为此引入数据库触发器或复杂 CHECK——代价不值得。由应用服务在同一事务内创建两条 member，并由**集成测试**覆盖该不变量。
+- 真正的关键唯一性（`A+B` 只有一个 conversation）已由 `UNIQUE(user_low_id, user_high_id)` 在数据库层保证。
 
 ### 关键决策
 
@@ -130,7 +146,7 @@ A-B 与 B-A 等价
 - **不存 `initiator_user_id`。** 会话身份是 `A ↔ B`，不是 `A → B`；「谁先发起」有多种定义，应由消息或事件判断。
 - **不存 `status`。** 状态由 `chat_conversation.status` 统一管理；subtype 表重复状态会导致「哪个才是真状态」的歧义。
 - **不存 `deleted_at`。** 生命周期统一由 `chat_conversation` 管理。
-- **推荐版本不存 `created_at`。** 主会话倾向的定稿版本只有三列，因为它是 Conversation 的 Direct subtype，不是独立生命周期实体；`chat_conversation.created_at` 已经存在。是否保留 `created_at` 属于 migration 阶段可复核项。
+- **是否保留 `created_at` 未最终裁决**（`designing`）。会话倾向的定稿版本只有三列，因为它是 Conversation 的 Direct subtype，不是独立生命周期实体；`chat_conversation.created_at` 已经存在。
 
 ### 创建算法：`getOrCreateDirectConversation`
 
@@ -138,7 +154,7 @@ A-B 与 B-A 等价
 
 ```text
 normalize(A, B) → low = min(A,B), high = max(A,B)
-事务内创建
+事务内创建：conversation + direct + member × 2 + user_state × 2
 捕获 UNIQUE(user_low_id, user_high_id) 冲突 → 重新查询已有 conversation 并返回
 ```
 
@@ -171,13 +187,14 @@ CREATE INDEX idx_chat_member_user
 
 ### 关键决策
 
-- **不保留 `status`。** 主会话在总审查中明确删除。当前 Direct Chat 成员一旦建立就长期存在，不存在真正的 `LEFT / REMOVED` 生命周期；保留只有一个合法值的字段不符合原则。未来群聊/客服会话出现成员退出语义时再加。
+- **不保留 `status`。** 主方案在总审查中明确删除。当前 Direct Chat 成员一旦建立就长期存在，不存在真正的 `left / removed` 生命周期；保留只有一个合法值的字段不符合原则。未来群聊/客服会话出现成员退出语义时再加。
 - **不保留 `left_at`。** 没有真实的 member leave 业务；否则极易被误用成取消关注时间、拉黑时间、删除聊天时间。
 - **不存 `unread_count`。** 与 `last_read_seq` 同时当真相会产生 `last_read_seq = 500` 但 `unread_count = 7` 而实际只有 5 条未读的矛盾。**`last_read_seq` 是真相，未读数是派生数据。**
 - **不存 `last_delivered_message_id`。** 第一阶段只支持「服务器已接受」与「已读/未读」，不做复杂 delivery receipt。
 - **不存 `is_pinned` / `is_muted` / `hidden_at`。** 属 `chat_conversation_user_state`，否则 member 表会变成垃圾桶。
-- **不表达 Block。** `A block B` 属 Social / Safety / Relationship；B 并没有因此退出 conversation，历史聊天仍属双方。发送时检查聊天权限即可。
+- **不表达 Block。** `A block B` 属 Social / Safety / Relationship；B 并没有因此退出 conversation，历史聊天仍属双方。发送时由 `canChat()` 检查即可。
 - **Social 状态变化不改 member。** 取消关注、解除互关、重新互关原则上都不修改本表。
+- **不建 `MessageReceipt` 之类的已读实体。** 已读就是成员游标。
 
 ### `last_read_seq` 语义与更新规则
 
@@ -221,7 +238,7 @@ CREATE INDEX idx_chat_conversation_user_state_user
     ON chat_conversation_user_state(user_id, conversation_id);
 ```
 
-复合 FK 到 member 的价值：数据库直接保证**不是 conversation member 就不可能拥有该 conversation 的个人状态**。这是 Chat Domain 内部约束，不存在跨域耦合问题，因此不需要再单独 FK `conversation_id → chat_conversation`。
+复合 FK 到 member 的价值：数据库直接保证**不是 conversation member 就不可能拥有该 conversation 的个人状态**。这是 Chat 域内部约束，不存在跨域耦合问题，因此不需要再单独 FK `conversation_id → chat_conversation`。
 
 ### 字段语义
 
@@ -253,7 +270,7 @@ cleared_before_seq = 500
 
 ## 聊天列表查询模型
 
-### 读取路径
+### 读取路径与过滤条件
 
 ```text
 chat_conversation_member (WHERE user_id = ?)   ← 用户参与了哪些会话
@@ -264,6 +281,16 @@ chat_conversation_user_state                   ← pinned / muted / hidden / cle
         ↓ 组合
 Social/Profile projection                      ← 头像、昵称（不在 Chat 冗余）
 ```
+
+`listConversations` 的**完整过滤条件**（三者缺一不可）：
+
+```sql
+WHERE m.user_id = :current_user
+  AND c.last_message_id IS NOT NULL      -- 空会话不进列表
+  AND s.hidden_at IS NULL                -- 已隐藏的会话不出现在列表
+```
+
+遗漏 `hidden_at IS NULL` 会导致「删除/隐藏聊天」的用户仍然看到该会话。
 
 查询顺序是**先按用户取会话，再 join**，不是扫描全表 conversation 再过滤。因此当前不需要给 `last_message_at` 单独建索引。
 
@@ -277,14 +304,6 @@ Social/Profile projection                      ← 头像、昵称（不在 Chat
 
 不引入 `pin_order`；未来允许手动调整置顶顺序时再评估。
 
-### 空会话不进列表
-
-```text
-last_message_id IS NULL → 不展示在聊天首页
-```
-
-因此允许提前 `getOrCreateDirectConversation()`，不会制造大量空白聊天条目。`created_at` 不能作为聊天列表默认排序依据。
-
 ### 未读数
 
 第一阶段采用聚合查询，不存 `unread_count`：
@@ -296,7 +315,7 @@ JOIN chat_message msg
   ON msg.conversation_id = m.conversation_id
  AND msg.seq > m.last_read_seq
  AND msg.sender_user_id <> m.user_id
- AND msg.status = 1
+ AND msg.status = 'normal'
 WHERE m.user_id = :user_id
 GROUP BY m.conversation_id;
 ```

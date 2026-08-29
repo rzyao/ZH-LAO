@@ -10,7 +10,7 @@ last_updated: 2026-08-30
 使用一个 PostgreSQL 实例、一个主数据库和十个业务 Schema：
 
 ```text
-identity  learning  social  community  messaging
+identity  learning  social  community  chat
 commerce  rewards   trust   operations platform
 ```
 
@@ -54,19 +54,17 @@ commerce  rewards   trust   operations platform
 | `identity` | `frozen` | 核心四表 SQL 级 `frozen`；OTP/Session/Device 已确认字段，未确认类型逐字段 `designing` |
 | `learning` | `frozen` | 43 张必建表、核心字段与约束已冻结；跨域 Media FK 与内容发布机制局部待定。 |
 | `social` | `frozen` | 20 张首期表已冻结；公开内容字段局部 `designing`。 |
-| `messaging` | `frozen` | Chat 第一阶段 7 张表定稿；表名前缀、枚举类型、主键生成方式与本页规范的差异为 `designing`。 |
+| `chat` | `frozen` | Chat 第一阶段 7 张表定稿；物理 DDL（跨域用户 FK、Media FK、`public_id` 生成算法）为 `designing` |
 | 其余六个 | `baseline` | `designing`，不得从实体名自动生成表 |
 
-详见 [Identity 数据库](../domains/identity/database.md)、[Learning 数据库](../domains/learning/database.md)、[Social 数据库](../domains/social/database.md) 与 [Messaging 数据库](../domains/messaging/database.md)。
+详见 [Identity 数据库](../domains/identity/database.md)、[Learning 数据库](../domains/learning/database.md)、[Social 数据库](../domains/social/database.md) 与 [Chat 数据库](../domains/chat/database.md)。
 
-## 已知规范偏差
+## 域命名与表名
 
-`messaging` Schema 在会话设计中出现了三处与本页十二项规范的偏差，**由主架构会话裁决，文档维护阶段不自行统一**：
+一级域与 Schema 统一命名：`chat` 域使用 `chat` Schema。此前使用过的 `messaging` 名称已废弃。
 
-| 项 | 本页规范 | Messaging 会话用法 |
-| --- | --- | --- |
-| 表名 | 复数 | 单数且带域前缀（`chat_conversation`） |
-| 状态/枚举 | `varchar(32)` + CHECK | `smallint` + CHECK |
-| 主键 | `bigint generated always as identity` | `BIGINT PRIMARY KEY` |
+`chat` 域的表名保留会话定稿的 `chat_*` 单数带前缀形式（如 `chat_conversation`），与本页「表名使用复数」不同，属**已裁决的正式例外**：该域由会话逐表定稿，表名与其结论逐字保持一致，且 `chat_` 前缀与 Schema 名一致，不存在语义冲突。其他域继续遵循复数规则。
 
-偏差只影响上述三项；Messaging 的字段语义、约束、索引意图与业务规则均已 `frozen`，不得因命名与类型差异整体降级。完整清单见 [Messaging 数据库](../domains/messaging/database.md) 的「与全局 SQL 规范的差异」一节。
+## `public_id` 适用范围
+
+本页「当前预期使用 `public_id` 的对象包括 User、Post、Conversation、Message、Order」已落实：`chat_conversation` 与 `chat_message` 均带有 `public_id varchar(32) NOT NULL UNIQUE`。生成算法与各实体前缀仍为 `designing`。

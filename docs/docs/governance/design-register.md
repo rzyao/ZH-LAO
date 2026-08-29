@@ -2,7 +2,8 @@
 status: baseline
 last_updated: 2026-08-30
 source_conversation: 数据库域设计；继续设计社交资料；设计聊天领域
-source_conversation_id: 6a92f0c0-90b4-83ea-a43d-cccb1ef2666d；6a931551-8a30-83e9-8caf-60e529abce68；6a9329e5-9f28-83ea-8eb1-f85be6e414fa
+source_conversation_id: 6a92f0c0-90b4-83ea-a43d-cccb1ef2666d；6a931551-8a30-83e9-8caf-60e529abce68；6a9319c2-2204-83ea-9341-7a57757a3082
+source_share_url: https://chatgpt.com/share/6a9329e5-9f28-83ea-8eb1-f85be6e414fa
 ---
 
 # 设计决策台账
@@ -24,10 +25,10 @@ source_conversation_id: 6a92f0c0-90b4-83ea-a43d-cccb1ef2666d；6a931551-8a30-83e
 | D-011 | User Status 为 active/disabled/closed | `frozen` | [Identity 数据库](../domains/identity/database.md) | suspended 已被取代 |
 | D-012 | Follow 单向，互关由应用服务生成 Match | `baseline` | [ADR-003](../adr/ADR-003-follow-mutual-follow-match.md) | Match 后免费聊天 |
 | D-013 | Block 归 Trust & Safety | `superseded` | [Social 关系](../domains/social/discovery-and-relationships.md) | 被 D-034 取代；Trust 仍拥有执法历史 |
-| D-014 | 礼物交易归 Commerce，消息只引用交易 | `baseline` | [Commerce](../domains/commerce/README.md) | 支持多入口送礼 |
+| D-014 | 礼物交易归 Commerce；Chat 与礼物的集成属 `deferred`，当前 Chat 域不存在 `GiftMessageReference`、GIFT 消息类型、`chat_message_gift` 或 `sendGiftMessage()`；未来若设计，由 Commerce 定义集成模型 | `baseline` | [Commerce](../domains/commerce/index.md) | 支持多入口送礼；Chat 侧集成方式未定 |
 | D-015 | Commerce/Rewards 通过 Entitlement 统一授予能力 | `baseline` | [ADR-005](../adr/ADR-005-entitlement-centered-authorization.md) | 不使用 is_vip |
 | D-016 | 推荐采用硬筛选 + 可配置解释性评分 | `baseline` | [功能开放](../product/feature-rollout.md) | 不做 ML 推荐 |
-| D-017 | Rewards 使用贡献事件、规则、条件、上限和奖励 | `baseline` | [Rewards](../domains/rewards/README.md) | 示例分值 illustrative |
+| D-017 | Rewards 使用贡献事件、规则、条件、上限和奖励 | `baseline` | [Rewards](../domains/rewards/index.md) | 示例分值 illustrative |
 | D-018 | Learning 知识分语言，课程/练习/进度统一 | `baseline` | [Learning 模型](../domains/learning/model.md) | 不强求语言学对称 |
 | D-019 | Learning 使用 Content Registry | `baseline` | [ADR-004](../adr/ADR-004-learning-content-registry.md) | 禁止万能多态 FK |
 | D-020 | Learning 第一版 43 张必建表与可选 question_reviews | `frozen` | [Learning 数据库](../domains/learning/database.md) | 会话口述 44，最终表名去重后为 43 |
@@ -47,25 +48,29 @@ source_conversation_id: 6a92f0c0-90b4-83ea-a43d-cccb1ef2666d；6a931551-8a30-83e
 | D-034 | `social_blocks` 为 Social 当前用户 Block 关系 | `frozen` | [Social 关系](../domains/social/discovery-and-relationships.md) | Trust & Safety 保留 restriction、审核和处罚所有权 |
 | D-035 | 首期公开动态/互动/举报入口归 Social | `baseline` | [Social 动态](../domains/social/community-content.md) | 具体字段仍 `designing`；先前 Community 所有权被取代 |
 | D-036 | 首期不建访客、收藏、关注请求、Candidate、事件或统计缓存表 | `frozen` | [Social 数据库](../domains/social/database.md) | `social_profile_stats` 仅未来缓存概念 |
-| D-037 | Chat 只负责会话与消息，不维护社交关系与 Match 状态机 | `frozen` | [Messaging](../domains/messaging/README.md) | 发送时按业务策略判断权限 |
+| D-037 | Chat 只负责会话与消息，不维护社交关系与 Match 状态机 | `frozen` | [Chat](../domains/chat/index.md) | 发送时按业务策略判断权限 |
 | D-038 | 同一用户对全生命周期只有一个 Direct Conversation | `frozen` | [ADR-011](../adr/ADR-011-chat-conversation-identity-and-direct-uniqueness.md) | `UNIQUE(user_low_id, user_high_id)` |
-| D-039 | 共享会话状态与用户个人会话状态分离 | `frozen` | [会话模型](../domains/messaging/conversation.md) | member 与 user_state 不合并 |
-| D-040 | conversation 不建 `created_by`/`last_activity_at`/`message_count`/`metadata JSONB`/`deleted_at` | `frozen` | [会话模型](../domains/messaging/conversation.md) | 语义模糊或当前无需求 |
-| D-041 | `last_message_id/seq/at` 是派生查询状态，`last_message_id` 不加 FK | `frozen` | [会话模型](../domains/messaging/conversation.md) | 避免与 message 双向依赖 |
-| D-042 | member 不保留 `status` 与 `left_at` | `frozen` | [会话模型](../domains/messaging/conversation.md) | 当前无真实成员生命周期 |
+| D-039 | 共享会话状态与用户个人会话状态分离 | `frozen` | [会话模型](../domains/chat/conversation.md) | member 与 user_state 不合并 |
+| D-040 | conversation 不建 `created_by`/`last_activity_at`/`message_count`/`metadata JSONB`/`deleted_at` | `frozen` | [会话模型](../domains/chat/conversation.md) | 语义模糊或当前无需求 |
+| D-041 | `last_message_id/seq/at` 是派生查询状态，`last_message_id` 不加 FK | `frozen` | [会话模型](../domains/chat/conversation.md) | 避免与 message 双向依赖 |
+| D-042 | member 不保留 `status` 与 `left_at` | `frozen` | [会话模型](../domains/chat/conversation.md) | 当前无真实成员生命周期 |
 | D-043 | 已读使用 `last_read_seq` 游标，未读数为派生值 | `frozen` | [ADR-013](../adr/ADR-013-read-state-as-cursor-not-receipt-table.md) | 不建 receipt/delivery 表 |
 | D-044 | 消息按 `seq` 排序，`seq` 在事务内由 `last_message_seq` 原子分配 | `frozen` | [ADR-012](../adr/ADR-012-message-seq-ordering-and-idempotency.md) | 不依赖 `created_at` |
 | D-045 | `client_message_id UUID` + `UNIQUE(sender_user_id, client_message_id)` 幂等 | `frozen` | [ADR-012](../adr/ADR-012-message-seq-ordering-and-idempotency.md) | 唯一冲突视为 idempotent success |
-| D-046 | 消息主体与内容 subtype 分离；首期 `type` 仅 `1=TEXT`、`2=IMAGE` | `frozen` | [消息模型](../domains/messaging/message.md) | 应用服务保证 subtype 一致 |
-| D-047 | 一条 IMAGE message 支持多图，Chat 只存 `asset_id` 引用 Media | `frozen` | [消息模型](../domains/messaging/message.md) | 不存 URL/宽高/MIME，不建 `chat_attachment` |
-| D-048 | 撤回只改 `status` 与 `recalled_at`，保留原始内容；不保留 `recalled_by_user_id` | `frozen` | [消息模型](../domains/messaging/message.md) | 当前只能撤回自己发送的消息 |
-| D-049 | 清空聊天记录使用 `cleared_before_seq` 可见边界，并同步推进 `last_read_seq` | `frozen` | [会话模型](../domains/messaging/conversation.md) | 不逐条写隐藏，不删除消息 |
-| D-050 | 隐藏会话用 `hidden_at` 而非 `deleted_at`；收到新消息或再次参与时恢复 | `frozen` | [会话模型](../domains/messaging/conversation.md) | 数据库命名表达真实语义 |
-| D-051 | `last_message_id IS NULL` 的空 conversation 不进入聊天列表 | `frozen` | [会话模型](../domains/messaging/conversation.md) | 允许提前 get-or-create |
+| D-046 | 消息主体与内容 subtype 分离；首期 `type` 仅 `1=TEXT`、`2=IMAGE` | `frozen` | [消息模型](../domains/chat/message.md) | 应用服务保证 subtype 一致 |
+| D-047 | 一条 IMAGE message 支持多图，Chat 只存 `asset_id` 引用 Media | `frozen` | [消息模型](../domains/chat/message.md) | 不存 URL/宽高/MIME，不建 `chat_attachment` |
+| D-048 | 撤回只改 `status` 与 `recalled_at`，保留原始内容；不保留 `recalled_by_user_id` | `frozen` | [消息模型](../domains/chat/message.md) | 当前只能撤回自己发送的消息 |
+| D-049 | 清空聊天记录使用 `cleared_before_seq` 可见边界，并同步推进 `last_read_seq` | `frozen` | [会话模型](../domains/chat/conversation.md) | 不逐条写隐藏，不删除消息 |
+| D-050 | 隐藏会话用 `hidden_at` 而非 `deleted_at`；收到新消息或再次参与时恢复 | `frozen` | [会话模型](../domains/chat/conversation.md) | 数据库命名表达真实语义 |
+| D-051 | `last_message_id IS NULL` 的空 conversation 不进入聊天列表 | `frozen` | [会话模型](../domains/chat/conversation.md) | 允许提前 get-or-create |
 | D-052 | 不新增 Notification 域；通知与实时分发归 Application/Infrastructure | `baseline` | [ADR-014](../adr/ADR-014-no-notification-domain-events-outbox-infra.md) | 用户明确否决临时扩域 |
-| D-053 | 领域事件在事务提交后由 Outbox 可靠投递 | `baseline` | [应用服务与事件](../domains/messaging/application-and-events.md) | outbox 不算 Chat 核心业务表 |
-| D-054 | 礼物从 Chat 第一阶段移除 | `deferred` | [消息模型](../domains/messaging/message.md) | 等 Commerce 设计礼物体系时再定义集成 |
-| D-055 | Chat 表名前缀、枚举类型、主键生成方式与全局 SQL 规范存在差异 | `designing` | [Messaging 数据库](../domains/messaging/database.md) | 由主架构会话裁决，文档不自行统一 |
-| D-056 | 产品首期含语音/翻译，但 Chat 数据库首期只到 TEXT/IMAGE | `designing` | [产品定位](../product/product-overview.md)、[消息模型](../domains/messaging/message.md) | 由主架构会话裁决 |
+| D-053 | 领域事件在事务提交后由 Outbox 可靠投递 | `baseline` | [应用服务与事件](../domains/chat/application-and-events.md) | outbox 不算 Chat 核心业务表 |
+| D-054 | 礼物从 Chat 第一阶段移除 | `deferred` | [消息模型](../domains/chat/message.md) | 等 Commerce 设计礼物体系时再定义集成 |
+| D-055 | Chat 命名统一为 Chat 域 / `chat` Schema / 代码模块；表名保留 `chat_*` 单数含前缀，登记为全局「复数」规范正式例外；枚举回归 `varchar(32)+CHECK`、主键回归 `identity`、`chat_conversation`/`chat_message` 补 `public_id`，均与全局 PostgreSQL 规范一致 | `frozen` | [Chat 数据库](../domains/chat/database.md)、[ADR-015](../adr/ADR-015-chat-naming-and-sql-adjudication.md) | 逻辑模型 frozen；剩余物理项见 D-057 |
+| D-056 | 产品首期含语音/翻译，但 Chat 数据库首期只到 TEXT/IMAGE | `designing` | [产品定位](../product/product-overview.md)、[消息模型](../domains/chat/message.md) | 由主架构会话裁决 |
+| D-057 | Chat 物理 DDL 仍为 `designing`：跨域用户 FK 目标表、Media FK、`chat_direct_conversation.created_at` 是否保留、`public_id` 生成算法、Outbox 物理表 | `designing` | [Chat 数据库](../domains/chat/database.md) | 逻辑模型已 frozen；物理 DDL 补齐前不得直接复制执行 |
+| D-058 | `listConversations` 过滤条件冻结为 `member.user_id = current_user` AND `conversation.last_message_id IS NOT NULL` AND `user_state.hidden_at IS NULL`，三者缺一不可 | `frozen` | [Chat 应用服务与事件](../domains/chat/application-and-events.md) | 缺 `hidden_at IS NULL` 会导致已隐藏会话仍出现在列表 |
+| D-059 | Direct 会话成员集合不变量冻结：`type='direct'` 的 `chat_conversation_member` 必须恰好含 `{user_low_id, user_high_id}` 两条；成员仅由 `getOrCreateDirectConversation()` 创建，禁止通用 `addMember()` | `frozen` | [Chat 会话模型](../domains/chat/conversation.md) | 数据库不阻止第三成员，由应用服务同一事务创建并由集成测试覆盖 |
+| D-060 | `canChat(sender, recipient)` 权限契约冻结：conversation active、sender 为 member、Social 授予聊天权限、无 Block、无 T&S messaging restriction；`paused` 不影响已有聊天，Match 后聊天永久免费，不检查任何付费权益 | `frozen` | [Chat 应用服务与事件](../domains/chat/application-and-events.md) | 判定在应用层，非数据库外键/触发器；Chat 不存 match_id/relationship status |
 
 新增主会话结论时，先更新本台账，再更新唯一事实源和覆盖清单。

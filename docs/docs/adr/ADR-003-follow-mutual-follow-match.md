@@ -7,7 +7,7 @@ date: 2026-08-30
 
 ## 决策
 
-只维护单向 Follow。A 与 B 双向 Follow 时，由应用服务产生 Match，之后 Messaging 可创建 Conversation。不另建 Like/Favorite 等重复关系。
+只维护单向 Follow。A 与 B 双向 Follow 时，由应用服务产生 Match，之后 Chat 可创建 Conversation。不另建 Like/Favorite 等重复关系。
 
 ## 后果
 

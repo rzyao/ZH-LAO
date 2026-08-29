@@ -28,4 +28,4 @@ Chat Domain 在数据库事务提交后发布三个领域事件：`MessageCreate
 - Chat 事务必须包含 outbox 行写入。
 - `chat_outbox_event` 是 Chat 视角的临时命名，后续应统一为项目级基础设施表（例如 `system_outbox_event` 或 `infra_outbox_event`）；当前先设计机制，不把它算进 Chat 核心业务表数量。
 - 未来若要设计推送通知、系统通知、营销通知、设备 token，需由主架构会话决定是否单独开 Notification Domain；文档维护阶段不自行扩域。
-- 事件与用例规格见 [应用服务与事件](../domains/messaging/application-and-events.md)。
+- 事件与用例规格见 [应用服务与事件](../domains/chat/application-and-events.md)。

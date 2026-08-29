@@ -15,7 +15,7 @@ last_updated: 2026-08-30
 | 产品支柱收敛 | 学习范围、双边价值、商业模式、社交资格、聊天范围 | [产品定位](../product/product-overview.md)、[业务模型](../product/business-model.md) |
 | 社交与运营规则 | Follow/Match、Feed、礼物、奖励、推荐、功能开放 | [业务模型](../product/business-model.md)、[功能开放](../product/feature-rollout.md) |
 | 一级 Domain Map | 十个域、职责、非职责和依赖 | [Domain Map](../architecture/domain-map.md) |
-| 三层实体地图 | Domain、Subdomain、Core Entity | [Domain Map](../architecture/domain-map.md)、[领域入口](../domains/README.md) |
+| 三层实体地图 | Domain、Subdomain、Core Entity | [Domain Map](../architecture/domain-map.md)、[领域入口](../domains/index.md) |
 | PostgreSQL 总规范 | 十个 Schema、十二项规则、ID/Public ID | [数据库规范](../architecture/database.md) |
 | Identity 核心 SQL | users、auth_identities、basic_profiles、learning_profiles | [Identity 数据库](../domains/identity/database.md) |
 | Identity 补全 | OTP、Session、状态、Device、游客转正式用户 | [Identity 模型](../domains/identity/model.md)、[流程](../domains/identity/flows.md) |
@@ -35,23 +35,23 @@ last_updated: 2026-08-30
 
 ## “设计聊天领域”会话
 
-来源：`6a9329e5-9f28-83ea-8eb1-f85be6e414fa`，共 58 条消息、19 个有效助手回合。会话以“把 Chat Domain 所有表定稿”收尾。
+来源：ChatGPT 内部会话 ID `6a9319c2-2204-83ea-9341-7a57757a3082`；可访问的分享副本 `https://chatgpt.com/share/6a9329e5-9f28-83ea-8eb1-f85be6e414fa`（标题「设计聊天领域」，共 58 条消息、19 个有效助手回合）。会话以“把 Chat Domain 所有表定稿”收尾。以内部会话 ID 直接拼出的分享链接当前返回 `Conversation has been deleted`，回溯请以 share URL 为准。
 
 | 会话阶段 | 已覆盖内容 | 文档 |
 | --- | --- | --- |
-| Chat 领域边界与定位 | 只负责会话与消息；不维护社交关系、不持有媒体、不记账、不实现推送 | [Messaging](../domains/messaging/README.md) |
-| `chat_conversation` | 极简聚合根、type/status 枚举、明确不存在的字段、生命周期、CLOSED 语义 | [会话模型](../domains/messaging/conversation.md) |
-| `chat_direct_conversation` | low/high canonical ordering、用户对唯一、不存 match_id/initiator/status、getOrCreate 算法 | [会话模型](../domains/messaging/conversation.md)、[ADR-011](../adr/ADR-011-chat-conversation-identity-and-direct-uniqueness.md) |
-| `chat_conversation_member` | 成员真相、last_read_seq 单调游标、不建 status/left_at/unread_count、Block 不进 member | [会话模型](../domains/messaging/conversation.md)、[ADR-013](../adr/ADR-013-read-state-as-cursor-not-receipt-table.md) |
-| `chat_message` | id 与 seq 双职责、sender 复合 FK、type/status 枚举、reply、撤回、client_message_id 幂等 | [消息模型](../domains/messaging/message.md)、[ADR-012](../adr/ADR-012-message-seq-ordering-and-idempotency.md) |
-| 消息内容与附件体系 | text/image subtype、多图、asset_id 引用 Media、上传与事务分离、subtype 一致性责任 | [消息模型](../domains/messaging/message.md) |
-| 礼物范围收缩 | 用户明确“先不设计礼物，礼物以后在设计” | [消息模型](../domains/messaging/message.md)、[未决事项](open-questions.md) |
-| 撤回/删除/隐藏/清空 | 四件事区分、cleared_before_seq 可见边界、hidden_at 命名、隐藏恢复规则 | [会话模型](../domains/messaging/conversation.md)、[消息模型](../domains/messaging/message.md) |
+| Chat 领域边界与定位 | 只负责会话与消息；不维护社交关系、不持有媒体、不记账、不实现推送 | [Chat](../domains/chat/index.md) |
+| `chat_conversation` | 极简聚合根、type/status 枚举、明确不存在的字段、生命周期、CLOSED 语义 | [会话模型](../domains/chat/conversation.md) |
+| `chat_direct_conversation` | low/high canonical ordering、用户对唯一、不存 match_id/initiator/status、getOrCreate 算法 | [会话模型](../domains/chat/conversation.md)、[ADR-011](../adr/ADR-011-chat-conversation-identity-and-direct-uniqueness.md) |
+| `chat_conversation_member` | 成员真相、last_read_seq 单调游标、不建 status/left_at/unread_count、Block 不进 member | [会话模型](../domains/chat/conversation.md)、[ADR-013](../adr/ADR-013-read-state-as-cursor-not-receipt-table.md) |
+| `chat_message` | id 与 seq 双职责、sender 复合 FK、type/status 枚举、reply、撤回、client_message_id 幂等 | [消息模型](../domains/chat/message.md)、[ADR-012](../adr/ADR-012-message-seq-ordering-and-idempotency.md) |
+| 消息内容与附件体系 | text/image subtype、多图、asset_id 引用 Media、上传与事务分离、subtype 一致性责任 | [消息模型](../domains/chat/message.md) |
+| 礼物范围收缩 | 用户明确“先不设计礼物，礼物以后在设计” | [消息模型](../domains/chat/message.md)、[未决事项](open-questions.md) |
+| 撤回/删除/隐藏/清空 | 四件事区分、cleared_before_seq 可见边界、hidden_at 命名、隐藏恢复规则 | [会话模型](../domains/chat/conversation.md)、[消息模型](../domains/chat/message.md) |
 | 已读与未读 | 游标模型、GREATEST 更新、markRead 校验、不建 receipt/delivery 表 | [ADR-013](../adr/ADR-013-read-state-as-cursor-not-receipt-table.md) |
-| 聊天列表查询模型 | last_message_* 派生字段、置顶排序、空会话不进列表、未读聚合、摘要不落库 | [会话模型](../domains/messaging/conversation.md) |
-| 发送事务与并发 | 十步事务、seq 原子分配、幂等优先、服务器时间、TOCTOU 取舍、多图全有或全无 | [消息模型](../domains/messaging/message.md) |
+| 聊天列表查询模型 | last_message_* 派生字段、置顶排序、空会话不进列表、未读聚合、摘要不落库 | [会话模型](../domains/chat/conversation.md) |
+| 发送事务与并发 | 十步事务、seq 原子分配、幂等优先、服务器时间、TOCTOU 取舍、多图全有或全无 | [消息模型](../domains/chat/message.md) |
 | 不新建 Notification 域 | 用户明确否决临时扩域；推送归基础设施 | [ADR-014](../adr/ADR-014-no-notification-domain-events-outbox-infra.md) |
-| 领域事件与 Outbox | 三个事件、提交后发布、outbox 同事务、partial index、命名待统一 | [应用服务与事件](../domains/messaging/application-and-events.md) |
-| 索引设计 | 两条主动索引、UNIQUE 自带索引、明确不建的四个索引 | [Messaging 数据库](../domains/messaging/database.md) |
-| 总审查与定稿 | 7 张表定稿、删除 member.status、新增 sender member 复合 FK、明确不建表清单 | [Messaging 数据库](../domains/messaging/database.md) |
-| 全局规范差异 | 表名、枚举类型、主键生成方式三处偏差提交主会话裁决 | [Messaging 数据库](../domains/messaging/database.md)、[未决事项](open-questions.md) |
+| 领域事件与 Outbox | 三个事件、提交后发布、outbox 同事务、partial index、命名待统一 | [应用服务与事件](../domains/chat/application-and-events.md) |
+| 索引设计 | 两条主动索引、UNIQUE 自带索引、明确不建的四个索引 | [Chat 数据库](../domains/chat/database.md) |
+| 总审查与定稿 | 7 张表定稿、删除 member.status、新增 sender member 复合 FK、明确不建表清单 | [Chat 数据库](../domains/chat/database.md) |
+| 全局规范差异 | 表名/枚举类型/主键生成方式/`public_id` 四项裁决：枚举回归 `varchar(32)+CHECK`、主键回归 `identity`、补 `public_id`、表名 `chat_*` 为已裁决例外 | [Chat 数据库](../domains/chat/database.md)、[ADR-015](../adr/ADR-015-chat-naming-and-sql-adjudication.md) |

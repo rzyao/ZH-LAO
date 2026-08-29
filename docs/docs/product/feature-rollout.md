@@ -9,7 +9,7 @@ last_updated: 2026-08-30
 
 ```text
 Learning → Community/Feed → User Profile → Follow
-→ Mutual Follow/Match → Messaging → Gift → Advanced Entitlements
+→ Mutual Follow/Match → Chat → Gift → Advanced Entitlements
 ```
 
 Feature Flag 至少要表达：
@@ -20,7 +20,7 @@ social.profile.enabled
 social.discover.enabled
 social.follow.enabled
 social.match.enabled
-messaging.enabled
+chat.enabled
 commerce.gift.enabled
 ```
 

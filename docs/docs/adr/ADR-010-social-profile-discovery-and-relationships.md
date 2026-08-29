@@ -17,4 +17,4 @@ date: 2026-08-30
 
 ## 后果
 
-服务层必须在事务中处理互关、结束 Match、双向偏好资格、照片/Prompt 排序和跨域 Block；数据库不使用 Trigger。统计和候选缓存未来可增加，但只能派生自事实表。字段级规格见 [Social 域](../domains/social/README.md)。
+服务层必须在事务中处理互关、结束 Match、双向偏好资格、照片/Prompt 排序和跨域 Block；数据库不使用 Trigger。统计和候选缓存未来可增加，但只能派生自事实表。字段级规格见 [Social 域](../domains/social/index.md)。
