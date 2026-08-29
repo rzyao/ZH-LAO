@@ -5,6 +5,8 @@ date: 2026-08-30
 
 # ADR-001：模块化单体与领域 Schema
 
+> **修订记录**：本决策的两处细节已被 [ADR-018 全局数据库设计原则最终版](ADR-018-global-database-design-principles-final.md) 修订——`community` Schema 取消后为九个业务 Schema；「允许跨 Schema Foreign Key」改为「同一 Domain（同一 Schema）内建真实 FK，禁止跨 Domain / 跨 Schema 物理 FK」。模块化单体、单实例单主库、按领域划分 Schema 的核心决策不变。现行口径以 [PostgreSQL 总规范](../architecture/database.md) 为准。
+
 ## 决策
 
 采用一个模块化后端、一个 PostgreSQL 实例、一个主数据库和十个业务 Schema。当前不按领域拆微服务或独立数据库，允许跨 Schema Foreign Key。

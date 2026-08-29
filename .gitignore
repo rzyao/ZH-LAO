@@ -17,6 +17,9 @@ build/
 **/.vitepress/.temp/
 .vitepress/dist-build/
 **/.vitepress/dist-build/
+# 一切 dist-* 变体输出目录（dist-build / dist-verify / 临时校验产物等）
+.vitepress/dist-*/
+**/.vitepress/dist-*/
 .vitepress/*.timestamp-*.mjs
 **/.vitepress/*.timestamp-*.mjs
 
