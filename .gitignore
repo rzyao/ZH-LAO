@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+**/node_modules/
+.pnpm-store/
+**/.pnpm-store/
+
+# Build & Cache outputs
+dist/
+**/dist/
+build/
+**/build/
+.vitepress/dist/
+**/.vitepress/dist/
+.vitepress/cache/
+**/.vitepress/cache/
+
+# OS & IDE
+.DS_Store
+**/.DS_Store
+Thumbs.db
+**/Thumbs.db
+.idea/
+**/.idea/
+.vscode/
+**/.vscode/
+*.local
+*.log
