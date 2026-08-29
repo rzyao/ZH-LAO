@@ -1,0 +1,345 @@
+{
+  "title": "设计运营域",
+  "messages": [
+    {
+      "id": "83842770-eb71-4647-852a-f17abd84d557",
+      "parent": "cbd65a79-d240-4a47-9807-f9c6a8dddeea",
+      "role": "system",
+      "model": "",
+      "create_time": 1788031497.69162,
+      "status": "finished_successfully",
+      "content_type": "text",
+      "body": ""
+    },
+    {
+      "id": "acadf048-45fa-41be-b6ec-c0a42b74e666",
+      "parent": "83842770-eb71-4647-852a-f17abd84d557",
+      "role": "system",
+      "model": "",
+      "create_time": 1788031497.69162,
+      "status": "finished_successfully",
+      "content_type": "text",
+      "body": ""
+    },
+    {
+      "id": "11b69126-d856-4285-b815-4e1a83d3d13e",
+      "parent": "acadf048-45fa-41be-b6ec-c0a42b74e666",
+      "role": "user",
+      "model": "",
+      "create_time": 1788031495.307,
+      "status": "finished_successfully",
+      "content_type": "text",
+      "body": "[数据库域设计](chatgpt-conversation://6a92f0c0-90b4-83ea-a43d-cccb1ef2666d)[继续设计社交资料](chatgpt-conversation://6a931551-8a30-83e9-8caf-60e529abce68)[设计聊天领域](chatgpt-conversation://6a9319c2-2204-83ea-9341-7a57757a3082)[继续设计商业领域](chatgpt-conversation://6a932385-7404-83ea-951b-e0df2fabaccc)[设计奖励域](chatgpt-conversation://6a9329c0-aea8-83ea-8f36-c7779057fc07)[设计安全治理域](chatgpt-conversation://6a932d56-5fdc-83ea-a8a8-abee14667d25)继续设计 Operations    **Domain**  。请承接之前已经确定的整体架构和数据库设计原则。  不能越过域边界"
+    },
+    {
+      "id": "02ac116e-81dc-44e8-822b-0ba5f6d6bfad",
+      "parent": "11b69126-d856-4285-b815-4e1a83d3d13e",
+      "role": "system",
+      "model": "",
+      "create_time": 1788031498.151528,
+      "status": "finished_successfully",
+      "content_type": "text",
+      "body": ""
+    },
+    {
+      "id": "de161f6b-3919-4fb0-bf9b-32f463512369",
+      "parent": "02ac116e-81dc-44e8-822b-0ba5f6d6bfad",
+      "role": "system",
+      "model": "",
+      "create_time": 1788031498.176249,
+      "status": "finished_successfully",
+      "content_type": "text",
+      "body": ""
+    },
+    {
+      "id": "dd7eb0cd-8b38-41b2-a117-c07bbf4f2613",
+      "parent": "de161f6b-3919-4fb0-bf9b-32f463512369",
+      "role": "system",
+      "model": "",
+      "create_time": 1788031497.717397,
+      "status": "finished_successfully",
+      "content_type": "text",
+      "body": ""
+    },
+    {
+      "id": "c80fc0bf-4c19-4f09-9e20-6f682fb89279",
+      "parent": "dd7eb0cd-8b38-41b2-a117-c07bbf4f2613",
+      "role": "assistant",
+      "model": "",
+      "create_time": 1788031497.8623726,
+      "status": "finished_successfully",
+      "content_type": "model_editable_context",
+      "body": ""
+    },
+    {
+      "id": "732dbbed-e439-4b9d-b056-58c63063314d",
+      "parent": "c80fc0bf-4c19-4f09-9e20-6f682fb89279",
+      "role": "assistant",
+      "model": "",
+      "create_time": 1788031497.861891,
+      "status": "finished_successfully",
+      "content_type": "text",
+      "body": "我会继续沿用前面已经定下来的领域边界、命名规范、PostgreSQL 约束策略和“域内自治、跨域只引用稳定标识”的原则来设计 **Operations Domain**。我先把前面已确定的架构约束和这个域在整体系统中的职责范围对齐，再开始逐表设计，避免把 Trust & Safety、Commerce、Rewards 或 Chat 的职责重复搬进来。"
+    },
+    {
+      "id": "67c56f33-504c-4928-8bf0-d6ef61132dd3",
+      "parent": "732dbbed-e439-4b9d-b056-58c63063314d",
+      "role": "assistant",
+      "model": "",
+      "create_time": 1788031497.861891,
+      "status": "finished_successfully",
+      "content_type": "text",
+      "body": "The output of this plugin was redacted."
+    },
+    {
+      "id": "8ba1c071-a67b-41ce-9cfc-a5a9e2491eb1",
+      "parent": "67c56f33-504c-4928-8bf0-d6ef61132dd3",
+      "role": "assistant",
+      "model": "",
+      "create_time": 1788031516.468422,
+      "status": "finished_successfully",
+      "content_type": "thoughts",
+      "body": ""
+    },
+    {
+      "id": "f5c4d477-4b0b-4d92-9cc0-1a48588ae9b4",
+      "parent": "8ba1c071-a67b-41ce-9cfc-a5a9e2491eb1",
+      "role": "assistant",
+      "model": "",
+      "create_time": 1788031518.492026,
+      "status": "finished_successfully",
+      "content_type": "thoughts",
+      "body": ""
+    },
+    {
+      "id": "2cc936bb-e713-40a6-9b00-6edbc6d13bf3",
+      "parent": "f5c4d477-4b0b-4d92-9cc0-1a48588ae9b4",
+      "role": "assistant",
+      "model": "",
+      "create_time": 1788031510.445413,
+      "status": "finished_successfully",
+      "content_type": "text",
+      "body": "目前边界可以先定得很清楚：**Operations 不承接业务域本身的状态机**。例如封禁/举报仍在 `trust`，退款仍在 `commerce`，奖励补发仍在 `rewards`；Operations 只负责“后台人员是谁、拥有什么后台权限、执行过什么后台操作”这一层。这样后台管理能力不会反过来侵入业务域。 "
+    },
+    {
+      "id": "e1bd6ccf-05fa-4779-b81b-5881859eb672",
+      "parent": "2cc936bb-e713-40a6-9b00-6edbc6d13bf3",
+      "role": "assistant",
+      "model": "",
+      "create_time": 1788031532.163857,
+      "status": "finished_successfully",
+      "content_type": "reasoning_recap",
+      "body": ""
+    },
+    {
+      "id": "4c6b7ae1-9dbf-4069-8b36-23196ec97878",
+      "parent": "e1bd6ccf-05fa-4779-b81b-5881859eb672",
+      "role": "assistant",
+      "model": "",
+      "create_time": 1788031523.865817,
+      "status": "finished_successfully",
+      "content_type": "text",
+      "body": "可以。继续按我们已经确定的 V2 原则来：**PostgreSQL 单实例单库 + 多 Schema、模块化单体、领域自治、表名复数 `snake_case`、`BIGINT identity` 主键、时间统一 `timestamptz`、能用关系字段就不用 JSONB、保留必要 FK，但不让一个域接管另一个域的业务状态机。** Operations 使用 `operations` Schema。 memcite\n\n## 1. 先确定 Operations Domain 的职责\n\n我建议把它定义成：\n\n> **Operations Domain = 内部运营后台的身份、授权与操作追踪域。**\n\n它解决三个问题：\n\n1. **谁可以进入运营后台**\n2. **这个后台人员可以做什么**\n3. **这个后台人员实际做过什么**\n\n它不是“所有后台功能的大杂烩”。\n\n例如后台里虽然能执行“封禁用户”“退款”“补发奖励”，但真正的数据仍然分别写入：\n\n- `trust.*` → 举报、处罚、封禁\n- `commerce.*` → 订单、退款、支付\n- `rewards.*` → 奖励发放\n- `social.*` → 社交资料\n- `messaging.*` → 聊天\n- `learning.*` → 学习内容\n\nOperations **只负责操作者和权限，以及留下操作审计记录**。\n\n---\n\n# 2. Operations Domain 最终建议只保留 5 张核心表\n\n我建议当前阶段不要做成复杂企业 IAM 系统。\n\n| 表 | 职责 |\n|---|---|\n| `operations.operators` | 后台运营人员 |\n| `operations.roles` | 后台角色 |\n| `operations.operator_roles` | 运营人员 ↔ 角色 |\n| `operations.role_permissions` | 角色 ↔ 权限 key |\n| `operations.operator_audit_logs` | 后台操作审计日志 |\n\n也就是说：\n\n```text\noperations\n├── operators\n├── roles\n├── operator_roles\n├── role_permissions\n└── operator_audit_logs\n```\n\n我**不建议建立 `permissions` 表**。\n\n这是一个比较重要的决定。\n\n---\n\n# 3. 为什么没有 `permissions` 表\n\n之前确定的一个重要原则是：\n\n> **代码定义能力，数据库配置规则。**\n\n后台权限非常适合这个原则。\n\n例如代码中定义：\n\n```text\ntrust.reports.read\ntrust.reports.resolve\ntrust.users.suspend\n\ncommerce.orders.read\ncommerce.refunds.create\n\nrewards.grants.read\nrewards.grants.create\n\nsocial.profiles.read\nsocial.profiles.moderate\n```\n\n这些权限代表的是：\n\n> 系统代码实际支持哪些操作。\n\n因此权限本身应该由代码控制，而不是运营人员随便往数据库创建：\n\n```text\npermissions\n-----------\nid\npermission_code\n...\n```\n\n否则可能出现数据库里有：\n\n```text\ncommerce.payment.force_success\n```\n\n但代码压根没有这个能力。\n\n所以采用：\n\n```text\nrole_permissions\n----------------\nrole_id\npermission_key\n```\n\n例如：\n\n```text\n1 | trust.reports.read\n1 | trust.reports.resolve\n1 | trust.users.suspend\n```\n\n代码负责验证：\n\n```text\npermission_key ∈ 已注册权限集合\n```\n\n数据库负责：\n\n> 哪个 Role 拥有哪些权限。\n\n这比额外维护一张 `permissions` 表更适合当前项目。\n\n---\n\n# 4. 明确不能放进 Operations 的东西\n\n这一点必须先锁死，否则 Operations 非常容易膨胀成“后台垃圾桶”。\n\n### 不放举报、审核、处罚\n\n这些已经属于：\n\n```text\ntrust\n```\n\n哪怕人工审核是在“运营后台”完成，也仍然是 Trust Domain 数据。\n\nOperations 只记录：\n\n```text\noperator 17\n执行了\ntrust.report.resolve\n```\n\n---\n\n### 不放退款、补单、支付调整\n\n属于：\n\n```text\ncommerce\n```\n\nOperations 不建立：\n\n```text\nadmin_refunds\nmanual_orders\npayment_adjustments\n```\n\n后台只是调用 Commerce Application Service。\n\n---\n\n### 不放奖励补发\n\n属于：\n\n```text\nrewards\n```\n\n---\n\n### 不放聊天管理\n\n属于：\n\n```text\nmessaging\n```\n\n---\n\n### 不放内容本身\n\n例如：\n\n```text\n课程\n词汇\n文章\nBanner 对应的业务内容\n动态\n礼物\n商品\n```\n\n都应该由拥有这些对象的业务域负责。\n\n---\n\n### 不放 Feature Flag / 系统参数\n\n这一类我建议留给下一步：\n\n```text\nplatform\n```\n\n因为它们描述的是：\n\n> 系统如何运行\n\n而 Operations 描述的是：\n\n> 谁在操作系统。\n\n这两个域不要混。\n\n---\n\n# 5. Operations 与 Trust 的边界尤其要注意\n\n例如管理员在后台封禁用户。\n\n正确调用链：\n\n```text\nOperator\n   │\n   ▼\nOperations 权限检查\n   │\n   │ trust.users.suspend\n   ▼\nTrust Application Service\n   │\n   ▼\ntrust.sanctions\n```\n\n随后：\n\n```text\nOperations\n   │\n   ▼\noperator_audit_logs\n```\n\n所以：\n\n```text\noperations.operator_audit_logs\n```\n\n可以记：\n\n```text\naction_key     = 'trust.users.suspend'\ntarget_domain  = 'trust'\ntarget_type    = 'sanction'\ntarget_id      = 9182\n```\n\n但是处罚的：\n\n```text\nreason\nstart_at\nend_at\nstatus\nappeal\n```\n\n全部属于 `trust`。\n\nOperations **绝不能再复制一份**。\n\n---\n\n# 6. Operations 与业务域的依赖方向\n\n建议固定：\n\n```text\n                     ┌──────────────┐\n                     │  Operations  │\n                     └───────┬──────┘\n                             │\n                authentication / authorization\n                             │\n         ┌───────────────────┼──────────────────┐\n         ▼                   ▼                  ▼\n      Trust              Commerce           Rewards\n         │                   │                  │\n         ▼                   ▼                  ▼\n   自己维护状态          自己维护状态        自己维护状态\n```\n\nOperations 可以：\n\n- 调用其他 Domain Application Service\n- 引用其他域对象 ID 做审计描述\n\n但不能：\n\n- 直接成为其他域的状态来源\n- 修改其他域表结构\n- 建立“后台专用版本”的业务表\n- 把其他域的数据复制进 Operations\n\n---\n\n# 7. 一个很重要的 FK 原则\n\nOperations 内部关系全部应该是真 FK：\n\n```text\noperator_roles.operator_id\n    → operators.id\n\noperator_roles.role_id\n    → roles.id\n\nrole_permissions.role_id\n    → roles.id\n\noperator_audit_logs.operator_id\n    → operators.id\n```\n\n但是 `operator_audit_logs` 中类似：\n\n```text\ntarget_domain\ntarget_type\ntarget_id\n```\n\n**不要建立跨域 polymorphic FK。**\n\n因为一条审计日志可能指向：\n\n```text\ntrust.sanctions\ncommerce.refunds\nrewards.grants\nsocial.profiles\nmessaging.messages\n```\n\n数据库不存在合理的：\n\n```text\ntarget_id FK ???\n```\n\n这里保留：\n\n```text\ntarget_domain\ntarget_type\ntarget_id\n```\n\n属于少数合理的弱引用场景。\n\n而且审计记录不应该因为目标业务记录删除而消失。\n\n---\n\n# 8. Operators 和 C 端用户必须分开\n\n这一点继续保持之前的设计方向：\n\n```text\nApp User ≠ Operator\n```\n\n不要做：\n\n```text\nusers.is_admin = true\n```\n\n也不要：\n\n```text\nusers.role = 'ADMIN'\n```\n\nC 端身份和后台运营身份生命周期完全不同。\n\n例如未来可能：\n\n```text\n普通用户\n老师\nVIP\n社交用户\n```\n\n这些都不意味着他是后台管理员。\n\n反过来运营人员也没必要拥有 C 端社交资料、会员、钱包、奖励等业务身份。\n\n所以：\n\n```text\noperations.operators\n```\n\n应该作为独立后台主体存在。 memcite\n\n---\n\n# 9. 当前 Operations Domain 的领域模型\n\n最终可以理解成：\n\n```text\nOperator\n   │\n   ├────< OperatorRole >──── Role\n   │                            │\n   │                            └────< RolePermission\n   │\n   └────< OperatorAuditLog\n```\n\n即：\n\n```text\noperators\n   │\n   ├── operator_roles\n   │       │\n   │       └── roles\n   │              │\n   │              └── role_permissions\n   │\n   └── operator_audit_logs\n```\n\n这是一个非常小、但边界很稳定的 Domain。\n\n---\n\n# 10. 我建议不要继续增加这些表\n\n当前阶段都不要：\n\n```text\npermissions\noperator_sessions\noperator_login_logs\noperator_passwords\noperator_mfa_devices\noperator_departments\noperator_teams\noperator_invitations\nrole_hierarchies\npermission_groups\nadmin_tasks\nadmin_notes\nadmin_notifications\nadmin_dashboards\nadmin_preferences\n```\n\n除非以后真的产生明确需求。\n\n尤其是：\n\n```text\noperator_sessions\noperator_passwords\noperator_mfa_devices\n```\n\n属于**认证机制**，不能因为后台用户位于 Operations，就顺手把认证系统塞进 Operations。\n\n---\n\n## 11. 因此 Operations Domain 第一版正式范围\n\n我们先把边界定稿为：\n\n```text\noperations.operators\noperations.roles\noperations.operator_roles\noperations.role_permissions\noperations.operator_audit_logs\n```\n\n它负责：\n\n```text\n后台运营主体\n        +\nRBAC 后台授权\n        +\n后台操作审计\n```\n\n不负责：\n\n```text\n业务审核状态\n业务处罚状态\n订单状态\n支付状态\n退款状态\n奖励状态\n聊天状态\n社交状态\n系统运行配置\nFeature Flags\n业务内容\n```\n\n这个划分能够让 **Operations 成为真正的 Backoffice Control Plane，而不是新的业务域聚合层**。\n\n下一步就可以按照之前的方式，**逐张定稿这 5 张表**。我建议从第一张 **`operations.operators`** 开始，然后依次做到 FK / UNIQUE / CHECK / INDEX 和状态枚举全部定稿。 memcite"
+    },
+    {
+      "id": "b7a3d821-07b2-4559-a96b-94c7f8ed5514",
+      "parent": "4c6b7ae1-9dbf-4069-8b36-23196ec97878",
+      "role": "user",
+      "model": "",
+      "create_time": 1788031733.063,
+      "status": "finished_successfully",
+      "content_type": "text",
+      "body": "**逐张定稿这 5 张表**。从第一张 **`operations.operators`** 开始，然后依次做到 FK / UNIQUE / CHECK / INDEX 和状态枚举全部定稿。"
+    },
+    {
+      "id": "82f2e873-e296-4849-b074-529f3d2f0845",
+      "parent": "b7a3d821-07b2-4559-a96b-94c7f8ed5514",
+      "role": "assistant",
+      "model": "",
+      "create_time": 1788031735.889791,
+      "status": "finished_successfully",
+      "content_type": "text",
+      "body": "我会按同一套定稿格式逐张完成：**职责 → 字段 → FK → UNIQUE → CHECK → INDEX → 状态枚举 → 不可违反规则 → 是否还能删字段**。这次直接把 5 张表都推进到可落库的最终版，不中途停在“草案”。"
+    },
+    {
+      "id": "ec628bd0-7388-436e-a8f4-c98e59860b28",
+      "parent": "82f2e873-e296-4849-b074-529f3d2f0845",
+      "role": "assistant",
+      "model": "",
+      "create_time": 1788031735.889791,
+      "status": "finished_successfully",
+      "content_type": "text",
+      "body": "The output of this plugin was redacted."
+    },
+    {
+      "id": "a1c06601-db40-42f2-ad36-5f29286ccd42",
+      "parent": "ec628bd0-7388-436e-a8f4-c98e59860b28",
+      "role": "assistant",
+      "model": "",
+      "create_time": 1788031757.480702,
+      "status": "finished_successfully",
+      "content_type": "thoughts",
+      "body": ""
+    },
+    {
+      "id": "40510d88-b9d4-4849-afac-be59148951f2",
+      "parent": "a1c06601-db40-42f2-ad36-5f29286ccd42",
+      "role": "assistant",
+      "model": "",
+      "create_time": 1788031760.308372,
+      "status": "finished_successfully",
+      "content_type": "thoughts",
+      "body": ""
+    },
+    {
+      "id": "ffdbcd5d-b60b-4103-999a-07326f24a8ad",
+      "parent": "40510d88-b9d4-4849-afac-be59148951f2",
+      "role": "assistant",
+      "model": "",
+      "create_time": 1788031752.013584,
+      "status": "finished_successfully",
+      "content_type": "text",
+      "body": "先处理第一张 `operations.operators`。这里我会纠正一个容易导致后续混乱的点：按照此前 V2 已确定的 ID 体系，后台主体属于“系统主体”一类，**不应在这里重新切成 BIGINT identity**；Operations 要继续沿用稳定的系统 ID 方案，并且不把密码、Session、MFA 等认证数据塞进这张表。 "
+    },
+    {
+      "id": "1cce7b1c-78ce-45ad-9793-8dbe51066ead",
+      "parent": "ffdbcd5d-b60b-4103-999a-07326f24a8ad",
+      "role": "assistant",
+      "model": "",
+      "create_time": 1788031782.78261,
+      "status": "finished_successfully",
+      "content_type": "reasoning_recap",
+      "body": ""
+    },
+    {
+      "id": "ea6d60e5-64e6-4c26-9d5e-8a944097394e",
+      "parent": "1cce7b1c-78ce-45ad-9793-8dbe51066ead",
+      "role": "assistant",
+      "model": "",
+      "create_time": 1788031767.383797,
+      "status": "finished_successfully",
+      "content_type": "text",
+      "body": "先从第 1 张开始定稿：`operations.operators`。\n\n这里我把它定位成 **Operations Domain 中的“运营身份档案”**，而不是认证账户表。登录凭据、密码、Session、MFA、失败锁定等认证数据不进入 Operations；`operators` 只描述“这个后台主体在 Operations 中是谁、是否允许承担运营职责”。跨 Auth Domain 只保留稳定 ID 逻辑引用，不建立跨域 FK。memcite\n\n# 1. `operations.operators`\n\n## 一、职责\n\n```text\noperations.operators\n```\n\n只负责：\n\n- 标识一个后台运营主体；\n- 关联其认证主体；\n- 提供后台展示名称；\n- 控制其 Operations 层面的启用 / 禁用状态；\n- 作为 `operator_roles` 和 `operator_audit_logs` 的主体。\n\n不负责：\n\n```text\n密码\n登录 Session\nMFA\n登录失败次数\n账号锁定\n权限列表\nrole_id\n最后登录时间\n业务处罚\n业务审核\n```\n\n---\n\n# 二、最终字段\n\n| 字段 | 类型 | Null | 默认值 | 说明 |\n|---|---|---:|---|---|\n| `id` | `varchar(20)` | NO | — | Operator 稳定 ID |\n| `auth_subject_id` | `varchar(20)` | NO | — | Auth Domain 中后台认证主体的稳定逻辑引用 |\n| `display_name` | `varchar(100)` | NO | — | 后台显示名称 |\n| `status` | `varchar(20)` | NO | `'active'` | Operator 状态 |\n| `created_at` | `timestamptz` | NO | `now()` | 创建时间 |\n| `updated_at` | `timestamptz` | NO | `now()` | 最后更新时间 |\n\n最终就是 **6 个字段**。\n\n我不建议继续增加字段。\n\n---\n\n# 三、为什么 `id` 使用 `varchar(20)`\n\n这里继续承接此前已经确定的 ID 体系，而不是重新引入：\n\n```text\nbigint generated ...\n```\n\nOperator 属于稳定的系统主体，因此：\n\n```text\nid varchar(20)\n```\n\n由应用层统一 ID 生成机制产生。\n\n这样后续其他领域需要记录：\n\n```text\nreviewed_by_operator_id\napproved_by_operator_id\ncreated_by_operator_id\n```\n\n时，都可以保存稳定 Operator ID。\n\n不过注意：\n\n> 其他 Domain 保存 `operator_id` 时仍然只是逻辑引用，不对 `operations.operators` 建跨 Domain FK。\n\nOperations 自己内部则可以建立真实 FK。memcite\n\n---\n\n# 四、`auth_subject_id`\n\n这是这一张表里最重要的边界字段。\n\n关系是：\n\n```text\nAuth Domain\n    │\n    │ auth_subject_id\n    ▼\noperations.operators\n```\n\nOperator **不是密码账户本身**。\n\nOperations 只知道：\n\n```text\noperator.id = op_xxx\nauth_subject_id = sys_xxx\n```\n\n至于：\n\n```text\n邮箱\n密码 Hash\nOAuth\nSession\nMFA\n登录失败\n认证锁定\n```\n\n全部由 Auth Domain 管理。\n\n因此不应该在 `operators` 再建立：\n\n```text\nusername\npassword_hash\npassword_salt\nlast_login_at\nfailed_login_count\nmfa_enabled\n```\n\n否则 Operations 会开始侵占 Authentication Domain。\n\n---\n\n# 五、为什么 `auth_subject_id` 必须 UNIQUE\n\n必须：\n\n```sql\nUNIQUE (auth_subject_id)\n```\n\n因为同一个认证主体：\n\n```text\nsys_001\n```\n\n不能同时拥有：\n\n```text\noperator_001\noperator_002\noperator_003\n```\n\n否则权限和审计身份都会产生歧义。\n\n关系必须是：\n\n```text\n1 auth subject\n      │\n      │ 0..1\n      ▼\n1 operator\n```\n\n因此：\n\n```text\nauth_subject_id UNIQUE NOT NULL\n```\n\n---\n\n# 六、`display_name`\n\n例如：\n\n```text\n张三\n内容审核员A\n客服01\n管理员\n```\n\n这是：\n\n> Operations 后台用于识别 Operator 的业务展示名称。\n\n它不是登录账号。\n\n因此：\n\n```sql\ndisplay_name varchar(100) NOT NULL\n```\n\n增加：\n\n```sql\nCHECK (btrim(display_name) <> '')\n```\n\n但**不要 UNIQUE**。\n\n因为完全可能出现两名：\n\n```text\n张伟\n张伟\n```\n\nOperator 的真正身份由：\n\n```text\nid\n```\n\n决定，而不是名字。\n\n---\n\n# 七、状态枚举最终定稿\n\n我建议只保留两个：\n\n```text\nactive\ndisabled\n```\n\n定义：\n\n```sql\nCHECK (\n    status IN (\n        'active',\n        'disabled'\n    )\n)\n```\n\n## `active`\n\n表示：\n\n> Operator 当前可以承担 Operations 权限。\n\n至于是否因为 Auth Domain 的认证问题而无法登录，是另一回事。\n\n必须同时满足：\n\n```text\nAuth 可以认证\n+\nOperator.status = active\n+\n拥有所需 Role / Permission\n```\n\n才能执行后台操作。\n\n---\n\n## `disabled`\n\n表示：\n\n> Operations 明确禁止该 Operator 再承担后台运营职责。\n\n例如：\n\n```text\n员工离职\n外包权限回收\n内部账号停用\n安全事件后撤销运营权限\n```\n\n历史记录仍然保留。\n\n---\n\n# 八、为什么没有 `suspended`\n\n不建议增加：\n\n```text\nsuspended\nlocked\npending\ninvited\ndeleted\n```\n\n### `locked`\n\n属于 Auth Domain。\n\n例如密码失败 10 次导致：\n\n```text\naccount locked\n```\n\n不是 Operations 的 Operator 状态。\n\n---\n\n### `invited`\n\n只有未来真的建立：\n\n```text\noperator_invitations\n```\n\n才需要考虑。\n\n当前没有邀请生命周期，没必要提前设计。\n\n---\n\n### `suspended`\n\n对于内部后台主体：\n\n```text\nactive\ndisabled\n```\n\n已经足够。\n\n临时禁用可以：\n\n```text\ndisabled\n→ active\n```\n\n无需再增加第三种语义接近的状态。\n\n---\n\n# 九、不增加 `deleted_at`\n\n这一张表我建议把它作为通用软删除规则的**明确例外**。\n\n原因是 Operator 属于审计主体：\n\n```text\nOperator\n   │\n   └── operator_audit_logs\n```\n\n一旦产生后台操作历史，这个主体就不能真正“消失”。\n\n所以 Operator 生命周期应该是：\n\n```text\nactive\n   │\n   ▼\ndisabled\n   │\n   ▼\n永久保留\n```\n\n而不是：\n\n```text\nactive\n→ deleted_at\n```\n\n否则会出现两个生命周期来源：\n\n```text\nstatus = disabled\ndeleted_at IS NOT NULL\n```\n\n进而产生：\n\n```text\ndisabled + deleted_at NULL\nactive + deleted_at 非 NULL\n```\n\n之类无意义组合。\n\n因此这张表：\n\n> **不软删除、不硬删除，只允许 disabled。**\n\n这对于审计型主体比机械增加 `deleted_at` 更干净。\n\n---\n\n# 十、FK 最终定稿\n\n## Domain 内\n\n`operators` 自身没有 Domain 内 FK。\n\n未来：\n\n```text\noperator_roles.operator_id\n    → operations.operators.id\n```\n\n以及：\n\n```text\noperator_audit_logs.operator_id\n    → operations.operators.id\n```\n\n会反向引用它。\n\n---\n\n## 跨 Domain\n\n```text\nauth_subject_id\n```\n\n是逻辑引用：\n\n```text\nAuth Domain → authentication subject\n```\n\n**不建立数据库 FK。**\n\n即不要：\n\n```sql\nFOREIGN KEY (auth_subject_id)\nREFERENCES auth.xxx(id)\n```\n\n这样保持 Domain schema 独立。\n\n---\n\n# 十一、UNIQUE 最终定稿\n\n只有：\n\n```sql\nUNIQUE (auth_subject_id)\n```\n\n不增加：\n\n```text\nUNIQUE(display_name)\nUNIQUE(status, ...)\n```\n\n---\n\n# 十二、CHECK 最终定稿\n\n两个业务 CHECK。\n\n### display_name\n\n```sql\nCHECK (btrim(display_name) <> '')\n```\n\n### status\n\n```sql\nCHECK (\n    status IN ('active', 'disabled')\n)\n```\n\n另外建议对逻辑引用增加最基本的数据完整性：\n\n```sql\nCHECK (btrim(auth_subject_id) <> '')\n```\n\n因此最终三个：\n\n```text\nck_operators_auth_subject_id_not_blank\nck_operators_display_name_not_blank\nck_operators_status\n```\n\n---\n\n# 十三、INDEX 最终定稿\n\n实际上这张表**不需要额外普通索引**。\n\n已有：\n\n### PK\n\n```text\nPRIMARY KEY (id)\n```\n\nPostgreSQL 自动产生唯一 B-tree index。\n\n### UNIQUE\n\n```text\nUNIQUE (auth_subject_id)\n```\n\nPostgreSQL 同样自动产生唯一 B-tree index。\n\n不要为了：\n\n```text\nstatus\ncreated_at\ndisplay_name\n```\n\n提前增加索引。\n\nOperator 数量本来就非常少，通常可能是个位数、几十个，甚至未来几百个也完全没必要。\n\n所以最终：\n\n```text\n额外 INDEX：0\n```\n\n这是有意设计，不是遗漏。\n\n---\n\n# 十四、最终 PostgreSQL DDL\n\n```sql\nCREATE TABLE operations.operators (\n    id              varchar(20)  NOT NULL,\n    auth_subject_id varchar(20)  NOT NULL,\n    display_name    varchar(100) NOT NULL,\n    status          varchar(20)  NOT NULL DEFAULT 'active',\n    created_at      timestamptz  NOT NULL DEFAULT now(),\n    updated_at      timestamptz  NOT NULL DEFAULT now(),\n\n    CONSTRAINT pk_operators\n        PRIMARY KEY (id),\n\n    CONSTRAINT uq_operators_auth_subject_id\n        UNIQUE (auth_subject_id),\n\n    CONSTRAINT ck_operators_auth_subject_id_not_blank\n        CHECK (btrim(auth_subject_id) <> ''),\n\n    CONSTRAINT ck_operators_display_name_not_blank\n        CHECK (btrim(display_name) <> ''),\n\n    CONSTRAINT ck_operators_status\n        CHECK (\n            status IN (\n                'active',\n                'disabled'\n            )\n        )\n);\n```\n\n---\n\n# 十五、字段删除审计\n\n一些看起来可能有用、但最终应该删除的字段：\n\n| 候选字段 | 结论 | 原因 |\n|---|---|---|\n| `username` | ❌ | 登录身份属于 Auth |\n| `email` | ❌ | Auth 已拥有认证身份信息，不重复存 |\n| `phone` | ❌ | Operations 当前无业务需求 |\n| `password_hash` | ❌ | 严禁越过 Auth Domain |\n| `role_id` | ❌ | 多角色关系由 `operator_roles` 管 |\n| `permissions` | ❌ | 权限由 RBAC 表管理 |\n| `is_admin` | ❌ | 权限不能退化成布尔字段 |\n| `is_active` | ❌ | 与 `status` 重复 |\n| `last_login_at` | ❌ | Auth 领域数据 |\n| `last_active_at` | ❌ | 当前没有运营业务价值 |\n| `disabled_at` | ❌ | Audit Log + status 足够 |\n| `disabled_by` | ❌ | 属于审计记录 |\n| `created_by` | ❌ | 初始 bootstrap 困难且 Audit Log 更合适 |\n| `remark` | ❌ | 当前没有明确业务语义 |\n| `metadata` | ❌ | 防止无意义 JSONB |\n| `deleted_at` | ❌ | Operator 永久保留，以 `disabled` 结束生命周期 |\n\n因此 **6 个字段就是最终版**。\n\n---\n\n# 十六、不可违反的领域规则\n\n最终锁定这 8 条：\n\n1. **一个 Auth 后台主体最多对应一个 Operator。**\n2. **Operator 不存储任何认证凭据。**\n3. **Operator 不直接拥有权限字段，权限必须经过 Role。**\n4. **Operator 不存 `role_id`，支持多角色。**\n5. **只有 `status = 'active'` 的 Operator 才可以获得 Operations 授权。**\n6. **`disabled` Operator 的历史角色和审计历史不得因此删除。**\n7. **Operator 不允许物理删除，也不采用 soft delete。**\n8. **其他 Domain 可以保存 Operator ID 作为审计逻辑引用，但不得建立跨 Domain FK。**\n\n所以第 1 张表正式定稿为：\n\n```text\noperations.operators\n──────────────────────────────\nid               varchar(20) PK\nauth_subject_id  varchar(20) UNIQUE\ndisplay_name     varchar(100)\nstatus           varchar(20)\ncreated_at       timestamptz\nupdated_at       timestamptz\n```\n\n状态只有：\n\n```text\nactive\ndisabled\n```\n\n**下一张进入 `operations.roles`。**它会决定 Role 是不是需要 `code + name + description + status`，以及“系统内置角色”和“可编辑角色”究竟应不应该通过字段区分。memcite"
+    },
+    {
+      "id": "d279e1a8-20e9-4484-a44c-cc090793b498",
+      "parent": "ea6d60e5-64e6-4c26-9d5e-8a944097394e",
+      "role": "user",
+      "model": "",
+      "create_time": 1788031993.348,
+      "status": "finished_successfully",
+      "content_type": "text",
+      "body": "继续完成所有表的审计"
+    },
+    {
+      "id": "0362c02f-acf3-4be2-a933-c1a0e5c75b98",
+      "parent": "d279e1a8-20e9-4484-a44c-cc090793b498",
+      "role": "assistant",
+      "model": "",
+      "create_time": 1788031995.9173071,
+      "status": "finished_successfully",
+      "content_type": "model_editable_context",
+      "body": ""
+    },
+    {
+      "id": "74b9bd3a-5b08-4a81-8d86-3d4285f2cc87",
+      "parent": "0362c02f-acf3-4be2-a933-c1a0e5c75b98",
+      "role": "assistant",
+      "model": "",
+      "create_time": 1788032000.363235,
+      "status": "finished_successfully",
+      "content_type": "thoughts",
+      "body": ""
+    },
+    {
+      "id": "d8158b23-c25f-48a6-b167-b74c5b3d3166",
+      "parent": "74b9bd3a-5b08-4a81-8d86-3d4285f2cc87",
+      "role": "assistant",
+      "model": "",
+      "create_time": 1788031995.916751,
+      "status": "finished_successfully",
+      "content_type": "text",
+      "body": "继续把剩下 4 张一次性定稿，并在最后做一轮 **Operations Domain 总审计**。重点会压掉重复字段、历史字段和“为了以后可能有用”而提前加的结构，只保留当前领域真正需要长期承担的约束。"
+    },
+    {
+      "id": "9df66cd2-b0dd-4e11-91ee-29a817286083",
+      "parent": "d8158b23-c25f-48a6-b167-b74c5b3d3166",
+      "role": "assistant",
+      "model": "",
+      "create_time": 1788032017.445113,
+      "status": "finished_successfully",
+      "content_type": "thoughts",
+      "body": ""
+    },
+    {
+      "id": "ceb0b4d2-192f-4d91-a6dc-32910fb41dfa",
+      "parent": "9df66cd2-b0dd-4e11-91ee-29a817286083",
+      "role": "assistant",
+      "model": "",
+      "create_time": 1788032034.240672,
+      "status": "finished_successfully",
+      "content_type": "reasoning_recap",
+      "body": ""
+    },
+    {
+      "id": "81edd256-e52b-4824-be6c-7adefe8425a7",
+      "parent": "ceb0b4d2-192f-4d91-a6dc-32910fb41dfa",
+      "role": "assistant",
+      "model": "",
+      "create_time": 1788031995.916751,
+      "status": "finished_successfully",
+      "content_type": "text",
+      "body": "下面直接把剩余 4 张表定稿，并在最后把 **Operations Domain 5 张表统一审计一遍**。\n\n---\n\n# 2. `operations.roles`\n\n## 职责\n\n表示后台 RBAC 角色，例如：\n\n```text\nsuper_admin\ntrust_reviewer\ncustomer_support\nfinance_operator\ncontent_operator\n```\n\nRole 是一组权限的稳定集合。\n\n它**不是职位、部门或员工组织架构**。\n\n## 最终字段\n\n| 字段 | 类型 | Null | 默认 | 说明 |\n|---|---|---:|---|---|\n| `id` | `varchar(20)` | NO | — | Role ID |\n| `code` | `varchar(50)` | NO | — | 稳定机器标识 |\n| `name` | `varchar(100)` | NO | — | 后台展示名称 |\n| `description` | `varchar(500)` | YES | — | 角色说明 |\n| `status` | `varchar(20)` | NO | `'active'` | 状态 |\n| `created_at` | `timestamptz` | NO | `now()` | 创建时间 |\n| `updated_at` | `timestamptz` | NO | `now()` | 更新时间 |\n\n### 状态枚举\n\n只保留：\n\n```text\nactive\ndisabled\n```\n\n其中：\n\n- `active`：参与权限计算；\n- `disabled`：整个角色立即失效，但角色及其关系继续保留。\n\n不需要：\n\n```text\ndraft\ndeleted\narchived\nsystem\n```\n\n---\n\n## `code` 的意义\n\n`code` 是稳定机器标识：\n\n```text\ntrust_reviewer\nfinance_operator\nsuper_admin\n```\n\n而：\n\n```text\nname = \"内容审核员\"\n```\n\n可以修改。\n\n因此：\n\n> `code` 创建后不可修改。\n\n这样代码、配置、审计日志都可以稳定引用 Role。\n\n---\n\n## 为什么不加 `is_system`\n\n最终建议：\n\n```text\n❌ is_system\n❌ is_builtin\n❌ editable\n```\n\n“哪些角色是系统预置角色、是否允许修改”属于应用层管理策略。\n\n当前没有必要把：\n\n```text\n系统角色\n自定义角色\n```\n\n变成领域状态。\n\n否则以后容易产生：\n\n```text\nis_system = true\nstatus = disabled\neditable = true\n```\n\n这种组合语义。\n\n---\n\n## FK\n\n无。\n\n---\n\n## UNIQUE\n\n```sql\nUNIQUE (code)\n```\n\n`name` 不唯一。\n\n---\n\n## CHECK\n\n```sql\nCHECK (\n    code ~ '^[a-z][a-z0-9_]*$'\n)\n```\n\n统一要求：\n\n```text\nlower_snake_case\n```\n\n另外：\n\n```sql\nCHECK (btrim(name) <> '')\n```\n\n以及：\n\n```sql\nCHECK (\n    description IS NULL\n    OR btrim(description) <> ''\n)\n```\n\n状态：\n\n```sql\nCHECK (\n    status IN ('active', 'disabled')\n)\n```\n\n---\n\n## INDEX\n\n不用增加普通索引。\n\n已有：\n\n```text\nPK(id)\nUNIQUE(code)\n```\n\n角色数量很小，对：\n\n```text\nstatus\nname\ncreated_at\n```\n\n提前建索引没有价值。\n\n---\n\n## 最终 DDL\n\n```sql\nCREATE TABLE operations.roles (\n    id          varchar(20)  NOT NULL,\n    code        varchar(50)  NOT NULL,\n    name        varchar(100) NOT NULL,\n    description varchar(500),\n    status      varchar(20)  NOT NULL DEFAULT 'active',\n    created_at  timestamptz  NOT NULL DEFAULT now(),\n    updated_at  timestamptz  NOT NULL DEFAULT now(),\n\n    CONSTRAINT pk_roles\n        PRIMARY KEY (id),\n\n    CONSTRAINT uq_roles_code\n        UNIQUE (code),\n\n    CONSTRAINT ck_roles_code\n        CHECK (\n            code ~ '^[a-z][a-z0-9_]*$'\n        ),\n\n    CONSTRAINT ck_roles_name_not_blank\n        CHECK (\n            btrim(name) <> ''\n        ),\n\n    CONSTRAINT ck_roles_description_not_blank\n        CHECK (\n            description IS NULL\n            OR btrim(description) <> ''\n        ),\n\n    CONSTRAINT ck_roles_status\n        CHECK (\n            status IN ('active', 'disabled')\n        )\n);\n```\n\n### 最终领域规则\n\n1. `code` 创建后不可修改。\n2. Role 不物理删除。\n3. Role 不 soft delete。\n4. 停用使用 `status = disabled`。\n5. Disabled Role 不再产生任何有效权限。\n6. Role 自己不保存 permissions JSON。\n7. Role 与 Operator 不直接保存对方 ID。\n\n---\n\n# 3. `operations.operator_roles`\n\n这是 Operator 与 Role 的标准多对多关系表。\n\n关系：\n\n```text\nOperator\n   │\n   │ N\n   ▼\noperator_roles\n   ▲\n   │ N\nRole\n```\n\n## 最终字段\n\n只需要：\n\n| 字段 | 类型 | Null | 默认 |\n|---|---|---:|---|\n| `operator_id` | `varchar(20)` | NO | — |\n| `role_id` | `varchar(20)` | NO | — |\n| `created_at` | `timestamptz` | NO | `now()` |\n\n**不需要单独 `id`。**\n\n---\n\n## 为什么没有 `status`\n\n不要：\n\n```text\nactive\nrevoked\ndisabled\n```\n\n授权存在：\n\n```text\noperator_roles 中有记录\n```\n\n授权不存在：\n\n```text\n删除记录\n```\n\n历史则进入：\n\n```text\noperator_audit_logs\n```\n\n这是最干净的关系模型。\n\n---\n\n## 为什么保留 `created_at`\n\n虽然审计日志会记录授权动作，但当前映射本身保留：\n\n```text\n这个角色从什么时候开始属于该 Operator\n```\n\n对后台展示和问题排查都有实际价值。\n\n因此保留。\n\n但不要再增加：\n\n```text\nassigned_at\n```\n\n因为和 `created_at` 完全重复。\n\n---\n\n## 为什么没有 `assigned_by_operator_id`\n\n这是典型重复审计数据。\n\n授权动作应记录：\n\n```text\noperator_audit_logs\n```\n\n而不是：\n\n```text\noperator_roles.assigned_by_operator_id\n```\n\n否则撤销、重新授权等历史最终还是无法靠关系表完整表达。\n\n---\n\n## PK / UNIQUE\n\n直接：\n\n```sql\nPRIMARY KEY (operator_id, role_id)\n```\n\n已经同时保证：\n\n```text\n一个 Operator 不可能重复拥有同一个 Role\n```\n\n因此不再增加 UNIQUE。\n\n---\n\n## FK\n\n都是 Operations Domain 内真实 FK：\n\n```text\noperator_id\n→ operations.operators.id\n\nrole_id\n→ operations.roles.id\n```\n\n使用：\n\n```text\nON DELETE RESTRICT\n```\n\n虽然我们已经规定 Operator / Role 不物理删除，但数据库层仍然明确保护。\n\n---\n\n## INDEX\n\nPK：\n\n```text\n(operator_id, role_id)\n```\n\n已经适合：\n\n```sql\nWHERE operator_id = ?\n```\n\n但不能很好支持：\n\n```sql\nWHERE role_id = ?\n```\n\n因此增加一个反向索引：\n\n```sql\n(role_id, operator_id)\n```\n\n仅此一个。\n\n---\n\n## 最终 DDL\n\n```sql\nCREATE TABLE operations.operator_roles (\n    operator_id varchar(20) NOT NULL,\n    role_id     varchar(20) NOT NULL,\n    created_at  timestamptz NOT NULL DEFAULT now(),\n\n    CONSTRAINT pk_operator_roles\n        PRIMARY KEY (operator_id, role_id),\n\n    CONSTRAINT fk_operator_roles_operator\n        FOREIGN KEY (operator_id)\n        REFERENCES operations.operators(id)\n        ON DELETE RESTRICT,\n\n    CONSTRAINT fk_operator_roles_role\n        FOREIGN KEY (role_id)\n        REFERENCES operations.roles(id)\n        ON DELETE RESTRICT\n);\n\nCREATE INDEX idx_operator_roles_role\n    ON operations.operator_roles (role_id, operator_id);\n```\n\n---\n\n## 一个数据库无法表达的重要规则\n\n只允许：\n\n```text\nactive Operator\n+\nactive Role\n```\n\n建立有效授权。\n\n这不能靠普通 CHECK 实现，因为 CHECK 不能安全读取另外两张表状态。\n\n因此：\n\n> 由 Operations Application Service 强制执行。\n\n而真正计算权限时，还必须再次检查：\n\n```text\noperator.status = active\nAND\nrole.status = active\n```\n\n不能因为关系表中存在记录就直接授权。\n\n---\n\n# 4. `operations.role_permissions`\n\n这张表描述：\n\n> Role 当前拥有哪些由代码注册的 Permission。\n\n关系：\n\n```text\nRole\n   │\n   │ 1:N\n   ▼\nRolePermission\n      │\n      ▼\npermission_key\n```\n\n注意依然：\n\n> **没有 `operations.permissions` 表。**\n\n---\n\n## 最终字段\n\n| 字段 | 类型 | Null | 默认 |\n|---|---|---:|---|\n| `role_id` | `varchar(20)` | NO | — |\n| `permission_key` | `varchar(100)` | NO | — |\n| `created_at` | `timestamptz` | NO | `now()` |\n\n依然不需要单独 ID。\n\n---\n\n## Permission 命名正式统一\n\n建议锁死：\n\n```text\n<domain>.<resource>.<action>\n```\n\n例如：\n\n```text\ntrust.reports.read\ntrust.reports.resolve\ntrust.sanctions.create\n\ncommerce.orders.read\ncommerce.refunds.create\n\nrewards.grants.read\nrewards.grants.create\n\nsocial.profiles.moderate\n```\n\n全部：\n\n```text\nlower_snake_case\n```\n\n不使用：\n\n```text\nTRUST_REPORT_READ\ntrust:reports:read\nTrust.Report.Read\n```\n\n---\n\n## PK\n\n```sql\nPRIMARY KEY (\n    role_id,\n    permission_key\n)\n```\n\n自然保证：\n\n> 一个 Role 不能重复拥有同一个 Permission。\n\n---\n\n## FK\n\n只有：\n\n```text\nrole_id\n→ operations.roles.id\n```\n\n不存在：\n\n```text\npermission_key → permissions\n```\n\n因为根本没有 permissions 表。\n\n---\n\n## CHECK\n\n至少要求合法 Permission 格式。\n\n```sql\nCHECK (\n    permission_key ~\n    '^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*){2,}$'\n)\n```\n\n意味着至少：\n\n```text\nxxx.xxx.xxx\n```\n\n例如：\n\n```text\ntrust.reports.read\n```\n\n合法。\n\n---\n\n## 更重要的应用层检查\n\n数据库只能验证“长得像 Permission”。\n\n数据库无法知道：\n\n```text\ntrust.reports.destroy_the_world\n```\n\n是不是代码真实支持的权限。\n\n因此写入时必须：\n\n```text\npermission_key ∈ Application Permission Registry\n```\n\n如果代码没有注册：\n\n```text\ncommerce.payments.force_success\n```\n\n数据库即使格式合法，也不能允许后台配置产生实际权限。\n\n这是应用层强约束。\n\n---\n\n## INDEX\n\n不加普通索引。\n\n因为核心访问方式：\n\n```sql\nWHERE role_id IN (...)\n```\n\n已经被：\n\n```text\nPRIMARY KEY(role_id, permission_key)\n```\n\n覆盖。\n\n如果未来真的频繁查询：\n\n```text\n哪些 Role 拥有 permission X\n```\n\n再增加：\n\n```text\n(permission_key, role_id)\n```\n\n当前没有必要。\n\n---\n\n## 最终 DDL\n\n```sql\nCREATE TABLE operations.role_permissions (\n    role_id        varchar(20)  NOT NULL,\n    permission_key varchar(100) NOT NULL,\n    created_at     timestamptz  NOT NULL DEFAULT now(),\n\n    CONSTRAINT pk_role_permissions\n        PRIMARY KEY (\n            role_id,\n            permission_key\n        ),\n\n    CONSTRAINT fk_role_permissions_role\n        FOREIGN KEY (role_id)\n        REFERENCES operations.roles(id)\n        ON DELETE RESTRICT,\n\n    CONSTRAINT ck_role_permissions_permission_key\n        CHECK (\n            permission_key ~\n            '^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*){2,}$'\n        )\n);\n```\n\n---\n\n# 5. `operations.operator_audit_logs`\n\n这是整个 Operations Domain 最需要认真控制边界的一张表。\n\n它不是：\n\n```text\n应用日志\n错误日志\nHTTP access log\n登录日志\n安全事件日志\n数据库变更日志\n```\n\n它只记录：\n\n> **后台 Operator 对系统执行了什么具有运营意义的操作。**\n\n例如：\n\n```text\n张三\n执行\ntrust.reports.resolve\n\n李四\n执行\ncommerce.refunds.create\n\n管理员\n执行\noperations.operator_roles.assign\n```\n\n---\n\n# 最终字段\n\n我建议最终保留：\n\n| 字段 | 类型 | Null | 默认 | 说明 |\n|---|---|---:|---|---|\n| `id` | `varchar(20)` | NO | — | Audit Log ID |\n| `operator_id` | `varchar(20)` | NO | — | 操作者 |\n| `action_key` | `varchar(100)` | NO | — | 操作 |\n| `target_domain` | `varchar(50)` | YES | — | 目标所属 Domain |\n| `target_type` | `varchar(50)` | YES | — | 目标类型 |\n| `target_id` | `varchar(20)` | YES | — | 目标 ID |\n| `request_id` | `varchar(64)` | YES | — | 请求链路 ID |\n| `ip_address` | `inet` | YES | — | 操作者来源 IP |\n| `details` | `jsonb` | NO | `{}` | 必要的操作上下文 |\n| `created_at` | `timestamptz` | NO | `now()` | 操作发生时间 |\n\n共 **10 个字段**。\n\n这里 `jsonb` 是合理例外。\n\n---\n\n# `action_key`\n\n继续统一：\n\n```text\n<domain>.<resource>.<action>\n```\n\n例如：\n\n```text\noperations.operator_roles.assign\noperations.operator_roles.revoke\n\noperations.role_permissions.grant\noperations.role_permissions.revoke\n\ntrust.reports.resolve\ntrust.sanctions.create\n\ncommerce.refunds.create\n```\n\n这样审计语义和 Permission key 可以自然对应。\n\n但注意：\n\n> Audit action 不要求必须等同某一个 Permission。\n\n例如：\n\n```text\ncommerce.refunds.approve\n```\n\n可能和权限体系存在一一对应，也可能不是。\n\n不要把两个概念强行做 FK。\n\n---\n\n# `target_domain / target_type / target_id`\n\n例如退款：\n\n```text\ntarget_domain = 'commerce'\ntarget_type   = 'refund'\ntarget_id     = 'rf_xxx'\n```\n\n处罚：\n\n```text\ntarget_domain = 'trust'\ntarget_type   = 'sanction'\ntarget_id     = 'sa_xxx'\n```\n\n这些全部是：\n\n> **弱逻辑引用。**\n\n绝不能建立：\n\n```text\ntarget_id → commerce.refunds\ntarget_id → trust.sanctions\n```\n\n这种 polymorphic FK。\n\n---\n\n# 为什么 `target_id` 可以为空\n\n有些操作针对的是集合或系统能力，例如：\n\n```text\ncommerce.orders.export\n```\n\n这时可以：\n\n```text\ntarget_domain = commerce\ntarget_type   = order\ntarget_id     = NULL\n```\n\n因此不要强制三者全部非空。\n\n但是有一个规则：\n\n```text\n如果出现 target_type / target_id，\n必须存在 target_domain。\n```\n\n并且：\n\n```text\n如果出现 target_id，\n必须存在 target_type。\n```\n\n所以合法组合只有：\n\n```text\nNULL / NULL / NULL\n\ncommerce / order / NULL\n\ncommerce / refund / rf_xxx\n```\n\n不允许：\n\n```text\nNULL / refund / rf_xxx\n\ncommerce / NULL / rf_xxx\n```\n\n---\n\n# `request_id`\n\n这个字段值得保留。\n\n因为后台操作出了问题以后，可以从：\n\n```text\nOperator Audit\n      │\n      ▼\nrequest_id\n      │\n      ▼\n应用日志 / trace\n```\n\n继续追查。\n\n但：\n\n```text\nrequest_id\n```\n\n不是 UNIQUE。\n\n一个 HTTP 请求完全可能产生多个审计动作。\n\n---\n\n# `ip_address`\n\nPostgreSQL 原生：\n\n```text\ninet\n```\n\n非常适合。\n\n不用：\n\n```text\nvarchar(45)\n```\n\n这是 PostgreSQL 相比 MySQL 值得利用的地方。\n\n---\n\n# `details jsonb`\n\n这是 Operations Domain 少数明确合理使用 JSONB 的地方。\n\n例如：\n\n```json\n{\n  \"role_id\": \"role_xxx\"\n}\n```\n\n或者：\n\n```json\n{\n  \"reason_code\": \"manual_review\"\n}\n```\n\n但必须严格规定：\n\n### 可以放\n\n- 非核心查询条件；\n- 操作发生时的小型上下文快照；\n- 无法稳定建模的附属信息。\n\n### 禁止放\n\n```text\npassword\ntoken\nauthorization header\n完整用户资料\n完整订单\n完整聊天消息\n银行卡信息\n支付凭据\n大对象快照\n```\n\n也不能把：\n\n```json\n{\n  \"targetDomain\": \"...\",\n  \"targetId\": \"...\",\n  \"action\": \"...\"\n}\n```\n\n这种已经有结构化字段的数据再复制进去。\n\n---\n\n# 为什么没有 `status / result`\n\n这里做一个明确领域定义：\n\n> `operator_audit_logs` 记录已经被系统接受并执行的运营动作。\n\n权限拒绝：\n\n```text\npermission denied\n```\n\n认证失败：\n\n```text\nlogin failed\n```\n\n系统异常：\n\n```text\n500 error\n```\n\n不是这张表的核心职责。\n\n分别应该进入安全日志 / 应用日志 / Observability。\n\n因此不增加：\n\n```text\nsuccess\nfailed\npending\n```\n\n否则 Operations Audit 很快会变成通用日志系统。\n\n---\n\n# FK\n\n唯一真正的 FK：\n\n```text\noperator_id\n→ operations.operators.id\n```\n\n使用：\n\n```text\nON DELETE RESTRICT\n```\n\n---\n\n# CHECK\n\n### action key\n\n```sql\naction_key ~\n'^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*){2,}$'\n```\n\n### target domain\n\n如果非 NULL：\n\n```sql\ntarget_domain ~ '^[a-z][a-z0-9_]*$'\n```\n\n### target type\n\n同样：\n\n```sql\ntarget_type ~ '^[a-z][a-z0-9_]*$'\n```\n\n### target 组合\n\n```sql\nCHECK (\n    (\n        target_domain IS NULL\n        AND target_type IS NULL\n        AND target_id IS NULL\n    )\n    OR\n    (\n        target_domain IS NOT NULL\n        AND target_type IS NOT NULL\n    )\n)\n```\n\n该规则允许：\n\n```text\ndomain + type + NULL id\n```\n\n---\n\n### details 必须为 JSON object\n\n这个非常值得约束：\n\n```sql\nCHECK (\n    jsonb_typeof(details) = 'object'\n)\n```\n\n避免有人写进去：\n\n```json\n[]\n```\n\n或者：\n\n```json\n\"hello\"\n```\n\n---\n\n# INDEX\n\nAudit Log 是 5 张表中唯一需要认真设计查询索引的表。\n\n最终保留 4 个。\n\n### 全局时间线\n\n```sql\n(created_at DESC)\n```\n\n用于：\n\n```text\n最近后台操作\n```\n\n---\n\n### 某 Operator 的历史\n\n```sql\n(operator_id, created_at DESC)\n```\n\n---\n\n### 某业务对象的历史\n\n```sql\n(\n    target_domain,\n    target_type,\n    target_id,\n    created_at DESC\n)\n```\n\n使用 partial index：\n\n```text\nWHERE target_domain IS NOT NULL\n```\n\n---\n\n### request tracing\n\n```sql\n(request_id)\nWHERE request_id IS NOT NULL\n```\n\n用于从 request id 快速反查运营动作。\n\n---\n\n## 最终 DDL\n\n```sql\nCREATE TABLE operations.operator_audit_logs (\n    id            varchar(20)  NOT NULL,\n    operator_id   varchar(20)  NOT NULL,\n    action_key    varchar(100) NOT NULL,\n\n    target_domain varchar(50),\n    target_type   varchar(50),\n    target_id     varchar(20),\n\n    request_id    varchar(64),\n    ip_address    inet,\n\n    details       jsonb        NOT NULL DEFAULT '{}'::jsonb,\n\n    created_at    timestamptz  NOT NULL DEFAULT now(),\n\n    CONSTRAINT pk_operator_audit_logs\n        PRIMARY KEY (id),\n\n    CONSTRAINT fk_operator_audit_logs_operator\n        FOREIGN KEY (operator_id)\n        REFERENCES operations.operators(id)\n        ON DELETE RESTRICT,\n\n    CONSTRAINT ck_operator_audit_logs_action_key\n        CHECK (\n            action_key ~\n            '^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*){2,}$'\n        ),\n\n    CONSTRAINT ck_operator_audit_logs_target_domain\n        CHECK (\n            target_domain IS NULL\n            OR target_domain ~ '^[a-z][a-z0-9_]*$'\n        ),\n\n    CONSTRAINT ck_operator_audit_logs_target_type\n        CHECK (\n            target_type IS NULL\n            OR target_type ~ '^[a-z][a-z0-9_]*$'\n        ),\n\n    CONSTRAINT ck_operator_audit_logs_target_reference\n        CHECK (\n            (\n                target_domain IS NULL\n                AND target_type IS NULL\n                AND target_id IS NULL\n            )\n            OR\n            (\n                target_domain IS NOT NULL\n                AND target_type IS NOT NULL\n            )\n        ),\n\n    CONSTRAINT ck_operator_audit_logs_target_id_not_blank\n        CHECK (\n            target_id IS NULL\n            OR btrim(target_id) <> ''\n        ),\n\n    CONSTRAINT ck_operator_audit_logs_request_id_not_blank\n        CHECK (\n            request_id IS NULL\n            OR btrim(request_id) <> ''\n        ),\n\n    CONSTRAINT ck_operator_audit_logs_details_object\n        CHECK (\n            jsonb_typeof(details) = 'object'\n        )\n);\n\nCREATE INDEX idx_operator_audit_logs_created_at\n    ON operations.operator_audit_logs (\n        created_at DESC\n    );\n\nCREATE INDEX idx_operator_audit_logs_operator_created_at\n    ON operations.operator_audit_logs (\n        operator_id,\n        created_at DESC\n    );\n\nCREATE INDEX idx_operator_audit_logs_target\n    ON operations.operator_audit_logs (\n        target_domain,\n        target_type,\n        target_id,\n        created_at DESC\n    )\n    WHERE target_domain IS NOT NULL;\n\nCREATE INDEX idx_operator_audit_logs_request_id\n    ON operations.operator_audit_logs (\n        request_id\n    )\n    WHERE request_id IS NOT NULL;\n```\n\n---\n\n# Operations Domain 最终总审计\n\n现在回头重新检查全部 5 张。\n\n## 最终表结构\n\n```text\noperations\n│\n├── operators\n│\n├── roles\n│\n├── operator_roles\n│\n├── role_permissions\n│\n└── operator_audit_logs\n```\n\n没有必要增加第 6 张表。\n\n---\n\n# 1. `operators`\n\n最终：\n\n```text\nid\nauth_subject_id\ndisplay_name\nstatus\ncreated_at\nupdated_at\n```\n\n### UNIQUE\n\n```text\nauth_subject_id\n```\n\n### 状态\n\n```text\nactive\ndisabled\n```\n\n### 额外 INDEX\n\n```text\n无\n```\n\n### 审计结论\n\n**通过。**\n\n不加：\n\n```text\nemail\nusername\npassword\nrole_id\npermissions\nis_admin\nlast_login_at\ndeleted_at\nmetadata\nremark\n```\n\n---\n\n# 2. `roles`\n\n最终：\n\n```text\nid\ncode\nname\ndescription\nstatus\ncreated_at\nupdated_at\n```\n\n### UNIQUE\n\n```text\ncode\n```\n\n### 状态\n\n```text\nactive\ndisabled\n```\n\n### 额外 INDEX\n\n```text\n无\n```\n\n### 审计结论\n\n**通过。**\n\n不增加：\n\n```text\nis_system\nis_builtin\npriority\nlevel\nparent_role_id\npermissions\ndeleted_at\n```\n\n尤其不做 Role hierarchy。\n\n当前完全没有必要引入：\n\n```text\nadmin\n └── moderator\n      └── reviewer\n```\n\n角色之间保持扁平。\n\n---\n\n# 3. `operator_roles`\n\n最终：\n\n```text\noperator_id\nrole_id\ncreated_at\n```\n\n### PK\n\n```text\n(operator_id, role_id)\n```\n\n### FK\n\n```text\noperator_id → operators.id\nrole_id     → roles.id\n```\n\n### INDEX\n\n```text\n(role_id, operator_id)\n```\n\n### 状态枚举\n\n**没有。**\n\n### 审计结论\n\n**通过。**\n\n不增加：\n\n```text\nid\nstatus\nassigned_at\nrevoked_at\nassigned_by\ndeleted_at\n```\n\n---\n\n# 4. `role_permissions`\n\n最终：\n\n```text\nrole_id\npermission_key\ncreated_at\n```\n\n### PK\n\n```text\n(role_id, permission_key)\n```\n\n### FK\n\n```text\nrole_id → roles.id\n```\n\n### INDEX\n\n额外：\n\n```text\n无\n```\n\n### 状态枚举\n\n**没有。**\n\n### 审计结论\n\n**通过。**\n\n不增加：\n\n```text\nid\npermission_id\nstatus\ngranted_by\ndeleted_at\n```\n\n并正式确认：\n\n```text\noperations.permissions\n```\n\n**不建。**\n\n---\n\n# 5. `operator_audit_logs`\n\n最终：\n\n```text\nid\noperator_id\naction_key\n\ntarget_domain\ntarget_type\ntarget_id\n\nrequest_id\nip_address\ndetails\n\ncreated_at\n```\n\n### FK\n\n```text\noperator_id → operators.id\n```\n\n### INDEX\n\n```text\ncreated_at DESC\n\noperator_id,\ncreated_at DESC\n\ntarget_domain,\ntarget_type,\ntarget_id,\ncreated_at DESC\n\nrequest_id\n```\n\n### 状态枚举\n\n**没有。**\n\n### 审计结论\n\n**通过。**\n\n---\n\n# 最终 FK 图\n\n```text\noperations.operators\n        ▲\n        │\n        │ FK\n        │\noperations.operator_roles\n        │\n        │ FK\n        ▼\noperations.roles\n        ▲\n        │\n        │ FK\n        │\noperations.role_permissions\n```\n\n另一侧：\n\n```text\noperations.operators\n        ▲\n        │ FK\n        │\noperations.operator_audit_logs\n```\n\n而：\n\n```text\noperators.auth_subject_id\n```\n\n是：\n\n```text\nAuth Domain 逻辑引用\nNO FK\n```\n\nAudit：\n\n```text\ntarget_domain\ntarget_type\ntarget_id\n```\n\n也是：\n\n```text\n跨 Domain 弱逻辑引用\nNO FK\n```\n\n所以不存在 Operations 对其他业务 Schema 的数据库强耦合。\n\n---\n\n# 最终状态枚举总表\n\n整个 Operations Domain **只有两个实体存在状态机**：\n\n| Table | Field | Values |\n|---|---|---|\n| `operators` | `status` | `active`, `disabled` |\n| `roles` | `status` | `active`, `disabled` |\n\n其他三张：\n\n```text\noperator_roles\nrole_permissions\noperator_audit_logs\n```\n\n全部不需要 status。\n\n这是一个很好的信号：\n\n> Operations Domain 没有被设计成充满无意义状态机的后台系统。\n\n---\n\n# 最终权限计算规则\n\n有效权限最终应按照：\n\n```text\nOperator\n    │\n    │ status = active\n    ▼\noperator_roles\n    │\n    ▼\nRole\n    │\n    │ status = active\n    ▼\nrole_permissions\n    │\n    ▼\npermission_key\n```\n\n因此数学上：\n\n```text\nEffectivePermissions(operator)\n=\n所有 active Role 的 Permission 并集\n```\n\n例如：\n\n```text\noperator A\n├── trust_reviewer\n│   ├── trust.reports.read\n│   └── trust.reports.resolve\n│\n└── support\n    ├── social.profiles.read\n    └── commerce.orders.read\n```\n\n最终：\n\n```text\nA permissions =\n{\n    trust.reports.read,\n    trust.reports.resolve,\n    social.profiles.read,\n    commerce.orders.read\n}\n```\n\n没有：\n\n```text\ndeny permission\npermission priority\nrole priority\nrole inheritance\nuser direct permission\n```\n\n这些当前全部不要。\n\n---\n\n# 一个必须锁死的规则：禁止 Operator 直接 Permission\n\n不要建立：\n\n```text\noperator_permissions\n```\n\n也不要：\n\n```text\noperators.permissions jsonb\n```\n\n授权路径永远只有：\n\n```text\nOperator\n    ↓\nRole\n    ↓\nPermission\n```\n\n否则几年后你会根本说不清：\n\n> 为什么这个 Operator 拥有这个权限？\n\nRBAC 应保持单一授权路径。\n\n---\n\n# `super_admin` 怎么办\n\n同样不要设计：\n\n```text\noperators.is_super_admin\n```\n\n应该创建 Role：\n\n```text\nroles.code = 'super_admin'\n```\n\n然后赋予全部需要的 Permission。\n\n也就是说：\n\n```text\nsuper_admin\n```\n\n仍然只是 Role。\n\n不是数据库中的特殊身份。\n\n---\n\n# 审计日志必须 Append-only\n\n这是 Operations Domain 最重要的不可违反规则之一。\n\n应用层禁止：\n\n```text\nUPDATE operator_audit_logs\nDELETE operator_audit_logs\n```\n\n正确生命周期只有：\n\n```text\nINSERT\n```\n\n一旦写入：\n\n```text\n永不修改\n```\n\n如果操作被后续撤销，例如：\n\n```text\nA 给 B 分配 Role\n```\n\n产生：\n\n```text\noperations.operator_roles.assign\n```\n\n之后撤回：\n\n```text\noperations.operator_roles.revoke\n```\n\n应该新增第二条 audit log。\n\n绝不能修改第一条记录。\n\n---\n\n# 是否需要数据库 Trigger 禁止 UPDATE / DELETE？\n\n**当前不建议。**\n\n因为这属于数据库层强行为控制，会增加迁移和运维复杂度。\n\n当前采用：\n\n```text\nApplication Service\n+\n数据库用户权限\n```\n\n控制 append-only 即可。\n\n未来如果进入更严格审计要求，再考虑数据库 trigger / audit extension。\n\n---\n\n# Operations Domain 最终不可违反的 15 条规则\n\n1. C 端 User 与后台 Operator 是两个不同主体。\n2. Operations 不存密码、Session、MFA 等认证数据。\n3. 一个 Auth Subject 最多对应一个 Operator。\n4. Operator 只能通过 Role 获得权限。\n5. 禁止 Operator direct permissions。\n6. Role 必须通过稳定 `code` 标识。\n7. Role `code` 创建后不可修改。\n8. Permission 定义权属于代码，不属于数据库。\n9. `permission_key` 必须来自应用 Permission Registry。\n10. Disabled Operator 不产生有效权限。\n11. Disabled Role 不产生有效权限。\n12. Operator 与 Role 不物理删除，以 `disabled` 终止生命周期。\n13. 关系授权撤销直接删除关系记录，不建立关系状态机。\n14. Audit Log 永久 append-only。\n15. Operations 不通过 FK 接管 Trust / Commerce / Rewards / Social / Chat 等领域对象。\n\n---\n\n# Operations Domain 最终定稿\n\n最终就是这 **5 张表**：\n\n```text\noperations.operators\noperations.roles\noperations.operator_roles\noperations.role_permissions\noperations.operator_audit_logs\n```\n\n总计字段：\n\n```text\noperators             6\nroles                 7\noperator_roles         3\nrole_permissions       3\noperator_audit_logs   10\n────────────────────────\n总计                  29\n```\n\n没有多余的：\n\n```text\npermissions\noperator_permissions\ndepartments\nteams\nsessions\nlogin_logs\nadmin_tasks\nadmin_notes\nrole_hierarchy\npermission_groups\n```\n\n到这里，**Operations Domain 可以正式视为数据库层设计定稿**。它的边界也很稳定：**后台身份 + RBAC + 操作审计**，不接管任何业务域本身。 memcite"
+    },
+    {
+      "id": "cb5a800a-106c-4931-98ba-f19e6399c447",
+      "parent": "81edd256-e52b-4824-be6c-7adefe8425a7",
+      "role": "user",
+      "model": "",
+      "create_time": 1788038805.328,
+      "status": "finished_successfully",
+      "content_type": "text",
+      "body": "请基于本会话已经完成的 Operations Domain 最终审计，做一次**全域审计后的最终确认修订**。\n\n最终 5 张表保持：\n\n- operations.operators\n- operations.roles\n- operations.operator\\_roles\n- operations.role\\_permissions\n- operations.operator\\_audit\\_logs\n\n主体设计不重新讨论。\n\n请完成以下确认：\n\n1. `operations.operators.auth_subject_id`\n\n   - 继续 UNIQUE。\n   - 它引用 Identity 的稳定 logical UUID / auth subject。\n   - 不建立跨 Domain physical FK。\n\n2. `roles`\n\n   - code UNIQUE。\n   - lower\\_snake\\_case。\n   - 使用 disabled / inactive，而不是因为角色不用就物理删除。\n\n3. `operator_roles`\n\n   - 保留：\r\n     `PK(operator_id, role_id)`\n   - 补/保留反向查询 INDEX：\r\n     `(role_id, operator_id)`\n\n4. `role_permissions`\n\n   - permission key 继续使用：\r\n     `<domain>.<resource>.<action>`\n   - 当前 V1 不增加独立 permission dictionary table，除非本会话此前已经明确需要。\n\n5. `operator_audit_logs`\n\n   - append-only。\n   - 不物理删除。\n   - target 继续使用：\r\n     `target_domain`\r\n     `target_type`\r\n     `target_id`\n   - target\\_id 是业务实体 stable UUID logical ID。\n   - 不建立到 Trust / Social / Chat / Commerce / Platform 的跨域 FK。\n\n6. 明确 Operations Audit 与 Trust 的区别：\n\n   - Trust Decision / Enforcement = 业务审核与处罚事实。\n   - Operations Audit = 哪个后台操作员在什么时候执行了什么管理动作。\n   - 两者不能互相替代，也不重复建模。\n\n7. 如果 operator 对 Trust case / decision / enforcement 执行后台动作：\n\n   - Operations 只记录操作轨迹。\n   - Trust 仍然保存业务事实。\n\n8. 删除策略：\n\n   - audit logs 永久事实。\n   - operators / roles 使用禁用状态。\n   - operator\\_roles 可以按角色解绑关系删除。\n\n最后输出 Operations Domain 最终 5 表确认版，重点列明：\n\n- 跨域 logical ID\n- FK 边界\n- audit append-only\n- 与 Trust 的职责划分"
+    },
+    {
+      "id": "9ad8e808-10e4-4e7c-a8d6-ae33fc2ff46f",
+      "parent": "cb5a800a-106c-4931-98ba-f19e6399c447",
+      "role": "system",
+      "model": "",
+      "create_time": 1788038808.118978,
+      "status": "finished_successfully",
+      "content_type": "text",
+      "body": ""
+    },
+    {
+      "id": "1fac8717-1194-425e-b62c-a53db7aacaea",
+      "parent": "9ad8e808-10e4-4e7c-a8d6-ae33fc2ff46f",
+      "role": "assistant",
+      "model": "",
+      "create_time": 1788038808.3003225,
+      "status": "finished_successfully",
+      "content_type": "model_editable_context",
+      "body": ""
+    },
+    {
+      "id": "73c5f653-2197-4a5b-86a0-8a68cbede63b",
+      "parent": "1fac8717-1194-425e-b62c-a53db7aacaea",
+      "role": "assistant",
+      "model": "",
+      "create_time": 1788038812.365143,
+      "status": "finished_successfully",
+      "content_type": "reasoning_recap",
+      "body": ""
+    },
+    {
+      "id": "150d0003-064c-429c-b5c9-6023ca5094ab",
+      "parent": "73c5f653-2197-4a5b-86a0-8a68cbede63b",
+      "role": "assistant",
+      "model": "",
+      "create_time": 1788038808.294448,
+      "status": "finished_successfully",
+      "content_type": "text",
+      "body": "可以。基于本会话已经完成的 Operations Domain 最终审计，这一轮只做**最终确认修订**，不重新打开主体设计。\n\n结论先给出：**5 张表保持不变，领域边界成立，没有必要新增第 6 张表。** 本轮重点把跨域 logical ID、删除策略、Audit 与 Trust 的边界正式锁死。\n\n# Operations Domain 最终确认版\n\n```text\noperations\n├── operators\n├── roles\n├── operator_roles\n├── role_permissions\n└── operator_audit_logs\n```\n\n---\n\n## 1. `operations.operators`\n\n最终职责：\n\n> 后台运营主体在 Operations Domain 中的身份档案。\n\n最终核心字段：\n\n```text\nid\nauth_subject_id\ndisplay_name\nstatus\ncreated_at\nupdated_at\n```\n\n### `auth_subject_id` 最终确认\n\n保持：\n\n```text\nUNIQUE (auth_subject_id)\n```\n\n语义正式确定为：\n\n> Identity / Authentication Domain 中稳定的 auth subject logical ID。\n\n关系：\n\n```text\nIdentity / Auth\n     │\n     │ stable logical ID\n     ▼\noperations.operators.auth_subject_id\n```\n\n### FK 边界\n\n明确：\n\n```text\nauth_subject_id\n    ❌ 不建立 physical FK\n```\n\n即使数据库处于同一个 PostgreSQL 实例、甚至同一个数据库，也不建立：\n\n```sql\nFOREIGN KEY (auth_subject_id)\nREFERENCES identity.xxx(...)\n```\n\n它是：\n\n> **跨 Domain logical reference。**\n\nIdentity 负责认证主体事实；Operations 只需要知道：\n\n```text\n这个 Operator 对应哪个稳定认证主体。\n```\n\n### UNIQUE\n\n必须：\n\n```text\nUNIQUE(auth_subject_id)\n```\n\n保证：\n\n```text\n1 auth subject\n    ↓\n最多 1 operator\n```\n\n不能一个 Identity 主体映射多个 Operator。\n\n### 状态\n\n继续统一使用：\n\n```text\nactive\ndisabled\n```\n\n这里不改成 `inactive`。\n\n原因不是 `inactive` 错，而是 Operations 已经使用：\n\n```text\ndisabled\n```\n\n表达明确的权限禁用语义，应保持 Domain 内统一。\n\n### 删除策略\n\n```text\noperators\n    ❌ 不物理删除\n    ❌ 不 soft delete\n    ✅ status = disabled\n```\n\nOperator 一旦参与过后台操作，就是审计历史的一部分。\n\n---\n\n# 2. `operations.roles`\n\n最终核心字段保持：\n\n```text\nid\ncode\nname\ndescription\nstatus\ncreated_at\nupdated_at\n```\n\n## `code`\n\n正式确认：\n\n```text\nUNIQUE(code)\n```\n\n格式：\n\n```text\nlower_snake_case\n```\n\n例如：\n\n```text\nsuper_admin\ntrust_reviewer\ncustomer_support\nfinance_operator\n```\n\n数据库约束继续：\n\n```sql\ncode ~ '^[a-z][a-z0-9_]*$'\n```\n\n### `code` 生命周期\n\n正式锁死：\n\n> Role `code` 创建后视为稳定机器标识，不应随意修改。\n\n展示名称变化应修改：\n\n```text\nname\n```\n\n而不是修改：\n\n```text\ncode\n```\n\n---\n\n## Role 删除策略\n\nRole 不因为暂时不用就：\n\n```text\nDELETE FROM operations.roles\n```\n\n而是：\n\n```text\nstatus = disabled\n```\n\n最终状态仍然：\n\n```text\nactive\ndisabled\n```\n\n因此：\n\n```text\ndisabled Role\n→ 不参与有效权限计算\n→ 历史关系和 Audit 仍可追踪\n```\n\n不增加：\n\n```text\ndeleted_at\narchived\ninactive\nis_deleted\n```\n\n---\n\n# 3. `operations.operator_roles`\n\n最终字段：\n\n```text\noperator_id\nrole_id\ncreated_at\n```\n\n## PK\n\n保持：\n\n```text\nPRIMARY KEY (\n    operator_id,\n    role_id\n)\n```\n\n这已经同时实现：\n\n```text\n一个 Operator 不可能重复绑定同一个 Role。\n```\n\n不需要额外：\n\n```text\nid\nUNIQUE(operator_id, role_id)\n```\n\n---\n\n## FK\n\n这是 **Operations Domain 内部关系**，因此建立真实 FK：\n\n```text\noperator_id\n    → operations.operators.id\n\nrole_id\n    → operations.roles.id\n```\n\n这与跨 Domain logical reference 完全不同。\n\n建议：\n\n```text\nON DELETE RESTRICT\n```\n\n作为数据库最后一道保护。\n\n---\n\n## INDEX\n\n最终明确保留反向查询索引：\n\n```text\n(role_id, operator_id)\n```\n\n因为：\n\n```text\nPK(operator_id, role_id)\n```\n\n已经很好支持：\n\n```text\n查 Operator 有哪些 Roles\n```\n\n但不理想支持：\n\n```text\n查某 Role 有哪些 Operators\n```\n\n所以最终：\n\n```sql\nCREATE INDEX idx_operator_roles_role\nON operations.operator_roles (\n    role_id,\n    operator_id\n);\n```\n\n这是必要索引，不属于过度设计。\n\n---\n\n## 删除策略\n\n这一张和 Operators / Roles 不一样。\n\n关系被解绑时：\n\n```text\nDELETE operator_roles relation\n```\n\n是正确行为。\n\n也就是：\n\n```text\n绑定角色\n→ INSERT\n\n解绑角色\n→ DELETE\n```\n\n不需要：\n\n```text\nstatus\ndisabled_at\nrevoked_at\ndeleted_at\n```\n\n历史事实由：\n\n```text\noperator_audit_logs\n```\n\n记录。\n\n因此：\n\n> **实体不删除，当前授权关系可以删除。**\n\n---\n\n# 4. `operations.role_permissions`\n\n最终字段：\n\n```text\nrole_id\npermission_key\ncreated_at\n```\n\n## Permission Key\n\n格式继续正式锁定为：\n\n```text\n<domain>.<resource>.<action>\n```\n\n例如：\n\n```text\ntrust.cases.read\ntrust.cases.resolve\n\ntrust.enforcements.create\n\ncommerce.refunds.create\n\nrewards.grants.create\n\noperations.operator_roles.assign\n```\n\n格式统一：\n\n```text\nlower_snake_case\n```\n\n---\n\n## Permission dictionary table\n\n最终确认：\n\n```text\n❌ operations.permissions\n```\n\n**V1 不建立。**\n\n本会话此前已经明确采用：\n\n> Permission capability 由应用代码注册，数据库负责 Role 与 Permission Key 的配置关系。\n\n因此权限来源关系是：\n\n```text\nApplication Permission Registry\n            │\n            │ defines valid keys\n            ▼\noperations.role_permissions\n```\n\n不是：\n\n```text\noperations.permissions\n         ↓\nrole_permissions\n```\n\n应用层必须保证：\n\n```text\npermission_key\n∈\nApplication Permission Registry\n```\n\n数据库 CHECK 只负责验证格式，不负责判断该 permission 是否真实存在。\n\n---\n\n## FK\n\n只有 Domain 内：\n\n```text\nrole_id\n    → operations.roles.id\n```\n\n不存在：\n\n```text\npermission_key FK\n```\n\n因为没有 Permission dictionary table。\n\n---\n\n## 删除策略\n\nRole 撤销一个权限：\n\n```text\nDELETE role_permissions relation\n```\n\n正确。\n\n同样不需要关系状态。\n\n如果这个修改属于重要后台管理操作：\n\n```text\noperations.role_permissions.grant\noperations.role_permissions.revoke\n```\n\n另写 Audit Log。\n\n---\n\n# 5. `operations.operator_audit_logs`\n\n这张表现在正式定义为：\n\n> **后台管理动作的永久事实记录。**\n\n最终核心字段：\n\n```text\nid\noperator_id\naction_key\n\ntarget_domain\ntarget_type\ntarget_id\n\nrequest_id\nip_address\ndetails\n\ncreated_at\n```\n\n---\n\n# Audit append-only 正式锁死\n\n生命周期只有：\n\n```text\nINSERT\n```\n\n禁止业务代码：\n\n```text\nUPDATE operator_audit_logs\nDELETE operator_audit_logs\n```\n\n因此：\n\n```text\nAudit Log\n    → immutable\n    → append-only\n    → permanent fact\n```\n\n如果后来的动作撤销前面的动作：\n\n错误方式：\n\n```text\nUPDATE old audit log\n```\n\n正确方式：\n\n```text\n旧：\noperations.operator_roles.assign\n\n新：\noperations.operator_roles.revoke\n```\n\n两条记录都永久存在。\n\n---\n\n# Target 最终结构\n\n保持：\n\n```text\ntarget_domain\ntarget_type\ntarget_id\n```\n\n例如：\n\n```text\ntarget_domain = 'trust'\ntarget_type   = 'case'\ntarget_id     = <stable logical ID>\n```\n\n或者：\n\n```text\ntarget_domain = 'commerce'\ntarget_type   = 'refund'\ntarget_id     = <stable logical ID>\n```\n\n---\n\n## `target_id`\n\n最终语义：\n\n> 对方 Domain 业务实体的 stable logical ID。\n\n这里强调的是：\n\n```text\nstable logical identifier\n```\n\n而不是 Operations 自己拥有这个实体。\n\n因此：\n\n```text\nTrust case ID\nTrust decision ID\nTrust enforcement ID\nCommerce refund ID\nSocial profile ID\nChat conversation/message ID\nPlatform config entity ID\n```\n\nOperations 都只是记录其稳定 logical ID。\n\n---\n\n# 跨 Domain FK 明确禁止\n\nAudit Log 不建立：\n\n```text\ntarget_id\n    → trust.*\n    → social.*\n    → chat.*\n    → commerce.*\n    → platform.*\n```\n\n即：\n\n```text\ntarget_domain\ntarget_type\ntarget_id\n```\n\n全部构成：\n\n> **polymorphic logical reference**\n\n而不是数据库 FK。\n\n尤其禁止根据：\n\n```text\ntarget_domain = 'trust'\n```\n\n设计触发器动态验证外域 FK。\n\n那只会把领域彻底耦合起来。\n\n---\n\n# 最终 FK 边界图\n\nOperations Domain 内部：\n\n```text\noperations.operators\n        ▲\n        │ physical FK\n        │\noperations.operator_roles\n        │\n        │ physical FK\n        ▼\noperations.roles\n        ▲\n        │ physical FK\n        │\noperations.role_permissions\n```\n\n以及：\n\n```text\noperations.operators\n        ▲\n        │ physical FK\n        │\noperations.operator_audit_logs\n```\n\n这是允许的，因为全部属于：\n\n```text\noperations\n```\n\n同一 Domain。\n\n跨域：\n\n```text\noperators.auth_subject_id\n        │\n        └── logical reference → Identity\n\noperator_audit_logs.target_id\n        │\n        ├── logical reference → Trust\n        ├── logical reference → Social\n        ├── logical reference → Chat\n        ├── logical reference → Commerce\n        ├── logical reference → Rewards\n        └── logical reference → Platform\n```\n\n全部：\n\n```text\nNO PHYSICAL FK\n```\n\n---\n\n# Operations Audit 与 Trust 的最终职责划分\n\n这一条必须作为领域架构规则正式保存。\n\n## Trust 记录什么？\n\nTrust 保存的是：\n\n> **业务审核、判断和处罚事实。**\n\n例如：\n\n```text\n某个 case 是否成立\n审核 decision 是什么\n为什么作出该 decision\n采取了什么 enforcement\n处罚何时开始\n何时结束\n处罚状态是什么\n```\n\n概念上：\n\n```text\nTrust Case\n    ↓\nTrust Decision\n    ↓\nTrust Enforcement\n```\n\n这些属于业务事实。\n\n---\n\n# Operations Audit 记录什么？\n\nOperations 保存的是：\n\n> **哪个后台 Operator 在什么时间执行了什么后台管理动作。**\n\n例如：\n\n```text\noperator_123\n\n在 2026-08-30T05:20...\n\n执行：\n\ntrust.cases.resolve\n\n目标：\n\ntrust / case / xxx\n```\n\n它回答的是：\n\n> 谁动了系统？\n\n而 Trust 回答的是：\n\n> Trust 业务上发生了什么？\n\n两者完全不是一回事。\n\n---\n\n# 举例：Operator 处理 Trust Case\n\n假设管理员张三处理：\n\n```text\nTrust Case TC-1001\n```\n\n判断举报成立并执行处罚。\n\n## Trust Domain\n\n应该保存：\n\n```text\ntrust case\n    ↓\ndecision = violation_confirmed\n    ↓\nenforcement = account_suspension\n```\n\n包含相应：\n\n```text\nreason\ndecision\nduration\neffective_at\nexpires_at\nstatus\n```\n\n这是：\n\n> **业务事实。**\n\n---\n\n## Operations Domain\n\n同时写：\n\n```text\noperator_id   = op_xxx\naction_key    = trust.cases.resolve\n\ntarget_domain = trust\ntarget_type   = case\ntarget_id     = TC-1001\n\ncreated_at    = ...\n```\n\n如果随后又执行 Enforcement：\n\n```text\naction_key    = trust.enforcements.create\n\ntarget_domain = trust\ntarget_type   = enforcement\ntarget_id     = ENF-xxx\n```\n\n这是：\n\n> **操作轨迹。**\n\n---\n\n# 两者绝不能互相替代\n\n不能认为：\n\n```text\nAudit Log 里有 trust.enforcements.create\n```\n\n所以 Trust 不需要：\n\n```text\ntrust.enforcements\n```\n\n错误。\n\nOperations Audit 并不是业务状态来源。\n\n同样不能认为 Trust 已经有：\n\n```text\ncreated_by_operator_id\nreviewed_by_operator_id\n```\n\n所以 Operations 不需要 Audit。\n\n也错误。\n\n因为：\n\n```text\nTrust\n```\n\n只能告诉你业务事实中的某些责任主体。\n\n而 Operations Audit 可以完整记录：\n\n```text\n谁查看\n谁修改\n谁重新审核\n谁创建处罚\n谁撤销\n谁修改后台权限\n```\n\n两者关注维度不同。\n\n---\n\n# 最终职责关系\n\n正式锁死：\n\n```text\n┌───────────────────────────────┐\n│ Trust Domain                  │\n│                               │\n│ Case                          │\n│ Decision                      │\n│ Enforcement                   │\n│                               │\n│ = 业务审核 / 处罚事实          │\n└───────────────────────────────┘\n\n              ▲\n              │ Operator executes\n              │\n┌───────────────────────────────┐\n│ Operations Domain             │\n│                               │\n│ Operator                      │\n│ RBAC                          │\n│ Operator Audit                │\n│                               │\n│ = 谁执行了什么后台管理动作     │\n└───────────────────────────────┘\n```\n\n因此：\n\n> **Operations 记录轨迹；Trust 保存事实。**\n\n这是最终边界。\n\n---\n\n# 删除策略最终矩阵\n\n| 表 | 物理删除 | Soft delete | 正确策略 |\n|---|---:|---:|---|\n| `operators` | ❌ | ❌ | `status = disabled` |\n| `roles` | ❌ | ❌ | `status = disabled` |\n| `operator_roles` | ✅ | 不需要 | 解绑即删除关系 |\n| `role_permissions` | ✅ | 不需要 | 撤销权限即删除关系 |\n| `operator_audit_logs` | ❌ | ❌ | 永久 append-only |\n\n这里的“可删除”只表示：\n\n> 当前授权关系可以消失。\n\n而不是抹掉历史。\n\n历史永远通过：\n\n```text\noperator_audit_logs\n```\n\n保留。\n\n---\n\n# 最终 5 表确认\n\n| 表 | 核心职责 | FK 策略 |\n|---|---|---|\n| `operations.operators` | 后台运营主体 | Auth 使用 logical ID，无跨域 FK |\n| `operations.roles` | RBAC Role | 无跨域关系 |\n| `operations.operator_roles` | Operator ↔ Role | Operations 内 physical FK |\n| `operations.role_permissions` | Role ↔ Permission Key | Role 为 physical FK；Permission 由代码定义 |\n| `operations.operator_audit_logs` | 后台管理操作永久审计 | Operator 内域 FK；target 为跨域 logical reference |\n\n---\n\n# 全域审计后最终不可违反规则\n\n本轮最终把下面这些规则作为 **Operations Domain 定稿约束**：\n\n1. **Operations 最终保持 5 张表，不增加 Permission dictionary table。**\n2. `operators.auth_subject_id` 是 Identity/Auth stable logical ID，并保持 `UNIQUE`。\n3. `auth_subject_id` 不建立跨 Domain physical FK。\n4. Operators / Roles 都不物理删除，以 `disabled` 结束当前有效生命周期。\n5. Role `code` 必须 `UNIQUE + lower_snake_case`。\n6. `operator_roles` 使用 `PK(operator_id, role_id)`。\n7. `operator_roles` 保留反向索引 `(role_id, operator_id)`。\n8. Permission key 固定为 `<domain>.<resource>.<action>`。\n9. Permission 定义权属于代码 Registry，不属于数据库。\n10. Operator 只能通过 Role 获取 Permission。\n11. Audit Log 是永久、不可修改、不可删除的 append-only 事实。\n12. Audit target 使用 `target_domain + target_type + target_id`。\n13. `target_id` 是目标业务实体 stable logical ID。\n14. Audit target 对所有其他 Domain 均不建立 physical FK。\n15. **Trust Decision / Enforcement 是业务事实。**\n16. **Operations Audit 是后台操作轨迹。**\n17. Operator 操作 Trust 时，Operations 记录“谁做了什么”；Trust 继续保存 case / decision / enforcement 本身。\n18. 两个 Domain 不允许互相替代，也不复制对方完整业务模型。\n\n至此可以把 **Operations Domain 视为全域审计后的最终确认版**：**后台主体 + RBAC + immutable management audit**，同时严格维持与 Identity 和 Trust 等其他 Domain 的 logical-ID 边界。 memcite"
+    }
+  ]
+}

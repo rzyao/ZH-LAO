@@ -5,6 +5,7 @@ export default defineConfig({
   description: '中老双语学习与跨语言社交应用设计文档系统',
   lang: 'zh-CN',
   base: '/',
+  outDir: process.env.VP_OUTDIR || '.vitepress/dist',
   ignoreDeadLinks: false,
   themeConfig: {
     nav: [
@@ -67,7 +68,9 @@ export default defineConfig({
           { text: 'Rewards · 数据库总览', link: '/domains/rewards/database' },
           { text: 'Trust & Safety', link: '/domains/trust/' },
           { text: 'Operations', link: '/domains/operations/' },
-          { text: 'Platform', link: '/domains/platform/' }
+          { text: 'Operations · 数据库总览', link: '/domains/operations/database' },
+          { text: 'Platform', link: '/domains/platform/' },
+          { text: 'Platform · 数据库总览', link: '/domains/platform/database' }
         ]
       },
       {
@@ -98,7 +101,9 @@ export default defineConfig({
           { text: 'ADR-014 不新增 Notification 域', link: '/adr/ADR-014-no-notification-domain-events-outbox-infra' },
           { text: 'ADR-015 Chat 命名与 SQL 规范裁决', link: '/adr/ADR-015-chat-naming-and-sql-adjudication' },
           { text: 'ADR-016 Commerce 资金与只追加账本', link: '/adr/ADR-016-commerce-money-and-append-only-ledger' },
-          { text: 'ADR-017 Rewards 边界与事件驱动发放', link: '/adr/ADR-017-rewards-boundary-and-event-driven-grant' }
+          { text: 'ADR-017 Rewards 边界与事件驱动发放', link: '/adr/ADR-017-rewards-boundary-and-event-driven-grant' },
+          { text: 'ADR-018 全局数据库设计原则最终版', link: '/adr/ADR-018-global-database-design-principles-final' },
+          { text: 'ADR-019 Operations 后台控制平面', link: '/adr/ADR-019-operations-backoffice-control-plane' }
         ]
       }
     ],

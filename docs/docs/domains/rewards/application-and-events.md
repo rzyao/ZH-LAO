@@ -90,7 +90,7 @@ event_type → 查 reward_rules.trigger_event_type
 但绝不直接修改 learning.* / social.* / chat.* / commerce.*
 ```
 
-- **Outbox**：`learning.outbox_events` 属于 Learning 自己；Rewards 若未来发布 `REWARD_GRANTED / REWARD_DELIVERED`，用 `rewards.outbox_events`（基础设施事件表，不计入 5 张核心业务表）。项目级 Outbox 统一方式等所有域设计结束一并确定。
+- **Outbox（审计确认）**：Rewards **不建独立 outbox 表**（不建 `rewards.outbox_events` / `reward_outbox` / `reward_event_outbox`）。若 Rewards 需发布 `REWARD_GRANTED / REWARD_DELIVERED`，统一写入项目级基础设施 **`system_outbox_events`**（系统级可靠消息基础设施，不计入 5 张核心业务表），并与其本地事务同 COMMIT；Outbox 中保存的 aggregate / subject / event logical reference 用 `uuid`，不通过 FK 耦合 Reward 业务表。源域（如 Learning）发布事件给 Rewards 也走同一统一基础设施。
 
 ## 7. Delivery Worker
 
@@ -124,11 +124,11 @@ Delivery = SUCCEEDED       → 绝对禁止 VOID 收回资产 → Commerce Adjus
 Rewards → Commerce 只发业务合同：
 
 ```text
-beneficiary_user_id : 123
+beneficiary_user_id : 123（UUID logical reference）
 asset_type          : COIN
 amount              : 10
 source_domain       : REWARDS
-source_reference_id : {grant_no}
+source_reference_id : {grant_no}（UUID）
 idempotency_key     : reward:{grant_no}
 reason_code         : DAILY_LEARNING
 ```

@@ -69,11 +69,13 @@ reward_rules
 
 ## 明确不负责
 
-- 不维护 Wallet / 余额 / Ledger：`balance_before`、`balance_after`、`ledger_debit/credit` 全属 Commerce。
+- 不维护 Wallet / 余额 / Ledger：`balance_before`、`balance_after`、`ledger_debit/credit`、`coin_balance`、`wallet_balance`、`wallet_id`、`ledger_id` 全属 Commerce。
 - 不负责 Adjustment（人工/系统纠错）、Reversal（逆向冲正）、Refund（退款）。
 - 不负责 Gift：礼物商品、订单、购买、资产消耗仍属 Commerce。
 - 不反向查询 Learning / Social / Chat / Identity 的表来重新验证已发生的事件。
+- **不建独立 Outbox 表**（不建 `rewards.outbox_events` / `reward_outbox` / `reward_event_outbox`）：跨域事件统一走项目级 `system_outbox_events`。
 - V1 不建：`reward_wallets`、`reward_balances`、`reward_ledgers`、`reward_transactions`、`reward_orders`、`reward_products`、`reward_points`、`reward_user_counters`、`reward_claims`、`reward_tasks`、`reward_user_tasks`、`reward_badges`、`reward_levels`。未来确有需求时再判断是扩展 Rewards 还是新建 Domain。
+- **跨域引用规范**：同 Domain 内用 `BIGINT` PK/FK；跨 Domain 的业务/事件/用户/目标引用一律 `uuid` logical reference 且**不建 FK**（见 [数据库](database.md)「跨 Domain Logical Reference」）。
 
 ## 状态汇总（V1）
 

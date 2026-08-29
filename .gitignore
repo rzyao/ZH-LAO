@@ -13,6 +13,12 @@ build/
 **/.vitepress/dist/
 .vitepress/cache/
 **/.vitepress/cache/
+.vitepress/.temp/
+**/.vitepress/.temp/
+.vitepress/dist-build/
+**/.vitepress/dist-build/
+.vitepress/*.timestamp-*.mjs
+**/.vitepress/*.timestamp-*.mjs
 
 # Agent working data
 .workbuddy/

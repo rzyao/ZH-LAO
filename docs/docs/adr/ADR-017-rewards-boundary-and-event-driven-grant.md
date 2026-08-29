@@ -30,8 +30,8 @@ Rewards Domain（会话「设计奖励域」）需要确定：平台如何把「
 
 ## 影响
 
-- Rewards 5 张表业务/逻辑设计冻结，可进入建表与实现；本域不建跨域 FK 的写法与 Commerce 会话的倾向一致，但**全局跨域 FK 政策与主键类型仍随 D-077/D-078 由主架构会话统一裁决**，裁决前不得据此改动全局规范或其他域。
-- 若 Rewards 未来需发布 `REWARD_GRANTED/REWARD_DELIVERED`，使用 `rewards.outbox_events`（基础设施表，不计入 5 张核心表）；项目级 Outbox 统一方式待所有域设计结束一并确定（D-089）。
+- Rewards 5 张表业务/逻辑设计冻结，可进入建表与实现；**审计后跨域引用规范确定：同 Domain 内 `BIGINT` PK/FK，跨 Domain 的业务/事件/用户/目标引用一律 `uuid` logical reference 且不建 FK**。本域不建跨域 FK 的写法与 Commerce/Trust 会话倾向一致，但**全局跨域 FK 政策与主键类型仍随 D-077/D-078 由主架构会话统一裁决**，裁决前不得据此改动全局规范或其他域。
+- **Outbox（审计确认）**：Rewards 不建独立 outbox 表；如需发布 `REWARD_GRANTED/REWARD_DELIVERED`，统一使用项目级基础设施 `system_outbox_events`（不计入 5 张核心表），并与其本地事务同 COMMIT。
 - 权益型奖励（会员天数、Follow 额度、曝光等 Entitlement）与 POINT/EXP/BADGE/GIFT/COUPON 资产、Manual Reward Grant、按用户时区奖励均延后（见[未决事项](../governance/open-questions.md)）。
 - 旧「Contribution/Scoring（ContributionEvent、ScoreRecord）计分模型」被本决策取代，台账 D-017 标记 `superseded`。
 

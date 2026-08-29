@@ -1,6 +1,6 @@
 # 设计安全治理域
 
-_消息数：28　总字符：71979_
+_消息数：37　总字符：93005_
 
 
 ---
@@ -5450,3 +5450,1873 @@ appeals
 这次审计之后，我认为 **Trust & Safety Domain 可以正式冻结**。
 
 尤其是这几个修正值得保留：**删除 Report 自身状态、Evidence 类型/来源拆开、Decision 去掉重复时间、Enforcement `active → applied`、增加 `cancelled`、细化社交/聊天限制、以及用 `appeal_id` 保留处罚修改历史**。这样后面无论人工审核、AI 审核还是申诉复核，都不用重新推翻这套核心数据模型。
+
+
+---
+
+### [29] USER　status=finished_successfully
+
+请基于本会话已经完成的 Trust & Safety Domain 最终审计定稿，做一次**全域审计后的最终确认修订**。
+
+最终 6 张表保持：
+
+- trust.reports
+- trust.moderation\_cases
+- trust.moderation\_evidence
+- trust.moderation\_decisions
+- trust.enforcement\_actions
+- trust.appeals
+
+请重点补充以下跨域结论：
+
+1. `trust.reports` 从现在开始明确为：
+   **全系统唯一 canonical user report fact。**
+
+2. Social Domain 中原有 `social_reports` 将被删除。
+
+   - Social / Chat / Commerce 等 Domain 只提供举报入口。
+   - 最终举报事实统一写入 `trust.reports`。
+
+3. `trust.reports` 的 subject 必须继续使用多态 logical reference：
+
+   - subject\_domain / subject\_type / subject\_id
+   - subject\_id 为稳定 UUID logical ID
+   - 不对 Social / Chat / Commerce 等业务 Domain 建 physical FK。
+
+4. reporter\_user\_id 同样是 Identity logical UUID，不建跨域 FK。
+
+5. operator / moderator 引用 Operations logical ID，不建跨域 FK。
+
+6. Trust Domain 内部关系继续使用真实 FK，并保持：
+
+   - Report → max 1 Case
+   - Case → max 1 Decision
+   - Decision → N EnforcementActions
+   - Decision + appellant\_user → max 1 Appeal
+
+7. 删除策略：
+
+   - reports
+   - evidence
+   - decisions
+   - enforcement history
+   - appeal history
+     都属于审核/执法事实，不物理删除。
+
+8. 明确 Trust 的职责：
+
+   - Trust 记录举报、审核、裁决和处罚事实。
+   - Trust 不直接拥有 Social follow/block、Chat conversation、Commerce wallet 等业务数据。
+   - enforcement\_action 是处罚事实。
+   - 业务 Domain 根据处罚状态执行自己的访问控制/业务限制。
+   - 不通过直接修改远端数据库表实现处罚。
+
+9. `social_blocks` 不属于 Trust：
+
+   - 用户主动拉黑 = Social relationship fact。
+   - 平台 ban/suspend/restrict = Trust enforcement fact。
+
+10. Outbox：
+
+    - Trust 对外传播 enforcement 状态变化时使用统一 `system_outbox_events`。
+    - 不建立 Trust 专属 outbox 表。
+
+最后输出 Trust & Safety Domain 的最终 6 表确认版，并明确写入：
+**`trust.reports`****&#x20;是系统唯一举报事实源。**
+
+
+---
+
+### [30] SYSTEM　status=finished_successfully
+
+_(empty)_
+
+
+---
+
+### [31] ASSISTANT　status=finished_successfully
+
+_(empty)_
+
+
+---
+
+### [32] ASSISTANT　status=finished_successfully
+
+这次确认会把你刚补充的跨域原则直接提升为 **Trust & Safety Domain 的最终不可违反约束**。其中最重要的修订是：举报目标统一升级为 `subject_domain + subject_type + subject_id`，并把审核员/操作员引用统一改为 **Operations logical ID**，不再使用 Identity 用户 ID 表达后台审核身份。
+
+
+---
+
+### [33] ASSISTANT　status=finished_successfully
+
+_(empty)_
+
+
+---
+
+### [34] ASSISTANT　status=finished_successfully
+
+_(empty)_
+
+
+---
+
+### [35] ASSISTANT　status=finished_successfully
+
+另一个需要明确冻结的点：`social_blocks` 与平台处罚彻底分开。用户主动拉黑仍然只属于 Social；Trust 只记录平台级 `ban / suspend / restrict / content enforcement`，两者以后不能因为“都限制了某个人”而合并成同一张表。
+
+
+---
+
+### [36] ASSISTANT　status=finished_successfully
+
+_(empty)_
+
+
+---
+
+### [37] ASSISTANT　status=finished_successfully
+
+可以。这一轮不是再设计，而是把本会话已经完成的审计结果与刚补充的跨域结论合并，形成 **Trust & Safety Domain 最终确认版**。
+
+最核心的最终结论先冻结：
+
+> **`trust.reports` 是系统唯一举报事实源。**
+
+Social、Chat、Commerce 等 Domain 可以提供“举报按钮 / 举报 API 入口”，但**不得再各自持有 canonical report 表**。原 Social Domain 的 `social_reports` 删除，所有用户举报最终统一落到 `trust.reports`。
+
+---
+
+# 一、Trust & Safety Domain 最终边界
+
+最终仍然只有 6 张核心表：
+
+```text
+trust
+├── reports
+├── moderation_cases
+├── moderation_evidence
+├── moderation_decisions
+├── enforcement_actions
+└── appeals
+```
+
+整个治理链固定为：
+
+```text
+用户举报
+   │
+   ▼
+trust.reports
+   │
+   │ 0..1
+   ▼
+trust.moderation_cases
+   │
+   ├────────► trust.moderation_evidence
+   │
+   ▼
+trust.moderation_decisions
+   │
+   ├────────► trust.enforcement_actions
+   │
+   ▼
+trust.appeals
+```
+
+非用户举报产生的审核，例如：
+
+```text
+pre_publish
+manual_review
+automated_detection
+system_rule
+```
+
+可以直接产生：
+
+```text
+moderation_case
+```
+
+而**不会伪造一条 `trust.reports`**。
+
+因此：
+
+> `trust.reports` 是 canonical **user report fact**，不是所有风险检测事件的统一表。
+
+---
+
+# 二、跨域引用统一升级为 Logical Subject Reference
+
+之前的：
+
+```text
+subject_type
+subject_id
+```
+
+最终统一修订为：
+
+```text
+subject_domain
+subject_type
+subject_id
+```
+
+含义分别为：
+
+```text
+subject_domain  被举报对象属于哪个 Domain
+subject_type    该 Domain 中的稳定业务对象类型
+subject_id      该业务对象的稳定 UUID logical ID
+```
+
+例如：
+
+```text
+subject_domain = social
+subject_type   = social_post
+subject_id     = <UUID>
+```
+
+或者：
+
+```text
+subject_domain = chat
+subject_type   = chat_message
+subject_id     = <UUID>
+```
+
+用户本身：
+
+```text
+subject_domain = identity
+subject_type   = user
+subject_id     = <UUID>
+```
+
+这里的：
+
+```text
+subject_domain
+subject_type
+```
+
+都是**领域协议代码**，不是数据库：
+
+```text
+schema_name
+table_name
+```
+
+因此禁止使用类似：
+
+```text
+social.posts
+chat.messages
+commerce.orders
+```
+
+作为数据库定位方式。
+
+---
+
+# 三、跨域绝不建立 Physical FK
+
+例如：
+
+```text
+trust.reports.subject_id
+```
+
+如果：
+
+```text
+subject_domain = social
+subject_type   = social_post
+```
+
+逻辑上指向：
+
+```text
+Social Domain 中某个 Post UUID
+```
+
+但数据库中不得：
+
+```sql
+FOREIGN KEY (subject_id)
+REFERENCES social.posts(id)
+```
+
+同样：
+
+```text
+reporter_user_id
+```
+
+逻辑指向：
+
+```text
+Identity user UUID
+```
+
+但不得：
+
+```sql
+REFERENCES identity.users(id)
+```
+
+这是最终域边界。
+
+---
+
+# 四、后台审核人员统一引用 Operations Domain
+
+这一点同时修订上一版命名。
+
+以后 Trust 不再使用：
+
+```text
+assigned_reviewer_user_id
+decided_by_user_id
+reviewer_user_id
+```
+
+这种容易让人误以为审核员是普通 Identity User 的字段。
+
+统一改为 Operations logical ID：
+
+```text
+assigned_operator_id
+added_by_operator_id
+decided_by_operator_id
+reviewer_operator_id
+```
+
+逻辑引用：
+
+```text
+operations.operators.id
+```
+
+但仍然：
+
+> **不建立跨域物理 FK。**
+
+即：
+
+```text
+Trust → Operations
+```
+
+只通过 UUID logical reference。
+
+---
+
+# 五、`trust.reports` 最终确认
+
+## 职责
+
+唯一职责：
+
+> 保存用户提交的一次原始举报事实。
+
+因此最终继续保持不可变设计：
+
+```text
+没有 status
+没有 updated_at
+没有 reviewer
+没有 decision
+没有 punishment
+```
+
+## 最终字段
+
+```text
+id
+reporter_user_id
+
+subject_domain
+subject_type
+subject_id
+
+reason_code
+description
+
+created_at
+```
+
+推荐结构：
+
+```sql
+CREATE TABLE trust.reports (
+    id uuid PRIMARY KEY,
+
+    reporter_user_id uuid NOT NULL,
+
+    subject_domain varchar(32) NOT NULL,
+    subject_type varchar(32) NOT NULL,
+    subject_id uuid NOT NULL,
+
+    reason_code varchar(32) NOT NULL,
+    description text,
+
+    created_at timestamptz NOT NULL DEFAULT now()
+);
+```
+
+其中：
+
+```text
+reporter_user_id
+```
+
+= Identity logical UUID。
+
+```text
+subject_id
+```
+
+= 对应业务 Domain 的稳定 logical UUID。
+
+两者都：
+
+```text
+NO CROSS-DOMAIN FK
+```
+
+---
+
+# 六、Report Subject 约束
+
+`subject_domain` 建议使用明确白名单。
+
+当前至少：
+
+```text
+identity
+social
+chat
+commerce
+```
+
+以后如果 Rewards / Learning 等允许用户举报，再通过 migration 显式加入。
+
+`subject_type` 继续使用稳定领域类型，例如：
+
+```text
+identity:
+    user
+
+social:
+    social_profile
+    social_post
+    social_post_image
+
+chat:
+    conversation
+    chat_message
+```
+
+Commerce 的可举报对象则由 Commerce 与 Trust 的公共协议明确后加入。
+
+重要的是：
+
+> 不允许前端自己提交任意 `subject_domain / subject_type` 字符串然后直接写库。
+
+Application Service 必须验证它是 Trust 支持的合法 SubjectRef。
+
+---
+
+# 七、Report INDEX 最终版
+
+```sql
+CREATE INDEX idx_reports_reporter_created
+ON trust.reports (
+    reporter_user_id,
+    created_at DESC
+);
+
+CREATE INDEX idx_reports_subject_created
+ON trust.reports (
+    subject_domain,
+    subject_type,
+    subject_id,
+    created_at DESC
+);
+```
+
+没有：
+
+```text
+UNIQUE(reporter_user_id, subject...)
+```
+
+因为同一个用户可以在不同时间再次举报同一个对象。
+
+---
+
+# 八、`trust.moderation_cases` 最终确认
+
+## 职责
+
+统一承载全部正式审核工作流：
+
+```text
+user_report
+pre_publish
+manual_review
+automated_detection
+system_rule
+```
+
+## 最终字段
+
+```text
+id
+
+source_type
+report_id
+
+subject_domain
+subject_type
+subject_id
+
+priority
+status
+
+assigned_operator_id
+
+cancellation_code
+
+review_started_at
+closed_at
+
+created_at
+updated_at
+```
+
+其中：
+
+```text
+report_id
+```
+
+属于 Trust 内部关系，因此建立：
+
+```sql
+FOREIGN KEY (report_id)
+REFERENCES trust.reports(id)
+ON DELETE RESTRICT
+```
+
+`assigned_operator_id`：
+
+```text
+→ operations.operators.id logical reference
+```
+
+不建 FK。
+
+---
+
+# 九、Report → Case 最终基数
+
+最终冻结：
+
+```text
+Report → max 1 Case
+```
+
+数据库强制：
+
+```sql
+CREATE UNIQUE INDEX uq_moderation_cases_report
+ON trust.moderation_cases (report_id)
+WHERE report_id IS NOT NULL;
+```
+
+同时：
+
+```text
+source_type = user_report
+```
+
+必须：
+
+```text
+report_id IS NOT NULL
+```
+
+其他：
+
+```text
+pre_publish
+manual_review
+automated_detection
+system_rule
+```
+
+必须：
+
+```text
+report_id IS NULL
+```
+
+另外一个正式业务不变量：
+
+```text
+case.subject_domain = report.subject_domain
+case.subject_type   = report.subject_type
+case.subject_id     = report.subject_id
+```
+
+由 Trust Application Service 在同一事务内保证。
+
+---
+
+# 十、Case 状态最终保持
+
+```text
+queued
+in_review
+resolved
+cancelled
+```
+
+Priority：
+
+```text
+low
+normal
+high
+critical
+```
+
+仍然注意：
+
+> `priority` 是 varchar，不能直接依赖字符串 DESC 表达业务优先级。
+
+审核队列继续使用：
+
+```sql
+CASE priority
+    WHEN 'critical' THEN 4
+    WHEN 'high' THEN 3
+    WHEN 'normal' THEN 2
+    WHEN 'low' THEN 1
+END DESC
+```
+
+---
+
+# 十一、`trust.moderation_evidence` 最终确认
+
+## 职责
+
+保存：
+
+> Case / Appeal 审核过程中形成的不可变证据。
+
+最终字段：
+
+```text
+id
+
+case_id
+appeal_id
+
+evidence_type
+source_type
+
+content_text
+storage_key
+
+reference_domain
+reference_type
+reference_id
+
+metadata
+content_sha256
+
+captured_at
+
+submitted_by_user_id
+added_by_operator_id
+
+created_at
+```
+
+这里再做一次最终命名修订。
+
+上一版单独的：
+
+```text
+added_by_user_id
+```
+
+不够准确，因为证据可能由：
+
+```text
+普通用户
+运营审核员
+系统
+```
+
+分别加入。
+
+最终拆成两个明确字段：
+
+```text
+submitted_by_user_id
+added_by_operator_id
+```
+
+---
+
+# 十二、Evidence Actor 规则
+
+如果：
+
+```text
+source_type = reporter
+source_type = appellant
+```
+
+则：
+
+```text
+submitted_by_user_id IS NOT NULL
+added_by_operator_id IS NULL
+```
+
+其中 `submitted_by_user_id`：
+
+```text
+→ Identity logical UUID
+```
+
+如果：
+
+```text
+source_type = moderator
+```
+
+则：
+
+```text
+submitted_by_user_id IS NULL
+added_by_operator_id IS NOT NULL
+```
+
+其中：
+
+```text
+added_by_operator_id
+→ Operations logical UUID
+```
+
+如果：
+
+```text
+source_type = system
+domain_snapshot
+```
+
+则两个都 NULL。
+
+全部没有跨域 FK。
+
+---
+
+# 十三、Evidence Reference 也统一三元组
+
+之前：
+
+```text
+reference_type
+reference_id
+```
+
+最终和 Report 的建模风格统一：
+
+```text
+reference_domain
+reference_type
+reference_id
+```
+
+例如：
+
+```text
+reference_domain = chat
+reference_type   = chat_message
+reference_id     = UUID
+```
+
+仍然只是 logical reference。
+
+---
+
+# 十四、Evidence Type / Source 最终冻结
+
+Evidence Type：
+
+```text
+text_snapshot
+media_snapshot
+object_reference
+metadata_snapshot
+```
+
+Evidence Source：
+
+```text
+system
+domain_snapshot
+reporter
+appellant
+moderator
+```
+
+Evidence 继续保持：
+
+> append-only。
+
+禁止正常业务：
+
+```text
+UPDATE evidence
+DELETE evidence
+```
+
+出现新证据就 INSERT 新记录。
+
+---
+
+# 十五、Evidence Trust 内部 FK
+
+建立真实 FK：
+
+```text
+moderation_evidence.case_id
+        ↓
+moderation_cases.id
+```
+
+以及：
+
+```text
+moderation_evidence.appeal_id
+        ↓
+appeals.id
+```
+
+均：
+
+```text
+ON DELETE RESTRICT
+```
+
+---
+
+# 十六、`trust.moderation_decisions` 最终确认
+
+最终字段：
+
+```text
+id
+
+case_id
+
+outcome
+violation_code
+severity
+
+policy_code
+policy_version
+
+decision_method
+
+decided_by_operator_id
+
+rationale
+decided_at
+```
+
+注意字段正式改成：
+
+```text
+decided_by_operator_id
+```
+
+逻辑引用：
+
+```text
+operations.operators.id
+```
+
+不建 FK。
+
+---
+
+# 十七、Decision Method
+
+继续：
+
+```text
+human
+automated
+hybrid
+```
+
+规则：
+
+```text
+automated
+→ decided_by_operator_id IS NULL
+```
+
+```text
+human / hybrid
+→ decided_by_operator_id IS NOT NULL
+```
+
+---
+
+# 十八、Decision 最终基数
+
+冻结：
+
+```text
+Case → max 1 Decision
+```
+
+数据库：
+
+```sql
+UNIQUE (case_id)
+```
+
+因此：
+
+```text
+moderation_cases
+        │
+        │ 1 : 0..1
+        ▼
+moderation_decisions
+```
+
+原 Decision 永远不因申诉被覆盖。
+
+---
+
+# 十九、Decision 违规事实规则
+
+只有：
+
+```text
+outcome = violation
+```
+
+时才能建立平台正式违规事实。
+
+此时必须同时存在：
+
+```text
+violation_code
+severity
+policy_code
+policy_version
+```
+
+例如：
+
+```text
+outcome        = violation
+violation_code = harassment
+severity       = high
+policy_code    = SOCIAL_HARASSMENT
+policy_version = 2026-08
+```
+
+举报者的：
+
+```text
+reason_code
+```
+
+永远不能替代 Decision。
+
+---
+
+# 二十、`trust.enforcement_actions` 最终确认
+
+## 职责
+
+它表示：
+
+> 平台已经决定采取的安全处罚 / 安全限制事实及其生命周期。
+
+它**不是 Social / Chat / Identity 的业务状态表**。
+
+最终字段：
+
+```text
+id
+
+decision_id
+appeal_id
+
+action_type
+
+target_user_id
+
+subject_domain
+subject_type
+subject_id
+
+status
+
+effective_at
+expires_at
+applied_at
+ended_at
+
+status_reason_code
+
+created_at
+updated_at
+```
+
+---
+
+# 二十一、Enforcement Action Type 最终冻结
+
+```text
+warning
+content_remove
+content_restrict
+social_post_restrict
+chat_send_restrict
+account_suspend
+account_ban
+```
+
+这里已经不使用模糊的：
+
+```text
+social_restrict
+chat_restrict
+```
+
+而是使用消费者能够明确执行的治理命令。
+
+---
+
+# 二十二、用户级处罚与内容级处罚严格分离
+
+用户级：
+
+```text
+warning
+social_post_restrict
+chat_send_restrict
+account_suspend
+account_ban
+```
+
+必须：
+
+```text
+target_user_id IS NOT NULL
+subject_domain IS NULL
+subject_type IS NULL
+subject_id IS NULL
+```
+
+其中：
+
+```text
+target_user_id
+→ Identity logical UUID
+```
+
+没有 FK。
+
+内容级：
+
+```text
+content_remove
+content_restrict
+```
+
+必须：
+
+```text
+target_user_id IS NULL
+
+subject_domain IS NOT NULL
+subject_type IS NOT NULL
+subject_id IS NOT NULL
+```
+
+例如：
+
+```text
+subject_domain = social
+subject_type   = social_post
+subject_id     = UUID
+```
+
+---
+
+# 二十三、Enforcement 状态最终冻结
+
+```text
+pending
+applied
+expired
+revoked
+cancelled
+failed
+```
+
+语义保持：
+
+```text
+pending → 等待执行
+
+applied → 已成功执行
+
+expired → 有期限处罚自然到期
+
+revoked → 已执行，后来被主动撤销
+
+cancelled → 尚未执行就被取消
+
+failed → 执行失败
+```
+
+尤其正式冻结：
+
+```text
+pending → cancelled
+```
+
+和：
+
+```text
+applied → revoked
+```
+
+不能混用。
+
+---
+
+# 二十四、Decision → Enforcement 最终基数
+
+冻结：
+
+```text
+Decision → N EnforcementActions
+```
+
+数据库只建立：
+
+```sql
+FOREIGN KEY (decision_id)
+REFERENCES trust.moderation_decisions(id)
+ON DELETE RESTRICT
+```
+
+**绝不建立：**
+
+```text
+UNIQUE(decision_id)
+```
+
+一次违规决定完全可能产生：
+
+```text
+content_remove
++
+warning
++
+chat_send_restrict
++
+account_suspend
+```
+
+多个处罚动作。
+
+---
+
+# 二十五、Appeal 与 Enforcement
+
+`appeal_id` 继续保留。
+
+它允许表达：
+
+```text
+原 Enforcement
+        ↓
+Appeal
+        ↓
+原处罚 revoked
+        +
+新的替代 Enforcement
+```
+
+不能通过直接：
+
+```sql
+UPDATE expires_at
+```
+
+把原来的：
+
+```text
+30 days
+```
+
+悄悄改成：
+
+```text
+7 days
+```
+
+而丢失处罚历史。
+
+---
+
+# 二十六、`trust.appeals` 最终确认
+
+最终字段：
+
+```text
+id
+
+decision_id
+appellant_user_id
+
+reason
+
+status
+resolution
+
+reviewer_operator_id
+resolution_note
+
+submitted_at
+review_started_at
+closed_at
+
+updated_at
+```
+
+这里正式把：
+
+```text
+reviewer_user_id
+```
+
+改为：
+
+```text
+reviewer_operator_id
+```
+
+逻辑引用：
+
+```text
+operations.operators.id
+```
+
+无物理 FK。
+
+`appellant_user_id`：
+
+```text
+Identity logical UUID
+```
+
+同样无物理 FK。
+
+---
+
+# 二十七、Appeal 基数最终冻结
+
+数据库：
+
+```sql
+UNIQUE (
+    decision_id,
+    appellant_user_id
+)
+```
+
+因此：
+
+```text
+Decision + appellant_user
+             ↓
+        max 1 Appeal
+```
+
+这是 V1 正式规则。
+
+如果以后真的支持：
+
+```text
+一审申诉
+二审申诉
+外部人工复核
+```
+
+再新增明确的 Appeal Review 模型，而不是现在放开重复申诉。
+
+---
+
+# 二十八、Appeal Status / Resolution
+
+Status：
+
+```text
+submitted
+under_review
+resolved
+withdrawn
+```
+
+Resolution：
+
+```text
+denied
+partially_granted
+granted
+```
+
+仍然遵守：
+
+> Appeal 的结果不会修改原始 `moderation_decisions`。
+
+---
+
+# 二十九、Trust 内部所有 Physical FK 最终表
+
+只有下面这些属于真正 PostgreSQL FK：
+
+```text
+moderation_cases.report_id
+    → reports.id
+
+moderation_evidence.case_id
+    → moderation_cases.id
+
+moderation_evidence.appeal_id
+    → appeals.id
+
+moderation_decisions.case_id
+    → moderation_cases.id
+
+enforcement_actions.decision_id
+    → moderation_decisions.id
+
+enforcement_actions.appeal_id
+    → appeals.id
+
+appeals.decision_id
+    → moderation_decisions.id
+```
+
+全部：
+
+```text
+ON DELETE RESTRICT
+```
+
+无：
+
+```text
+ON DELETE CASCADE
+```
+
+---
+
+# 三十、跨域 Logical ID 最终表
+
+| Trust 字段 | 逻辑来源 | Physical FK |
+|---|---|---:|
+| `reporter_user_id` | Identity | ❌ |
+| `subject_id` | Identity / Social / Chat / Commerce 等 | ❌ |
+| `assigned_operator_id` | Operations | ❌ |
+| `submitted_by_user_id` | Identity | ❌ |
+| `added_by_operator_id` | Operations | ❌ |
+| `reference_id` | 其他业务 Domain | ❌ |
+| `decided_by_operator_id` | Operations | ❌ |
+| `target_user_id` | Identity | ❌ |
+| `appellant_user_id` | Identity | ❌ |
+| `reviewer_operator_id` | Operations | ❌ |
+
+这条以后不要再改。
+
+---
+
+# 三十一、删除策略最终冻结
+
+以下都是治理 / 审计 / 执法事实：
+
+```text
+trust.reports
+trust.moderation_evidence
+trust.moderation_decisions
+trust.enforcement_actions
+trust.appeals
+```
+
+正常业务：
+
+```text
+不得物理 DELETE
+```
+
+它们通过状态和补充记录表示历史变化。
+
+`moderation_cases` 虽然属于工作流实体，而不是纯事实事件，但由于：
+
+```text
+Report
+Evidence
+Decision
+```
+
+都会形成对它的审计链，因此同样：
+
+> **正常业务不物理删除 Case。**
+
+整个 Trust Domain 最终可以按照：
+
+```text
+audit-retained
+```
+
+处理。
+
+数据保留期限如果未来受隐私法规要求影响，应由独立数据保留策略处理，而不是业务代码随意 DELETE。
+
+---
+
+# 三十二、`social_reports` 正式删除
+
+这一点现在正式写入跨域定稿：
+
+```text
+social.social_reports
+```
+
+或者原 Social Domain 中任何同职责的：
+
+```text
+social_reports
+post_reports
+profile_reports
+```
+
+**全部不再作为最终设计存在。**
+
+Social 只负责：
+
+```text
+用户点击举报
+        ↓
+校验 Social 对象存在/权限
+        ↓
+调用 Trust 举报能力
+        ↓
+trust.reports
+```
+
+Chat：
+
+```text
+举报消息 / 会话
+        ↓
+trust.reports
+```
+
+Commerce：
+
+```text
+举报相关商业对象
+        ↓
+trust.reports
+```
+
+因此：
+
+> **不存在“Social 举报事实”和“Trust 举报事实”两套数据。**
+
+---
+
+# 三十三、Trust 不拥有 `social_blocks`
+
+正式冻结：
+
+```text
+social_blocks ≠ enforcement_actions
+```
+
+## 用户主动拉黑
+
+例如：
+
+> A 不想再看到 B。
+
+这是：
+
+```text
+Social relationship fact
+```
+
+属于 Social Domain：
+
+```text
+social_blocks
+```
+
+它表达：
+
+```text
+user A blocks user B
+```
+
+不是平台处罚。
+
+---
+
+## 平台 Ban / Suspend / Restrict
+
+例如：
+
+> 平台禁止 B 发动态 7 天。
+
+这是：
+
+```text
+Trust enforcement fact
+```
+
+属于：
+
+```text
+trust.enforcement_actions
+```
+
+表达：
+
+```text
+social_post_restrict
+account_suspend
+account_ban
+...
+```
+
+两者永远不能合并。
+
+简单来说：
+
+```text
+用户说：
+“我不想和他互动”
+        ↓
+Social Block
+
+
+平台说：
+“你不能继续使用某项能力”
+        ↓
+Trust Enforcement
+```
+
+---
+
+# 三十四、Trust 绝不拥有远端业务数据
+
+Trust 不拥有：
+
+```text
+Social follow
+Social block
+Social match
+Social posts
+
+Chat conversation
+Chat messages
+
+Commerce orders
+Commerce wallet
+Commerce ledger
+
+Rewards balance
+Rewards rules
+
+Identity account
+```
+
+Trust 只拥有：
+
+```text
+举报事实
+审核案件
+审核证据
+审核决定
+处罚事实
+申诉事实
+```
+
+---
+
+# 三十五、Enforcement 不通过跨库 UPDATE 执行
+
+这个规则现在正式升级为不可违反架构原则。
+
+禁止：
+
+```sql
+-- Trust service
+
+UPDATE social.posts ...
+UPDATE chat.users ...
+UPDATE identity.users ...
+UPDATE commerce.wallets ...
+```
+
+Trust 不能因为做出了处罚决定，就直接侵入别的 Domain 数据库表。
+
+正确结构：
+
+```text
+Trust
+ │
+ │ enforcement state changed
+ ▼
+system_outbox_events
+ │
+ ├─────────► Identity
+ ├─────────► Social
+ └─────────► Chat
+```
+
+业务 Domain 根据收到的治理状态变化：
+
+> **自己执行本域访问控制或业务限制。**
+
+---
+
+# 三十六、共享 Outbox 最终确认
+
+Trust **不建立**：
+
+```text
+trust.outbox_events
+trust.enforcement_outbox
+trust_event_outbox
+```
+
+统一使用已经确定的系统级：
+
+```text
+system_outbox_events
+```
+
+Trust 对外传播的重点事件可以包括：
+
+```text
+enforcement.applied
+enforcement.expired
+enforcement.revoked
+enforcement.cancelled
+```
+
+以及必要时：
+
+```text
+enforcement.failed
+```
+
+事件负载至少可以携带：
+
+```text
+enforcement_action_id
+decision_id
+
+action_type
+status
+
+target_user_id
+或
+subject_domain
+subject_type
+subject_id
+
+effective_at
+expires_at
+```
+
+消费者依靠稳定的：
+
+```text
+enforcement_action_id
+```
+
+进行幂等处理。
+
+---
+
+# 三十七、Outbox 与业务事务规则
+
+例如 Trust 执行：
+
+```text
+enforcement_action:
+pending → applied
+```
+
+在同一个本地数据库事务中：
+
+```text
+UPDATE trust.enforcement_actions
+        +
+INSERT system_outbox_events
+```
+
+然后异步发布：
+
+```text
+Trust Enforcement Event
+```
+
+而不是：
+
+```text
+先 UPDATE Trust
+↓
+HTTP 调 Social
+↓
+HTTP 调 Chat
+↓
+其中一个失败
+```
+
+造成分布式半完成状态。
+
+因此：
+
+> `system_outbox_events` 是跨 Domain 状态传播基础设施，但不是 Trust Domain 第 7 张业务表。
+
+最终 Trust 核心表仍然只有 6 张。
+
+---
+
+# 三十八、全域关系最终冻结
+
+```text
+                    ┌────────────────────┐
+User Report ───────►│   trust.reports    │
+                    └─────────┬──────────┘
+                              │ 0..1
+                              ▼
+                    ┌────────────────────┐
+Automated ─────────►│ moderation_cases   │◄──────── Pre-publish
+Manual ────────────►│                    │
+                    └──────┬───────┬─────┘
+                           │       │
+                           │       │ 0..1
+                           │       ▼
+                           │  ┌──────────────────────┐
+                           │  │ moderation_decisions │
+                           │  └──────────┬───────────┘
+                           │             │
+                           │             │ 0..N
+                           ▼             ▼
+               ┌─────────────────┐ ┌─────────────────────┐
+               │moderation_      │ │ enforcement_actions │
+               │evidence         │ └──────────┬──────────┘
+               └─────────────────┘            │
+                                              │ state events
+                                              ▼
+                                    system_outbox_events
+                                              │
+                              ┌───────────────┼───────────────┐
+                              ▼               ▼               ▼
+                           Identity         Social           Chat
+
+
+moderation_decisions
+        │
+        │ 0..N users
+        ▼
+┌────────────────────┐
+│ trust.appeals      │
+└────────────────────┘
+
+UNIQUE(decision_id, appellant_user_id)
+```
+
+---
+
+# 三十九、最终 6 表确认清单
+
+| 表 | 最终职责 | 删除策略 |
+|---|---|---|
+| `trust.reports` | **全系统唯一用户举报事实源** | 不物理删除 |
+| `trust.moderation_cases` | 所有正式审核工作流 | 正常业务不物理删除 |
+| `trust.moderation_evidence` | 不可变审核/申诉证据 | 不物理删除、不覆盖 |
+| `trust.moderation_decisions` | 不可变审核裁决事实 | 不物理删除、不覆盖 |
+| `trust.enforcement_actions` | 平台处罚事实及生命周期 | 保留完整历史 |
+| `trust.appeals` | 用户申诉与复核历史 | 不物理删除 |
+
+---
+
+# 四十、最终不可违反的跨域原则
+
+现在可以把整个 Trust & Safety Domain 最终压缩成这些规则：
+
+1. **`trust.reports` 是系统唯一举报事实源。**
+2. Social / Chat / Commerce 等 Domain 只有举报入口，不拥有第二套举报事实。
+3. 原 Social `social_reports` 删除。
+4. 举报目标统一使用 `subject_domain + subject_type + subject_id`。
+5. `subject_id` 必须是业务 Domain 稳定 UUID logical ID。
+6. 所有跨域 SubjectRef 不建立 Physical FK。
+7. `reporter_user_id / appellant_user_id / target_user_id` 是 Identity logical UUID，不建 FK。
+8. 所有 moderator / reviewer / operator 字段引用 `operations.operators.id` logical UUID，不建 FK。
+9. Trust 内部实体之间继续使用真实 PostgreSQL FK。
+10. `Report → max 1 Case`。
+11. `Case → max 1 Decision`。
+12. `Decision → N EnforcementActions`。
+13. `Decision + appellant_user → max 1 Appeal`。
+14. Report / Evidence / Decision / Enforcement history / Appeal history 不物理删除。
+15. Trust 不拥有 Social Follow / Block / Match。
+16. 用户主动 Block 是 Social Relationship Fact。
+17. 平台 Ban / Suspend / Restrict 是 Trust Enforcement Fact。
+18. Trust 不拥有 Chat Conversation / Message。
+19. Trust 不拥有 Commerce Wallet / Ledger / Order。
+20. `enforcement_action` 表示平台处罚事实，不表示远端业务表状态。
+21. 业务 Domain 根据 Enforcement 状态自己实施访问控制。
+22. Trust 禁止直接修改其他 Domain 的数据库表。
+23. 跨域处罚传播统一通过 `system_outbox_events`。
+24. 不建立 Trust 专属 Outbox。
+
+至此，这一版可以作为 **Trust & Safety Domain 全域审计后的最终确认定稿**。
+
+最重要的架构结论正式写死：
+
+> **`trust.reports` 是系统唯一举报事实源。**
+
+以后无论用户从 Social 动态、资料、Chat 消息、会话还是 Commerce 入口点击举报，入口可以属于各业务 Domain，**举报事实最终只有一份，并且只能存在于 `trust.reports`。**

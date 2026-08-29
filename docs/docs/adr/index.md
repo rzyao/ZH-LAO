@@ -19,5 +19,7 @@
 | [ADR-015](ADR-015-chat-naming-and-sql-adjudication.md) | Chat 命名统一与 SQL 规范裁决 | `frozen` |
 | [ADR-016](ADR-016-commerce-money-and-append-only-ledger.md) | Commerce 独占资金事实，虚拟币钱包与只追加账本 | `frozen` |
 | [ADR-017](ADR-017-rewards-boundary-and-event-driven-grant.md) | Rewards 独占奖励决定，事件驱动与幂等发放 | `frozen` |
+| [ADR-018](ADR-018-global-database-design-principles-final.md) | 全局数据库设计原则最终版（混合主键 / 跨域 logical UUID / canonical fact 单一归属 / 统一删除策略 / Infra 边界） | `frozen` |
+| [ADR-019](ADR-019-operations-backoffice-control-plane.md) | Operations 为后台控制平面（运营主体 + RBAC + 不可变操作审计，代码定义权限） | `frozen` |
 
 ADR 记录长期取舍；字段和业务规格仍以对应领域文档为唯一事实源。

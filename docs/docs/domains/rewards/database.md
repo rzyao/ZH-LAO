@@ -38,10 +38,23 @@ reward_events → reward_rules → reward_programs
 | 时间 `timestamptz` | 一致 |
 | 状态 `varchar + CHECK` | 一致，不使用 PostgreSQL ENUM |
 | JSONB 只存动态配置 | `condition_config` / `limit_config` / `payload` 属真正动态数据 |
-| 保留 FK | 域内 FK 保留（program_id/rule_id/event_id/grant_id） |
-| **跨 Schema FK** | **本域不建任何跨域 FK**：`subject_user_id`、`user_id` 不指向 `identity.*`，`source_reference_id` 不指向 `learning/social/chat.*`，`target_reference_id` 不指向 `commerce.*`——一律为逻辑业务引用。这与 Commerce 会话「跨域不建 FK」的倾向一致，但全局跨域 FK 政策仍随台账 D-077/D-078 由主会话裁决，本域不因该裁决改动 | 
-| `public_id` 策略 | 本域不叫 `public_id`，跨域稳定 ID 是 `grant_no uuid`；Commerce 记录 `source_domain=REWARDS` + `source_reference_id=grant_no` |
-| Outbox | 不属本 5 张核心业务表；若 Rewards 未来发布 `REWARD_GRANTED/REWARD_DELIVERED`，可使用 `rewards.outbox_events`（基础设施表），项目级统一方式待所有域设计结束一并确定 |
+| 保留 FK | 域内 FK 保留（program_id/rule_id/event_id/grant_id），全部 `ON DELETE RESTRICT` |
+| **跨 Schema FK** | **本域不建任何跨域 FK**。审计后统一规则：**同 Domain 内用 `BIGINT` PK/FK；凡跨 Domain 的业务/事件/用户/目标引用一律用 `uuid` logical reference 且不建 FK**。详见下节「跨 Domain Logical Reference」 |
+| `public_id` 策略 | 本域不叫 `public_id`；跨域稳定 ID 是 `grant_no uuid`；Commerce 记录 `source_domain=REWARDS` + `source_reference_id=grant_no` |
+| Outbox | **Rewards 不建独立 outbox 表**（不建 `rewards.outbox_events` / `reward_outbox` / `reward_event_outbox`）。如需发布 `REWARD_GRANTED/REWARD_DELIVERED` 等跨域事件，统一使用项目级基础设施 `system_outbox_events`（系统级可靠消息基础设施，不计入 5 张业务表），其中保存的 logical reference 继续用 `uuid`、不通过 FK 耦合 Reward 业务表 |
+
+## 跨 Domain Logical Reference（审计确认版）
+
+| Rewards 字段 | 类型 | 指向 | FK |
+| --- | --- | --- | --- |
+| `reward_events.source_event_id` | `uuid` | 源 Domain Event | **无** |
+| `reward_events.subject_user_id` | `uuid` | User logical ID | **无** |
+| `reward_events.source_reference_id` | `uuid` | 源 Domain 业务对象 | **无** |
+| `reward_grants.user_id` | `uuid` | User logical ID | **无** |
+| `reward_grants.grant_no` | `uuid` | Rewards 对外 Grant ID | — |
+| `reward_deliveries.target_reference_id` | `uuid` | Commerce 返回的业务 ID | **无** |
+
+Rewards 内部关系（`reward_rules.program_id`、`reward_grants.program_id/rule_id/event_id`、`reward_deliveries.grant_id`）继续使用 **`BIGINT` 内部 FK**。禁止 `subject_user_id → identity.*`、`source_reference_id → learning/social/chat.*`、`source_event_id → system_outbox_events`、`target_reference_id → commerce.*` 等跨域 FK。
 
 ## 1. `rewards.reward_programs`
 
@@ -83,6 +96,8 @@ ACTIVE ◄───► PAUSED
 - `PAUSED`：临时停止产生新奖励；已产生 Grant 不受影响。
 - `ENDED`：活动结束，不能回到 ACTIVE；**晚到 Event 若 `occurred_at` 落于历史有效窗口内，仍可按历史规则处理**。
 - `ARCHIVED`：管理只读归档，不改变历史事实。
+
+> 审计确认：**不新增 `INACTIVE` 状态**——`PAUSED` / `ENDED` / `ARCHIVED` 已分别表达不同 inactive 语义，避免重复状态。
 
 ## 2. `rewards.reward_rules`
 
@@ -168,12 +183,12 @@ Rewards 的**入站边界表**：记录其他 Domain 已确认发生的、Reward
 | --- | --- | ---: | --- |
 | `id` | `bigint generated always as identity` | NO | PK |
 | `source_domain` | `varchar(32)` | NO | 来源领域（如 `LEARNING`、`SOCIAL`、`IDENTITY`、`CHAT`、`COMMERCE`），仅为来源声明 |
-| `source_event_id` | `varchar(128)` | NO | 源事件唯一 ID（第一层幂等） |
+| `source_event_id` | `uuid` | NO | 跨 Domain Event 唯一 ID（UUID logical reference，第一层幂等） |
 | `event_type` | `varchar(64)` | NO | 事件类型（如 `LEARNING_DAILY_GOAL_COMPLETED`、`PROFILE_COMPLETED`、`INVITE_SUCCEEDED`） |
 | `event_version` | `integer` | NO | Event Schema 版本，`> 0` |
-| `subject_user_id` | `bigint` | NO | 奖励判定主体的逻辑用户 ID（**无 FK → identity.***） |
+| `subject_user_id` | `uuid` | NO | 跨 Domain User logical ID（UUID logical reference，**无 FK → identity.***） |
 | `source_reference_type` | `varchar(64)` | YES | 源业务对象类型（审计用，无 FK） |
-| `source_reference_id` | `varchar(128)` | YES | 源业务对象 ID（审计用，无 FK） |
+| `source_reference_id` | `uuid` | YES | 源业务对象 logical ID（UUID logical reference，审计用，无 FK） |
 | `occurred_at` | `timestamptz` | NO | 业务实际发生时间（**奖励周期唯一时间轴**） |
 | `payload` | `jsonb` | NO | 判定所需最小事件数据 |
 | `processing_status` | `varchar(16)` | NO | 处理状态 |
@@ -248,7 +263,7 @@ PROCESSING
 
 ## 4. `rewards.reward_grants`
 
-Rewards 的**核心业务事实表**：一条记录 = 一个正式奖励决定（“已决定给用户 100 Coin”）。它不是 Wallet Ledger，不代表资产已到账。
+Rewards 的**核心业务事实表**：一条记录 = 一个正式奖励决定。**正式语义：RewardGrant 是「奖励权益事实」——Rewards 已决定该用户拥有获得这些 Coin 的权益；它不是 Wallet Ledger，也不代表资产最终到账。** 资产是否真正入账以 Commerce Ledger 为准（Grant=GRANTED 且 Delivery 可能仍 RETRY_WAIT，此时不能宣称“已到账”）。
 
 | 字段 | 类型 | Null | 说明 |
 | --- | --- | ---: | --- |
@@ -257,7 +272,7 @@ Rewards 的**核心业务事实表**：一条记录 = 一个正式奖励决定�
 | `program_id` | `bigint` | NO | FK → reward_programs.id |
 | `rule_id` | `bigint` | NO | FK → reward_rules.id（指向产生该 Grant 的 Rule Version） |
 | `event_id` | `bigint` | **NO** | FK → reward_events.id（最终定稿为 NOT NULL：V1 不开放无来源 Manual Grant） |
-| `user_id` | `bigint` | NO | 获奖用户逻辑 ID（**无 FK → identity.***） |
+| `user_id` | `uuid` | NO | 跨 Domain User logical ID（UUID logical reference，**无 FK → identity.***） |
 | `reward_type` | `varchar(32)` | NO | 奖励类型（V1 `COIN`） |
 | `reward_amount` | `bigint` | NO | 奖励数量，`> 0` |
 | `reason_code` | `varchar(64)` | NO | 奖励原因快照（如 `DAILY_CHECK_IN`） |
@@ -327,7 +342,7 @@ CREATE INDEX idx_reward_grants_event ON rewards.reward_grants(event_id);
 | `attempt_count` | `integer` | NO | 调用目标域次数，`>= 0` |
 | `processing_started_at` | `timestamptz` | YES | 本轮 PROCESSING 开始时间（Worker 租约/崩溃恢复） |
 | `next_retry_at` | `timestamptz` | YES | 下次重试时间 |
-| `target_reference_id` | `varchar(128)` | YES | 下游返回的业务引用（Commerce 的 transaction reference，仅追踪/审计用） |
+| `target_reference_id` | `uuid` | YES | Commerce 返回的稳定业务 logical reference（UUID，仅追踪/审计用） |
 | `last_error_code` | `varchar(64)` | YES | 最近错误码 |
 | `last_error_message` | `text` | YES | 最近错误 |
 | `delivered_at` | `timestamptz` | YES | 实际成功时间 |
