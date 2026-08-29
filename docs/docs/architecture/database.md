@@ -55,9 +55,16 @@ commerce  rewards   trust   operations platform
 | `learning` | `frozen` | 43 张必建表、核心字段与约束已冻结；跨域 Media FK 与内容发布机制局部待定。 |
 | `social` | `frozen` | 20 张首期表已冻结；公开内容字段局部 `designing`。 |
 | `chat` | `frozen` | Chat 第一阶段 7 张表定稿；物理 DDL（跨域用户 FK、Media FK、`public_id` 生成算法）为 `designing` |
-| 其余六个 | `baseline` | `designing`，不得从实体名自动生成表 |
+| `commerce` | `frozen`（V1 逻辑） | 16 张业务表表级/字段级 `frozen`；**物理约定与全局规范冲突，`designing`**（见下）；会员/Subscription/Entitlement 落表 `deferred` |
+| 其余四个 | `baseline` | `designing`，不得从实体名自动生成表 |
 
-详见 [Identity 数据库](../domains/identity/database.md)、[Learning 数据库](../domains/learning/database.md)、[Social 数据库](../domains/social/database.md) 与 [Chat 数据库](../domains/chat/database.md)。
+详见 [Identity 数据库](../domains/identity/database.md)、[Learning 数据库](../domains/learning/database.md)、[Social 数据库](../domains/social/database.md)、[Chat 数据库](../domains/chat/database.md) 与 [Commerce 数据库](../domains/commerce/database.md)。
+
+## 跨域物理约定冲突（待主会话裁决）
+
+Commerce V1 会话以 `uuid` 主键、跨域不建 FK 给出 DDL，并假设「整个项目一直采用 UUID」。这与本页规范第 3 条（`bigint generated always as identity`，不使用 UUID）、第 11/12 条（保留 FK、允许跨 Schema FK）冲突；Chat 亦已在 [ADR-015](../adr/ADR-015-chat-naming-and-sql-adjudication.md) 就同类偏差裁决为「主键回归 identity」。Identity/Learning/Social/Chat 四域当前实际均为 `bigint identity`。
+
+因此全项目**主键类型（bigint identity vs UUID）与跨域引用是否建物理 FK** 是一个尚未统一、由主架构会话裁决的问题（见 [未决事项](../governance/open-questions.md)、台账 D-077/D-078）。Commerce 的业务模型、表清单与字段语义不受影响、保持 `frozen`；在其物理 DDL 与其余四域对齐之前，本页十二项规范不作改动，也不得把 Commerce 的 `uuid`/无 FK 写法当作新的全局标准推广到其他域。
 
 ## 域命名与表名
 

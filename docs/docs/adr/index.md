@@ -17,5 +17,6 @@
 | [ADR-013](ADR-013-read-state-as-cursor-not-receipt-table.md) | 已读游标而非 Receipt 表 | `frozen` |
 | [ADR-014](ADR-014-no-notification-domain-events-outbox-infra.md) | 不新增 Notification 域，事件走 Outbox | `baseline` |
 | [ADR-015](ADR-015-chat-naming-and-sql-adjudication.md) | Chat 命名统一与 SQL 规范裁决 | `frozen` |
+| [ADR-016](ADR-016-commerce-money-and-append-only-ledger.md) | Commerce 独占资金事实，虚拟币钱包与只追加账本 | `frozen` |
 
 ADR 记录长期取舍；字段和业务规格仍以对应领域文档为唯一事实源。

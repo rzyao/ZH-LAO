@@ -55,3 +55,24 @@ last_updated: 2026-08-30
 | 索引设计 | 两条主动索引、UNIQUE 自带索引、明确不建的四个索引 | [Chat 数据库](../domains/chat/database.md) |
 | 总审查与定稿 | 7 张表定稿、删除 member.status、新增 sender member 复合 FK、明确不建表清单 | [Chat 数据库](../domains/chat/database.md) |
 | 全局规范差异 | 表名/枚举类型/主键生成方式/`public_id` 四项裁决：枚举回归 `varchar(32)+CHECK`、主键回归 `identity`、补 `public_id`、表名 `chat_*` 为已裁决例外 | [Chat 数据库](../domains/chat/database.md)、[ADR-015](../adr/ADR-015-chat-naming-and-sql-adjudication.md) |
+
+## “设计 Commerce Domain”会话
+
+来源：`6a933931-27f8-83ea-9df3-b054d2bca5fe`（分享 URL 同名），共 69 条消息。会话从领域边界出发，按 Product → Price → Gift → Wallet → Ledger → Order → Payment → GiftSend → Refund 逐张设计，以“把所有表都定稿”收尾，产出 **Commerce Schema V1 冻结版（16 张业务表）**。
+
+| 会话阶段 | 已覆盖内容 | 文档 |
+| --- | --- | --- |
+| Commerce 边界与资金真相 | 不让 Social/Chat 处理钱；Chat 送礼只展示；账务真相归 Commerce | [ADR-016](../adr/ADR-016-commerce-money-and-append-only-ledger.md)、[Commerce](../domains/commerce/index.md) |
+| 虚拟币钱包模型 | 真钱充值→Coins→送礼消费；V1 单资产、无冻结、无分桶 | [Commerce](../domains/commerce/index.md)、[Commerce 数据库](../domains/commerce/database.md) |
+| 五大内部模块与 16 表清单 | Catalog/Ordering/Payment/Wallet/Gifting；Refund 归入 Payment 组落 2 表 | [Commerce](../domains/commerce/index.md)、[Commerce 数据库](../domains/commerce/database.md) |
+| Catalog 三表 | 商品类型 CHECK、价格区间与渠道唯一、不存 total；Product 与 Gift 分离 | [Commerce 数据库](../domains/commerce/database.md) |
+| Ordering 三表 | 订单幂等与金额 CHECK、Snapshot、履约类型与状态 | [Commerce 数据库](../domains/commerce/database.md) |
+| Payment 两表 | Provider 枚举、服务端验证、Webhook 原始事实与幂等 | [Commerce 数据库](../domains/commerce/database.md) |
+| Wallet 与 Ledger | 余额快照、append-only、before/after 平衡、六类 business_type、统一 WalletService | [Commerce 数据库](../domains/commerce/database.md)、[ADR-016](../adr/ADR-016-commerce-money-and-append-only-ledger.md) |
+| Reward 边界问答 | Reward 独立域，Commerce 只经 `reward_grant` 记账、不含规则 | [Commerce 数据库](../domains/commerce/database.md)、D-067 |
+| Adjustment / Reversal 问答与建模 | 二者语义差异、只存成功事实、冲正不变量 | [Commerce 数据库](../domains/commerce/database.md)、D-065 |
+| `commerce_gift_sends` | 只存成功/冲正、快照、跨域 conversation_id、送礼事务四合一 | [Commerce 数据库](../domains/commerce/database.md)、D-071 |
+| Refund / RefundRecovery | 全额退款规则、与 Refund 不合并、回收仅在退款成功后 | [Commerce 数据库](../domains/commerce/database.md)、D-070 |
+| 金额与两套单位 | 真钱 amount_minor+currency，Coins bigint，不用 currency='COIN' | [Commerce 数据库](../domains/commerce/database.md)、D-072 |
+| 总体收口审查 | 状态机分列、删除策略、跨表应用层规则、明确不建表清单 | [Commerce 数据库](../domains/commerce/database.md)、D-074~D-076 |
+| 全局规范差异（本会话新增冲突） | UUID 主键、跨域不建 FK 两项物理约定与 D-007/D-055/ADR-015 及四域基线冲突，提交主会话裁决 | [Commerce 数据库](../domains/commerce/database.md)「与全局 SQL 规范的关系」、[未决事项](open-questions.md)、D-077/D-078 |

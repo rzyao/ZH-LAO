@@ -11,12 +11,14 @@
 - 一级域：Identity、Learning、Social、Community、Chat、Commerce、Rewards、Trust & Safety、Operations、Platform。
 - Chat 与社交关系解耦：会话身份由用户对唯一确定，取消关注或重新互关不改变会话。
 - 实时推送不独立成域：Chat 发布领域事件，WebSocket/App Push 由基础设施负责。
+- Commerce 独占「钱与虚拟资产」事实，采用虚拟币钱包 + 只追加账本；Social/Chat 不处理资金，Chat 送礼只展示。
 - 代码定义能力，Feature Flag 决定开放，运营配置决定规则。
 
 ## 文档地图
 
 - [领域文档入口](docs/domains/index.md)
-- [Chat（Chat）域](docs/domains/chat/index.md)
+- [Chat 域](docs/domains/chat/index.md)
+- [Commerce 域](docs/domains/commerce/index.md)
 - [产品定位与范围](docs/product/product-overview.md)
 - [业务与商业模型](docs/product/business-model.md)
 - [功能开放与产品规则](docs/product/feature-rollout.md)
@@ -37,7 +39,7 @@
 | Social | `frozen` | 20 张首期表；资料、偏好、发现和关系字段 `frozen`，公开内容字段局部 `designing` |
 | Community | `deferred` | 首期动态事实已归 Social；独立社区能力延期 |
 | Chat | `frozen` | 7 张表定稿 `frozen`；物理 DDL（跨域用户 FK、Media FK、`public_id` 生成算法、Outbox 物理表）`designing`，用例字段契约 `designing` |
-| Commerce | `baseline` | `designing` |
+| Commerce | `frozen`（V1） | 16 张业务表 `frozen`；物理约定（UUID 主键 / 跨域 FK）与全局规范冲突，`designing` 待主会话裁决；会员/Subscription/Entitlement 落表 `deferred` |
 | Rewards | `baseline` | `designing` |
 | Trust & Safety | `baseline` | `designing` |
 | Operations | `baseline` | `designing` |

@@ -7,7 +7,7 @@
 | Social | `frozen` | 20 张首期表；公开内容字段局部 `designing` | [Social](social/index.md) |
 | Community | `deferred` | `deferred` | [Community](community/index.md) |
 | Chat | `frozen` | 7 张表 `frozen`；物理 DDL（跨域用户 FK、Media FK、`public_id` 生成算法、Outbox 物理表）`designing`，用例字段契约 `designing` | [Chat](chat/index.md) |
-| Commerce | `baseline` | `designing` | [Commerce](commerce/index.md) |
+| Commerce | `frozen`（V1） | 16 张业务表 `frozen`；物理约定（UUID 主键 / 跨域 FK）与全局规范冲突，`designing` 待主会话裁决；会员/Subscription/Entitlement 落表 `deferred` | [Commerce](commerce/index.md) |
 | Rewards | `baseline` | `designing` | [Rewards](rewards/index.md) |
 | Trust & Safety | `baseline` | `designing` | [Trust & Safety](trust/index.md) |
 | Operations | `baseline` | `designing` | [Operations](operations/index.md) |

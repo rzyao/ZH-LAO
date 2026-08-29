@@ -1,14 +1,14 @@
 ---
 status: baseline
 last_updated: 2026-08-30
-source_conversation: 数据库域设计；继续设计社交资料；设计聊天领域
-source_conversation_id: 6a92f0c0-90b4-83ea-a43d-cccb1ef2666d；6a931551-8a30-83e9-8caf-60e529abce68；6a9319c2-2204-83ea-9341-7a57757a3082
-source_share_url: https://chatgpt.com/share/6a9329e5-9f28-83ea-8eb1-f85be6e414fa
+source_conversation: 数据库域设计；继续设计社交资料；设计聊天领域；设计 Commerce Domain
+source_conversation_id: 6a92f0c0-90b4-83ea-a43d-cccb1ef2666d；6a931551-8a30-83e9-8caf-60e529abce68；6a9319c2-2204-83ea-9341-7a57757a3082；6a933931-27f8-83ea-9df3-b054d2bca5fe
+source_share_url: https://chatgpt.com/share/6a9329e5-9f28-83ea-8eb1-f85be6e414fa；https://chatgpt.com/share/6a933931-27f8-83ea-9df3-b054d2bca5fe
 ---
 
 # 设计决策台账
 
-来源：ChatGPT 会话“数据库域设计”“继续设计社交资料”“设计聊天领域”。用户明确选择，以及方案提出后以“继续/继续下一步”推进且未反对，均视为当前基线。
+来源：ChatGPT 会话“数据库域设计”“继续设计社交资料”“设计聊天领域”“设计 Commerce Domain”。用户明确选择，以及方案提出后以“继续/继续下一步”推进且未反对，均视为当前基线。
 
 | ID | 结论 | 状态 | 事实源 | 备注 |
 | --- | --- | --- | --- | --- |
@@ -72,5 +72,23 @@ source_share_url: https://chatgpt.com/share/6a9329e5-9f28-83ea-8eb1-f85be6e414fa
 | D-058 | `listConversations` 过滤条件冻结为 `member.user_id = current_user` AND `conversation.last_message_id IS NOT NULL` AND `user_state.hidden_at IS NULL`，三者缺一不可 | `frozen` | [Chat 应用服务与事件](../domains/chat/application-and-events.md) | 缺 `hidden_at IS NULL` 会导致已隐藏会话仍出现在列表 |
 | D-059 | Direct 会话成员集合不变量冻结：`type='direct'` 的 `chat_conversation_member` 必须恰好含 `{user_low_id, user_high_id}` 两条；成员仅由 `getOrCreateDirectConversation()` 创建，禁止通用 `addMember()` | `frozen` | [Chat 会话模型](../domains/chat/conversation.md) | 数据库不阻止第三成员，由应用服务同一事务创建并由集成测试覆盖 |
 | D-060 | `canChat(sender, recipient)` 权限契约冻结：conversation active、sender 为 member、Social 授予聊天权限、无 Block、无 T&S messaging restriction；`paused` 不影响已有聊天，Match 后聊天永久免费，不检查任何付费权益 | `frozen` | [Chat 应用服务与事件](../domains/chat/application-and-events.md) | 判定在应用层，非数据库外键/触发器；Chat 不存 match_id/relationship status |
+| D-061 | Commerce 独占「钱与虚拟资产」事实；Social/Chat 不处理资金，Chat 送礼只触发展示 | `frozen` | [ADR-016](../adr/ADR-016-commerce-money-and-append-only-ledger.md)、[Commerce](../domains/commerce/index.md) | 账务真相在 Commerce |
+| D-062 | V1 采用虚拟币钱包模型：真钱充值兑换 Coins，礼物等用 Coins 消费 | `frozen` | [Commerce](../domains/commerce/index.md) | 非「即时逐笔扣真钱」 |
+| D-063 | `commerce_wallets.balance` 是快照，`commerce_wallet_ledger` 是 append-only 资金真相（只 INSERT，不改删） | `frozen` | [Commerce 数据库](../domains/commerce/database.md) | 纠错靠追加 Reversal |
+| D-064 | 所有资产变化经统一 `WalletService.applyEntry` 单事务写 Ledger+余额；禁止各 Service/管理员直接 UPDATE wallet | `frozen` | [Commerce 数据库](../domains/commerce/database.md) | 资产规则单一实现 |
+| D-065 | Adjustment（无业务来源的人工/系统纠正，可正可负）与 Reversal（对某笔既有 Ledger 的反向冲正，金额相反、不冲正 Reversal、最多一次、无部分冲正）分离；二者无 status 只存成功事实 | `frozen` | [Commerce 数据库](../domains/commerce/database.md) | 账务纠错机制，仍属 Commerce |
+| D-066 | Ledger `business_type` 收口为六个完整业务名：`order_fulfillment / reward_grant / gift_send / wallet_adjustment / wallet_reversal / refund_recovery` | `frozen` | [Commerce 数据库](../domains/commerce/database.md) | 不使用 purchase/reward 等模糊名 |
+| D-067 | Reward 为独立域，Commerce 不建 `commerce_rewards`；奖励资产经 `reward_grant` 写入钱包，`business_id` 逻辑引用 Reward 域，不含奖励规则 | `frozen` | [Commerce 数据库](../domains/commerce/database.md) | 见 D-017 Rewards 域 |
+| D-068 | Product（真钱商品，V1 仅 coin_pack）与 Gift（Coins 消费对象）分离；`commerce_gifts` 不再经 `product_id` 依赖商品表 | `frozen` | [Commerce 数据库](../domains/commerce/database.md) | 取代早期 `products 1:0..1 gifts` 设想 |
+| D-069 | 历史交易用 Snapshot：`commerce_order_items` 与 `commerce_gift_sends` 保存当时价格/名称/类型；Catalog 改名改价不回算历史 | `frozen` | [Commerce 数据库](../domains/commerce/database.md) | Catalog 是现在，Snapshot 是当时 |
+| D-070 | 订单/支付/履约/退款/回收状态机冻结（见 Commerce 数据库）；Order 无 completed/fulfilled，履约由 Fulfillment 表达；Refund 与 RefundRecovery 绝不合并 | `frozen` | [Commerce 数据库](../domains/commerce/database.md) | 允许 Payment refunded 而 RefundRecovery failed 的真实异常 |
+| D-071 | `commerce_gift_sends` 只保存成功/冲正事实，状态 `succeeded/reversed`；余额不足/下架/关系不允许直接事务失败不落库；送礼事务 `GiftSend+debit+Ledger+Outbox` 一次提交 | `frozen` | [Commerce 数据库](../domains/commerce/database.md) | 不落 pending/failed 垃圾交易 |
+| D-072 | 真钱用 `amount_minor bigint + currency`，Coins 用 `bigint` 且不使用 `currency='COIN'`；两套金额严格分开 | `frozen` | [Commerce 数据库](../domains/commerce/database.md) | Coin 非法币 |
+| D-073 | V1 单资产钱包：一个用户一个 Coin Wallet、单一 balance；不做多资产/冻结/available-locked-bonus-paid 分桶 | `frozen` | [Commerce 数据库](../domains/commerce/database.md) | 出现第二种资产或提现/竞拍/预授权再升级 |
+| D-074 | 交易类表不做普通物理删除；Ledger/Adjustment/Reversal 正常业务不可 UPDATE/DELETE；拒绝 `commerce_transactions`/`commerce_wallet_transactions` 万能表 | `frozen` | [Commerce 数据库](../domains/commerce/database.md) | 分领域建模 |
+| D-075 | Commerce V1 明确不建：subscription/membership/entitlement 落表、promotions/coupons、creator_earnings/withdrawals/settlements、gift_inventory、wallet_debt/asset_accounts/frozen_balances；会员/Subscription/Entitlement 表延后到后续 Commerce 修订 | `deferred` | [Commerce](../domains/commerce/index.md) | Entitlement 能力模型仍由 ADR-005 承载，仅落表延后 |
+| D-076 | Commerce V1 冻结为 16 张业务表（Catalog4/Ordering3/Payment2/Wallet4/Gifting1/Refund2）；`system_outbox_events` 属基础设施不计入 | `frozen` | [Commerce 数据库](../domains/commerce/database.md) | 送礼依赖 Outbox `GiftSent` 通知 Chat |
+| D-077 | **冲突，待主会话裁决**：Commerce 会话 DDL 用 `uuid` 主键并假设「全项目一直用 UUID」，与 D-007 规范第 3 条、D-055/ADR-015「主键回归 identity」及 Identity/Learning/Social/Chat 四域实际 `bigint identity` 冲突 | `designing` | [Commerce 数据库](../domains/commerce/database.md)「与全局 SQL 规范的关系」、[未决事项](open-questions.md) | 文档维护不擅自改 UUID 也不擅自改回 bigint；不改全局规范/其他域 |
+| D-078 | **冲突，待主会话裁决**：Commerce 会话主张「跨域只存 ID 不建 FK」（user_id/conversation_id/image_asset_id/business_id/operator_id），与规范第 11/12 条及 Chat 已用 `(conversation_id,user_id)` 复合 FK 现状冲突；若定 bigint 则这些跨域列需改型 | `designing` | [Commerce 数据库](../domains/commerce/database.md)、[未决事项](open-questions.md) | 域内 FK 保留不受影响 |
 
 新增主会话结论时，先更新本台账，再更新唯一事实源和覆盖清单。
