@@ -8,6 +8,7 @@ export type Page<T> = Readonly<{items:readonly T[];total:number}>;
 export type AuditPage = Readonly<{items:readonly AuditRecord[];nextCursor:string|null}>;
 
 export interface OperationsRepository {
+  lockBootstrap(db:DatabaseExecutor):Promise<void>;
   findOperatorById(db:DatabaseExecutor,id:string,lock?:boolean):Promise<OperatorRecord|null>;
   findOperatorByAuthSubjectId(db:DatabaseExecutor,id:string,lock?:boolean):Promise<OperatorRecord|null>;
   listOperators(db:DatabaseExecutor,input:{page:number;pageSize:number;status?:'active'|'disabled'|undefined}):Promise<Page<OperatorRecord>>;
