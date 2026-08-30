@@ -39,7 +39,7 @@ test.describe('Admin Foundation smoke', () => {
   test('navigation works for the design-system page', async ({ page }) => {
     await page.goto('/system/design-system')
     await expect(page.getByRole('heading', { name: 'Design System' })).toBeVisible()
-    await expect(page.getByText('示例记录 1')).toBeVisible()
+    await expect(page.getByRole('cell', { name: '示例记录 1', exact: true })).toBeVisible()
   })
 
   test('404 works for unknown routes', async ({ page }) => {

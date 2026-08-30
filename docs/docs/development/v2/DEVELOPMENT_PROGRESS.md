@@ -22,6 +22,7 @@ last_updated: 2026-08-30
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | PostgreSQL Baseline | `COMPLETE` | — | `PASS` | — | — | 2026-08-30 | 冻结基线见 `database/v2/` | `database/v2/reports/V2_DATABASE_BASELINE_REPORT.md` | Fresh DB、migration 幂等及数据库审计通过 | 无 | 2026-08-30 |
 | Application Foundation | `COMPLETE` | DB Baseline `PASS` | `PASS` | — | 2026-08-30 | 2026-08-30 | [计划](01-foundation/APPLICATION_FOUNDATION_PLAN.md) | [报告](01-foundation/APPLICATION_FOUNDATION_REPORT.md) | typecheck/lint/build；14 unit + 10 PostgreSQL integration + 3 validation lifecycle；complete/partial/empty/unavailable readiness；fresh 17 migrations；DB audit PASS；临时库残留 0 | 无 | 2026-08-30 |
+| Admin Foundation | `COMPLETE` | Application Foundation `PASS` | `PASS` | — | 2026-08-31 | 2026-08-31 | [计划](ADMIN_FOUNDATION_PLAN.md) | [报告](ADMIN_FOUNDATION_REPORT.md) | typecheck/lint PASS；57 unit/component PASS；build PASS；Playwright smoke 6/6 PASS；架构/范围/依赖/安全审计 PASS；Business API/页面/Fake CRUD = 0 | 无 | 2026-08-31 |
 | Identity | `IN_PROGRESS` | Foundation `PASS` | `PASS`（Design Audit） | — | 2026-08-30 | — | [实施计划](02-identity/IDENTITY_IMPLEMENTATION_PLAN.md)、[Use Cases](02-identity/IDENTITY_USE_CASES.md)、[API](02-identity/IDENTITY_API.md) | [设计审计](02-identity/IDENTITY_DESIGN_AUDIT.md)、[IDN-01 报告](02-identity/IDN_01_REPORT.md)、[IDN-02 报告](02-identity/IDN_02_REPORT.md)、[IDN-03 报告](02-identity/IDN_03_REPORT.md) | IDN-03 repository layer；22 unit + 13 PostgreSQL integration；User/Session/OTP 并发锁、rollback 与 executor isolation PASS；migration changes = 0 | 无 | 2026-08-30 |
 | Platform | `NOT_STARTED` | Foundation `PASS` | — | — | — | — | 待创建 | 待创建 | — | 无 | 2026-08-30 |
 | Operations | `NOT_STARTED` | Identity + Platform 基础能力可用 | — | — | — | — | 待创建 | 待创建 | — | 无 | 2026-08-30 |
@@ -41,7 +42,9 @@ last_updated: 2026-08-30
 
 ## 当前行动
 
-Identity Design Gate 已通过，Identity Implementation 已进入 `IN_PROGRESS`。`IDN-01` 至 `IDN-08` 已完成；`IDN-09` 仍为 `NOT_STARTED`，不得自动开始。
+Admin Foundation 已完整执行并通过 `ADMIN_FOUNDATION_GATE = PASS`（ADM-F01 → ADM-F18 全部完成；typecheck / lint / 57 unit+component / build / Playwright smoke 6/6 全绿；架构与范围审计通过，Business API / 业务页面 / Fake CRUD = 0）。
+
+Identity Implementation 仍为 `IN_PROGRESS`：`IDN-01` 至 `IDN-10` 已完成；`IDN-11` 仍为 `NOT_STARTED`，不得自动开始。Admin 下一阶段（Identity Admin 等）同样等待新的明确任务与对应 Contract 冻结。
 
 ## 更新历史
 
@@ -56,3 +59,5 @@ Identity Design Gate 已通过，Identity Implementation 已进入 `IN_PROGRESS`
 | 2026-08-30 | Identity | 完成 IDN-02 Core Types；建立冻结 enum、UUID/BIGINT、E.164、学习方向与 secret/hash 类型边界 | `PASS`（IDN-02） | 22 unit + 10 PostgreSQL integration；fresh 17/0 migrations、database audit PASS；repositories/SQL/routes/services = 0 |
 | 2026-08-30 | Identity | 完成 IDN-03 Repository Layer；7 个契约与 PostgreSQL 实现、事务作用域 factory、row/advisory locking | `PASS`（IDN-03） | 22 unit + 13 PostgreSQL integration；User/Session/OTP concurrency、rollback、executor isolation PASS；migration changes = 0 |
 | 2026-08-30 | Identity | 完成 IDN-04 至 IDN-08：OTP、phone 认证注册与 token 技术服务 | `PASS`（IDN-04~08） | 27 unit + 16 PostgreSQL integration；OTP request/consume concurrency PASS；migration changes = 0 |
+| 2026-08-31 | Identity | 完成 IDN-09 至 IDN-10：Session refresh/logout 与 Device lifecycle | `PASS`（IDN-09~10） | 27 unit + 17 PostgreSQL integration；refresh rotation 与 device-session 联动 PASS；migration changes = 0 |
+| 2026-08-31 | Admin Foundation | 执行 ADM-F01 → ADM-F18 全量任务并通过 `ADMIN_FOUNDATION_GATE` | `PASS` | 57 unit/component + build + Playwright smoke 6/6；架构/范围/依赖/安全/可访问性审计 PASS；Business API / 业务页面 / Fake CRUD = 0 |
