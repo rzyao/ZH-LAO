@@ -1,8 +1,9 @@
 import type { DatabaseExecutor } from '../../../database/executor.js';
-import type { AuditPage,AuditRecord,AssignedRoleRecord,OperationsRepository,OperatorRecord,Page,RoleRecord } from '../application/ports/index.js';
+import type { AuditPage,AuditRecord,AssignedRoleRecord,AuthorizationSnapshot,OperationsRepository,OperatorRecord,Page,RoleRecord } from '../application/ports/index.js';
 
 type RowBase=Record<string,unknown>;
 type OperatorRow=RowBase&{id:string;auth_subject_id:string;display_name:string;status:'active'|'disabled';created_at:Date;updated_at:Date;total?:number};
+type AuthorizationRow=OperatorRow&{has_permission:boolean};
 type RoleRow=RowBase&{id:string;code:string;name:string;description:string|null;status:'active'|'disabled';created_at:Date;updated_at:Date;assigned_at?:Date;total?:number};
 type AuditRow=RowBase&{id:string;operator_id:string;action_key:string;target_domain:string|null;target_type:string|null;target_id:string|null;request_id:string|null;ip_address:string|null;details:Readonly<Record<string,unknown>>;created_at:Date};
 type CountRow=RowBase&{count:string};type PermissionRow=RowBase&{permission_key:string};
@@ -11,6 +12,7 @@ const role=(r:RoleRow):RoleRecord=>({id:r.id,code:r.code,name:r.name,description
 const audit=(r:AuditRow):AuditRecord=>({id:r.id,operatorId:r.operator_id,actionKey:r.action_key,targetDomain:r.target_domain,targetType:r.target_type,targetId:r.target_id,requestId:r.request_id,ipAddress:r.ip_address,details:r.details,createdAt:r.created_at});
 export class PostgresOperationsRepository implements OperationsRepository{
  async lockBootstrap(db:DatabaseExecutor){await db.query('SELECT pg_advisory_xact_lock(904202608311::bigint)');}
+ async getAuthorizationSnapshot(db:DatabaseExecutor,authSubjectId:string,permissionKey:string):Promise<AuthorizationSnapshot|null>{const q=await db.query<AuthorizationRow>(`SELECT o.*, EXISTS (SELECT 1 FROM operations.operator_roles x JOIN operations.roles r ON r.id=x.role_id AND r.status='active' JOIN operations.role_permissions rp ON rp.role_id=r.id WHERE x.operator_id=o.id AND rp.permission_key=$2) AS has_permission FROM operations.operators o WHERE o.auth_subject_id=$1`,[authSubjectId,permissionKey]);const r=q.rows[0];return r?{operator:op(r),hasPermission:r.has_permission}:null;}
  async findOperatorById(db:DatabaseExecutor,id:string,lock=false){const q=await db.query<OperatorRow>(`SELECT * FROM operations.operators WHERE id=$1${lock?' FOR UPDATE':''}`,[id]);return q.rows[0]?op(q.rows[0]):null;}
  async findOperatorByAuthSubjectId(db:DatabaseExecutor,id:string,lock=false){const q=await db.query<OperatorRow>(`SELECT * FROM operations.operators WHERE auth_subject_id=$1${lock?' FOR UPDATE':''}`,[id]);return q.rows[0]?op(q.rows[0]):null;}
  async listOperators(db:DatabaseExecutor,i:{page:number;pageSize:number;status?:'active'|'disabled'|undefined}):Promise<Page<OperatorRecord>>{const v:unknown[]=[];const where=i.status?(v.push(i.status),`WHERE status=$${v.length}`):'';v.push(i.pageSize,(i.page-1)*i.pageSize);const q=await db.query<OperatorRow>(`SELECT *, count(*) OVER()::int AS total FROM operations.operators ${where} ORDER BY created_at DESC,id ASC LIMIT $${v.length-1} OFFSET $${v.length}`,v);return{items:q.rows.map(op),total:Number(q.rows[0]?.total??0)};}
