@@ -6,7 +6,7 @@ document: OPERATIONS_DESIGN_AUDIT
 audited_at: 2026-08-31
 design_gate: PASS
 implementation_started: false
-repository_commit_audited: d7b4ed1f204164bde39bf4cf4db324101ef15651
+repository_commit_audited: 000f4c4aafacf4938d74902eddc4d78323196a89
 ---
 
 # ZH-LAO V2 — Operations Design Audit
@@ -16,7 +16,7 @@ repository_commit_audited: d7b4ed1f204164bde39bf4cf4db324101ef15651
 Independent pre-implementation audit of：
 
 ```text
-Repository current main
+Repository current main / relevant concurrent delta
 Frozen Operations DB
 Product semantics
 Operator lifecycle
@@ -27,135 +27,83 @@ Bootstrap
 Backend public boundary
 HTTP/API
 Admin Foundation integration
-Platform dependency
+Platform integration readiness
 Concurrency/security
 Implementation Plan
 ```
 
-No Operations production code was implemented，and `0200_operations.sql` was not modified。
+No Operations production code was implemented and `0200_operations.sql` was not modified。
 
-## 2. Repository Audit Facts
+## 2. Repository Audit & Mid-Session Delta
 
-### 2.1 Branch / Commit
+### 2.1 Final Code Baseline
 
-At the start of this design session：
-
-```text
-repository     = rzyao/ZH-LAO
-branch         = main
-default branch = main
-HEAD           = d7b4ed1f204164bde39bf4cf4db324101ef15651
-latest commit  = docs(platform): complete Platform design audit
-```
-
-Relevant preceding Platform commits included：
+本会话开始时首次读到：
 
 ```text
-981c5dcb... docs(platform): add Platform implementation plan
-96598731... docs(platform): freeze Platform API contracts
-48a8de7c... docs(platform): freeze runtime config contracts
+d7b4ed1f204164bde39bf4cf4db324101ef15651
+docs(platform): complete Platform design audit
 ```
 
-Operations design documents created by this session necessarily advance `main` after the audited baseline commit；the baseline above remains the repository fact source used for the audit。
-
-### 2.2 Current CI / Workflow
-
-Repository contains `.github/workflows/foundation.yml`。
-
-It runs：
+随后远程 `main` 在 Operations 第一份设计文档写入前新增：
 
 ```text
-PostgreSQL 18 service
-pnpm apps/backend verify
-pnpm apps/backend build
-pnpm apps/backend test:integration
-pnpm database/v2 test
-pnpm database/v2 validate
+000f4c4aafacf4938d74902eddc4d78323196a89
+feat(platform): implement Phase 3 platform domain and identity hotfixes
 ```
 
-No Operations-specific CI existed before this design session because no Operations module existed。
+Operations 第一份设计提交 `4301bf...` 的 parent 正是 `000f4c4...`，因此最终 repository/code audit baseline 统一改为 `000f4c4...`。
 
-### 2.3 Backend Architecture
+本会话之后的 HEAD 继续前进仅因为 Operations 文档更新；没有 Operations source implementation。
 
-Current backend has Foundation infrastructure plus `modules/identity`；`modules/platform` and `modules/operations` are not present at the audited commit。
+### 2.2 Relevant Repository State
 
-Foundation provides：
+当前 backend modules：
 
 ```text
-AuthContext { subjectId, sessionId? }
-AuthenticationProvider
-requireAuthentication()
-AppError
-DatabaseExecutor / TransactionManager
-logging / outbox / HTTP infrastructure
+identity   = present
+platform   = present
+operations = absent
 ```
 
-### 2.4 Identity Status
-
-Canonical development progress and implementation report show：
+因此：
 
 ```text
-IDENTITY_IMPLEMENTATION = COMPLETE
-IDENTITY_GATE           = PASS
-IDENTITY_DOMAIN         = FROZEN
+OPERATIONS_IMPLEMENTATION_STARTED = NO
 ```
 
-Identity public boundary exists at：
+### 2.3 Current CI
+
+`.github/workflows/foundation.yml` 当前包含：
 
 ```text
-apps/backend/src/modules/identity/public/
+backend job:
+  PostgreSQL 18
+  backend verify
+  backend build
+  backend integration
+  database test
+  database validate
+
+admin job:
+  admin verify
+  Playwright Chromium E2E
+
+docs job:
+  VitePress/docs build
+
+mobile job:
+  mobile verify
+  continue-on-error in current workflow text
 ```
 
-`IdentityPublicQuery` exposes stable UUID status/summary reads and does not expose internal BIGINT to consumers。
+本 Design Session 没有修改 CI。
 
-Identity AuthenticationProvider validates Bearer tokens and only returns AuthContext for current Identity `status=active`。
-
-### 2.5 Platform Status — Strictly Separated
-
-Platform documents on current main prove：
-
-```text
-PLATFORM_DESIGN_GATE          = PASS
-PLATFORM_IMPLEMENTATION_STARTED = NO
-Platform implementation module   = absent
-PLATFORM_FINAL_GATE              = NOT_RUN
-```
-
-Platform Design Gate PASS must not be reported as implementation completion。
-
-Platform Design also has a required future prerequisite：
-
-```text
-PLT-01 forward-only Feature Flag Override index correction
-```
-
-before relevant Platform Override implementation。
-
-### 2.6 Admin Foundation Status
-
-```text
-ADMIN_FOUNDATION      = COMPLETE
-ADMIN_FOUNDATION_GATE = PASS
-```
-
-Foundation already includes：
-
-```text
-AuthProvider/AuthGuard
-PermissionGuard/can()
-token store
-ApiClient
-UUID/time/pagination/error contracts
-11-Domain navigation placeholders
-```
-
-But report explicitly states real Operator login/permission fetch waits for Identity/Operations integration；no business CRUD pages exist。
-
-## 3. Global Architecture Audit
+## 3. Canonical Architecture Audit
 
 PASS。
 
-Design preserves：
+保持：
 
 ```text
 Modular Monolith
@@ -172,13 +120,13 @@ cross-domain internal BIGINT reference = forbidden
 cross-domain reference = stable logical UUID
 ```
 
-No new microservice / Redis / Kafka introduced。
+No Redis / Kafka / permission microservice。
 
 ## 4. Frozen Database Audit
 
 PASS。
 
-`database/v2/migrations/0200_operations.sql` contains exactly：
+`database/v2/migrations/0200_operations.sql` exactly：
 
 ```text
 operations.operators
@@ -188,17 +136,17 @@ operations.role_permissions
 operations.operator_audit_logs
 ```
 
-Important confirmations：
+Confirmed：
 
-- Operator/Role/Audit IDs are UUID；
+- Operator/Role/Audit IDs UUID；
 - `operators.auth_subject_id UUID UNIQUE`；
-- no FK to Identity；
+- no Identity FK；
 - `operator_roles PK(operator_id, role_id)`；
-- reverse `(role_id, operator_id)` index exists；
-- same-domain FKs real and `ON DELETE RESTRICT`；
-- permission/audit action key regex exists；
-- Audit schema supports actor/action/target/request/IP/details/time；
-- Audit schema has **no result field**。
+- reverse `(role_id,operator_id)` index；
+- same-domain FKs real + `ON DELETE RESTRICT`；
+- permission/action format CHECKs；
+- Audit actor/action/target/request/IP/details/time fields；
+- no Audit result/status field。
 
 ```text
 Frozen migration edits = 0
@@ -210,140 +158,173 @@ DATABASE_CONTRACT_CONFLICT = 0
 
 PASS。
 
-All REQUIRED Use Cases fit frozen schema。
+所有 24 REQUIRED Use Cases 均适配 frozen schema：
 
-Notable adjudications：
+- delete 不支持，使用 existing `disabled`；
+- auth subject immutability 是 application invariant；
+- reserved `super_admin` 是 code policy，不需要 `is_system`；
+- last-admin protection 用 existing rows + transaction lock；
+- complete-set permission mutation 使用 existing relation table；
+- code catalog 无需 dictionary table；
+- Bootstrap 只使用现有 5 tables；
+- Operator/Role/Audit UUID 可安全用于 Admin API。
 
-- Operator/Role delete rejected rather than inventing deleted_at；
-- `auth_subject_id` immutable application rule，不需要新 field；
-- `super_admin` system protection is code/application policy，不需要 `is_system`；
-- last-admin invariant uses transaction + row lock，不需要 new column；
-- SetRolePermissions uses existing relation rows；
-- Permission Catalog lives in code；no permission table；
-- Bootstrap uses existing 5 tables；
-- API identifiers are UUID-safe；no internal BIGINT issue。
+No DB contract workaround or hidden field required。
 
 ## 6. Identity Boundary Audit
 
 PASS。
 
-Correct dependency：
+当前 `identity/public` 已收紧为纯接口：
 
 ```text
-Foundation/Identity Authentication
-→ AuthContext.subjectId UUID
-→ Operations auth_subject_id lookup
+IdentityPublicQueries
+IdentityPublicSummary
+UserPublicId / IdentityAccountStatus public types
 ```
 
-Operations may use `identity/public` only for Create/Enable/Bootstrap subject validation。
+Operations only consumes that public boundary for Create/Enable/Bootstrap subject checks。
 
-Forbidden dependencies remain forbidden：
+当前 Foundation/Identity auth pipeline：
 
 ```text
-identity/application
-identity/infrastructure
-identity repositories
+Bearer token
+→ IdentityAuthenticationProvider
+→ read Identity by public UUID
+→ only status=active yields AuthContext.subjectId
+```
+
+禁止：
+
+```text
+identity/application import
+identity/infrastructure import
+Identity repositories
 identity.* SQL
-Identity internal BIGINT
+internal BIGINT
 ```
 
-No duplicated password/OTP/session/JWT logic。
+Duplicate admin password/OTP/JWT/session system = 0。
 
-## 7. Platform Boundary Audit
+## 7. Platform Status Audit — Strictly Separated
 
 PASS。
 
-Operations consumes Platform frozen permission requirements but does not own Platform state。
+Current repository now proves：
 
 ```text
-Operations = authorization + operator audit actor
-Platform   = feature/config/version/announcement/region canonical state
+PLATFORM_DESIGN_GATE = PASS
+PLATFORM_PHYSICAL_CONTRACT = PASS
+PLATFORM_IMPLEMENTATION = COMPLETE
+PLATFORM_GATE = PASS
+PLATFORM_DOMAIN = FROZEN
 ```
 
-Operations does not proxy Platform CRUD and does not write `platform.*`。
+Platform corrected physical index drift using forward-only `1250_platform_override_indexes.sql` without editing frozen `0300_platform.sql`。
 
-Platform Integration is explicitly marked `IMPLEMENTATION_DEPENDENCY` because Platform implementation is not present。
+Platform implementation report confirms：
 
 ```text
-Platform Design dependency        = SATISFIED
-Platform runtime implementation   = NOT AVAILABLE
-Operations Design blocker         = NO
-Platform integration blocker now  = YES for OPS-14 only
+6 frozen tables
+33 required use cases implemented
+3 public readers
+5 runtime HTTP endpoints
+0 cross-domain SQL
+0 internal BIGINT leak
+0 Redis/Kafka/premature outbox
+BLOCKER/HIGH/MEDIUM/LOW = 0
 ```
+
+### Platform Management Integration Reality
+
+Current `apps/backend/src/modules/platform/http/routes.ts` registers runtime endpoints only。Platform management application use cases are implemented but management HTTP/RBAC wiring is not registered there。
+
+Therefore：
+
+```text
+Platform Design dependency       = SATISFIED
+Platform Implementation dependency= SATISFIED
+Platform Final Gate              = PASS
+Operations integration blocker   = NO
+Remaining work                   = OPS-14 RBAC/Audit management wiring
+```
+
+Operations still must not write `platform.*` or own Platform state。
 
 ## 8. Operator Lifecycle Audit
 
 PASS。
 
-Resolved decisions：
+Frozen decisions：
 
 ```text
-self-registration      = NO
-create by operator     = YES, exact permission
-first operator         = controlled CLI bootstrap
-disable                = status=disabled, retain history/roles
-enable                  = requires active Identity subject
-physical delete         = NO
-auth_subject rebind     = NO
+self-registration  = NO
+first operator     = controlled one-time CLI
+normal creation    = exact operations.operators.create
+Identity validation= public contract only
+auth_subject rebind= NO
+disable            = retain history/assignments
+enable             = requires active Identity
+physical delete    = NO
+soft delete        = NO
 ```
 
-No unresolved lifecycle semantics。
+Unresolved lifecycle decisions = 0。
 
 ## 9. Role Model Audit
 
 PASS。
 
-Resolved：
-
 ```text
 custom roles            = YES
-reserved super_admin    = YES
 role code mutable       = NO
 name/description mutable= YES
-disabled role permission= ignored
-role deletion           = NO
+disabled role           = ignored by RBAC
+role delete             = NO
 role hierarchy          = NO
+reserved super_admin    = YES
+super_admin bypass      = NO
 ```
 
-`super_admin` is not authorization bypass；it has explicit rows for full catalog。
+`super_admin` permissions remain explicit current catalog rows。
+
+Catalog evolution strategy does not require a hidden bypass：existing `operations.role_permissions.set` performs reconciliation before newly protected behavior is used。
 
 ## 10. Permission Grammar / Catalog Audit
 
 PASS。
 
 ```text
-exact 3 segments
+application grammar = exact 3 segments
 <domain>.<plural_resource>.<action>
 lower_snake_case
-wildcards = NO
+wildcard = NO
 custom DB permission creation = NO
 ```
 
-Current exact catalog freezes：
+Current exact catalog：
 
 ```text
-Operations = 16 keys
-Platform   = 10 already-frozen keys
-Total current catalog = 26 keys
+Operations = 16
+Platform   = 10
+Total      = 26
 ```
 
-No future Content/Learning/Audio/Social/Chat/Commerce/Rewards/Trust exact keys were invented prematurely。
+No Content/Learning/Audio/Social/Chat/Commerce/Rewards/Trust exact keys invented prematurely。
 
-Permission DB regex is intentionally looser (`3+` segments) than application contract；code catalog rejects anything not exactly registered，so no physical migration change is required。
+Physical regex being wider (`3+` segments) is not a contract conflict because application accepts only registered exact keys。
 
 ## 11. Authorization Audit
 
 PASS。
 
-Frozen algorithm：
-
 ```text
 Identity authenticated
 → Operator exists
 → Operator active
-→ active roles only
-→ union exact permissions
-→ exact required key
+→ active assigned Roles only
+→ UNION exact keys
+→ required exact key membership
 ```
 
 Confirmed absent：
@@ -354,90 +335,123 @@ role hierarchy
 deny
 priority
 per-user direct permission
-superadmin bypass
+super-admin bypass
 permission cache
 ```
 
-Identity disabled/closed already causes AuthenticationProvider to reject the request before Operations authorization。
-
-Concurrency linearization for in-flight cross-domain actions is explicitly documented；no distributed rollback is claimed。
+In-flight owner action linearization documented without claiming distributed rollback。
 
 ## 12. Last-Admin / Concurrency Audit
 
 PASS。
 
-Key races have a physical/application answer：
+| Race | Protection |
+|---|---|
+| duplicate assignment | composite PK + idempotency |
+| duplicate auth subject | UNIQUE |
+| duplicate role code | UNIQUE |
+| concurrent permission replace | `SELECT role FOR UPDATE` |
+| concurrent final super-admin reduction | lock reserved Role row + re-count |
+| role/operator disabled | no cache; next decision reads current DB |
 
-```text
-duplicate assignment        -> composite PK
-duplicate auth subject      -> UNIQUE
-duplicate role code         -> UNIQUE
-permission replace          -> SELECT role FOR UPDATE
-last super-admin reduction  -> lock reserved role row + re-count
-role/operator disable       -> no auth cache; current DB state at decision point
-```
-
-No new DB field required。
+No new DB column required。
 
 ## 13. Audit Contract Audit
 
-PASS with one documented V1 durability debt。
+PASS with one explicit V1 durability debt。
 
-Frozen schema has no result field，so design correctly does **not** invent one。
+### Success-only Fact
 
-Canonical meaning：
+Frozen schema has no result field and existing DB design explicitly defines Audit as accepted/executed Operator actions。
+
+Therefore：
 
 ```text
-persisted audit row = successful accepted Operator action
+persisted audit row = implicit SUCCESS
 ```
 
-Failed auth / denied authz / validation failure / owner-domain failure remain security/application/observability logs。
+Auth failure / authz denial / validation reject / owner failure / pre-success exception -> security/application/observability logs。
 
-This resolves the requested “result” dimension without violating frozen DB：success is implicit；failed-result Audit rows are not supported in V1。
+`details.result` workaround is forbidden。
 
-Audit remains a trace of actor action，not a second Trust/Commerce/Platform business fact source。
+### Business Fact Boundary
 
-### Cross-Domain Write Boundary
+Audit remains action trail only：
 
-Operations-owned mutation：state + audit in same Operations transaction。
+```text
+Trust enforcement canonical fact -> Trust
+Commerce refund canonical fact   -> Commerce
+Platform state                   -> Platform
+who performed admin action       -> Operations Audit
+```
 
-Owner-Domain mutation：owner commits first，then synchronous Operations success audit；no cross-domain transaction。
+### Transaction Boundary
 
-Because current Platform Design explicitly froze `Platform Outbox events = NONE REQUIRED IN V1`，this session does not silently introduce a Platform audit-outbox requirement。
+Operations own mutation：same Operations transaction for state + Audit。
 
-Risk：owner commit can succeed while subsequent Audit persistence fails。
+Cross Domain：
 
-V1 response/logging semantics are frozen，and this is tracked below as MEDIUM TECH_DEBT rather than hidden。
+```text
+Operations authorize
+→ Owner Domain canonical commit
+→ synchronous Operations success Audit
+```
+
+No cross-domain DB transaction。
+
+### MEDIUM-01 — Cross-Domain Audit Persistence Gap
+
+Owner commit can succeed while later Operations Audit insert fails。
+
+Platform current implementation intentionally has no premature outbox，so Operations Design does not silently impose a new Platform event contract。
+
+V1 containment：
+
+```text
+critical log request_id/operator/action/target
+stable internal ambiguity error
+Admin refresh before retry
+```
+
+Future reliable fix requires explicit owner-domain outbox Audit contract revision。
+
+```text
+Severity = MEDIUM
+Status   = ACCEPTED V1 TECH_DEBT
+Unresolved product decision = NO
+Database conflict = NO
+```
 
 ## 14. Bootstrap Audit
 
 PASS。
 
 ```text
-public HTTP bootstrap = NO
+public bootstrap HTTP = NO
 default admin/admin    = NO
-long-lived bootstrap env secret = NO
-first-run CLI          = YES
+long-lived auth bypass = NO
+controlled CLI         = YES
 Identity active check  = YES
 single Operations tx   = YES
-bootstrap audit        = YES
-second invocation after any Operator exists = REJECT
+super_admin full catalog= YES
+bootstrap Audit        = YES
+second invocation      = REJECT once any Operator exists
 ```
 
-No bootstrap auth backdoor remains in HTTP surface。
+No bootstrap backdoor remains in HTTP contract。
 
 ## 15. Public Contract Audit
 
 PASS。
 
-Frozen conceptual exports：
+Frozen public concepts：
 
 ```text
 OperationsAuthorizer
 OperationsOperatorResolver
 OperationsAuditRecorder
 AuthorizedOperatorContext
-OperatorPermissionKey / static catalog
+OperatorPermissionKey/static catalog
 ```
 
 Forbidden exports：
@@ -450,48 +464,53 @@ DB rows
 SQL
 ```
 
-This gives future owner Domains one reusable RBAC path instead of reimplementing Operations SQL。
+Other Domains have one reusable RBAC path and must not query Operations tables themselves。
 
 ## 16. HTTP/API Audit
 
 PASS。
 
-Operations management base follows current Platform/Admin convention：
-
 ```text
-/api/v1/admin/operations
+base = /api/v1/admin/operations
 ```
 
-Key results：
-
-- `/me` feeds Admin Foundation real permission state；
-- operator/role management uses stable UUID；
-- role assignments use idempotent PUT/DELETE；
-- role permission mutation has one model only：complete-set PUT；
-- Permission Catalog is read-only code source；
-- Audit filters only use schema-supported dimensions；
-- no bootstrap HTTP endpoint；
-- Foundation AppError envelope reused。
+- `/me` supplies real current Operator + effective permission state；
+- Operator/Role/Audit identifiers UUID；
+- assignment uses idempotent PUT/DELETE；
+- Role permission mutation uses one complete-set PUT；
+- Permission Catalog read-only from code；
+- Audit filters match schema fields；
+- no failed-result query；
+- no bootstrap HTTP；
+- Foundation error envelope reused。
 
 Internal BIGINT leakage = 0。
 
-## 17. Admin Integration Readiness Audit
+## 17. Admin Foundation Readiness Audit
 
 PASS at contract level。
 
-Admin Foundation has compatible Auth/Permission skeleton，UUID/error/API client contracts。
+Admin Foundation already has：
 
-Future binding：
+```text
+AuthProvider/AuthGuard
+PermissionGuard/can()
+ApiClient
+token store
+UUID/time/pagination/error contracts
+```
+
+Binding：
 
 ```text
 Identity token
-→ GET Operations /me
-→ exact permissions
-→ PermissionGuard/can() for UI
-→ backend OperationsAuthorizer for actual enforcement
+→ Operations /me
+→ exact effective permissions
+→ frontend permission-aware UI
+→ backend OperationsAuthorizer = actual security enforcement
 ```
 
-No Admin page code was started。
+No Admin page implemented in this session。
 
 ## 18. Cache / Performance Audit
 
@@ -503,11 +522,9 @@ in-process cache            = NO
 Redis                       = NO
 ```
 
-Given low Admin QPS and high stale-permission risk，this is the lower-operations V1 choice。
+For low Admin QPS and security-sensitive permissions, no-cache is the low-ops V1 choice。
 
 ## 19. Use Case Audit
-
-Final classification：
 
 ```text
 REQUIRED      = 24
@@ -515,86 +532,45 @@ DEFERRED      = 4
 NOT_SUPPORTED = 11
 ```
 
-Required set covers current operator，authorization，operator/role management，assignment，permission catalog/set，audit query/recording，bootstrap。
+No mechanical 5-table CRUD expansion detected。
 
-No mechanical table CRUD expansion found。
-
-## 20. Findings
-
-### MEDIUM-01 — Cross-Domain Audit Persistence Gap
-
-**Finding**
-
-Frozen owner-domain write and Operations audit cannot be made atomic without either a cross-domain transaction or an owner-domain outbox integration contract。
-
-**Why not silently use Outbox now**
-
-Platform Design Gate has already frozen `Platform Outbox events = NONE REQUIRED IN V1`。Changing that here would invalidate a separate Domain design without an explicit revision。
-
-**V1 Resolution/Containment**
+## 20. Anti-Pattern Audit
 
 ```text
-owner commit
-→ synchronous Operations audit attempt
-→ on audit failure: critical log request/operator/action/target
-→ return stable ambiguity error; client refreshes before retry
+duplicate admin auth system               = 0
+Operations SQL -> identity.*               = 0
+Operations SQL -> platform.*               = 0
+internal BIGINT leakage                    = 0
+permission wildcard ambiguity              = 0
+role hierarchy overengineering             = 0
+ABAC creep                                  = 0
+Audit replacing owner business fact        = 0
+Operations owning Platform state           = 0
+public bootstrap backdoor                  = 0
+super_admin authorization bypass           = 0
+unhandled last-admin race                  = 0
+stale authorization cache design           = 0
 ```
 
-**Residual Risk**
-
-A committed business action can exist without the canonical Operator audit row if the second write fails。
-
-**Status**
-
-```text
-ACCEPTED V1 TECH_DEBT
-Severity = MEDIUM
-Design decision unresolved = NO
-Database conflict = NO
-```
-
-Future fix requires explicit cross-domain outbox contract revision。
-
-### LOW-01 — DEVELOPMENT_PROGRESS Was Stale for Platform Design
-
-At audit start，`DEVELOPMENT_PROGRESS.md` still showed Platform `NOT_STARTED / plan pending` despite Platform design docs existing and Design Gate PASS。
-
-This is documentation drift，not runtime architecture drift。
-
-This session should update the progress board after Operations docs are committed。
-
-## 21. Anti-Pattern Audit
-
-```text
-duplicate admin auth system                 = 0
-Operations SQL -> identity.*                 = 0
-Operations SQL -> platform.*                 = 0
-internal BIGINT leakage                      = 0
-permission wildcard ambiguity                = 0
-role hierarchy overengineering               = 0
-ABAC creep                                    = 0
-audit replacing business fact                = 0
-Operations owning Platform state             = 0
-public bootstrap backdoor                    = 0
-superadmin authorization bypass              = 0
-unhandled last-admin race                     = 0
-permission cache stale-state design           = 0
-```
-
-## 22. Remaining Counts
-
-After all product decisions are frozen：
+## 21. Findings
 
 ```text
 BLOCKER = 0
 HIGH    = 0
 MEDIUM  = 1
-LOW     = 0 after progress board synchronization
+LOW     = 0
 ```
 
-`MEDIUM-01` is explicit V1 technical debt，not an unresolved product decision。
+Only remaining finding：
 
-## 23. Gate Conditions
+```text
+MEDIUM-01 Cross-Domain Audit Persistence Gap
+= accepted V1 TECH_DEBT
+```
+
+No unresolved product decisions and no database contract conflicts remain。
+
+## 22. Gate Conditions
 
 Required：
 
@@ -612,12 +588,13 @@ BLOCKER = 0
 HIGH = 0
 Unresolved product decisions = 0
 Database contract conflicts = 0
-Frozen migration edited = NO
+Frozen Operations migration edited = NO
 New Operations table required = NO
 Operations implementation started = NO
+Platform external integration blocker = NO
 ```
 
-## 24. Final Design Gate
+## 23. Final Design Gate
 
 ```text
 Operator Lifecycle        = FROZEN
@@ -635,6 +612,6 @@ OPERATIONS_DESIGN_GATE = PASS
 OPERATIONS_IMPLEMENTATION_STARTED = NO
 ```
 
-Design PASS does not authorize implementation automatically。Another execution-development session must explicitly begin OPS-01。
+Design PASS 不自动授权 implementation。必须由另一个 execution-development session 明确进入 OPS-01。
 
 STOP。
