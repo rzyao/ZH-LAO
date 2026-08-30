@@ -1,5 +1,7 @@
 import pino from 'pino';
+import type { FastifyInstance } from 'fastify';
 import { describe,expect,it } from 'vitest';
+import { buildApp } from '../../src/bootstrap/build-app.js';
 import { asExecutor } from '../../src/database/pool.js';
 import { createIdentityRepositories,IdentityAuthenticationProvider } from '../../src/modules/identity/infrastructure/index.js';
 import { createIdentityPublicQuery,AccessTokenService } from '../../src/modules/identity/application/services/index.js';
@@ -12,24 +14,25 @@ async function register(ctx:IdentityTestApp,phone:string){await ctx.app.inject({
 
 integration('Operations E2E with real Identity AuthenticationProvider',()=>{
  it('runs Identity JWT -> Operator -> role permission -> Operations mutation -> Audit and immediate revocation',async()=>{
-  const ctx=await buildIdentityTestApp({logger});
+  const ctx=await buildIdentityTestApp({logger});let operationsApp:FastifyInstance|undefined;
   try{
    const executor=asExecutor(ctx.pool);const repositories=createIdentityRepositories;const identityPublic=createIdentityPublicQuery(repositories,executor);const authProvider=new IdentityAuthenticationProvider(new AccessTokenService(JWT_TEST_SECRET,TEST_ISSUER,TEST_AUDIENCE),repositories,executor);const operations=buildOperationsModule({executor,transactionManager:ctx.transactions,identity:identityPublic,authentication:authProvider});
-   const rootIdentity=await register(ctx,'+8562051999001');await operations.service.bootstrap(rootIdentity.user_id,'Root Operator');await operations.registerHttp(ctx.app);
-   const me=await ctx.app.inject({method:'GET',url:'/api/v1/admin/operations/me',headers:bearer(rootIdentity.access_token)});expect(me.statusCode).toBe(200);expect(me.json().operator.permissions).toHaveLength(26);
-   const workerIdentity=await register(ctx,'+8562051999002');const created=await ctx.app.inject({method:'POST',url:'/api/v1/admin/operations/operators',headers:bearer(rootIdentity.access_token),payload:{auth_subject_id:workerIdentity.user_id,display_name:'Worker'}});expect(created.statusCode).toBe(201);const operatorId=created.json().operator.operator_id as string;
-   const roleRes=await ctx.app.inject({method:'POST',url:'/api/v1/admin/operations/roles',headers:bearer(rootIdentity.access_token),payload:{code:'e2e_reader',name:'E2E Reader'}});expect(roleRes.statusCode).toBe(201);const roleId=roleRes.json().role.role_id as string;
-   expect((await ctx.app.inject({method:'PUT',url:`/api/v1/admin/operations/roles/${roleId}/permissions`,headers:bearer(rootIdentity.access_token),payload:{permission_keys:['operations.operators.read']}})).statusCode).toBe(200);
-   expect((await ctx.app.inject({method:'PUT',url:`/api/v1/admin/operations/operators/${operatorId}/roles/${roleId}`,headers:bearer(rootIdentity.access_token)})).statusCode).toBe(200);
-   expect((await ctx.app.inject({method:'GET',url:'/api/v1/admin/operations/operators',headers:bearer(workerIdentity.access_token)})).statusCode).toBe(200);
-   expect((await ctx.app.inject({method:'POST',url:'/api/v1/admin/operations/roles',headers:bearer(workerIdentity.access_token),payload:{code:'should_fail',name:'Denied'}})).statusCode).toBe(403);
-   expect((await ctx.app.inject({method:'POST',url:`/api/v1/admin/operations/roles/${roleId}/disable`,headers:bearer(rootIdentity.access_token)})).statusCode).toBe(200);
-   expect((await ctx.app.inject({method:'GET',url:'/api/v1/admin/operations/operators',headers:bearer(workerIdentity.access_token)})).statusCode).toBe(403);
-   expect((await ctx.app.inject({method:'POST',url:`/api/v1/admin/operations/roles/${roleId}/enable`,headers:bearer(rootIdentity.access_token)})).statusCode).toBe(200);
-   expect((await ctx.app.inject({method:'GET',url:'/api/v1/admin/operations/operators',headers:bearer(workerIdentity.access_token)})).statusCode).toBe(200);
-   expect((await ctx.app.inject({method:'POST',url:`/api/v1/admin/operations/operators/${operatorId}/disable`,headers:bearer(rootIdentity.access_token)})).statusCode).toBe(200);
-   expect((await ctx.app.inject({method:'GET',url:'/api/v1/admin/operations/operators',headers:bearer(workerIdentity.access_token)})).statusCode).toBe(403);
+   const rootIdentity=await register(ctx,'+8562051999001');const workerIdentity=await register(ctx,'+8562051999002');await operations.service.bootstrap(rootIdentity.user_id,'Root Operator');
+   operationsApp=buildApp({logger,database:executor});await operations.registerHttp(operationsApp);
+   const me=await operationsApp.inject({method:'GET',url:'/api/v1/admin/operations/me',headers:bearer(rootIdentity.access_token)});expect(me.statusCode).toBe(200);expect(me.json().operator.permissions).toHaveLength(26);
+   const created=await operationsApp.inject({method:'POST',url:'/api/v1/admin/operations/operators',headers:bearer(rootIdentity.access_token),payload:{auth_subject_id:workerIdentity.user_id,display_name:'Worker'}});expect(created.statusCode).toBe(201);const operatorId=created.json().operator.operator_id as string;
+   const roleRes=await operationsApp.inject({method:'POST',url:'/api/v1/admin/operations/roles',headers:bearer(rootIdentity.access_token),payload:{code:'e2e_reader',name:'E2E Reader'}});expect(roleRes.statusCode).toBe(201);const roleId=roleRes.json().role.role_id as string;
+   expect((await operationsApp.inject({method:'PUT',url:`/api/v1/admin/operations/roles/${roleId}/permissions`,headers:bearer(rootIdentity.access_token),payload:{permission_keys:['operations.operators.read']}})).statusCode).toBe(200);
+   expect((await operationsApp.inject({method:'PUT',url:`/api/v1/admin/operations/operators/${operatorId}/roles/${roleId}`,headers:bearer(rootIdentity.access_token)})).statusCode).toBe(200);
+   expect((await operationsApp.inject({method:'GET',url:'/api/v1/admin/operations/operators',headers:bearer(workerIdentity.access_token)})).statusCode).toBe(200);
+   expect((await operationsApp.inject({method:'POST',url:'/api/v1/admin/operations/roles',headers:bearer(workerIdentity.access_token),payload:{code:'should_fail',name:'Denied'}})).statusCode).toBe(403);
+   expect((await operationsApp.inject({method:'POST',url:`/api/v1/admin/operations/roles/${roleId}/disable`,headers:bearer(rootIdentity.access_token)})).statusCode).toBe(200);
+   expect((await operationsApp.inject({method:'GET',url:'/api/v1/admin/operations/operators',headers:bearer(workerIdentity.access_token)})).statusCode).toBe(403);
+   expect((await operationsApp.inject({method:'POST',url:`/api/v1/admin/operations/roles/${roleId}/enable`,headers:bearer(rootIdentity.access_token)})).statusCode).toBe(200);
+   expect((await operationsApp.inject({method:'GET',url:'/api/v1/admin/operations/operators',headers:bearer(workerIdentity.access_token)})).statusCode).toBe(200);
+   expect((await operationsApp.inject({method:'POST',url:`/api/v1/admin/operations/operators/${operatorId}/disable`,headers:bearer(rootIdentity.access_token)})).statusCode).toBe(200);
+   expect((await operationsApp.inject({method:'GET',url:'/api/v1/admin/operations/operators',headers:bearer(workerIdentity.access_token)})).statusCode).toBe(403);
    const audits=await operations.service.listAudits({operatorId:me.json().operator.operator_id,limit:100});expect(audits.items.some(a=>a.actionKey==='operations.operators.create'&&a.targetId===operatorId)).toBe(true);expect(audits.items.some(a=>a.actionKey==='operations.operator_roles.assign')).toBe(true);expect(audits.items.some(a=>a.actionKey==='operations.roles.disable')).toBe(true);
-  }finally{await ctx.dispose();}
+  }finally{if(operationsApp)await operationsApp.close();await ctx.dispose();}
  },120_000);
 });
