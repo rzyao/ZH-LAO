@@ -1,55 +1,87 @@
 # V2 Database Baseline Report
 
-Generated from PostgreSQL catalog at: 2026-08-30T10:20:21.982Z
+Generated from PostgreSQL catalog at: 2026-08-30T10:39:54.163Z
 
-Final status: **PASS_WITH_BLOCKERS**
+Final status: **PASS**
 
 ## Runtime and infrastructure
 
 | Item | Value |
 | --- | --- |
-| Database | zh_lao_v2_validation_20260830101915 |
+| Database | zh_lao_v2_validation_20260830103734 |
 | PostgreSQL | 18.6 (Debian 18.6-1.pgdg13+2) |
 | Role | zh_lao |
-| Business schemas | audio, chat, commerce, content, identity, learning, operations, platform, rewards, social, trust |
-| Business tables | 117 executable / 121 frozen target |
+| Business schemas | identity, content, learning, social, chat, audio, commerce, rewards, trust, operations, platform |
+| Infrastructure schemas | infrastructure |
+| Business tables | 122 core+revision / 121 original target |
+| Infrastructure tables | 2 |
 | Extensions | pg_trgm 1.6, plpgsql 1.0 |
 | Illegal cross-domain FK | 0 |
 
-Only `pg_trgm` was added by V2. `plpgsql` is built in. The V2 baseline did not install PostGIS, citext, or pgcrypto, and it did not create physical Asset/Media or outbox tables.
+Only `pg_trgm` was added by V2. `plpgsql` is built in. The V2 baseline did not install PostGIS, citext, or pgcrypto. Physical asset and outbox infrastructure is isolated in the `infrastructure` schema.
 
 ## Migration files
 
 | Migration | SHA-256 | Applied at |
 | --- | --- | --- |
-| 0000_infrastructure.sql | 5d918e0280348c62b2f9ca1a8a7d57cf15a779f2da40c2f2cb0493ce70099e5a | 2026-08-30T10:19:15.231Z |
-| 0100_identity.sql | 0e6d17346ed339145b4cdc7dc0c6772262685169eca64f1b503ca2bedb183d36 | 2026-08-30T10:19:15.243Z |
-| 0200_operations.sql | c35fa48ff2bf841550cac0927879b999b827c23b84a01ebf9bd55b01986fc632 | 2026-08-30T10:19:15.251Z |
-| 0300_platform.sql | 42df6a8c3a78ab149f57e4bd28e6896aae1590e8349a0a9dc2e54b5fa4791183 | 2026-08-30T10:19:15.258Z |
-| 0400_content.sql | c722654def7a71079d98c355d046d8d6bc3a68f304f3998573d0862540a40986 | 2026-08-30T10:19:15.267Z |
-| 0500_learning.sql | 7f6007c313f684385a5dba4cf9ad134b49293468d7479cc7a415c5bfbabfb06c | 2026-08-30T10:19:15.301Z |
-| 0600_audio.sql | 42ca0d357babb1acf6b4ead5a500b16c096a8b8a1b3861b67e0ee3f4dddbc453 | 2026-08-30T10:19:15.312Z |
-| 0700_social.sql | b5853d01e9fecb129cf0d95f71e36d6d221dbec8a3c50d6ef0a3e8d93120b4a9 | 2026-08-30T10:19:15.331Z |
-| 0800_chat.sql | 32b0ab8f5e4f1c05a229c99fd6063fbfd4947e3f2014578ae6bc0a5cefeb8126 | 2026-08-30T10:19:15.352Z |
-| 0900_commerce.sql | 79c56da178e30e303955fa88837a7c735e707a04578a5cc9c56d9ea8d188282d | 2026-08-30T10:19:15.363Z |
-| 1000_rewards.sql | 86f4dc243a826481a51e37e595d90923d1e570f62923e69e13c6396b78c5a792 | 2026-08-30T10:19:15.437Z |
-| 1100_trust.sql | c08b1476e4ffe1736e135657dff0001ca92c57465e6236fbf645fd1f5c20964a | 2026-08-30T10:19:15.451Z |
+| 0000_infrastructure.sql | 5d918e0280348c62b2f9ca1a8a7d57cf15a779f2da40c2f2cb0493ce70099e5a | 2026-08-30T10:37:34.679Z |
+| 0100_identity.sql | 0e6d17346ed339145b4cdc7dc0c6772262685169eca64f1b503ca2bedb183d36 | 2026-08-30T10:37:34.686Z |
+| 0200_operations.sql | c35fa48ff2bf841550cac0927879b999b827c23b84a01ebf9bd55b01986fc632 | 2026-08-30T10:37:34.691Z |
+| 0300_platform.sql | 42df6a8c3a78ab149f57e4bd28e6896aae1590e8349a0a9dc2e54b5fa4791183 | 2026-08-30T10:37:34.699Z |
+| 0400_content.sql | c722654def7a71079d98c355d046d8d6bc3a68f304f3998573d0862540a40986 | 2026-08-30T10:37:34.709Z |
+| 0500_learning.sql | 7f6007c313f684385a5dba4cf9ad134b49293468d7479cc7a415c5bfbabfb06c | 2026-08-30T10:37:34.744Z |
+| 0600_audio.sql | 42ca0d357babb1acf6b4ead5a500b16c096a8b8a1b3861b67e0ee3f4dddbc453 | 2026-08-30T10:37:34.756Z |
+| 0700_social.sql | b5853d01e9fecb129cf0d95f71e36d6d221dbec8a3c50d6ef0a3e8d93120b4a9 | 2026-08-30T10:37:34.776Z |
+| 0800_chat.sql | 32b0ab8f5e4f1c05a229c99fd6063fbfd4947e3f2014578ae6bc0a5cefeb8126 | 2026-08-30T10:37:34.801Z |
+| 0900_commerce.sql | 79c56da178e30e303955fa88837a7c735e707a04578a5cc9c56d9ea8d188282d | 2026-08-30T10:37:34.812Z |
+| 1000_rewards.sql | 86f4dc243a826481a51e37e595d90923d1e570f62923e69e13c6396b78c5a792 | 2026-08-30T10:37:34.887Z |
+| 1100_trust.sql | c08b1476e4ffe1736e135657dff0001ca92c57465e6236fbf645fd1f5c20964a | 2026-08-30T10:37:34.901Z |
+| 1200_asset_infrastructure.sql | e2f0a031d749e1937764ca4b551bbae31a73b1a13f874ce2a1b961bc95b3e585 | 2026-08-30T10:37:34.913Z |
+| 1210_trust_evidence.sql | b69422055ca78c7b44d44825154bdfa0c360da8ced978222d05c7d83ec3c5816 | 2026-08-30T10:37:34.918Z |
+| 1220_identity_auth_runtime.sql | f8de46ddc9f570778fb0e4049cf3a9a6bb32be129a5363a4f1e47026bd31e100 | 2026-08-30T10:37:34.923Z |
+| 1230_system_outbox.sql | e110b36048b6f842833601c86a4ab825ba8a044d0b708b7a3527b9391743cd29 | 2026-08-30T10:37:34.931Z |
+| 1240_content_revision.sql | 89fca2f3e362f8e254167dae4a55edd27d5f320942b63a65c70fbd8f63569cb2 | 2026-08-30T10:37:34.937Z |
 
 ## Domain summary
 
 | Schema | Tables | PK | FK | UNIQUE constraints | CHECK | Indexes |
 | --- | --- | --- | --- | --- | --- | --- |
-| identity | 4 | 4 | 3 | 2 | 4 | 7 |
-| content | 31 | 31 | 41 | 25 | 42 | 63 |
+| identity | 7 | 7 | 7 | 4 | 13 | 20 |
+| content | 32 | 32 | 42 | 27 | 47 | 69 |
 | learning | 10 | 10 | 1 | 1 | 15 | 17 |
 | social | 19 | 19 | 26 | 10 | 26 | 43 |
 | chat | 7 | 7 | 9 | 6 | 14 | 15 |
 | audio | 9 | 9 | 12 | 14 | 34 | 33 |
 | commerce | 16 | 16 | 20 | 16 | 76 | 66 |
 | rewards | 5 | 5 | 5 | 8 | 31 | 32 |
-| trust | 5 | 5 | 5 | 2 | 36 | 23 |
+| trust | 6 | 6 | 7 | 2 | 45 | 28 |
 | operations | 5 | 5 | 4 | 2 | 13 | 12 |
 | platform | 6 | 6 | 3 | 5 | 28 | 13 |
+
+### Infrastructure inventory
+
+| Schema | Tables | PK | FK | UNIQUE constraints | CHECK | Indexes |
+| --- | --- | --- | --- | --- | --- | --- |
+| infrastructure | 2 | 2 | 0 | 2 | 10 | 9 |
+
+## Baseline integrity summary
+
+| Metric | Result |
+| --- | --- |
+| Tables without primary key | 0 |
+| Illegal cross-domain foreign keys | 0 |
+| Logical UUID violations | 0 |
+| TIMESTAMP WITHOUT TIME ZONE columns | 0 |
+| Unresolved specification blockers | 0 |
+
+## Previously missing business tables
+
+| Table | Present |
+| --- | --- |
+| identity.otp_challenges | YES |
+| identity.sessions | YES |
+| identity.devices | YES |
+| trust.moderation_evidence | YES |
 
 ## Cross-domain FK audit
 
@@ -117,22 +149,29 @@ Only `pg_trgm` was added by V2. `plpgsql` is built in. The V2 baseline did not i
 | rewards.reward_deliveries.target_reference_id | uuid | PASS |
 | trust.reports.reporter_user_id | uuid | PASS |
 | trust.reports.subject_id | uuid | PASS |
+| trust.moderation_evidence.asset_id | uuid | PASS |
+| content.content_revisions.entity_id | uuid | PASS |
+| content.content_revisions.created_by_operator_id | uuid | PASS |
+| infrastructure.assets.id | uuid | PASS |
+| infrastructure.system_outbox_events.id | uuid | PASS |
+| infrastructure.system_outbox_events.event_id | uuid | PASS |
+| infrastructure.system_outbox_events.aggregate_id | uuid | PASS |
 
 ## Document / migration / PostgreSQL differences
 
 - Content authoritative list is Curriculum 5 + Practice 5 = 31; the higher-level 6 + 4 grouping is treated as a non-blocking categorization mismatch.
 - Identity `users.public_id` is UUID and `basic_profiles.avatar_media_id` is UUID without FK, applying ADR-018/D-152 over the older Identity field page.
-- The executable target is 117 tables. Four frozen table identities lack a non-conflicting physical contract and are not represented by speculative DDL.
+- The original 121-table business inventory is complete; `content.content_revisions` is an additional Content-owned physical table required by the revision contract, so the final business count is 122.
 
-## Specification blockers
+## Resolved blockers
 
-- **BLOCKED_BY_SPEC_CONFLICT — identity auxiliary authentication tables:** otp_challenges, sessions, and devices have frozen responsibilities but unresolved types, nullability, status values, defaults, and uniqueness scope.
-- **BLOCKED_BY_SPEC_CONFLICT — trust.moderation_evidence storage ownership:** storage_key conflicts with D-152 Asset canonical ownership; the replacement asset_id contract and payload CHECK are not frozen.
-- **BLOCKED_BY_SPEC_CONFLICT — Media/Asset Infrastructure:** Canonical ownership is frozen, but the physical table, lifecycle states, fields, indexes, and retention are designing.
-- **BLOCKED_BY_SPEC_CONFLICT — system_outbox_events:** The single global outbox responsibility is frozen, but its physical columns, indexes, retry metadata, and retention are designing.
-- **BLOCKED_BY_SPEC_CONFLICT — Content Revision physical model:** Content owns revisions, but the physical version/revision tables and publishing contract remain designing.
+- Identity OTP, Session, and Device contracts are frozen in `1220_identity_auth_runtime.sql` with hashed secrets, lifecycle CHECKs, domain FKs, and targeted indexes.
+- Trust evidence stores nullable `asset_id` for file evidence and no longer stores `storage_key`; physical file facts belong only to `infrastructure.assets`.
+- Media/Asset Infrastructure is frozen as `infrastructure.assets`; business domains retain only UUID logical references.
+- The shared transactional outbox is frozen as `infrastructure.system_outbox_events` with UUID event/aggregate IDs and unpublished-event scanning indexes.
+- Content revisions are frozen as `content.content_revisions` with polymorphic Content logical UUIDs, monotonic revision numbers, lifecycle status, snapshots, and one published revision per entity.
 
-Blocked tables: `identity.otp_challenges`, `identity.sessions`, `identity.devices`, `trust.moderation_evidence`.
+Unresolved specification blockers: 0.
 
 ## Complete PostgreSQL catalog
 
@@ -205,6 +244,48 @@ Indexes:
 | --- | --- | --- | --- |
 | basic_profiles_pkey | true | — | CREATE UNIQUE INDEX basic_profiles_pkey ON identity.basic_profiles USING btree (user_id) |
 
+#### identity.devices
+
+| Column | Type | Nullable | Default | Identity |
+| --- | --- | --- | --- | --- |
+| id | bigint | false | — | a |
+| user_id | bigint | false | — | — |
+| installation_id | uuid | false | — | — |
+| platform | character varying(16) | false | — | — |
+| device_name | character varying(128) | true | — | — |
+| app_version | character varying(32) | true | — | — |
+| push_token | text | true | — | — |
+| first_seen_at | timestamp with time zone | false | now() | — |
+| last_seen_at | timestamp with time zone | true | — | — |
+| revoked_at | timestamp with time zone | true | — | — |
+| created_at | timestamp with time zone | false | now() | — |
+| updated_at | timestamp with time zone | false | now() | — |
+
+Constraints:
+
+| Name | Type | Definition |
+| --- | --- | --- |
+| devices_platform_check | c | CHECK (platform::text = ANY (ARRAY['android'::character varying, 'ios'::character varying]::text[])) |
+| devices_user_id_fkey | f | FOREIGN KEY (user_id) REFERENCES identity.users(id) ON DELETE RESTRICT |
+| devices_created_at_not_null | n | NOT NULL created_at |
+| devices_first_seen_at_not_null | n | NOT NULL first_seen_at |
+| devices_id_not_null | n | NOT NULL id |
+| devices_installation_id_not_null | n | NOT NULL installation_id |
+| devices_platform_not_null | n | NOT NULL platform |
+| devices_updated_at_not_null | n | NOT NULL updated_at |
+| devices_user_id_not_null | n | NOT NULL user_id |
+| devices_pkey | p | PRIMARY KEY (id) |
+| devices_installation_id_key | u | UNIQUE (installation_id) |
+
+Indexes:
+
+| Name | Unique | Predicate | Definition |
+| --- | --- | --- | --- |
+| devices_installation_id_key | true | — | CREATE UNIQUE INDEX devices_installation_id_key ON identity.devices USING btree (installation_id) |
+| devices_pkey | true | — | CREATE UNIQUE INDEX devices_pkey ON identity.devices USING btree (id) |
+| idx_devices_user | false | — | CREATE INDEX idx_devices_user ON identity.devices USING btree (user_id, last_seen_at DESC) |
+| uq_devices_push_token | true | ((push_token IS NOT NULL) AND (revoked_at IS NULL)) | CREATE UNIQUE INDEX uq_devices_push_token ON identity.devices USING btree (push_token) WHERE ((push_token IS NOT NULL) AND (revoked_at IS NULL)) |
+
 #### identity.learning_profiles
 
 | Column | Type | Nullable | Default | Identity |
@@ -231,6 +312,95 @@ Indexes:
 | Name | Unique | Predicate | Definition |
 | --- | --- | --- | --- |
 | learning_profiles_pkey | true | — | CREATE UNIQUE INDEX learning_profiles_pkey ON identity.learning_profiles USING btree (user_id) |
+
+#### identity.otp_challenges
+
+| Column | Type | Nullable | Default | Identity |
+| --- | --- | --- | --- | --- |
+| id | bigint | false | — | a |
+| user_id | bigint | true | — | — |
+| phone_number | character varying(32) | false | — | — |
+| purpose | character varying(32) | false | — | — |
+| code_hash | character varying(255) | false | — | — |
+| status | character varying(16) | false | 'pending'::character varying | — |
+| attempt_count | integer | false | 0 | — |
+| max_attempts | smallint | false | 5 | — |
+| expires_at | timestamp with time zone | false | — | — |
+| verified_at | timestamp with time zone | true | — | — |
+| created_at | timestamp with time zone | false | now() | — |
+
+Constraints:
+
+| Name | Type | Definition |
+| --- | --- | --- |
+| otp_challenges_attempt_count_check | c | CHECK (attempt_count >= 0) |
+| otp_challenges_attempt_limit_check | c | CHECK (attempt_count <= max_attempts) |
+| otp_challenges_max_attempts_check | c | CHECK (max_attempts > 0) |
+| otp_challenges_purpose_check | c | CHECK (purpose::text = ANY (ARRAY['login'::character varying, 'bind_phone'::character varying, 'change_phone'::character varying]::text[])) |
+| otp_challenges_status_check | c | CHECK (status::text = ANY (ARRAY['pending'::character varying, 'verified'::character varying, 'expired'::character varying, 'cancelled'::character varying, 'locked'::character varying]::text[])) |
+| otp_challenges_status_time_check | c | CHECK (status::text = 'verified'::text AND verified_at IS NOT NULL OR status::text <> 'verified'::text AND verified_at IS NULL) |
+| otp_challenges_user_id_fkey | f | FOREIGN KEY (user_id) REFERENCES identity.users(id) ON DELETE RESTRICT |
+| otp_challenges_attempt_count_not_null | n | NOT NULL attempt_count |
+| otp_challenges_code_hash_not_null | n | NOT NULL code_hash |
+| otp_challenges_created_at_not_null | n | NOT NULL created_at |
+| otp_challenges_expires_at_not_null | n | NOT NULL expires_at |
+| otp_challenges_id_not_null | n | NOT NULL id |
+| otp_challenges_max_attempts_not_null | n | NOT NULL max_attempts |
+| otp_challenges_phone_number_not_null | n | NOT NULL phone_number |
+| otp_challenges_purpose_not_null | n | NOT NULL purpose |
+| otp_challenges_status_not_null | n | NOT NULL status |
+| otp_challenges_pkey | p | PRIMARY KEY (id) |
+
+Indexes:
+
+| Name | Unique | Predicate | Definition |
+| --- | --- | --- | --- |
+| idx_otp_challenges_destination_purpose | false | — | CREATE INDEX idx_otp_challenges_destination_purpose ON identity.otp_challenges USING btree (phone_number, purpose, created_at DESC) |
+| idx_otp_challenges_expiry | false | ((status)::text = 'pending'::text) | CREATE INDEX idx_otp_challenges_expiry ON identity.otp_challenges USING btree (expires_at) WHERE ((status)::text = 'pending'::text) |
+| idx_otp_challenges_status_created | false | — | CREATE INDEX idx_otp_challenges_status_created ON identity.otp_challenges USING btree (status, created_at DESC) |
+| otp_challenges_pkey | true | — | CREATE UNIQUE INDEX otp_challenges_pkey ON identity.otp_challenges USING btree (id) |
+
+#### identity.sessions
+
+| Column | Type | Nullable | Default | Identity |
+| --- | --- | --- | --- | --- |
+| id | bigint | false | — | a |
+| user_id | bigint | false | — | — |
+| device_id | bigint | true | — | — |
+| refresh_token_hash | character varying(255) | false | — | — |
+| status | character varying(16) | false | 'active'::character varying | — |
+| expires_at | timestamp with time zone | false | — | — |
+| last_active_at | timestamp with time zone | true | — | — |
+| created_at | timestamp with time zone | false | now() | — |
+| revoked_at | timestamp with time zone | true | — | — |
+| revocation_reason | character varying(64) | true | — | — |
+
+Constraints:
+
+| Name | Type | Definition |
+| --- | --- | --- |
+| sessions_status_check | c | CHECK (status::text = ANY (ARRAY['active'::character varying, 'revoked'::character varying, 'expired'::character varying]::text[])) |
+| sessions_status_revocation_check | c | CHECK (status::text = 'revoked'::text AND revoked_at IS NOT NULL AND revocation_reason IS NOT NULL OR status::text <> 'revoked'::text AND revoked_at IS NULL AND revocation_reason IS NULL) |
+| sessions_device_id_fkey | f | FOREIGN KEY (device_id) REFERENCES identity.devices(id) ON DELETE RESTRICT |
+| sessions_user_id_fkey | f | FOREIGN KEY (user_id) REFERENCES identity.users(id) ON DELETE RESTRICT |
+| sessions_created_at_not_null | n | NOT NULL created_at |
+| sessions_expires_at_not_null | n | NOT NULL expires_at |
+| sessions_id_not_null | n | NOT NULL id |
+| sessions_refresh_token_hash_not_null | n | NOT NULL refresh_token_hash |
+| sessions_status_not_null | n | NOT NULL status |
+| sessions_user_id_not_null | n | NOT NULL user_id |
+| sessions_pkey | p | PRIMARY KEY (id) |
+| sessions_refresh_token_hash_key | u | UNIQUE (refresh_token_hash) |
+
+Indexes:
+
+| Name | Unique | Predicate | Definition |
+| --- | --- | --- | --- |
+| idx_sessions_device | false | (device_id IS NOT NULL) | CREATE INDEX idx_sessions_device ON identity.sessions USING btree (device_id, created_at DESC) WHERE (device_id IS NOT NULL) |
+| idx_sessions_expiry | false | ((status)::text = 'active'::text) | CREATE INDEX idx_sessions_expiry ON identity.sessions USING btree (expires_at) WHERE ((status)::text = 'active'::text) |
+| idx_sessions_user_status | false | — | CREATE INDEX idx_sessions_user_status ON identity.sessions USING btree (user_id, status, created_at DESC) |
+| sessions_pkey | true | — | CREATE UNIQUE INDEX sessions_pkey ON identity.sessions USING btree (id) |
+| sessions_refresh_token_hash_key | true | — | CREATE UNIQUE INDEX sessions_refresh_token_hash_key ON identity.sessions USING btree (refresh_token_hash) |
 
 #### identity.users
 
@@ -375,6 +545,55 @@ Indexes:
 | --- | --- | --- | --- |
 | content_relations_pkey | true | — | CREATE UNIQUE INDEX content_relations_pkey ON content.content_relations USING btree (id) |
 | content_relations_source_content_id_target_content_id_relat_key | true | — | CREATE UNIQUE INDEX content_relations_source_content_id_target_content_id_relat_key ON content.content_relations USING btree (source_content_id, target_content_id, relation_type) |
+
+#### content.content_revisions
+
+| Column | Type | Nullable | Default | Identity |
+| --- | --- | --- | --- | --- |
+| id | bigint | false | — | a |
+| revision_public_id | uuid | false | — | — |
+| entity_type | character varying(32) | false | — | — |
+| entity_id | uuid | false | — | — |
+| revision_number | integer | false | — | — |
+| status | character varying(16) | false | 'draft'::character varying | — |
+| snapshot | jsonb | false | — | — |
+| created_by_operator_id | uuid | true | — | — |
+| created_at | timestamp with time zone | false | now() | — |
+| published_at | timestamp with time zone | true | — | — |
+| supersedes_revision_id | bigint | true | — | — |
+
+Constraints:
+
+| Name | Type | Definition |
+| --- | --- | --- |
+| content_revisions_entity_type_check | c | CHECK (entity_type::text = ANY (ARRAY['content'::character varying, 'course'::character varying, 'lesson'::character varying, 'exercise'::character varying, 'question'::character varying, 'translation'::character varying]::text[])) |
+| content_revisions_published_time_check | c | CHECK (status::text = 'published'::text AND published_at IS NOT NULL OR status::text <> 'published'::text AND published_at IS NULL) |
+| content_revisions_revision_number_check | c | CHECK (revision_number > 0) |
+| content_revisions_snapshot_check | c | CHECK (jsonb_typeof(snapshot) = 'object'::text) |
+| content_revisions_status_check | c | CHECK (status::text = ANY (ARRAY['draft'::character varying, 'published'::character varying, 'superseded'::character varying]::text[])) |
+| content_revisions_supersedes_revision_id_fkey | f | FOREIGN KEY (supersedes_revision_id) REFERENCES content.content_revisions(id) ON DELETE RESTRICT |
+| content_revisions_created_at_not_null | n | NOT NULL created_at |
+| content_revisions_entity_id_not_null | n | NOT NULL entity_id |
+| content_revisions_entity_type_not_null | n | NOT NULL entity_type |
+| content_revisions_id_not_null | n | NOT NULL id |
+| content_revisions_revision_number_not_null | n | NOT NULL revision_number |
+| content_revisions_revision_public_id_not_null | n | NOT NULL revision_public_id |
+| content_revisions_snapshot_not_null | n | NOT NULL snapshot |
+| content_revisions_status_not_null | n | NOT NULL status |
+| content_revisions_pkey | p | PRIMARY KEY (id) |
+| content_revisions_entity_type_entity_id_revision_number_key | u | UNIQUE (entity_type, entity_id, revision_number) |
+| content_revisions_revision_public_id_key | u | UNIQUE (revision_public_id) |
+
+Indexes:
+
+| Name | Unique | Predicate | Definition |
+| --- | --- | --- | --- |
+| content_revisions_entity_type_entity_id_revision_number_key | true | — | CREATE UNIQUE INDEX content_revisions_entity_type_entity_id_revision_number_key ON content.content_revisions USING btree (entity_type, entity_id, revision_number) |
+| content_revisions_pkey | true | — | CREATE UNIQUE INDEX content_revisions_pkey ON content.content_revisions USING btree (id) |
+| content_revisions_revision_public_id_key | true | — | CREATE UNIQUE INDEX content_revisions_revision_public_id_key ON content.content_revisions USING btree (revision_public_id) |
+| idx_content_revisions_entity | false | — | CREATE INDEX idx_content_revisions_entity ON content.content_revisions USING btree (entity_type, entity_id, revision_number DESC) |
+| idx_content_revisions_status_time | false | — | CREATE INDEX idx_content_revisions_status_time ON content.content_revisions USING btree (status, published_at DESC) |
+| uq_content_revisions_current_published | true | ((status)::text = 'published'::text) | CREATE UNIQUE INDEX uq_content_revisions_current_published ON content.content_revisions USING btree (entity_type, entity_id) WHERE ((status)::text = 'published'::text) |
 
 #### content.content_tags
 
@@ -4215,6 +4434,61 @@ Indexes:
 | moderation_decisions_case_unique | true | — | CREATE UNIQUE INDEX moderation_decisions_case_unique ON trust.moderation_decisions USING btree (case_id) |
 | moderation_decisions_pkey | true | — | CREATE UNIQUE INDEX moderation_decisions_pkey ON trust.moderation_decisions USING btree (id) |
 
+#### trust.moderation_evidence
+
+| Column | Type | Nullable | Default | Identity |
+| --- | --- | --- | --- | --- |
+| id | uuid | false | — | — |
+| case_id | uuid | false | — | — |
+| appeal_id | uuid | true | — | — |
+| evidence_type | character varying(32) | false | — | — |
+| source_type | character varying(24) | false | — | — |
+| content_text | text | true | — | — |
+| asset_id | uuid | true | — | — |
+| reference_domain | character varying(32) | true | — | — |
+| reference_type | character varying(32) | true | — | — |
+| reference_id | uuid | true | — | — |
+| metadata | jsonb | false | '{}'::jsonb | — |
+| content_sha256 | character varying(64) | true | — | — |
+| captured_at | timestamp with time zone | false | — | — |
+| submitted_by_user_id | uuid | true | — | — |
+| added_by_operator_id | uuid | true | — | — |
+| created_at | timestamp with time zone | false | now() | — |
+
+Constraints:
+
+| Name | Type | Definition |
+| --- | --- | --- |
+| moderation_evidence_actor_check | c | CHECK ((source_type::text = ANY (ARRAY['reporter'::character varying, 'appellant'::character varying]::text[])) AND submitted_by_user_id IS NOT NULL AND added_by_operator_id IS NULL OR source_type::text = 'moderator'::text AND submitted_by_user_id IS NULL AND added_by_operator_id IS NOT NULL OR (source_type::text = ANY (ARRAY['system'::character varying, 'domain_snapshot'::character varying]::text[])) AND submitted_by_user_id IS NULL AND added_by_operator_id IS NULL) |
+| moderation_evidence_content_sha256_check | c | CHECK (content_sha256 IS NULL OR content_sha256::text ~ '^[0-9a-f]{64}$'::text) |
+| moderation_evidence_evidence_type_check | c | CHECK (evidence_type::text = ANY (ARRAY['text_snapshot'::character varying, 'media_snapshot'::character varying, 'object_reference'::character varying, 'metadata_snapshot'::character varying]::text[])) |
+| moderation_evidence_metadata_check | c | CHECK (jsonb_typeof(metadata) = 'object'::text) |
+| moderation_evidence_payload_check | c | CHECK (evidence_type::text = 'text_snapshot'::text AND content_text IS NOT NULL AND asset_id IS NULL AND reference_id IS NULL AND content_sha256 IS NOT NULL OR evidence_type::text = 'media_snapshot'::text AND content_text IS NULL AND asset_id IS NOT NULL AND reference_id IS NULL AND content_sha256 IS NOT NULL OR evidence_type::text = 'object_reference'::text AND content_text IS NULL AND asset_id IS NULL AND reference_domain IS NOT NULL AND reference_type IS NOT NULL AND reference_id IS NOT NULL OR evidence_type::text = 'metadata_snapshot'::text AND content_text IS NULL AND asset_id IS NULL AND reference_id IS NULL AND metadata <> '{}'::jsonb) |
+| moderation_evidence_reference_domain_check | c | CHECK (reference_domain IS NULL OR (reference_domain::text = ANY (ARRAY['identity'::character varying, 'social'::character varying, 'chat'::character varying, 'commerce'::character varying]::text[]))) |
+| moderation_evidence_reference_pair_check | c | CHECK (reference_domain IS NULL AND reference_type IS NULL AND reference_id IS NULL OR reference_domain IS NOT NULL AND reference_type IS NOT NULL AND reference_id IS NOT NULL) |
+| moderation_evidence_reference_type_check | c | CHECK (reference_type IS NULL OR (reference_type::text = ANY (ARRAY['user'::character varying, 'social_profile'::character varying, 'social_post'::character varying, 'social_post_image'::character varying, 'chat_message'::character varying, 'conversation'::character varying]::text[]))) |
+| moderation_evidence_source_type_check | c | CHECK (source_type::text = ANY (ARRAY['system'::character varying, 'domain_snapshot'::character varying, 'reporter'::character varying, 'appellant'::character varying, 'moderator'::character varying]::text[])) |
+| moderation_evidence_appeal_id_fkey | f | FOREIGN KEY (appeal_id) REFERENCES trust.appeals(id) ON DELETE RESTRICT |
+| moderation_evidence_case_id_fkey | f | FOREIGN KEY (case_id) REFERENCES trust.moderation_cases(id) ON DELETE RESTRICT |
+| moderation_evidence_captured_at_not_null | n | NOT NULL captured_at |
+| moderation_evidence_case_id_not_null | n | NOT NULL case_id |
+| moderation_evidence_created_at_not_null | n | NOT NULL created_at |
+| moderation_evidence_evidence_type_not_null | n | NOT NULL evidence_type |
+| moderation_evidence_id_not_null | n | NOT NULL id |
+| moderation_evidence_metadata_not_null | n | NOT NULL metadata |
+| moderation_evidence_source_type_not_null | n | NOT NULL source_type |
+| moderation_evidence_pkey | p | PRIMARY KEY (id) |
+
+Indexes:
+
+| Name | Unique | Predicate | Definition |
+| --- | --- | --- | --- |
+| idx_moderation_evidence_appeal | false | (appeal_id IS NOT NULL) | CREATE INDEX idx_moderation_evidence_appeal ON trust.moderation_evidence USING btree (appeal_id, captured_at) WHERE (appeal_id IS NOT NULL) |
+| idx_moderation_evidence_asset | false | (asset_id IS NOT NULL) | CREATE INDEX idx_moderation_evidence_asset ON trust.moderation_evidence USING btree (asset_id, captured_at) WHERE (asset_id IS NOT NULL) |
+| idx_moderation_evidence_case | false | — | CREATE INDEX idx_moderation_evidence_case ON trust.moderation_evidence USING btree (case_id, captured_at) |
+| idx_moderation_evidence_reference | false | (reference_id IS NOT NULL) | CREATE INDEX idx_moderation_evidence_reference ON trust.moderation_evidence USING btree (reference_domain, reference_type, reference_id) WHERE (reference_id IS NOT NULL) |
+| moderation_evidence_pkey | true | — | CREATE UNIQUE INDEX moderation_evidence_pkey ON trust.moderation_evidence USING btree (id) |
+
 #### trust.reports
 
 | Column | Type | Nullable | Default | Identity |
@@ -4657,4 +4931,113 @@ Indexes:
 | --- | --- | --- | --- |
 | runtime_configs_pkey | true | — | CREATE UNIQUE INDEX runtime_configs_pkey ON platform.runtime_configs USING btree (id) |
 | uq_runtime_configs_key | true | — | CREATE UNIQUE INDEX uq_runtime_configs_key ON platform.runtime_configs USING btree (key) |
+
+### infrastructure
+
+#### infrastructure.assets
+
+| Column | Type | Nullable | Default | Identity |
+| --- | --- | --- | --- | --- |
+| id | uuid | false | — | — |
+| storage_provider | character varying(32) | false | — | — |
+| storage_bucket | character varying(255) | false | — | — |
+| storage_key | character varying(1024) | false | — | — |
+| mime_type | character varying(255) | false | — | — |
+| size_bytes | bigint | false | — | — |
+| checksum_algorithm | character varying(32) | true | — | — |
+| checksum | character varying(256) | true | — | — |
+| status | character varying(16) | false | 'pending'::character varying | — |
+| original_filename | character varying(512) | true | — | — |
+| file_extension | character varying(32) | true | — | — |
+| width | integer | true | — | — |
+| height | integer | true | — | — |
+| duration_ms | bigint | true | — | — |
+| metadata | jsonb | false | '{}'::jsonb | — |
+| created_at | timestamp with time zone | false | now() | — |
+| updated_at | timestamp with time zone | false | now() | — |
+| deleted_at | timestamp with time zone | true | — | — |
+
+Constraints:
+
+| Name | Type | Definition |
+| --- | --- | --- |
+| assets_deleted_state_check | c | CHECK (status::text = 'deleted'::text AND deleted_at IS NOT NULL OR status::text <> 'deleted'::text AND deleted_at IS NULL) |
+| assets_duration_ms_check | c | CHECK (duration_ms IS NULL OR duration_ms >= 0) |
+| assets_height_check | c | CHECK (height IS NULL OR height > 0) |
+| assets_metadata_check | c | CHECK (jsonb_typeof(metadata) = 'object'::text) |
+| assets_size_bytes_check | c | CHECK (size_bytes >= 0) |
+| assets_status_check | c | CHECK (status::text = ANY (ARRAY['pending'::character varying, 'ready'::character varying, 'deleted'::character varying, 'failed'::character varying]::text[])) |
+| assets_width_check | c | CHECK (width IS NULL OR width > 0) |
+| assets_created_at_not_null | n | NOT NULL created_at |
+| assets_id_not_null | n | NOT NULL id |
+| assets_metadata_not_null | n | NOT NULL metadata |
+| assets_mime_type_not_null | n | NOT NULL mime_type |
+| assets_size_bytes_not_null | n | NOT NULL size_bytes |
+| assets_status_not_null | n | NOT NULL status |
+| assets_storage_bucket_not_null | n | NOT NULL storage_bucket |
+| assets_storage_key_not_null | n | NOT NULL storage_key |
+| assets_storage_provider_not_null | n | NOT NULL storage_provider |
+| assets_updated_at_not_null | n | NOT NULL updated_at |
+| assets_pkey | p | PRIMARY KEY (id) |
+| assets_storage_provider_storage_bucket_storage_key_key | u | UNIQUE (storage_provider, storage_bucket, storage_key) |
+
+Indexes:
+
+| Name | Unique | Predicate | Definition |
+| --- | --- | --- | --- |
+| assets_pkey | true | — | CREATE UNIQUE INDEX assets_pkey ON infrastructure.assets USING btree (id) |
+| assets_storage_provider_storage_bucket_storage_key_key | true | — | CREATE UNIQUE INDEX assets_storage_provider_storage_bucket_storage_key_key ON infrastructure.assets USING btree (storage_provider, storage_bucket, storage_key) |
+| idx_assets_checksum | false | (checksum IS NOT NULL) | CREATE INDEX idx_assets_checksum ON infrastructure.assets USING btree (checksum_algorithm, checksum) WHERE (checksum IS NOT NULL) |
+| idx_assets_status_created | false | — | CREATE INDEX idx_assets_status_created ON infrastructure.assets USING btree (status, created_at DESC) |
+
+#### infrastructure.system_outbox_events
+
+| Column | Type | Nullable | Default | Identity |
+| --- | --- | --- | --- | --- |
+| id | uuid | false | — | — |
+| event_id | uuid | false | — | — |
+| source_domain | character varying(32) | false | — | — |
+| event_type | character varying(128) | false | — | — |
+| aggregate_type | character varying(64) | false | — | — |
+| aggregate_id | uuid | false | — | — |
+| payload | jsonb | false | '{}'::jsonb | — |
+| headers | jsonb | false | '{}'::jsonb | — |
+| occurred_at | timestamp with time zone | false | — | — |
+| available_at | timestamp with time zone | false | now() | — |
+| published_at | timestamp with time zone | true | — | — |
+| attempt_count | integer | false | 0 | — |
+| last_error | text | true | — | — |
+| created_at | timestamp with time zone | false | now() | — |
+
+Constraints:
+
+| Name | Type | Definition |
+| --- | --- | --- |
+| system_outbox_events_attempt_count_check | c | CHECK (attempt_count >= 0) |
+| system_outbox_events_headers_check | c | CHECK (jsonb_typeof(headers) = 'object'::text) |
+| system_outbox_events_payload_check | c | CHECK (jsonb_typeof(payload) = 'object'::text) |
+| system_outbox_events_aggregate_id_not_null | n | NOT NULL aggregate_id |
+| system_outbox_events_aggregate_type_not_null | n | NOT NULL aggregate_type |
+| system_outbox_events_attempt_count_not_null | n | NOT NULL attempt_count |
+| system_outbox_events_available_at_not_null | n | NOT NULL available_at |
+| system_outbox_events_created_at_not_null | n | NOT NULL created_at |
+| system_outbox_events_event_id_not_null | n | NOT NULL event_id |
+| system_outbox_events_event_type_not_null | n | NOT NULL event_type |
+| system_outbox_events_headers_not_null | n | NOT NULL headers |
+| system_outbox_events_id_not_null | n | NOT NULL id |
+| system_outbox_events_occurred_at_not_null | n | NOT NULL occurred_at |
+| system_outbox_events_payload_not_null | n | NOT NULL payload |
+| system_outbox_events_source_domain_not_null | n | NOT NULL source_domain |
+| system_outbox_events_pkey | p | PRIMARY KEY (id) |
+| system_outbox_events_event_id_key | u | UNIQUE (event_id) |
+
+Indexes:
+
+| Name | Unique | Predicate | Definition |
+| --- | --- | --- | --- |
+| idx_outbox_event_id | false | — | CREATE INDEX idx_outbox_event_id ON infrastructure.system_outbox_events USING btree (event_id) |
+| idx_outbox_source_aggregate | false | — | CREATE INDEX idx_outbox_source_aggregate ON infrastructure.system_outbox_events USING btree (source_domain, aggregate_type, aggregate_id, created_at DESC) |
+| idx_outbox_unpublished | false | (published_at IS NULL) | CREATE INDEX idx_outbox_unpublished ON infrastructure.system_outbox_events USING btree (available_at, created_at) WHERE (published_at IS NULL) |
+| system_outbox_events_event_id_key | true | — | CREATE UNIQUE INDEX system_outbox_events_event_id_key ON infrastructure.system_outbox_events USING btree (event_id) |
+| system_outbox_events_pkey | true | — | CREATE UNIQUE INDEX system_outbox_events_pkey ON infrastructure.system_outbox_events USING btree (id) |
 

@@ -2,7 +2,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { collectAudit } from './audit.mjs';
-import { BUSINESS_SCHEMAS, requireDatabaseUrl } from './db.mjs';
+import { AUDIT_SCHEMAS, BUSINESS_SCHEMAS, INFRASTRUCTURE_SCHEMAS, requireDatabaseUrl } from './db.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const reportsDir = path.resolve(here, '..', 'reports');
@@ -33,6 +33,15 @@ export async function writeReport(connectionString = requireDatabaseUrl()) {
     audit.constraintCounts[schema].check,
     audit.constraintCounts[schema].indexes,
   ]);
+  const infrastructureCounts = INFRASTRUCTURE_SCHEMAS.map((schema) => [
+    schema,
+    audit.tables.filter((row) => row.schema === schema).length,
+    audit.constraintCounts[schema].pk,
+    audit.constraintCounts[schema].fk,
+    audit.constraintCounts[schema].unique,
+    audit.constraintCounts[schema].check,
+    audit.constraintCounts[schema].indexes,
+  ]);
 
   const logicalRows = JSON.parse(await (await import('node:fs/promises')).readFile(
     path.resolve(here, '..', 'checks', 'expected-schema.json'), 'utf8',
@@ -55,13 +64,15 @@ export async function writeReport(connectionString = requireDatabaseUrl()) {
       ['Database', audit.server.database],
       ['PostgreSQL', audit.server.version],
       ['Role', audit.server.role],
-      ['Business schemas', audit.schemas.join(', ')],
-      ['Business tables', `${audit.actualBusinessTableCount} executable / 121 frozen target`],
+      ['Business schemas', BUSINESS_SCHEMAS.join(', ')],
+      ['Infrastructure schemas', INFRASTRUCTURE_SCHEMAS.join(', ')],
+      ['Business tables', `${audit.actualBusinessTableCount} core+revision / 121 original target`],
+      ['Infrastructure tables', audit.actualInfrastructureTableCount],
       ['Extensions', audit.extensions.map((row) => `${row.name} ${row.version}`).join(', ')],
       ['Illegal cross-domain FK', audit.illegalCrossDomainFks.length],
     ]),
     '',
-    'Only `pg_trgm` was added by V2. `plpgsql` is built in. The V2 baseline did not install PostGIS, citext, or pgcrypto, and it did not create physical Asset/Media or outbox tables.',
+    'Only `pg_trgm` was added by V2. `plpgsql` is built in. The V2 baseline did not install PostGIS, citext, or pgcrypto. Physical asset and outbox infrastructure is isolated in the `infrastructure` schema.',
     '',
     '## Migration files',
     '',
@@ -70,6 +81,29 @@ export async function writeReport(connectionString = requireDatabaseUrl()) {
     '## Domain summary',
     '',
     table(['Schema', 'Tables', 'PK', 'FK', 'UNIQUE constraints', 'CHECK', 'Indexes'], tableCounts),
+    '',
+    '### Infrastructure inventory',
+    '',
+    table(['Schema', 'Tables', 'PK', 'FK', 'UNIQUE constraints', 'CHECK', 'Indexes'], infrastructureCounts),
+    '',
+    '## Baseline integrity summary',
+    '',
+    table(['Metric', 'Result'], [
+      ['Tables without primary key', audit.tablesWithoutPk.length],
+      ['Illegal cross-domain foreign keys', audit.illegalCrossDomainFks.length],
+      ['Logical UUID violations', audit.logicalUuidViolations.length],
+      ['TIMESTAMP WITHOUT TIME ZONE columns', audit.timestampWithoutTimezone.length],
+      ['Unresolved specification blockers', audit.blockers.length],
+    ]),
+    '',
+    '## Previously missing business tables',
+    '',
+    table(['Table', 'Present'], [
+      ['identity.otp_challenges', audit.tables.some((row) => row.schema === 'identity' && row.table === 'otp_challenges') ? 'YES' : 'NO'],
+      ['identity.sessions', audit.tables.some((row) => row.schema === 'identity' && row.table === 'sessions') ? 'YES' : 'NO'],
+      ['identity.devices', audit.tables.some((row) => row.schema === 'identity' && row.table === 'devices') ? 'YES' : 'NO'],
+      ['trust.moderation_evidence', audit.tables.some((row) => row.schema === 'trust' && row.table === 'moderation_evidence') ? 'YES' : 'NO'],
+    ]),
     '',
     '## Cross-domain FK audit',
     '',
@@ -85,21 +119,23 @@ export async function writeReport(connectionString = requireDatabaseUrl()) {
     '',
     '- Content authoritative list is Curriculum 5 + Practice 5 = 31; the higher-level 6 + 4 grouping is treated as a non-blocking categorization mismatch.',
     '- Identity `users.public_id` is UUID and `basic_profiles.avatar_media_id` is UUID without FK, applying ADR-018/D-152 over the older Identity field page.',
-    '- The executable target is 117 tables. Four frozen table identities lack a non-conflicting physical contract and are not represented by speculative DDL.',
+    '- The original 121-table business inventory is complete; `content.content_revisions` is an additional Content-owned physical table required by the revision contract, so the final business count is 122.',
     '',
-    '## Specification blockers',
+    '## Resolved blockers',
     '',
-    ...audit.blockers.flatMap((blocker) => [
-      `- **${blocker.code} — ${blocker.subject}:** ${blocker.detail}`,
-    ]),
+    '- Identity OTP, Session, and Device contracts are frozen in `1220_identity_auth_runtime.sql` with hashed secrets, lifecycle CHECKs, domain FKs, and targeted indexes.',
+    '- Trust evidence stores nullable `asset_id` for file evidence and no longer stores `storage_key`; physical file facts belong only to `infrastructure.assets`.',
+    '- Media/Asset Infrastructure is frozen as `infrastructure.assets`; business domains retain only UUID logical references.',
+    '- The shared transactional outbox is frozen as `infrastructure.system_outbox_events` with UUID event/aggregate IDs and unpublished-event scanning indexes.',
+    '- Content revisions are frozen as `content.content_revisions` with polymorphic Content logical UUIDs, monotonic revision numbers, lifecycle status, snapshots, and one published revision per entity.',
     '',
-    `Blocked tables: ${audit.blockedTables.map((name) => `\`${name}\``).join(', ')}.`,
+    `Unresolved specification blockers: ${audit.blockers.length}.`,
     '',
     '## Complete PostgreSQL catalog',
     '',
   ];
 
-  for (const schema of BUSINESS_SCHEMAS) {
+  for (const schema of AUDIT_SCHEMAS) {
     sections.push(`### ${schema}`, '');
     for (const tableRow of audit.tables.filter((row) => row.schema === schema)) {
       const name = tableRow.table;

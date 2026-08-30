@@ -16,6 +16,10 @@ export const BUSINESS_SCHEMAS = [
   'platform',
 ];
 
+export const INFRASTRUCTURE_SCHEMAS = ['infrastructure'];
+
+export const AUDIT_SCHEMAS = [...BUSINESS_SCHEMAS, ...INFRASTRUCTURE_SCHEMAS];
+
 export function requireDatabaseUrl(name = 'DATABASE_URL') {
   const value = process.env[name];
   if (!value) {

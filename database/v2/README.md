@@ -5,17 +5,15 @@ the frozen ZH-LAO Domain documentation dated 2026-08-30.
 
 ## Status
 
-The executable baseline creates all 11 business schemas and 117 business
-tables. It intentionally does not invent physical contracts for four blocked
-tables:
+**Baseline status: PASS.** The executable baseline creates all 11 business
+schemas, completes the original 121-table business inventory, and adds the
+Content-owned `content.content_revisions` table required by the now-frozen
+revision contract (122 business tables total). The shared infrastructure
+schema contains the canonical `assets` table and transactional
+`system_outbox_events` table.
 
-- `identity.otp_challenges`
-- `identity.sessions`
-- `identity.devices`
-- `trust.moderation_evidence`
-
-Asset/Media Infrastructure, `system_outbox_events`, and the Content Revision
-physical model are also specification blockers. See
+The physical contracts resolved in this increment are recorded in
+`checks/frozen-physical-contracts.md`. See
 `reports/V2_DATABASE_BASELINE_REPORT.md` for the catalog-derived result.
 
 ## Commands
@@ -82,8 +80,19 @@ Migration order:
 10. `0900_commerce.sql` — 16 Commerce tables
 11. `1000_rewards.sql` — five Rewards tables
 12. `1100_trust.sql` — five non-conflicting Trust tables
+13. `1200_asset_infrastructure.sql` — canonical physical asset facts
+14. `1210_trust_evidence.sql` — Trust evidence with logical `asset_id`
+15. `1220_identity_auth_runtime.sql` — OTP, devices, and revocable sessions
+16. `1230_system_outbox.sql` — shared transactional outbox
+17. `1240_content_revision.sql` — Content revision history and publication
 
 The standalone boundary query in `checks/illegal_cross_domain_fk.sql` must
 return zero rows. The Node audit runs the same catalog rule and also verifies
-schemas, tables, PK coverage, logical UUID contracts, extensions, constraints,
-and indexes.
+business/infrastructure schemas, tables, PK coverage, logical UUID contracts,
+extensions, constraints, and indexes.
+
+## Next stage boundary
+
+This task stops at the V2 PostgreSQL Database Baseline. Repository, Service,
+API, frontend, and legacy-data migration remain a separate Domain-by-Domain
+Application Migration task.

@@ -2,13 +2,14 @@
   "postgresMajor": 18,
   "extensions": ["pg_trgm"],
   "schemas": {
-    "identity": ["auth_identities", "basic_profiles", "learning_profiles", "users"],
+    "identity": ["auth_identities", "basic_profiles", "devices", "learning_profiles", "otp_challenges", "sessions", "users"],
     "content": [
       "answer_rules", "content_equivalents", "content_relations", "content_tags", "contents",
       "courses", "examples", "exercises", "lesson_items", "lesson_sections", "lessons",
       "lo_letters", "lo_sentences", "lo_syllable_letters", "lo_syllables", "lo_word_syllables",
       "lo_words", "meanings", "pronunciations", "question_contents", "question_options", "questions",
       "tags", "translations", "units", "zh_hanzi", "zh_hanzi_pinyin", "zh_pinyin",
+      "content_revisions",
       "zh_sentences", "zh_word_hanzi", "zh_words"
     ],
     "learning": [
@@ -38,9 +39,10 @@
       "commerce_wallet_adjustments", "commerce_wallet_ledger", "commerce_wallet_reversals", "commerce_wallets"
     ],
     "rewards": ["reward_deliveries", "reward_events", "reward_grants", "reward_programs", "reward_rules"],
-    "trust": ["appeals", "enforcement_actions", "moderation_cases", "moderation_decisions", "reports"],
+    "trust": ["appeals", "enforcement_actions", "moderation_cases", "moderation_decisions", "moderation_evidence", "reports"],
     "operations": ["operator_audit_logs", "operator_roles", "operators", "role_permissions", "roles"],
-    "platform": ["announcements", "app_versions", "feature_flag_overrides", "feature_flags", "regions", "runtime_configs"]
+    "platform": ["announcements", "app_versions", "feature_flag_overrides", "feature_flags", "regions", "runtime_configs"],
+    "infrastructure": ["assets", "system_outbox_events"]
   },
   "logicalUuidColumns": [
     "identity.users.public_id", "identity.basic_profiles.avatar_media_id",
@@ -70,36 +72,12 @@
     "rewards.reward_events.source_event_id", "rewards.reward_events.subject_user_id",
     "rewards.reward_events.source_reference_id", "rewards.reward_grants.grant_no",
     "rewards.reward_grants.user_id", "rewards.reward_deliveries.target_reference_id",
-    "trust.reports.reporter_user_id", "trust.reports.subject_id"
+    "trust.reports.reporter_user_id", "trust.reports.subject_id",
+    "trust.moderation_evidence.asset_id", "content.content_revisions.entity_id",
+    "content.content_revisions.created_by_operator_id", "infrastructure.assets.id",
+    "infrastructure.system_outbox_events.id", "infrastructure.system_outbox_events.event_id",
+    "infrastructure.system_outbox_events.aggregate_id"
   ],
-  "blockedTables": [
-    "identity.otp_challenges", "identity.sessions", "identity.devices", "trust.moderation_evidence"
-  ],
-  "blockers": [
-    {
-      "code": "BLOCKED_BY_SPEC_CONFLICT",
-      "subject": "identity auxiliary authentication tables",
-      "detail": "otp_challenges, sessions, and devices have frozen responsibilities but unresolved types, nullability, status values, defaults, and uniqueness scope."
-    },
-    {
-      "code": "BLOCKED_BY_SPEC_CONFLICT",
-      "subject": "trust.moderation_evidence storage ownership",
-      "detail": "storage_key conflicts with D-152 Asset canonical ownership; the replacement asset_id contract and payload CHECK are not frozen."
-    },
-    {
-      "code": "BLOCKED_BY_SPEC_CONFLICT",
-      "subject": "Media/Asset Infrastructure",
-      "detail": "Canonical ownership is frozen, but the physical table, lifecycle states, fields, indexes, and retention are designing."
-    },
-    {
-      "code": "BLOCKED_BY_SPEC_CONFLICT",
-      "subject": "system_outbox_events",
-      "detail": "The single global outbox responsibility is frozen, but its physical columns, indexes, retry metadata, and retention are designing."
-    },
-    {
-      "code": "BLOCKED_BY_SPEC_CONFLICT",
-      "subject": "Content Revision physical model",
-      "detail": "Content owns revisions, but the physical version/revision tables and publishing contract remain designing."
-    }
-  ]
+  "blockedTables": [],
+  "blockers": []
 }

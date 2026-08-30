@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
-import { BUSINESS_SCHEMAS, requireDatabaseUrl, withClient } from './db.mjs';
+import { AUDIT_SCHEMAS, BUSINESS_SCHEMAS, INFRASTRUCTURE_SCHEMAS, requireDatabaseUrl, withClient } from './db.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const expectedPath = path.resolve(here, '..', 'checks', 'expected-schema.json');
@@ -13,7 +13,7 @@ async function loadExpected() {
 export async function collectAudit(connectionString = requireDatabaseUrl()) {
   const expected = await loadExpected();
   return withClient(connectionString, async (client) => {
-    const schemaParams = BUSINESS_SCHEMAS;
+    const schemaParams = AUDIT_SCHEMAS;
     const server = await client.query(`SELECT current_database() AS database, current_user AS role,
         current_setting('server_version') AS version,
         current_setting('server_version_num')::integer AS version_num`);
@@ -61,8 +61,13 @@ export async function collectAudit(connectionString = requireDatabaseUrl()) {
     const actualTableSet = new Set(tables.rows.map((row) => `${row.schema}.${row.table}`));
     const expectedTables = Object.entries(expected.schemas)
       .flatMap(([schema, names]) => names.map((name) => `${schema}.${name}`));
+    const expectedBusinessTables = BUSINESS_SCHEMAS.flatMap((schema) =>
+      (expected.schemas[schema] ?? []).map((name) => `${schema}.${name}`));
+    const expectedInfrastructureTables = INFRASTRUCTURE_SCHEMAS.flatMap((schema) =>
+      (expected.schemas[schema] ?? []).map((name) => `${schema}.${name}`));
     const expectedTableSet = new Set(expectedTables);
     const missingSchemas = BUSINESS_SCHEMAS.filter((schema) => !actualSchemaSet.has(schema));
+    const missingInfrastructureSchemas = INFRASTRUCTURE_SCHEMAS.filter((schema) => !actualSchemaSet.has(schema));
     const missingTables = expectedTables.filter((table) => !actualTableSet.has(table));
     const unexpectedTables = [...actualTableSet].filter((table) => !expectedTableSet.has(table));
 
@@ -73,6 +78,9 @@ export async function collectAudit(connectionString = requireDatabaseUrl()) {
       .filter((row) => row.type === 'p')
       .map((row) => `${row.schema}.${row.table}`));
     const tablesWithoutPk = [...actualTableSet].filter((table) => !pkTables.has(table));
+    const timestampWithoutTimezone = columns.rows
+      .filter((row) => row.type === 'timestamp without time zone')
+      .map((row) => `${row.schema}.${row.table}.${row.column}`);
 
     const columnMap = new Map(columns.rows.map((row) => [`${row.schema}.${row.table}.${row.column}`, row]));
     const fkSourceColumns = new Set();
@@ -102,7 +110,7 @@ export async function collectAudit(connectionString = requireDatabaseUrl()) {
     const major = Math.floor(server.rows[0].version_num / 10000);
 
     const constraintCounts = {};
-    for (const schema of BUSINESS_SCHEMAS) {
+    for (const schema of AUDIT_SCHEMAS) {
       const rows = constraints.rows.filter((row) => row.schema === schema);
       constraintCounts[schema] = {
         pk: rows.filter((row) => row.type === 'p').length,
@@ -115,6 +123,7 @@ export async function collectAudit(connectionString = requireDatabaseUrl()) {
 
     const violations = [
       ...missingSchemas.map((schema) => ({ check: 'schema', detail: `missing ${schema}` })),
+      ...missingInfrastructureSchemas.map((schema) => ({ check: 'infrastructure_schema', detail: `missing ${schema}` })),
       ...missingTables.map((table) => ({ check: 'table', detail: `missing ${table}` })),
       ...unexpectedTables.map((table) => ({ check: 'table', detail: `unexpected ${table}` })),
       ...tablesWithoutPk.map((table) => ({ check: 'primary_key', detail: `${table} has no primary key` })),
@@ -137,15 +146,19 @@ export async function collectAudit(connectionString = requireDatabaseUrl()) {
       migrations: migrations.rows,
       constraintCounts,
       missingSchemas,
+      missingInfrastructureSchemas,
       missingTables,
       unexpectedTables,
       tablesWithoutPk,
+      timestampWithoutTimezone,
       illegalCrossDomainFks,
       logicalUuidViolations,
       blockers: expected.blockers,
       blockedTables: expected.blockedTables,
-      expectedBusinessTableCount: expectedTables.length,
-      actualBusinessTableCount: actualTableSet.size,
+      expectedBusinessTableCount: expectedBusinessTables.length,
+      actualBusinessTableCount: [...actualTableSet].filter((name) => name.split('.')[0] !== 'infrastructure').length,
+      expectedInfrastructureTableCount: expectedInfrastructureTables.length,
+      actualInfrastructureTableCount: [...actualTableSet].filter((name) => name.split('.')[0] === 'infrastructure').length,
       violations,
       databaseAuditPassed: violations.length === 0,
       finalStatus: violations.length === 0 && expected.blockers.length > 0 ? 'PASS_WITH_BLOCKERS' : violations.length === 0 ? 'PASS' : 'FAIL',
