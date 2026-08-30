@@ -22,7 +22,7 @@ last_updated: 2026-08-30
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | PostgreSQL Baseline | `COMPLETE` | — | `PASS` | — | — | 2026-08-30 | 冻结基线见 `database/v2/` | `database/v2/reports/V2_DATABASE_BASELINE_REPORT.md` | Fresh DB、migration 幂等及数据库审计通过 | 无 | 2026-08-30 |
 | Application Foundation | `COMPLETE` | DB Baseline `PASS` | `PASS` | — | 2026-08-30 | 2026-08-30 | [计划](01-foundation/APPLICATION_FOUNDATION_PLAN.md) | [报告](01-foundation/APPLICATION_FOUNDATION_REPORT.md) | typecheck/lint/build；14 unit + 10 PostgreSQL integration + 3 validation lifecycle；complete/partial/empty/unavailable readiness；fresh 17 migrations；DB audit PASS；临时库残留 0 | 无 | 2026-08-30 |
-| Identity | `PLANNING` | Foundation `PASS` | `PASS`（Design Audit） | — | — | — | [实施计划](02-identity/IDENTITY_IMPLEMENTATION_PLAN.md)、[Use Cases](02-identity/IDENTITY_USE_CASES.md)、[API](02-identity/IDENTITY_API.md) | [设计审计](02-identity/IDENTITY_DESIGN_AUDIT.md) | Frozen 7 表、Foundation contracts、API/Use Case、并发与安全设计审计通过；migration changes = 0 | 无 | 2026-08-30 |
+| Identity | `IN_PROGRESS` | Foundation `PASS` | `PASS`（Design Audit） | — | 2026-08-30 | — | [实施计划](02-identity/IDENTITY_IMPLEMENTATION_PLAN.md)、[Use Cases](02-identity/IDENTITY_USE_CASES.md)、[API](02-identity/IDENTITY_API.md) | [设计审计](02-identity/IDENTITY_DESIGN_AUDIT.md)、[IDN-01 报告](02-identity/IDN_01_REPORT.md) | IDN-01 module skeleton；16 unit + 10 PostgreSQL integration；fresh 17/0 migrations and audit PASS；migration changes = 0 | 无 | 2026-08-30 |
 | Platform | `NOT_STARTED` | Foundation `PASS` | — | — | — | — | 待创建 | 待创建 | — | 无 | 2026-08-30 |
 | Operations | `NOT_STARTED` | Identity + Platform 基础能力可用 | — | — | — | — | 待创建 | 待创建 | — | 无 | 2026-08-30 |
 | Content | `NOT_STARTED` | Operations `PASS` | — | — | — | — | 待创建 | 待创建 | — | 无 | 2026-08-30 |
@@ -41,7 +41,7 @@ last_updated: 2026-08-30
 
 ## 当前行动
 
-`PHASE 1 — Application Foundation` 已完成并通过 Gate。Identity Planning 已完成，Identity Design Audit 已通过；Identity Implementation 仍为 `NOT_STARTED`，不得自动执行 `IDN-01`。
+Identity Design Gate 已通过，Identity Implementation 已进入 `IN_PROGRESS`。`IDN-01 — Identity Module Skeleton` 已完成；`IDN-02` 仍为 `NOT_STARTED`，不得自动开始。
 
 ## 更新历史
 
@@ -52,3 +52,4 @@ last_updated: 2026-08-30
 | 2026-08-30 | Application Foundation | 完成应用与 Worker 基础设施、测试自动化和阶段审计 | `PASS` | 14 unit + 5 PostgreSQL 18.6 integration；fresh migration 与 database audit PASS |
 | 2026-08-30 | Application Foundation | 收口 FND-16、禁止 Integration 零测试通过、完善 validation 数据库 finally 清理并重新审计 | `PASS` | 14 unit + 10 integration + 3 validation lifecycle；完整/partial/empty/unavailable readiness；17/0 migrations；DB audit PASS；临时库残留 0 |
 | 2026-08-30 | Identity | 完成实施计划、Use Cases、API 的严格设计审计并修正 OTP 请求与单手机号并发语义 | `PASS`（Design Audit） | Frozen migration changes = 0；blocking open decisions = 0；Identity Implementation = NOT_STARTED |
+| 2026-08-30 | Identity | 完成 IDN-01 Identity Module Skeleton；接入 composition root，新增 public/import boundary 与 route-absence 验证 | `PASS`（IDN-01） | 16 unit + 10 PostgreSQL integration；fresh 17/0 migrations、database audit PASS；Identity business routes/SQL/repositories = 0 |

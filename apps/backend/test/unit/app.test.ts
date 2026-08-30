@@ -6,6 +6,7 @@ import { requireAuthentication } from '../../src/auth/auth-hook.js';
 import { newLogicalUuid } from '../../src/ids/uuid.js';
 import type { DatabaseExecutor } from '../../src/database/executor.js';
 import { requiredMigrations } from '../../src/database/required-migrations.generated.js';
+import { identityModule } from '../../src/modules/identity/index.js';
 
 const database = { query: async (text: string) => ({
   rows: text.includes('to_regclass')
@@ -16,6 +17,12 @@ const database = { query: async (text: string) => ({
 const logger = pino({ level: 'silent' });
 
 describe('Fastify foundation', () => {
+  it('loads the Identity module without business routes', async () => {
+    const app = buildApp({ logger, database });
+    await identityModule.registerHttp(app);
+    expect((await app.inject('/api/v1/identity/phone-otp')).statusCode).toBe(404);
+    await app.close();
+  });
   it('serves liveness and readiness with request IDs', async () => {
     const app = buildApp({ logger, database });
     expect((await app.inject('/health/live')).statusCode).toBe(200);
