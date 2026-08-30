@@ -58,6 +58,9 @@ ADMIN_DATABASE_URL='postgresql://.../postgres' pnpm run validate
 
 Real credentials must remain in environment variables and must never be added
 to this directory. `.env.example` contains placeholders only.
+For local development, package scripts automatically load an ignored `.env`
+file when it exists; explicitly supplied process environment variables still
+take precedence.
 
 ## Migration behavior
 

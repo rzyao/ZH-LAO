@@ -21,7 +21,7 @@ last_updated: 2026-08-30
 | Phase | 当前状态 | 进入条件 | Gate | 负责人 | 开始日期 | 完成日期 | 计划 | 报告 | 验证证据 | 阻塞项 | 最后更新 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | PostgreSQL Baseline | `COMPLETE` | — | `PASS` | — | — | 2026-08-30 | 冻结基线见 `database/v2/` | `database/v2/reports/V2_DATABASE_BASELINE_REPORT.md` | Fresh DB、migration 幂等及数据库审计通过 | 无 | 2026-08-30 |
-| Application Foundation | `NEXT` | DB Baseline `PASS` | — | — | — | — | 待创建 | 待创建 | — | 无 | 2026-08-30 |
+| Application Foundation | `COMPLETE` | DB Baseline `PASS` | `PASS` | — | 2026-08-30 | 2026-08-30 | [计划](01-foundation/APPLICATION_FOUNDATION_PLAN.md) | [报告](01-foundation/APPLICATION_FOUNDATION_REPORT.md) | typecheck/lint/build；14 unit + 5 PostgreSQL integration；fresh 17 migrations；DB audit PASS | 无 | 2026-08-30 |
 | Identity | `NOT_STARTED` | Foundation `PASS` | — | — | — | — | 待创建 | 待创建 | — | 无 | 2026-08-30 |
 | Platform | `NOT_STARTED` | Foundation `PASS` | — | — | — | — | 待创建 | 待创建 | — | 无 | 2026-08-30 |
 | Operations | `NOT_STARTED` | Identity + Platform 基础能力可用 | — | — | — | — | 待创建 | 待创建 | — | 无 | 2026-08-30 |
@@ -41,7 +41,7 @@ last_updated: 2026-08-30
 
 ## 当前行动
 
-当前只允许为 `PHASE 1 — Application Foundation` 制定详细分计划。分计划通过审核前，不实施 Foundation，也不进入 Identity。
+`PHASE 1 — Application Foundation` 已完成并通过 Gate。下一步只允许制定并审核 Identity 的 Implementation Plan、Use Cases 与 API；本阶段不自动进入 Identity 实施。
 
 ## 更新历史
 
@@ -49,3 +49,4 @@ last_updated: 2026-08-30
 | --- | --- | --- | --- | --- |
 | 2026-08-30 | PostgreSQL Baseline | 初始化为 `COMPLETE` | `PASS` | V2 Database Baseline 已冻结并通过验证 |
 | 2026-08-30 | Application Foundation | 初始化为唯一 `NEXT` Phase | — | 等待制定 `APPLICATION_FOUNDATION_PLAN.md` |
+| 2026-08-30 | Application Foundation | 完成应用与 Worker 基础设施、测试自动化和阶段审计 | `PASS` | 14 unit + 5 PostgreSQL 18.6 integration；fresh migration 与 database audit PASS |

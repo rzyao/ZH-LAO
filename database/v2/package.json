@@ -4,10 +4,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "migrate": "node scripts/migrate.mjs",
-    "audit": "node scripts/audit.mjs",
-    "report": "node scripts/report.mjs",
-    "validate": "node scripts/validate.mjs"
+    "migrate": "node --env-file-if-exists=.env scripts/migrate.mjs",
+    "audit": "node --env-file-if-exists=.env scripts/audit.mjs",
+    "report": "node --env-file-if-exists=.env scripts/report.mjs",
+    "validate": "node --env-file-if-exists=.env scripts/validate.mjs"
   },
   "dependencies": {
     "pg": "^8.16.3"

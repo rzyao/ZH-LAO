@@ -1,7 +1,7 @@
 # ZH-LAO 项目知识入口
 
 **项目：** 中文–老挝语综合学习与跨语言社交应用  
-**整体阶段：** PostgreSQL V2 Baseline 已 `COMPLETE / PASS`；Application Foundation 为唯一 `NEXT` Phase
+**整体阶段：** PostgreSQL V2 Baseline 与 Application Foundation 已 `COMPLETE / PASS`；Identity 详细设计为唯一 `NEXT` Phase
 **首期目标：** Android，中老用户同时上线，不以中国大陆应用商店为主要发行渠道；约 10,000 注册用户，核心指标为注册量和 DAU/MAU。
 
 ## 当前设计基线

@@ -1,0 +1,31 @@
+name: Foundation
+on:
+  push:
+  pull_request:
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 20
+    env:
+      ADMIN_DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/postgres
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10.20.0 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm, cache-dependency-path: "**/pnpm-lock.yaml" }
+      - run: pnpm --dir database/v2 install --frozen-lockfile
+      - run: pnpm --dir apps/backend install --frozen-lockfile
+      - run: pnpm --dir apps/backend verify
+      - run: pnpm --dir apps/backend build
+      - run: pnpm --dir apps/backend test:integration
+      - run: pnpm --dir database/v2 validate

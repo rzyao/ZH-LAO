@@ -38,6 +38,10 @@ Thumbs.db
 **/.vscode/
 *.local
 *.log
+.env
+**/.env
+coverage/
+**/coverage/
 
 # ChatGPT share export script outputs & caches
 _session/
