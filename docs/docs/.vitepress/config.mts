@@ -46,6 +46,7 @@ export default defineConfig({
         text: 'V2 开发计划',
         items: [
           { text: '开发计划入口', link: '/development/v2/' },
+          { text: '开发流程控制中心', link: '/development/v2/DEVELOPMENT_CONTROL_CENTER' },
           { text: '全量开发总计划', link: '/development/v2/MASTER_DEVELOPMENT_PLAN' },
           { text: '开发进度记录表', link: '/development/v2/DEVELOPMENT_PROGRESS' }
         ]
