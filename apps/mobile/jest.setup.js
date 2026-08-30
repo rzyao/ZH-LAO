@@ -84,12 +84,14 @@ jest.mock('expo-audio', () => {
 });
 
 jest.mock('react-native-safe-area-context', () => {
+  const RN = require('react-native');
+  const mockView = (props) => require('react').createElement(RN.View, props, props.children);
   const inset = { top: 47, right: 0, bottom: 34, left: 0 };
   return {
     useSafeAreaInsets: () => inset,
     useSafeAreaFrame: () => ({ x: 0, y: 0, width: 390, height: 844 }),
     SafeAreaProvider: ({ children }) => children,
-    SafeAreaView: ({ children }) => children,
+    SafeAreaView: mockView,
     SafeAreaProviderCompat: { SafeAreaProvider: ({ children }) => children },
     initialWindowMetrics: {
       frame: { x: 0, y: 0, width: 390, height: 844 },

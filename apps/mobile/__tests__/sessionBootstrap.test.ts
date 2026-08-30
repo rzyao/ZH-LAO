@@ -4,6 +4,7 @@ import {
   getIdentitySessionAdapter,
   registerIdentitySessionAdapter,
 } from '../src/auth/session/identityAdapter';
+import type { PublicId } from '../src/api/contracts/uuid';
 import { createInMemorySecureStorage } from '../src/storage/secureStorage';
 import { credentialMemory } from '../src/storage/memoryStorage';
 
@@ -45,7 +46,7 @@ describe('Session bootstrap (auth skeleton)', () => {
     await secure.setItem('zhlao.auth.refresh_token', 'stored-refresh');
     registerIdentitySessionAdapter({
       async restoreSession() {
-        return { accessToken: 'a-1', refreshToken: 'r-1', subjectId: SUBJECT, expiresAt: null };
+        return { accessToken: 'a-1', refreshToken: 'r-1', subjectId: SUBJECT as PublicId, expiresAt: null };
       },
     });
     const state = await bootstrapSession(deps);

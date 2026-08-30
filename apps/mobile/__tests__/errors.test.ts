@@ -21,7 +21,7 @@ import {
 
 describe('Error foundation', () => {
   it('maps HTTP statuses onto the unified error model', () => {
-    const cases: Array<[number, new () => InstanceType<typeof Error>]> = [
+    const cases: [number, new () => InstanceType<typeof Error>][] = [
       [401, UnauthorizedError],
       [403, ForbiddenError],
       [404, NotFoundError],

@@ -9,6 +9,9 @@ export const lo = {
       loginCta: 'ເຂົ້າສູ່ລະບົບ / ສະໝັກ',
     },
     tabs: {
+      home: 'ໜ້າຫຼັກ',
+      lab: 'ຫ້ອງທົດລອງ',
+      settings: 'ການຕັ້ງຄ່າ',
       discover: 'ຄົ້ນຫາ',
       chats: 'ສົນທະນາ',
       translate: 'ແປພາສາ',

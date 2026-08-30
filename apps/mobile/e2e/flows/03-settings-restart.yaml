@@ -1,0 +1,16 @@
+# MOB-F19 smoke flow 3: open the neutral settings screens (theme / language),
+# then restart the app and verify it boots again.
+appId: com.zhlao.app
+---
+- launchApp:
+    clearState: false
+- tapOn: "设置"
+- tapOn: "主题外观"
+- assertVisible: ".*"
+- takeScreenshot: smoke-03-theme
+- back
+- stopApp
+- launchApp:
+    clearState: false
+- assertVisible: "概览"
+- takeScreenshot: smoke-04-restart

@@ -1,0 +1,11 @@
+# MOB-F19 smoke flow 2: bottom navigation between the three foundation tabs.
+appId: com.zhlao.app
+---
+- launchApp:
+    clearState: false
+- assertVisible: "概览"
+- tapOn: "实验室"
+- assertVisible: "实验室"
+- tapOn: "设置"
+- assertVisible: "设置"
+- takeScreenshot: smoke-02-nav

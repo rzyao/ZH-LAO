@@ -61,6 +61,22 @@ module.exports = defineConfig([
     },
   },
   {
+    files: ['__tests__/**/*.{ts,tsx}', 'jest.setup.js'],
+    languageOptions: {
+      globals: {
+        describe: 'readonly',
+        it: 'readonly',
+        test: 'readonly',
+        expect: 'readonly',
+        jest: 'readonly',
+        beforeEach: 'readonly',
+        afterEach: 'readonly',
+        beforeAll: 'readonly',
+        afterAll: 'readonly',
+      },
+    },
+  },
+  {
     // `src/api/client` is the ONLY place allowed to own the axios transport.
     files: ['src/api/client/**/*.ts'],
     rules: {

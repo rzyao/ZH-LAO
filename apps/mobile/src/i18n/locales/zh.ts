@@ -9,6 +9,9 @@ export const zh = {
       loginCta: '登录 / 注册',
     },
     tabs: {
+      home: '概览',
+      lab: '实验室',
+      settings: '设置',
       discover: '发现',
       chats: '聊天',
       translate: '翻译',

@@ -1,0 +1,9 @@
+# MOB-F19 / MOBILE_FOUNDATION_GATE smoke flow 1: launch + main UI.
+# No real business API is required: the app boots to the Home tab with
+# EXPO_PUBLIC_API_URL configured but no server contacted at boot.
+appId: com.zhlao.app
+---
+- launchApp:
+    clearState: true
+- assertVisible: "概览"
+- takeScreenshot: smoke-01-home

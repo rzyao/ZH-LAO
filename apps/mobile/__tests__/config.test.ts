@@ -27,7 +27,7 @@ describe('App config', () => {
     const config = { apiBaseUrl: '', appEnv: 'development' } as unknown as AppConfig;
     const issues = validateAppConfig(config);
     expect(issues).toHaveLength(1);
-    expect(issues[0].code).toBe('MISSING_API_BASE_URL');
+    expect(issues[0]!.code).toBe('MISSING_API_BASE_URL');
 
     const ok = { apiBaseUrl: 'https://api.example.com', appEnv: 'development' } as unknown as AppConfig;
     expect(validateAppConfig(ok)).toHaveLength(0);
