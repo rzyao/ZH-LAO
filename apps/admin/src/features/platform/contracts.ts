@@ -113,7 +113,7 @@ export type FeatureFlagUpdateInput = z.infer<typeof featureFlagUpdateSchema>
 
 export const featureFlagOverrideInputSchema = z
   .object({
-    region_code: z.string().trim().regex(/^[A-Z][A-Z0-9_]{1,7}$/).optional().or(z.literal('')),
+    region_code: z.union([z.string().trim().regex(/^[A-Z][A-Z0-9_]{1,7}$/), z.literal('')]),
     client_platform: z.union([clientPlatformSchema, z.literal('')]),
     enabled: z.boolean(),
   })
@@ -181,7 +181,7 @@ export type RuntimeConfigEditInput = z.infer<typeof runtimeConfigEditSchema>
 export const appVersionCreateSchema = z.object({
   client_platform: clientPlatformSchema,
   version: z.string().trim().min(1).max(50),
-  build_number: z.coerce.number().int().positive(),
+  build_number: z.number().int().positive(),
   release_notes: z.string().trim().max(5000).optional(),
 })
 export type AppVersionCreateInput = z.infer<typeof appVersionCreateSchema>
@@ -209,10 +209,16 @@ export const announcementCreateSchema = z
     starts_at: optionalScopeString,
     ends_at: optionalScopeString,
   })
-  .refine((value) => !value.starts_at || !value.ends_at || new Date(value.ends_at) > new Date(value.starts_at), {
-    path: ['ends_at'],
-    message: 'End time must be after start time',
-  })
+  .refine(
+    (value) =>
+      !value.starts_at ||
+      !value.ends_at ||
+      new Date(value.ends_at).getTime() > new Date(value.starts_at).getTime(),
+    {
+      path: ['ends_at'],
+      message: 'End time must be after start time',
+    },
+  )
 export type AnnouncementCreateInput = z.infer<typeof announcementCreateSchema>
 
 export const regionCreateSchema = z.object({
