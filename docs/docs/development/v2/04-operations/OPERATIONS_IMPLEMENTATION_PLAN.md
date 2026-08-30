@@ -6,11 +6,12 @@ document: OPERATIONS_IMPLEMENTATION_PLAN
 last_updated: 2026-08-31
 design_only: true
 implementation_started: false
-repository_commit_audited: d7b4ed1f204164bde39bf4cf4db324101ef15651
+repository_commit_audited: 000f4c4aafacf4938d74902eddc4d78323196a89
 depends_on:
   - OPERATIONS_USE_CASES.md
   - OPERATIONS_RBAC_CONTRACTS.md
   - OPERATIONS_API.md
+  - ../03-platform/PLATFORM_IMPLEMENTATION_REPORT.md
 ---
 
 # ZH-LAO V2 — Operations Implementation Plan
@@ -19,25 +20,29 @@ depends_on:
 
 ## 1. Entry State
 
-Repository facts at design audit start：
+最终 repository re-audit baseline：
 
 ```text
-Branch                              = main
-Audited HEAD                        = d7b4ed1f204164bde39bf4cf4db324101ef15651
-Identity Implementation             = COMPLETE / PASS / FROZEN
-Admin Foundation                    = COMPLETE / PASS
-Platform Design Gate                = PASS
-Platform Implementation             = NOT_STARTED
-Platform Final Gate                 = NOT_RUN
-Operations frozen tables            = 5
-Operations implementation module    = NOT_PRESENT
+Branch                       = main
+Pre-Operations design commit = 000f4c4aafacf4938d74902eddc4d78323196a89
+Identity                     = COMPLETE / PASS / FROZEN
+Admin Foundation             = COMPLETE / PASS
+Platform Design Gate         = PASS
+Platform Implementation      = COMPLETE
+Platform Gate                = PASS
+Platform Domain              = FROZEN
+Operations frozen tables     = 5
+Operations module            = NOT_PRESENT
+Operations implementation    = NOT_STARTED
 ```
 
-Important：后续本设计文档提交会使 `main` HEAD 前进，但所有 repository audit facts 以上述 pre-design commit 为基线。
+Platform 已完成 PLT-01 corrective migration（`1250_platform_override_indexes.sql`）和 Phase 3 implementation，所以本 Operations Phase 不再等待 Platform implementation。
+
+当前 Platform application 层已经实现 33 required use cases；HTTP 只注册 runtime routes。Platform management HTTP + Operations RBAC/Audit wiring 属 OPS-14 integration scope。
 
 ## 2. Global Constraints
 
-整个执行阶段禁止：
+整个未来执行阶段禁止：
 
 ```text
 edit database/v2/migrations/0200_operations.sql
@@ -48,794 +53,418 @@ query/write platform.* from Operations repositories
 create admin username/password/session/JWT system
 add wildcard/deny/hierarchy/ABAC
 add Redis/Kafka/microservice
-implement Admin pages before backend contract tests pass
+start Content Domain
 ```
 
-Only forward migration may be added if a real physical contract defect is discovered and separately approved；本 Design Audit 当前发现 `DATABASE_CONTRACT_CONFLICT = 0`，因此没有 Operations forward migration prerequisite。
+本 Design Audit：
+
+```text
+DATABASE_CONTRACT_CONFLICT = 0
+Operations corrective migration required = NO
+```
 
 ## 3. Dependency Split
 
-### Independent of Platform Implementation
+### Operations Core
 
-以下可以在未来 Operations execution session 独立完成：
+OPS-01 ~ OPS-13 与 OPS-15 可直接基于 Identity/Fundation + frozen Operations DB 实施。
 
-```text
-OPS-01 Module Skeleton
-OPS-02 Domain Types / Permission Catalog
-OPS-03 Repositories
-OPS-04 Identity Public Adapter / Operator Resolution
-OPS-05 Authorization / RBAC
-OPS-06 Operator Management
-OPS-07 Role Management
-OPS-08 Role Assignment / Permission Set
-OPS-09 Audit Logging
-OPS-10 Public Contracts
-OPS-11 Operations HTTP/API
-OPS-12 Bootstrap First Operator
-OPS-13 Operations Integration/E2E
-OPS-15 Security/Race
-```
+### Platform Integration
 
-### Platform Integration Dependency
+OPS-14 的 external dependency **已经满足**：Platform `COMPLETE/PASS/FROZEN`。
+
+它仍应排在 Operations public authorizer/audit 完成之后，因为剩余工作是：
 
 ```text
-OPS-14 Platform Management Integration
+Platform management HTTP/application adapter
++ Operations exact permission enforcement
++ Operations success Audit
 ```
 
-需要 Platform management application/HTTP implementation 可用。
+不是 Platform canonical logic redesign。
 
-Platform current Design Gate PASS 足以冻结 permission keys 与 route authorization requirement，但不能假装 runtime/module 已存在。
+## OPS-00 — Design Freeze
 
-## 4. OPS-00 — Design Freeze
+**Goal**：将本会话文档设为唯一 implementation input。
 
-### Goal
-
-将本会话产生的 Operations product/API/RBAC/audit decisions 作为 Implementation 唯一输入。
-
-### Scope
+**Scope**：
 
 ```text
 OPERATIONS_USE_CASES.md
 OPERATIONS_RBAC_CONTRACTS.md
 OPERATIONS_API.md
-OPERATIONS_DESIGN_AUDIT.md
 OPERATIONS_IMPLEMENTATION_PLAN.md
+OPERATIONS_DESIGN_AUDIT.md
 ```
 
-### Dependencies
+**Dependencies**：Identity PASS；Platform PASS；frozen `0200_operations.sql`。
 
-Identity frozen public contract + frozen `0200_operations.sql` + Platform Design Gate PASS。
+**Files**：docs only。
 
-### Files
+**Tests**：document cross-check。
 
-Docs only。
+**Audit**：unresolved decisions=0；database conflicts=0。
 
-### Tests
+**Gate**：`OPERATIONS_DESIGN_GATE = PASS` before OPS-01。
 
-No runtime test；执行文档交叉审计。
+## OPS-01 — Module Skeleton
 
-### Audit
+**Goal**：创建与当前 Identity/Platform 一致的 Modular Monolith boundary，不实现业务。
 
-确认 unresolved product decision = 0、database conflict = 0。
-
-### Gate
-
-`OPERATIONS_DESIGN_GATE = PASS` 才允许另一个执行会话进入 OPS-01。
-
-## 5. OPS-01 — Module Skeleton
-
-### Goal
-
-创建与 Identity 一致的 Modular Monolith boundary，而不实现业务。
-
-### Scope
-
-目标结构：
+**Scope**：
 
 ```text
 apps/backend/src/modules/operations/
 ├── domain/
-├── application/
-│   └── ports/
+├── application/ports/
 ├── infrastructure/
 ├── http/
 ├── public/
 └── index.ts
 ```
 
-### Dependencies
+**Dependencies**：Foundation module/composition conventions。
 
-Foundation module/composition conventions。
+**Files**：Operations skeleton + composition registration only。
 
-### Files
+**Tests**：typecheck/build；import-boundary；business route absent。
 
-Operations module skeleton + composition registration only。
+**Audit**：no repositories/SQL/business behavior accidentally introduced。
 
-### Tests
+**Gate**：Module Boundary PASS。
 
-- typecheck/build；
-- import-boundary tests；
-- no business route accidentally registered；
-- no cross-domain internal import。
+## OPS-02 — Domain Types / Permission Catalog
 
-### Audit
+**Goal**：实现 UUID/status/role code/permission grammar 与 static catalog。
 
-Repositories/SQL/use cases still absent at this task end。
-
-### Gate
-
-Module boundary PASS。
-
-## 6. OPS-02 — Domain Types / Permission Catalog
-
-### Goal
-
-实现冻结 UUID/status/role-code/permission grammar 与 canonical exact catalog。
-
-### Scope
+**Scope**：
 
 ```text
-OperatorId
-RoleId
-AuditLogId
-OperatorStatus
-RoleStatus
+OperatorId / RoleId / AuditLogId
+OperatorStatus / RoleStatus
 RoleCode
-OperatorPermissionKey
-AuditActionKey
+OperatorPermissionKey / AuditActionKey
 OPERATOR_PERMISSION_CATALOG
 ```
 
-Initial catalog = Operations 16 keys + Platform frozen 10 keys。
+Initial catalog：Operations 16 + Platform 10 = 26 exact keys。
 
-### Dependencies
+**Dependencies**：OPS-01 + RBAC contract。
 
-OPS-01 + RBAC contract。
+**Files**：`domain/*`，`public/permissions.ts` or equivalent。
 
-### Files
+**Tests**：exact 3 segments；lower_snake_case；wildcard reject；unknown reject；varchar length；Platform 10 exact-match frozen docs。
 
-`domain/*` + `public/permissions.ts` or equivalent public-safe export。
+**Audit**：no invented future Domain keys；no permissions table。
 
-### Tests
+**Gate**：Permission Catalog PASS。
 
-- exact 3-segment grammar；
-- lower_snake_case；
-- wildcard rejected；
-- unknown permission rejected；
-- all catalog keys <= DB varchar limits；
-- Platform 10 frozen keys exact-match docs。
+## OPS-03 — Repository Layer
 
-### Audit
+**Goal**：建立只访问 `operations.*` 的 persistence boundary。
 
-No invented future Content/Trust/etc keys。
+**Scope**：operators / roles / operator_roles / role_permissions / operator_audit_logs / RBAC resolution / audit filters。
 
-### Gate
+**Dependencies**：OPS-02；Foundation DatabaseExecutor/TransactionManager。
 
-Permission Catalog PASS。
+**Files**：`application/ports/*`，`infrastructure/repositories.ts`。
 
-## 7. OPS-03 — Repository Layer
+**Tests**：real PostgreSQL UUID mapping；UNIQUE constraints；composite PK；role reverse lookup；active-role permission union query；audit filters；rollback。
 
-### Goal
-
-建立只访问 `operations.*` 的 repository contracts/PG implementations。
-
-### Scope
-
-至少覆盖：
+**Audit**：
 
 ```text
-operators
-roles
-operator_roles
-role_permissions
-operator_audit_logs
-RBAC resolution query
-Audit query filters
+SQL identity.* = 0
+SQL platform.* = 0
+Operations tables touched = frozen 5 only
 ```
 
-Repository methods必须面向 use cases，而不是 raw generic CRUD gateway。
+**Gate**：Repository Boundary PASS。
 
-### Dependencies
+## OPS-04 — Identity Public Adapter / Operator Resolution
 
-OPS-02 + Foundation DatabaseExecutor/TransactionManager。
+**Goal**：实现 `AuthContext.subjectId -> Operator` 与 Create/Enable/Bootstrap Identity validation。
 
-### Files
+**Scope**：consume Foundation AuthContext；consume only current `IdentityPublicQueries` interface；resolve by `auth_subject_id`；active/disabled semantics。
 
-`application/ports/*`, `infrastructure/repositories.ts`。
+**Dependencies**：Identity PASS + OPS-03。
 
-### Tests
+**Files**：Operations application adapters/services；no Identity internals。
 
-PostgreSQL integration：
+**Tests**：active identity/operator；non-operator；disabled operator；missing/inactive subject；static import boundary。
 
-- UUID mapping；
-- UNIQUE auth_subject/code；
-- composite PK；
-- role reverse query；
-- active-role permission resolution；
-- audit filter/index-compatible queries；
-- transaction rollback。
+**Audit**：duplicate password/OTP/session/JWT code = 0。
 
-### Audit
+**Gate**：Identity Boundary PASS。
 
-```text
-SQL touching identity.* = 0
-SQL touching platform.* = 0
-Operations tables touched = exactly frozen 5
-```
+## OPS-05 — Authorization / RBAC
 
-### Gate
+**Goal**：实现 exact Permission union 与 stable public authorizer。
 
-Repository boundary PASS。
-
-## 8. OPS-04 — Identity Public Adapter / Operator Resolution
-
-### Goal
-
-复用 Identity/Fundation auth，建立 `AuthContext.subjectId -> Operator` resolution。
-
-### Scope
-
-- consume Foundation `AuthContext`；
-- consume only `modules/identity/public` for Create/Enable/Bootstrap identity checks；
-- resolve Operator by `auth_subject_id`；
-- active/disabled semantics。
-
-### Dependencies
-
-Identity FROZEN public contract + OPS-03。
-
-### Files
-
-Operations application service/adapters only；禁止 import Identity application/infrastructure/repositories。
-
-### Tests
-
-- active Identity + active Operator；
-- authenticated non-operator；
-- disabled Operator；
-- Identity subject not found/inactive for create/enable；
-- import boundary static tests。
-
-### Audit
-
-No duplicated auth/session/JWT/OTP code。
-
-### Gate
-
-Identity Boundary PASS。
-
-## 9. OPS-05 — Authorization / RBAC
-
-### Goal
-
-实现 exact Permission union 与统一 public authorizer。
-
-### Scope
+**Scope**：
 
 ```text
-active operator
-→ active assigned roles
-→ exact permission union
+active Operator
+→ active Roles
+→ exact permission UNION
 → require exact key
 ```
 
 No cache。
 
-### Dependencies
+**Dependencies**：OPS-02~04。
 
-OPS-02~04。
+**Files**：application authorization service + public adapter。
 
-### Files
+**Tests**：multi-role union；duplicate collapse；disabled role ignored；disabled operator deny all；no-role empty；exact-only；wildcard absent；super_admin explicit-row proof（删除一条 test permission 后 deny）。
 
-application authorization service + public contract adapter。
+**Audit**：authorization allow branch based on `role.code === 'super_admin'` = 0。
 
-### Tests
+**Gate**：RBAC PASS。
 
-- multiple-role union；
-- duplicate key union；
-- disabled role ignored；
-- disabled operator deny all；
-- no role => empty permissions；
-- exact match only；
-- wildcard absent；
-- `super_admin` works only because explicit rows exist；remove an explicit row in test => permission denied，证明 no bypass。
+## OPS-06 — Operator Management
 
-### Audit
+**Goal**：实现 List/Get/Create/Update/Disable/Enable Operator。
 
-Search for `role.code === 'super_admin'` allow path must find 0 authorization bypass。
+**Scope**：frozen Use Cases；auth_subject immutable；no delete。
 
-### Gate
+**Dependencies**：OPS-04/05 + local Audit primitive。
 
-RBAC Semantics PASS。
+**Files**：Operations application services。
 
-## 10. OPS-06 — Operator Management
+**Tests**：active Identity create；duplicate conflict；inactive/missing Identity；display name update；immutable auth subject；disable/enable；enable requires active Identity；no delete method；same-tx state+Audit rollback。
 
-### Goal
+**Audit**：lifecycle matches contract。
 
-实现 List/Get/Create/Update/Disable/Enable Operator。
+**Gate**：Operator Management PASS。
 
-### Scope
+## OPS-07 — Role Management
 
-按 Use Cases 冻结；`auth_subject_id` immutable；no delete。
+**Goal**：实现 List/Get/Create/Update/Disable/Enable Role 与 reserved `super_admin` policy。
 
-### Dependencies
+**Scope**：code immutable；custom roles；super_admin protected；no delete。
 
-OPS-04/05 + TransactionManager + Audit local writer。
+**Dependencies**：OPS-03/05 + local Audit primitive。
 
-### Files
+**Files**：Role application services。
 
-Operations application services；HTTP later in OPS-11。
+**Tests**：code format/unique；code update reject；metadata update；custom disable/enable；super_admin disable reject；state+Audit atomic。
 
-### Tests
+**Audit**：no `is_system` DB field invented。
 
-- create active identity subject；
-- duplicate auth subject conflict；
-- inactive/missing identity rejected；
-- display name update；
-- immutable auth subject；
-- disable/enable；
-- enable requires active Identity；
-- no physical delete method；
-- same-tx mutation+audit rollback tests。
+**Gate**：Role Management PASS。
 
-### Audit
+## OPS-08 — Role Assignment / Permission Set
 
-Operator lifecycle exactly frozen。
+**Goal**：实现 assignment 与唯一 complete-set permission mutation。
 
-### Gate
+**Scope**：list/assign/revoke roles；list catalog；list/set Role permissions；last-super-admin invariant；super_admin catalog reconciliation。
 
-Operator Management PASS。
+**Dependencies**：OPS-02/03/05/07。
 
-## 11. OPS-07 — Role Management
+**Files**：assignment/permission application services。
 
-### Goal
+**Tests**：multi-role；duplicate assign idempotent；concurrent duplicate assign；revoke idempotent；disabled target reject；catalog validation；empty custom set；concurrent set serialized；super_admin exact full catalog；last-admin disable/revoke race；no-op no Audit。
 
-实现 List/Get/Create/Update/Disable/Enable Role 与 reserved super_admin policy。
+**Audit**：no alternate Grant/Remove permission service/API。
 
-### Scope
+**Gate**：Assignment/Permission PASS。
 
-- code immutable；
-- custom roles；
-- super_admin reserved；
-- no role deletion。
+## OPS-09 — Audit Logging
 
-### Dependencies
+**Goal**：实现 immutable success-only Operator Audit。
 
-OPS-03/05/09-local-audit primitive may be built in same execution batch but task gate requires audit availability before completion。
+**Scope**：local same-tx Audit writer；public cross-domain success recorder；list/detail queries；safe details policy；no update/delete repository path。
 
-### Tests
+**Dependencies**：OPS-03 + Audit contract。
 
-- code regex/unique；
-- code update rejected；
-- metadata update；
-- custom disable/enable；
-- super_admin disable rejected；
-- mutation+audit atomic。
+**Files**：audit application/infrastructure/public adapter。
 
-### Audit
+**Tests**：actor FK；action grammar；target combinations；request_id/IP；trusted-proxy source handling；safe details rejection；same-tx rollback；no-op no Audit；failed/denied no canonical Audit；cursor/filter queries；no UPDATE/DELETE path。
 
-No `is_system` DB field invented。
+**Audit**：no `result` column or `details.result` convention。
 
-### Gate
+**Gate**：Audit Contract PASS。
 
-Role Management PASS。
+## OPS-10 — Public Contracts
 
-## 12. OPS-08 — Role Assignment / Permissions
+**Goal**：实现其他 Domain 唯一允许依赖的 Operations boundary。
 
-### Goal
-
-实现 assignment 与唯一 `SetRolePermissions` mutation model。
-
-### Scope
-
-- list/assign/revoke Operator Roles；
-- list catalog；
-- list/set complete Role permission set；
-- last-super-admin invariant。
-
-### Dependencies
-
-OPS-02/03/05/07。
-
-### Tests
-
-- multi-role；
-- duplicate assign idempotent；
-- concurrent duplicate assign；
-- revoke idempotent；
-- disabled target operator/role assign rejected；
-- exact catalog validation；
-- empty custom role set；
-- concurrent permission replace serialized by Role row lock；
-- super_admin set must equal full catalog；
-- last-super-admin disable/revoke race with shared row lock；
-- no duplicate/no-op audit。
-
-### Audit
-
-No Grant/Remove alternate permission service/API exists。
-
-### Gate
-
-Assignment/Permission PASS。
-
-## 13. OPS-09 — Audit Logging
-
-### Goal
-
-实现 immutable success-only Operator audit canonical fact。
-
-### Scope
-
-- local transaction audit writer；
-- public cross-domain success audit recorder；
-- query list/detail；
-- details allowlist/sanitization；
-- no update/delete repository methods。
-
-### Dependencies
-
-OPS-03 + RBAC contract。
-
-### Files
-
-Operations audit application/infrastructure/public adapter。
-
-### Tests
-
-- actor FK；
-- action grammar；
-- target combinations；
-- request_id/IP；
-- details object/sensitive-key rejection；
-- mutation + audit same tx；
-- no-op mutation no audit；
-- no update/delete path；
-- failed/denied action does not create canonical audit row；
-- audit filters + cursor pagination。
-
-### Audit
-
-Confirm no `result` DB field or hidden `details.result` convention introduced。
-
-### Gate
-
-Audit Contract PASS。
-
-## 14. OPS-10 — Public Contracts
-
-### Goal
-
-冻结并实现其他 Domain 唯一可依赖的 Operations boundary。
-
-### Scope
+**Scope**：
 
 ```text
 OperationsAuthorizer
 OperationsOperatorResolver
 OperationsAuditRecorder
-OperatorPermissionKey/catalog
 AuthorizedOperatorContext
+OperatorPermissionKey/catalog
 ```
 
-### Dependencies
+**Dependencies**：OPS-05/09。
 
-OPS-05/09。
+**Files**：`modules/operations/public/*`。
 
-### Files
+**Tests**：public imports compile；external fixture can authorize + record safe Audit using public contract only。
 
-`modules/operations/public/*` + import-boundary tests。
+**Audit**：repo/DB/SQL export = 0。
 
-### Tests
+**Gate**：Public Contract PASS。
 
-- public imports compile；
-- no repo/DB/SQL export；
-- external test fixture can authorize exact key and record safe success audit using only public contract。
+## OPS-11 — Operations HTTP/API
 
-### Audit
+**Goal**：实现 frozen `/api/v1/admin/operations/**` endpoints。
 
-Cross-domain internal dependency = 0。
+**Scope**：所有 REQUIRED Operations HTTP endpoints；Bootstrap 与 public Audit recorder 不走 HTTP。
 
-### Gate
+**Dependencies**：OPS-06~10 + Foundation auth/error conventions。
 
-Public Contract PASS。
+**Files**：`modules/operations/http/*` + composition wiring。
 
-## 15. OPS-11 — HTTP/API
+**Tests**：401；authenticated non-operator 403；disabled 403；missing exact permission 403；success DTO；strict unknown fields；UUID；stable errors；SQL errors hidden；`/me` effective permissions；idempotent PUT/DELETE。
 
-### Goal
+**Audit**：route direct SQL/repository access = 0。
 
-实现冻结 `/api/v1/admin/operations/**` endpoints。
+**Gate**：Operations HTTP PASS。
 
-### Scope
+## OPS-12 — Bootstrap First Operator
 
-All REQUIRED HTTP endpoints in `OPERATIONS_API.md`，except Bootstrap/public audit recorder which are non-HTTP。
+**Goal**：解决 zero-admin initialization，不留 public backdoor。
 
-### Dependencies
+**Scope**：controlled CLI；first Operator + reserved super_admin + full exact catalog + Audit。
 
-OPS-06~10 + Foundation auth/error/http conventions。
+**Dependencies**：OPS-02/03/04/08/09。
 
-### Files
+**Files**：backend CLI/script composition；no HTTP route。
 
-`modules/operations/http/*` + composition wiring。
+**Tests**：empty system success；Identity missing/inactive reject；transaction rollback no partial state；second invocation reject；no default credential；Audit produced；full explicit catalog rows。
 
-### Tests
+**Audit**：public bootstrap route = 0；long-lived bypass = 0。
 
-HTTP integration：
+**Gate**：Bootstrap PASS。
 
-- unauthenticated 401；
-- authenticated non-operator 403；
-- disabled operator 403；
-- exact missing permission 403；
-- success contracts；
-- unknown fields/mass assignment rejected；
-- UUID validation；
-- stable errors；
-- raw SQL errors hidden；
-- GetCurrentOperator permission list；
-- idempotent PUT/DELETE semantics。
+## OPS-13 — Operations Core Integration / E2E
 
-### Audit
+**Goal**：用 real PostgreSQL + current Identity AuthenticationProvider 验证 auth→RBAC→Operations mutation→Audit 全链路。
 
-Route handler direct SQL/repository access = 0。
+**Scope**：Operations core only。
 
-### Gate
+**Dependencies**：OPS-01~12。
 
-HTTP/API PASS。
+**Files**：integration/E2E tests。
 
-## 16. OPS-12 — Bootstrap First Operator
+**Tests**：bootstrap；Identity login/auth；GET `/me`；create operator/role；set permissions；assign；allowed/denied endpoints；disable operator immediate next-request deny；disable role removes permission；re-enable restores；last-admin protection；Audit timeline。
 
-### Goal
+**Audit**：core auth/repository fakes = 0 in E2E。
 
-解决 zero-admin initialization without public backdoor。
+**Gate**：Operations Core E2E PASS。
 
-### Scope
+## OPS-14 — Platform Management RBAC/Audit Integration
 
-Controlled CLI only；first Operator + reserved super_admin + full explicit catalog + audit。
+**Goal**：将 Platform 已实现的 management application use cases 接入统一 Admin authentication/RBAC/Audit contract。
 
-### Dependencies
+**Scope**：实现/注册 frozen `/api/v1/admin/platform/**` management routes or adapter wiring；每个 resource 使用已冻结 Platform exact permission；Platform canonical writes 仍由 Platform application/infrastructure 执行。
 
-OPS-02/03/04/08/09。
-
-### Files
-
-Backend script/CLI composition；no HTTP route。
-
-### Tests
-
-- empty Operations succeeds；
-- Identity missing/inactive rejected；
-- transaction rollback leaves no partial role/operator/permission；
-- second invocation rejected；
-- no default credential；
-- audit row produced；
-- full catalog explicit rows assigned。
-
-### Audit
-
-Search public routes for bootstrap = 0。
-
-### Gate
-
-Bootstrap PASS。
-
-## 17. OPS-13 — Operations Domain Integration / E2E
-
-### Goal
-
-用真实 PostgreSQL + Identity AuthenticationProvider 验证完整 Admin auth→RBAC→Operations mutation→audit 链路。
-
-### Scope
-
-No Platform dependency。
-
-### Dependencies
-
-OPS-01~12。
-
-### Tests
-
-E2E scenarios：
+**Dependencies**：
 
 ```text
-bootstrap first operator
-login/authenticate through existing Identity
-GET /me
-create custom operator/role
-set permissions
-assign role
-new operator authorizes allowed endpoint
-denied endpoint stays forbidden
-disable operator immediately denies next request
-disable role removes permissions
-re-enable restores
-last-super-admin protection
-audit timeline contains successful mutations
+PLATFORM_IMPLEMENTATION = COMPLETE
+PLATFORM_GATE = PASS
+OPS-10 Public Contract PASS
+OPS-11 HTTP infrastructure available
 ```
 
-### Audit
+External dependency status：**SATISFIED**。
 
-Fake core auth/repository = 0 in E2E。
+**Files**：composition root + Platform management HTTP adapter/integration wiring as required；不得在 Operations repository 增加 Platform SQL。
 
-### Gate
+**Tests**：每个 Platform management read/write exact permission；frontend guard bypass cannot bypass backend；Platform state remains owner-owned；successful write Audit；Audit failure ambiguity handling；no distributed transaction。
 
-Operations Core E2E PASS。
-
-## 18. OPS-14 — Platform Management Integration
-
-### Goal
-
-将 Platform frozen management APIs 接入 Operations authorization/audit contract。
-
-### Scope
-
-Only after Platform management application/HTTP exists：
+**Audit**：
 
 ```text
-/api/v1/admin/platform/**
+Operations SQL -> platform.* = 0
+Platform-owned RBAC implementation = 0
+Operations-owned Platform state = 0
 ```
 
-requires exact frozen Platform permissions。
+**Gate**：Platform Integration PASS。
 
-No Operations proxy API，no Operations write to `platform.*`。
+## OPS-15 — Security / Race
 
-### Dependencies
+**Goal**：专项验证授权安全与关键并发 invariant。
 
-```text
-PLATFORM_IMPLEMENTATION = sufficient management capability available
-Platform PLT-01 corrective prerequisite completed where required
-OPS-10 public contract PASS
-```
+**Scope**：mass assignment；IDOR；permission injection；wildcard attempts；operator/role disable races；permission replace race；last-super-admin race；bootstrap race；Audit secret leakage；proxy/IP handling。
 
-### Tests
+**Dependencies**：OPS-13；Platform cases after OPS-14。
 
-- each Platform management resource read/write protected by correct exact key；
-- frontend-only guards cannot bypass backend；
-- Platform state remains Platform-owned；
-- successful writes create Operations audit；
-- audit failure path exposes committed-state ambiguity safely and critical logs request_id；
-- no distributed/cross-domain DB transaction。
+**Files**：security/race tests only unless finding requires contract-conformant fix。
 
-### Audit
+**Tests**：multi-run real PostgreSQL concurrency suite。
 
-`platform.*` SQL under Operations module = 0。
+**Audit**：no stale RBAC cache；linearization semantics match docs。
 
-### Gate
+**Gate**：Security/Race PASS。
 
-Platform Integration PASS。
+## OPS-16 — Final Implementation Conformance Audit
 
-## 19. OPS-15 — Security / Race
+**Goal**：独立核对 frozen docs ↔ implementation。
 
-### Goal
+**Scope**：DB/repositories；Use Cases/services；RBAC；Public Contract；HTTP；Audit；Bootstrap；Admin Foundation compatibility；Platform boundary。
 
-专项验证授权安全与关键并发 invariant。
+**Dependencies**：OPS-01~15 required work complete。
 
-### Scope
+**Files**：audit report inputs only。
 
-```text
-mass assignment
-IDOR
-permission string injection
-wildcard attempts
-role disable race
-operator disable race
-permission replace race
-last-super-admin race
-bootstrap race
-audit details secret leakage
-```
+**Tests**：backend verify/build/integration；database validation；targeted architecture searches；fresh PostgreSQL。
 
-### Dependencies
+**Audit**：Severity = BLOCKER/HIGH/MEDIUM/LOW；frozen migration edit check。
 
-OPS-13；Platform-specific cases after OPS-14 when available。
+**Gate**：BLOCKER=0/HIGH=0 before final report。
 
-### Tests
+## OPS-17 — Final Report / Exit Gate
 
-多轮 PostgreSQL race/stability suite。
+**Goal**：生成未来 `OPERATIONS_IMPLEMENTATION_REPORT.md` 并决定 implementation Gate。
 
-### Audit
+**Scope**：tests/evidence；dependency status；security/race；migration delta；remaining debt。
 
-No stale authorization cache because cache absent；document linearization behavior for in-flight cross-domain request。
+**Dependencies**：OPS-16 PASS。
 
-### Gate
+**Files**：future implementation report + progress sync。
 
-Security/Race PASS。
+**Tests**：re-run repository CI-required backend/database commands；Admin integration tests when implemented。
 
-## 20. OPS-16 — Final Design/Implementation Conformance Audit
+**Audit**：不得把 Design Gate 当 Implementation Gate。
 
-### Goal
-
-独立核对 frozen docs ↔ implementation。
-
-### Scope
-
-```text
-DB ↔ repositories
-Use Cases ↔ services
-RBAC ↔ authorization
-Public Contract ↔ imports
-HTTP ↔ API doc
-Audit ↔ transaction paths
-Bootstrap ↔ no backdoor
-Admin Foundation compatibility
-Platform boundary
-```
-
-### Dependencies
-
-All required implementation tasks complete。
-
-### Tests
-
-Full regression：backend verify/build/integration + database validation；no frozen migration edits。
-
-### Audit Severity
-
-BLOCKER / HIGH / MEDIUM / LOW。
-
-### Gate
-
-BLOCKER=0 and HIGH=0 before exit report。
-
-## 21. OPS-17 — Final Report / Exit Gate
-
-### Goal
-
-生成 Operations Implementation final report and close phase。
-
-### Scope
-
-Evidence counts，dependency status，remaining tech debt，migration delta，security/race results。
-
-### Dependencies
-
-OPS-16 PASS。
-
-### Files
-
-Future：
-
-```text
-OPERATIONS_IMPLEMENTATION_REPORT.md
-```
-
-### Tests
-
-Re-run required CI commands and fresh PostgreSQL validation。
-
-### Audit
-
-Do not mark complete if Platform-required integration remains an unresolved HIGH/BLOCKER under the then-current Master Plan。
-
-### Gate
-
-Future only：
+**Gate**：未来才能设置：
 
 ```text
 OPERATIONS_IMPLEMENTATION = COMPLETE
 OPERATIONS_GATE = PASS
 ```
 
-Current design session MUST NOT set either value。
-
-## 22. Admin Client Scope After Backend Contract
-
-Future Admin work may implement：
+当前会话必须保持：
 
 ```text
-current operator binding
-permission-aware navigation
-backend-backed route/action guards
-operator list/detail/edit
-role list/detail/edit
-permission matrix/editor
-audit log list/detail
+OPERATIONS_IMPLEMENTATION_STARTED = NO
 ```
 
-But this plan does not implement Admin pages。
+## 4. Admin Client Scope After Backend Contract
 
-Admin page work should begin only after OPS-11/13 contracts are functional，and Platform Admin pages only after OPS-14 integration is functional。
+未来可实现：
 
-## 23. Outbox / Cache Plan
+```text
+current Operator binding
+permission-aware navigation
+backend-backed route/action guards
+Operator management
+Role management
+Permission editor
+Audit log view
+```
+
+但本计划不开发 Admin 页面。
+
+## 5. Outbox / Cache Decision
 
 ```text
 Operations RBAC outbox = NONE
@@ -843,16 +472,18 @@ Authorization cache    = NONE
 Redis/Kafka            = NONE
 ```
 
-Cross-domain reliable audit via outbox remains explicit DEFERRED TECH_DEBT，not a hidden OPS task。
+Reliable cross-domain Audit delivery via outbox 仍为 explicit DEFERRED TECH_DEBT，不是隐藏 implementation task。
 
-## 24. Exit Conditions for Starting Implementation
+## 6. Start Condition
 
-Another execution-development session may start OPS-01 only if：
+另一个 execution-development session 只有在：
 
 ```text
 OPERATIONS_DESIGN_GATE = PASS
-frozen docs committed
+canonical docs committed
 user explicitly asks to begin Operations implementation
 ```
 
-This document ends at planning。STOP。
+后才能进入 OPS-01。
+
+STOP。
