@@ -49,6 +49,8 @@ export default defineConfig({
           { text: 'Identity 流程', link: '/domains/identity/flows' },
           { text: 'Identity 数据库', link: '/domains/identity/database' },
           { text: 'Identity 业务模型', link: '/domains/identity/model' },
+          { text: 'Content', link: '/domains/content/' },
+          { text: 'Content · 数据库总览', link: '/domains/content/database' },
           { text: 'Learning', link: '/domains/learning/' },
           { text: 'Learning 表总览', link: '/domains/learning/database' },
           { text: 'Learning 业务模型', link: '/domains/learning/model' },
@@ -58,6 +60,8 @@ export default defineConfig({
           { text: 'Learning · Progress', link: '/domains/learning/progress' },
           { text: 'Learning · Dictionary', link: '/domains/learning/dictionary' },
           { text: 'Learning · AI & Media', link: '/domains/learning/ai-media' },
+          { text: 'Audio', link: '/domains/audio/' },
+          { text: 'Audio · 数据库总览', link: '/domains/audio/database' },
           { text: 'Social', link: '/domains/social/' },
           { text: 'Social · 资料', link: '/domains/social/profile' },
           { text: 'Social · 发现与关系', link: '/domains/social/discovery-and-relationships' },
@@ -113,7 +117,9 @@ export default defineConfig({
           { text: 'ADR-016 Commerce 资金与只追加账本', link: '/adr/ADR-016-commerce-money-and-append-only-ledger' },
           { text: 'ADR-017 Rewards 边界与事件驱动发放', link: '/adr/ADR-017-rewards-boundary-and-event-driven-grant' },
           { text: 'ADR-018 全局数据库设计原则最终版', link: '/adr/ADR-018-global-database-design-principles-final' },
-          { text: 'ADR-019 Operations 后台控制平面', link: '/adr/ADR-019-operations-backoffice-control-plane' }
+          { text: 'ADR-019 Operations 后台控制平面', link: '/adr/ADR-019-operations-backoffice-control-plane' },
+          { text: 'ADR-020 Audio Production 域', link: '/adr/ADR-020-audio-production-domain' },
+          { text: 'ADR-021 Content/Learning 拆分', link: '/adr/ADR-021-content-and-learning-domain-split' }
         ]
       }
     ],

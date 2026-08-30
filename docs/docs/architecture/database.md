@@ -9,14 +9,17 @@ last_updated: 2026-08-30
 
 ## 物理边界
 
-使用一个 PostgreSQL 实例、一个主数据库与九个业务 Schema：
+使用一个 PostgreSQL 实例、一个主数据库与十一个业务 Schema：
 
 ```text
-identity  learning  social  chat
-commerce  rewards   trust   operations platform
+identity  content  learning  social  chat  audio
+commerce  rewards  trust     operations platform
 ```
 
 - `community` Schema 已取消：动态、点赞、评论、Feed 等社区/动态能力正式归入 `social` Schema，不再保留独立 Community Schema。
+- `content` Schema 承载 Content 业务域（第 11 个业务 Schema，D-147/[ADR-021](../adr/ADR-021-content-and-learning-domain-split.md)）：中文/老挝语 canonical 教学内容定义（课程/单元/Lesson/词汇/句子/教学文本/标准答案/标准发音要求/内容版本与 Content Revision/发布状态）。
+- `learning` Schema 收窄为用户学习状态与学习事实（进度/完成/掌握/复习/学习历史/学习统计）；原 Learning 的 43 张必建表按职责归属 `content.*` 与 `learning.*` 两个 Schema（定义类 → content、用户状态/行为类 → learning），**逐表归属清单待主会话给出（D-147 `designing`，文档建议映射见 [Content 数据库](../domains/content/database.md)）**；不因拆分重新设计已定稿表。
+- `audio` Schema 承载 Audio Production 业务域（第 10 个业务 Schema，D-139/[ADR-020](../adr/ADR-020-audio-production-domain.md)），固定 9 张业务表：`audio_slots` / `audio_tasks` / `audio_generation_attempts` / `audio_asset_versions` / `audio_reviews` / `audio_task_events` / `audio_task_batches` / `audio_task_batch_items` / `audio_default_presets`。
 - `platform` 承载 Platform 业务域能力，固定为 6 张业务表：`feature_flags` / `feature_flag_overrides` / `runtime_configs` / `app_versions` / `announcements` / `regions`（Product Runtime Control Plane）。`system_outbox_events`（全系统唯一一套）与统一 Asset/Media 基础设施属于 **Platform Infrastructure**，不计入业务 Schema，也不计入任何业务 Domain 的业务表数量。其他业务 Domain 不建立指向 `platform.*` 的跨域 FK（Region 语义跨域用 `region_code` 等逻辑标识）。
 - 不采用一个 Domain 一个数据库。
 
@@ -57,7 +60,8 @@ commerce  rewards   trust   operations platform
 | Schema | 模型 | 字段设计 |
 | --- | --- | --- |
 | `identity` | `frozen` | 核心四表 SQL 级 `frozen`；OTP/Session/Device 已确认字段，未确认类型逐字段 `designing` |
-| `learning` | `frozen` | 43 张必建表、核心字段与约束已冻结；跨域 Media FK 与内容发布机制局部待定。 |
+| `content` | `frozen`（域边界）/ `designing`（逐表归属） | 教学内容定义类表（Knowledge/Dictionary/Curriculum 定义、Practice 定义、Content Revision 等）由原 Learning 43 张必建表按职责迁入；字段规格沿用已冻结的 Learning 分层页；逐表归属清单与跨域 `public_id` 字段级落地待主会话确认（D-147） |
+| `learning` | `frozen`（域边界）/ `designing`（逐表归属） | 用户学习状态/行为类表（Progress/Mastery/Review/Activity、作答历史等）保留或迁入；字段规格沿用已冻结的 Learning 分层页；逐表归属清单与跨域 logical reference 字段级落地待主会话确认（D-147） |
 | `social` | `frozen` | 20 张首期表已冻结；公开内容字段局部 `designing`。 |
 | `chat` | `frozen` | Chat 第一阶段 7 张表定稿；「全域审计后的最终修正版」已把跨域用户 / Media 引用统一为 logical UUID（无跨域物理 FK）、`public_id` 定为 UUID；剩余物理 DDL（Outbox 物理表、UUID 分配实现）为 `designing`；逻辑模型与跨域契约均符合全局最终版（`bigint identity` 内部 PK + `public_id uuid` logical ID） |
 | `commerce` | `frozen`（V1） | 16 张业务表 `frozen`；物理约定（`uuid` 主键 + 跨域只存 logical UUID 不建物理 FK）**符合全局最终版（ADR-018），compliant**；会员/Subscription/Entitlement 落表 `deferred` |
@@ -65,8 +69,9 @@ commerce  rewards   trust   operations platform
 | `rewards` | `frozen` | 5 张表（programs/rules/events/grants/deliveries）字段级 `frozen`；审计确认跨域引用统一 `uuid` logical reference、不建独立 outbox（统一 `system_outbox_events`），符合全局最终版（ADR-018）；权益型奖励/Manual Grant/非 Coin 资产延后 |
 | `operations` | `frozen` | 5 张表（operators/roles/operator_roles/role_permissions/operator_audit_logs）字段级 `frozen`；稳定逻辑 ID 用 `varchar(20)`（非 UUID）与全局「跨域 logical UUID」的类型差异待主会话裁决；后台认证机制归 Identity/Auth 未设计 |
 | `platform` | `frozen` | 6 张业务表（`feature_flags`/`feature_flag_overrides`/`runtime_configs`/`app_versions`/`announcements`/`regions`）字段级 `frozen`（全域审计最终修正版）；`runtime_configs` 仅 current-state（无版本/回滚）；Media/Asset Infrastructure 与 `system_outbox_events` 物理细节 `designing` |
+| `audio` | `frozen` | 9 张业务表字段级 `frozen`（D-139~D-144）；`uuid` 主键 + 跨域只存 logical UUID（`content_entity_id`/operator 等）不建跨域物理 FK，符合全局最终版（ADR-018）；`audio_asset_versions` 自持文件事实与 Media/Asset Infrastructure 的边界衔接待主会话裁决（D-146，`designing`） |
 
-详见 [Identity 数据库](../domains/identity/database.md)、[Learning 数据库](../domains/learning/database.md)、[Social 数据库](../domains/social/database.md)、[Chat 数据库](../domains/chat/database.md)、[Commerce 数据库](../domains/commerce/database.md)、[Trust 数据库](../domains/trust/database.md)、[Rewards 数据库](../domains/rewards/database.md)、[Operations 数据库](../domains/operations/database.md) 与 [Platform 数据库](../domains/platform/database.md)。
+详见 [Identity 数据库](../domains/identity/database.md)、[Content 数据库](../domains/content/database.md)、[Learning 数据库](../domains/learning/database.md)、[Social 数据库](../domains/social/database.md)、[Chat 数据库](../domains/chat/database.md)、[Commerce 数据库](../domains/commerce/database.md)、[Trust 数据库](../domains/trust/database.md)、[Rewards 数据库](../domains/rewards/database.md)、[Operations 数据库](../domains/operations/database.md)、[Platform 数据库](../domains/platform/database.md) 与 [Audio 数据库](../domains/audio/database.md)。
 
 ## 跨域物理约定已裁决（全局最终版）
 

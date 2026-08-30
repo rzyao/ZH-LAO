@@ -21,5 +21,7 @@
 | [ADR-017](ADR-017-rewards-boundary-and-event-driven-grant.md) | Rewards 独占奖励决定，事件驱动与幂等发放 | `frozen` |
 | [ADR-018](ADR-018-global-database-design-principles-final.md) | 全局数据库设计原则最终版（混合主键 / 跨域 logical UUID / canonical fact 单一归属 / 统一删除策略 / Infra 边界） | `frozen` |
 | [ADR-019](ADR-019-operations-backoffice-control-plane.md) | Operations 为后台控制平面（运营主体 + RBAC + 不可变操作审计，代码定义权限） | `frozen` |
+| [ADR-020](ADR-020-audio-production-domain.md) | Audio Production 独立成域（第 10 个业务域，Slot/Task/Attempt/Asset Version/Review，`official_asset_version_id` 唯一正式音频指针） | `frozen` |
+| [ADR-021](ADR-021-content-and-learning-domain-split.md) | Learning 拆分为 Content + Learning（第 11 个业务域；Content = canonical 教学内容、Learning = 用户学习状态；`Identity → Learning → Content`；Audio 契约改 `Audio → Content`） | `frozen` |
 
 ADR 记录长期取舍；字段和业务规格仍以对应领域文档为唯一事实源。

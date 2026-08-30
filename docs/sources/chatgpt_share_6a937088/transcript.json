@@ -1,0 +1,115 @@
+{
+  "title": "拆分学习域",
+  "messages": [
+    {
+      "id": "3c0b9e6e-1367-4078-a532-f766245c11fc",
+      "parent": "3dc22134-3a86-4292-a1be-5d6af5351c7d",
+      "role": "system",
+      "model": "",
+      "create_time": 1788047364.655327,
+      "status": "finished_successfully",
+      "content_type": "text",
+      "body": ""
+    },
+    {
+      "id": "3bdeb282-dce9-4172-ba67-1e14f70ff513",
+      "parent": "3c0b9e6e-1367-4078-a532-f766245c11fc",
+      "role": "system",
+      "model": "",
+      "create_time": 1788047364.655327,
+      "status": "finished_successfully",
+      "content_type": "text",
+      "body": ""
+    },
+    {
+      "id": "4f1287e3-48b4-4dd0-944c-9b6f03079b62",
+      "parent": "3bdeb282-dce9-4172-ba67-1e14f70ff513",
+      "role": "user",
+      "model": "",
+      "create_time": 1788047361.501,
+      "status": "finished_successfully",
+      "content_type": "text",
+      "body": "[全域数据库最终审计](chatgpt-conversation://6a934480-c434-83e9-993a-c120d7688e3c)把学习域拆分为内容域和学习域"
+    },
+    {
+      "id": "56185220-b4a2-4d11-998e-95d15731626b",
+      "parent": "4f1287e3-48b4-4dd0-944c-9b6f03079b62",
+      "role": "system",
+      "model": "",
+      "create_time": 1788047365.093118,
+      "status": "finished_successfully",
+      "content_type": "text",
+      "body": ""
+    },
+    {
+      "id": "1c97c1ef-a42d-4d34-a0a6-888ede50e613",
+      "parent": "56185220-b4a2-4d11-998e-95d15731626b",
+      "role": "system",
+      "model": "",
+      "create_time": 1788047365.117747,
+      "status": "finished_successfully",
+      "content_type": "text",
+      "body": ""
+    },
+    {
+      "id": "92caa879-f63b-46eb-97b9-a8cdaebbffec",
+      "parent": "1c97c1ef-a42d-4d34-a0a6-888ede50e613",
+      "role": "system",
+      "model": "",
+      "create_time": 1788047364.681194,
+      "status": "finished_successfully",
+      "content_type": "text",
+      "body": ""
+    },
+    {
+      "id": "f4cfc4bf-5ef2-42de-917d-f2fafbb3b27a",
+      "parent": "92caa879-f63b-46eb-97b9-a8cdaebbffec",
+      "role": "assistant",
+      "model": "",
+      "create_time": 1788047364.817649,
+      "status": "finished_successfully",
+      "content_type": "model_editable_context",
+      "body": ""
+    },
+    {
+      "id": "c67205c9-75f3-4432-aa38-c872a7f03d6c",
+      "parent": "f4cfc4bf-5ef2-42de-917d-f2fafbb3b27a",
+      "role": "assistant",
+      "model": "",
+      "create_time": 1788047364.817225,
+      "status": "finished_successfully",
+      "content_type": "text",
+      "body": "The output of this plugin was redacted."
+    },
+    {
+      "id": "7745c42e-1786-4038-84ff-87c456f2bce8",
+      "parent": "c67205c9-75f3-4432-aa38-c872a7f03d6c",
+      "role": "assistant",
+      "model": "",
+      "create_time": 1788047377.652588,
+      "status": "finished_successfully",
+      "content_type": "thoughts",
+      "body": ""
+    },
+    {
+      "id": "88e6435d-47e4-4330-8e9d-11745cc84a00",
+      "parent": "7745c42e-1786-4038-84ff-87c456f2bce8",
+      "role": "assistant",
+      "model": "",
+      "create_time": 1788047377.655095,
+      "status": "finished_successfully",
+      "content_type": "reasoning_recap",
+      "body": ""
+    },
+    {
+      "id": "42468f82-d04f-4a0c-95db-e8f76701451c",
+      "parent": "88e6435d-47e4-4330-8e9d-11745cc84a00",
+      "role": "assistant",
+      "model": "",
+      "create_time": 1788047371.802876,
+      "status": "finished_successfully",
+      "content_type": "text",
+      "body": "可以。这里应当把《全域数据库最终审计》里原来的 **Learning Domain** 拆成两个独立边界，但**只调整 Domain 归属，不重新设计已经定稿的数据模型**。\n\n:::writing{variant=\"document\" id=\"48317\"}\n# 全域数据库最终审计修订：Learning 拆分为 Content + Learning\n\n基于已经完成的全域数据库最终审计，现对原 `Learning Domain` 做一次边界修订。\n\n本次修订属于 **Domain 职责拆分**，不是重新设计数据库。\n\n## 一、最终裁决\n\n原：\n\n`Learning Domain`\n\n正式拆分为：\n\n- `Content Domain`\n- `Learning Domain`\n\n原则：\n\n> Content 管“用户学什么”；Learning 管“用户学得怎么样”。\n\n原 Learning 中已经定稿的数据模型、字段、约束、索引等原则上保持不变，只根据职责重新划分所属 Domain。\n\n---\n\n# 二、Content Domain\n\n## 定位\n\n`Content Domain` 是学习内容的 canonical source of truth。\n\n负责所有与具体用户无关、可以被多个用户共同消费的教学内容。\n\n典型职责包括：\n\n- 课程体系\n- 单元\n- 课程 / Lesson\n- 词汇\n- 句子\n- 教学文本\n- 内容之间的组织关系\n- 内容语言信息\n- 标准答案\n- 标准发音要求\n- 教学内容版本\n- Content Revision\n- 内容发布状态\n\n判断标准：\n\n> 即使系统中一个用户都没有，这些数据依然存在，则原则上属于 Content Domain。\n\nContent Domain 不负责：\n\n- 用户学习进度\n- 用户掌握程度\n- 用户完成状态\n- 用户个人学习记录\n- 用户复习状态\n- 用户学习行为\n\n---\n\n# 三、Learning Domain\n\n## 定位\n\n新的 `Learning Domain` 专门负责：\n\n> 用户 × Content 之间产生的学习状态和学习事实。\n\n典型职责包括：\n\n- 用户课程进度\n- 用户 Lesson / Unit 进度\n- 用户词汇学习状态\n- 用户句子学习状态\n- 用户完成记录\n- 用户掌握状态\n- 学习历史\n- 复习状态\n- 学习统计所需的 canonical learning facts\n\n判断标准：\n\n> 数据只有在某个用户开始学习之后才产生，则原则上属于 Learning Domain。\n\nLearning 不再拥有课程、词汇、句子等 canonical 内容本身。\n\n---\n\n# 四、两个 Domain 的关系\n\n依赖方向明确为：\n\n`Learning → Content`\n\nLearning 可以保存：\n\n- `user_id`\n- `content_id`\n- `course_id`\n- `lesson_id`\n- `unit_id`\n- `vocabulary_id`\n- `sentence_id`\n\n等 logical references。\n\n但必须遵守全局数据库规范：\n\n- Content 内部实体可以继续使用已经定稿的内部 PK。\n- 所有会被其他 Domain 引用的 Content 实体必须具有稳定 UUID logical/public ID。\n- Learning → Content 不建立跨 Domain physical FK。\n- Learning 不得引用 Content 的内部 BIGINT PK。\n- Identity 用户同样通过稳定 UUID logical ID 引用。\n- Learning → Identity 不建立 physical FK。\n\n---\n\n# 五、内容事实与用户事实严格分离\n\n以下事实属于 Content：\n\n`这个词是什么`\n`这个句子的正文是什么`\n`这个 Lesson 包含什么`\n`正确答案是什么`\n`标准发音要求是什么`\n`当前 Content Revision 是什么`\n\n以下事实属于 Learning：\n\n`用户是否学过这个词`\n`用户是否完成这个 Lesson`\n`用户对这个句子的掌握程度`\n`用户最后一次学习时间`\n`用户是否需要复习`\n\n不得为了查询方便在 Learning 中复制第二份 canonical 内容。\n\n---\n\n# 六、Content Revision\n\n原 Learning Domain 中承担的 Content Revision 职责现在正式迁移到：\n\n`Content Domain`\n\nContent Revision 描述：\n\n> 教学内容本身发生了什么版本变化。\n\n它不是用户学习进度的一部分。\n\nLearning 可以记录：\n\n`用户学习时对应的 content revision`\n\n用于判断：\n\n- 内容更新后是否需要重新学习\n- 已学习进度是否仍然有效\n- 统计应该按照哪个内容版本解释\n\n但 Revision 本身仍由 Content Domain 管理。\n\n---\n\n# 七、Audio Production Domain 契约同步修正\n\n此前已经确定：\n\n> 文本、正确发音要求、Content Revision 由学习侧拥有，Audio Production 只负责生产音频。\n\nLearning 拆分后，此处正式修订为：\n\n> **Content Domain 拥有文本、正确发音要求和 Content Revision。**\n\n因此依赖关系改为：\n\n`Audio Production → Content`\n\n而不是：\n\n`Audio Production → Learning`\n\nContent 提供稳定 logical UUID，例如：\n\n`content_entity_id / content_revision_id`\n\nAudio Production 使用 logical reference，不建立跨 Domain FK。\n\nAudio Production 仍然只负责：\n\n- audio slot\n- production task\n- generation attempt\n- asset version\n- review\n- production event\n- batch\n- preset\n\nAudio Production 不拥有教学文本，不成为教学内容 canonical source。\n\n---\n\n# 八、其他 Domain 引用学习内容时的规则\n\nSocial、Chat、Commerce、Rewards、Audio Production、Operations、Trust 等 Domain，如果需要指向教学内容：\n\n统一引用：\n\n`Content Domain logical UUID`\n\n而不是 Learning Domain 内部 ID。\n\n如果引用的是：\n\n> 某个用户的学习事实\n\n才引用：\n\n`Learning Domain logical UUID`\n\n因此两个概念必须严格区分：\n\n`content_id`\n\n和：\n\n`learning_record_id / progress_id`\n\n不得混用。\n\n---\n\n# 九、事件归属\n\n内容相关事件归 Content，例如：\n\n- content_created\n- content_updated\n- content_published\n- content_revision_created\n- lesson_published\n\n学习行为事件归 Learning，例如：\n\n- learning_started\n- lesson_completed\n- vocabulary_learned\n- review_completed\n- progress_updated\n\nContent 不记录用户学习事实。\n\nLearning 不产生第二份内容事实。\n\n---\n\n# 十、数据库 Schema\n\n建议最终数据库 Schema 明确分离为：\n\n`content.*`\n\n和：\n\n`learning.*`\n\n原 Learning Domain 中的表按照职责迁移：\n\n### 迁入 `content.*`\n\n所有：\n\n- 教学内容定义表\n- 内容组织关系表\n- 课程 / Unit / Lesson 定义表\n- Vocabulary / Sentence 等 canonical content 表\n- Content Revision / Version 相关表\n\n### 保留在 `learning.*`\n\n所有：\n\n- 用户进度表\n- 用户学习状态表\n- 用户完成事实表\n- 用户复习状态表\n- 用户与教学内容产生的学习关系表\n\n本次只是 Schema / Domain ownership 调整。\n\n**不得因为拆 Domain 顺便重新设计已经最终定稿的表。**\n\n---\n\n# 十一、最终架构规则\n\n从本次修订开始，全域设计统一采用以下定义：\n\n### Content Domain\n\n**Canonical Learning Content**\n\n回答：\n\n> 系统有什么可以学？\n\n### Learning Domain\n\n**User Learning State & Facts**\n\n回答：\n\n> 某个用户学了什么，以及学得怎么样？\n\n关系：\n\n`Identity → Learning → Content`\n\n其中箭头仅表示逻辑依赖，不表示数据库 physical FK。\n\n---\n\n# 十二、最终裁决\n\n本次修订正式覆盖此前所有将以下职责统称为 `Learning Domain` 的表述：\n\n- 教学内容\n- 用户学习状态\n\n以后必须严格区分：\n\n**Content Domain = 教学内容事实**\n\n**Learning Domain = 用户学习事实**\n\n原有已经定稿的业务模型继续有效。\n\n除 Domain ownership、Schema 名称以及由此产生的跨 Domain logical reference 调整之外，不因本次拆分增加、删除或重新设计业务表。\n\n全域其他已经最终定稿的 Domain 保持不变。\n:::\n\n这里有一个需要同步修改的关键点：之前 **Audio Production Domain** 定稿里写的是“Learning 拥有文本 / 正确发音 / Content Revision”，现在应该统一改成 **Content Domain 拥有这三类事实**；Learning 不再承担它们。memcite"
+    }
+  ]
+}

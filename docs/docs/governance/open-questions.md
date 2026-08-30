@@ -17,7 +17,10 @@ last_updated: 2026-08-30
 
 ## designing
 
-- Learning：媒体引用的最终物理形态（Media/Asset 归 Platform Infrastructure，业务域只存 `asset_id` UUID，跨域不建 FK——ADR-018；Learning 各 `*_media_id` 字段的落地方式待 Media Infrastructure 定稿）、内容发布/版本系统的完整模型、TTS/翻译的运营额度与限流参数；TTS 路由配置（如 `tts.zh.default_provider`）按 PLATFORM-02 属 Learning 自有运营参数，不进 `platform.runtime_configs`，落表待设计（D-129）；`question_reviews` 是否在首期后启用。
+- Content & Learning（「拆分学习域」会话已裁决拆分为两域，见 [Content 域](../domains/content/index.md)、[设计台账](design-register.md) D-147/D-148/D-149）：
+  - **已解决（不再列 designing）**：域边界（Content = Canonical Learning Content、Learning = User Learning State & Facts）、依赖 `Identity → Learning → Content`（逻辑依赖）、Audio 契约改为 `Audio Production → Content`、事件归属与跨域引用规则（引用教学内容用 Content logical UUID、引用学习事实才用 Learning logical UUID，`content_id` 与 `learning_record_id/progress_id` 不得混用）。
+  - **43 张必建表在 `content.*` / `learning.*` 两个 Schema 的逐表归属清单**待主会话给出（D-147 `designing`；文档暂按「定义类 → content、用户状态/行为类 → learning」给出建议映射，见 [Content 数据库](../domains/content/database.md)）；由此产生的跨域 logical reference 字段级落地（如 Learning 表保存 `content_id` logical UUID、被跨域引用的 Content 实体 `public_id`）待逐表确认。
+  - 媒体引用的最终物理形态（Media/Asset 归 Platform Infrastructure，业务域只存 `asset_id` UUID，跨域不建 FK——ADR-018；Content/Learning 各 `*_media_id` 字段的落地方式待 Media Infrastructure 定稿）、内容发布/版本系统的完整模型、TTS/翻译的运营额度与限流参数；~~TTS 路由配置（如 `tts.zh.default_provider`）落表待设计~~（**已由 D-142 解决**：TTS Provider/Model/Voice/Preset 参数归 TTS 服务自维护，Audio 域仅存 `audio_default_presets` 默认映射，Content 不落 TTS 路由表）；旧音频表 `pronunciation_audios`/`tts_jobs` 已被 Audio Production Domain 取代（`superseded`，D-145），其删除/迁移方式与 Content/Learning 必建表计数（43）调整待主会话确认；`question_reviews` 是否在首期后启用。
 - Identity：OTP/Session/Device 的未确认类型与约束，Refresh Token 轮换，Session 状态，设备安装唯一范围，`avatar_media_id` FK。
 - Social（19 表「全域审计修正版定稿」已落盘，见 [Social 数据库](../domains/social/database.md) 与台账 D-135~D-138）：**已解决（不再列 designing）**——公开动态/评论的完整字段规格与 `visibility`、图片上限（照片 6 / 动态 9）、删除策略、Feed 索引、跨域 logical UUID 契约（六实体 `public_id`，`user_id`/`media_id` 跨域 UUID 无物理 FK）、Exposure 90 天 retention。剩余：资料关闭后恢复或重建的产品规则。
 - Community：已正式并入 Social（全局最终版 ADR-018），不再独立成域；未来若真需独立社区能力再评估（首期动态事实已归 Social）。
@@ -48,7 +51,12 @@ last_updated: 2026-08-30
   - `regions.name` 是否在数据库存多语言文本（结合 Localization 设计）；未来引入稳定 Region UUID 后的跨域引用形态。
   - 未来新增客户端平台（web 等）时对 `feature_flag_overrides`/`app_versions`/`announcements` 三处 `client_platform` CHECK 的统一 migration（V1 仅 android/ios）。
   - Feature Flag 更高级灰度（用户级、百分比、版本表达式、时间窗口）与 `runtime_configs` 版本化/回滚：V1 明确不做，未来确有需求再单独设计正式模型（PLATFORM-06/07）。
-- 一级域命名：**用户原始请求列出 `Messaging`，本项目已通过 ADR-015 将「Chat」定为唯一正式命名（`messaging` 名称已废弃）；本次「设计运营域」会话的域列表请求亦再次使用 `Messaging`，会话正文同时出现 `messaging.*` 与 `Chat` 两种写法。** 当前文档一律使用 `Chat`；若主会话希望改回 `Messaging`，需重新裁决命名并联动 PROJECT.md、Domain Map、数据库规范与目录。同理，用户域列表含 `Community`，但 D-005 已裁决 Community 能力并入 Social、不再独立成域，文档沿用该结论。
+- Audio Production（9 张业务表已定稿 `frozen`，见 [Audio 域](../domains/audio/index.md)、[Audio 数据库](../domains/audio/database.md) 与台账 D-139~D-144）：
+  - **已按 D-148 修正**：canonical 内容/规范发音/Content Revision 的拥有者由 Learning 改为 **Content**（依赖 `Audio Production → Content`），Audio 仍只负责生产；原「Learning 拥有 canonical 内容与规范发音」表述不再使用。
+  - `audio_asset_versions` 自持文件事实（`storage_key`/`mime_type`/`size_bytes`/`checksum_sha256`，R2 直连，`storage_key` 全表 UNIQUE）与 D-127「Media/Asset Infrastructure 为所有 `asset_id` 权威技术属主、业务域只存 `asset_id`」的边界衔接**待主会话裁决**（D-146）；裁决前 audio 域按会话定稿自持文件事实。
+  - 旧 Learning `pronunciation_audios`/`tts_jobs` 的删除/数据迁移方式与 Content/Learning 必建表计数（43）调整待主会话确认（D-145 `designing`，联动 D-147 逐表归属清单）。
+  - Audio 各 operator 字段引用 Operations logical ID（会话表述为 UUID），与 D-107 `varchar(20)` 的类型口径差异沿用既有未决项。
+- 一级域命名：**用户原始请求列出 `Messaging`，本项目已通过 ADR-015 将「Chat」定为唯一正式命名（`messaging` 名称已废弃）；本次「设计运营域」会话的域列表请求亦再次使用 `Messaging`，会话正文同时出现 `messaging.*` 与 `Chat` 两种写法。** 当前文档一律使用 `Chat`；若主会话希望改回 `Messaging`，需重新裁决命名并联动 PROJECT.md、Domain Map、数据库规范与目录。同理，用户域列表含 `Community`，但 D-005 已裁决 Community 能力并入 Social、不再独立成域，文档沿用该结论。**用户原始域列表中的单个 `Learning` 已由「拆分学习域」会话（分享 `6a937088`）裁决拆分为 `Content` + `Learning` 两域（D-147），业务 Schema 总数现为 11。**
 - 前端、后端具体技术栈，API 风格、任务队列、部署与发布方案。
 
 未决项只能由主架构会话决定；文档维护阶段不得自行填充。

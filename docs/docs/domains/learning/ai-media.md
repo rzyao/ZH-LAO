@@ -5,9 +5,11 @@ last_updated: 2026-08-30
 
 # Pronunciation、TTS、Media 与 Translation 规格
 
+> **取代说明（2026-08-30）**：`Pronunciation Audio` 与 `TTS Job` 两节的表级设计已被 **Audio Production Domain**（[Audio 域](../audio/index.md)、[Audio 数据库](../audio/database.md)、[ADR-020](../../adr/ADR-020-audio-production-domain.md)）取代，`superseded`（D-145）——业务音频的生产、版本、审核、发布统一归 `audio` Schema 的 Slot/Task/Attempt/Asset Version/Review 模型。原原则「发音是知识属性、音频独立生产、TTS 异步生成」由 Audio 域延续强化。Translation Request 与 Platform Media 引用契约两节仍为本文档事实源。
+
 原则：发音是知识属性；音频是媒体资产；TTS 是生成方式；翻译是独立能力。
 
-## Pronunciation Audio
+## Pronunciation Audio（superseded → Audio Production）
 
 | 表 | 冻结字段与约束 |
 | --- | --- |
@@ -15,7 +17,7 @@ last_updated: 2026-08-30
 
 partial UNIQUE：每个 Pronunciation 只能有一个 `is_primary=true AND status=active` 的 Audio。真人录音与 TTS 不分表；差异由 `audio_source/provider/model/voice_code` 表达。质量不佳的 Audio 标为 `rejected`，不覆盖旧记录。
 
-## TTS Job
+## TTS Job（superseded → Audio Production）
 
 | 表 | 冻结字段与约束 |
 | --- | --- |
@@ -35,4 +37,4 @@ partial UNIQUE：每个 Pronunciation 只能有一个 `is_primary=true AND statu
 
 Learning 的 `media_id`、`cover_media_id` 与 `result_media_id` 最终指向 `platform.media_assets.id`。Platform MediaAsset 负责 `object_key`、`mime_type`、`size`、`duration`、`width`、`height`、`storage_provider`、`processing_status`；跨 Schema FK 的最终 migration 仍为 `designing`。
 
-TTS 路由由 Platform Config 决定，例如 `tts.zh.default_provider`、`tts.zh.default_model`、`tts.zh.short_word_provider`、`tts.lo.default_provider`、`tts.lo.default_model`。Learning 只发出 GeneratePronunciationAudio 能力请求。
+TTS 路由配置已由 D-142 裁决：TTS Provider/Model/Voice/Preset 参数及其历史**归 TTS 服务自维护**，Learning 不落 TTS 路由表，也不进 `platform.runtime_configs`；Audio 域只保存 `tts_preset_key` 使用事实与 `audio_default_presets` 默认映射（current configuration）。早期「`tts.zh.default_provider` 等由 Platform Config 决定」的方案不再进入实现。

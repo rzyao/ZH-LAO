@@ -164,4 +164,31 @@ last_updated: 2026-08-30
 | 统一删除策略 | 状态化退役 / 当前关系可 DELETE / 保留发布历史 / infrastructure append-oriented + retention 四分类 | [Platform 数据库](../domains/platform/database.md)、[设计台账](design-register.md) D-126 |
 | 最终不可违反规则 | PLATFORM-01..17（六表不变、key 不复用、禁 Global Override、runtime config 能力边界、发布历史保留、region 非 GIS、outbox 唯一、asset_id 单一属主、删除策略分类） | [Platform 数据库](../domains/platform/database.md) |
 | 与旧模型关系 | 旧 FeatureRule/ConfigItem/ConfigVersion/RegionPolicy/VersionPolicy/MediaAsset/Notification/NotificationTemplate/AuditLog 实体被六表模型取代 | [设计台账](design-register.md) D-128 `superseded` |
-| 明确遗留 | Media/Asset 物理表与生命周期枚举、`system_outbox_events` 物理字段、`regions.name` 多语言（Localization）、TTS 路由配置归 Learning | [未决事项](open-questions.md)、[设计台账](design-register.md) D-129 |
+| 明确遗留 | Media/Asset 物理表与生命周期枚举、`system_outbox_events` 物理字段、`regions.name` 多语言（Localization）、TTS 路由配置归 Learning（该遗留已由 D-142 解决：TTS 参数归 TTS 服务自维护，Audio 域存 `audio_default_presets`，Learning 不落路由表） | [未决事项](open-questions.md)、[设计台账](design-register.md) D-129 |
+
+## "设计音频生产域"会话
+
+来源：分享 `https://chatgpt.com/share/6a93716e-8a28-83ea-abbd-355679b38fe2`（标题「设计音频生产域」，提取定稿）。正文已导出至 `docs/sources/chatgpt_share_6a93716e/`。会话定稿 Audio Production Domain 为第 10 个业务域（Schema `audio`，9 张业务表字段级定稿），并以 [ADR-020](../adr/ADR-020-audio-production-domain.md) 记录独立成域决策。（业务域计数此后经 [ADR-021](../adr/ADR-021-content-and-learning-domain-split.md)/D-147 拆分 Learning 为 Content + Learning，现为 **11** 个。）
+
+| 会话阶段 | 已覆盖内容 | 文档 |
+| --- | --- | --- |
+| 域定位与边界 | 业务音频的生产/版本/审核/发布/重试/批量/审计统一归 Audio；非通用媒体文件域；与 Content 为 C 模式协作（canonical 内容与规范发音归 Content，Audio 独立生产并保存输入快照——「Learning 拥有」的会话原表述已由 D-148 修订为 Content 拥有） | [Audio 域](../domains/audio/index.md)、[ADR-020](../adr/ADR-020-audio-production-domain.md) |
+| 核心对象模型 | Slot → Task → Generation Attempt（仅 TTS）→ Asset Version → Review；`audio_slots.official_asset_version_id` 唯一 canonical pointer；fresh/stale 判定（stale 不清空 official pointer） | [Audio 域](../domains/audio/index.md)、[设计台账](design-register.md) D-140 |
+| 9 表字段级定稿 | `audio_slots`/`audio_tasks`/`audio_generation_attempts`/`audio_asset_versions`/`audio_reviews`/`audio_task_events`/`audio_task_batches`/`audio_task_batch_items`/`audio_default_presets` 的字段、约束、索引、状态枚举 | [Audio 数据库](../domains/audio/database.md) |
+| 生产与失败语义 | V1 `tts`（主）+`human_recording`（兜底）；技术失败 = 同 Task 新 Attempt；审核 Reject = 旧 Task 结束 + successor Task（`predecessor_task_id`）；每次生产一个候选；一个 Asset Version 一个文件；人工录音不伪造 Attempt | [Audio 域](../domains/audio/index.md)、[设计台账](design-register.md) D-141 |
+| TTS 契约 | Provider/Model/Voice/Preset 归 TTS 服务自维护；只存 `tts_preset_key` 使用事实与 `audio_default_presets` 默认映射；TTS 异步执行、自行上传 Cloudflare R2、不留原始生成文件 | [Audio 域](../domains/audio/index.md)、[设计台账](design-register.md) D-142（解决 D-129 TTS 路由遗留） |
+| 审核与发布 | `audio_reviews` append-only（decision/reject_reason CHECK）；approved ≠ published；发布原子事务；曾发布文件永久保留；未发布 rejected 文件异步清理（不建 cleanup jobs 表） | [Audio 数据库](../domains/audio/database.md)、[设计台账](design-register.md) D-143 |
+| 幂等/并发/批处理 | 三层并发（业务唯一约束 + Idempotency Key/request_id + `lock_version`）；同 Slot 至多一个 active Task（partial UNIQUE 六状态）；Attempt 唯一约束与 worker/callback 并发控制；Batch 只批量创建 Task（key+`request_hash` 幂等） | [Audio 数据库](../domains/audio/database.md)、[设计台账](design-register.md) D-144 |
+| 取代 Learning 旧音频表 | 旧 `pronunciation_audios`/`tts_jobs`（D-028 表级）`superseded`；Learning 必建表计数（43）相应调整；明确不建清单（TTS 参数历史表、cleanup jobs 表、Publish History/current-official/regeneration/human recording attempt/多格式 variant 表、`is_current` 类字段） | [设计台账](design-register.md) D-145、[Learning AI & Media](../domains/learning/ai-media.md) |
+| 边界衔接遗留 | `audio_asset_versions` 自持文件事实（R2 直连、`storage_key` 全表 UNIQUE）与 D-127「Media/Asset Infrastructure 为 asset_id 权威技术属主」的边界冲突待主会话裁决；Audio operator 字段引用 Operations logical ID 的类型口径沿用 D-107 未决项 | [未决事项](open-questions.md)、[设计台账](design-register.md) D-146 |
+
+## "拆分学习域"会话
+
+来源：分享 `https://chatgpt.com/share/6a937088-e570-83e9-912e-11cc3de27eba`（标题「拆分学习域」，共 11 条消息）。用户消息 [03] 指令「全域数据库最终审计把学习域拆分为内容域和学习域」，助手消息 [11] 产出「全域数据库最终审计修订：Learning 拆分为 Content + Learning」的**最终裁决**（`:::writing` 文档）。会话结论为正式裁决：原 Learning Domain 按职责拆分，**不重新设计已定稿数据模型**。正文已导出至 `docs/sources/chatgpt_share_6a937088/`。
+
+| 会话阶段 | 已覆盖内容 | 文档 |
+| --- | --- | --- |
+| 拆分裁决 | Learning 正式拆为 **Content Domain**（Canonical Learning Content：课程/单元/Lesson/词汇/句子/教学文本/内容组织/语言信息/标准答案/标准发音要求/内容版本/Content Revision/发布状态，「零用户时依然存在」）与 **Learning Domain**（User Learning State & Facts：课程/Lesson/Unit 进度、词汇/句子学习状态、完成记录、掌握状态、学习历史、复习状态、学习统计 facts，「用户开始学习后才产生」）；依赖 `Identity → Learning → Content`（逻辑箭头）；Learning 可存 `content_id/course_id/lesson_id/unit_id/vocabulary_id/sentence_id` logical references；被跨域引用的 Content 实体须有稳定 UUID logical/public ID；Learning→Content、Learning→Identity 不建物理 FK；事实严格分离（Learning 不复制第二份 canonical 内容）；Content Revision 归 Content、Learning 只记录学习时对应的 revision；Schema 拆 `content.*`/`learning.*`；不因拆分重新设计已定稿表 | [Domain Map](../architecture/domain-map.md)、[Content 域](../domains/content/index.md)、[Content 数据库](../domains/content/database.md)、[Learning 数据库](../domains/learning/database.md)、[设计台账](design-register.md) D-147、[ADR-021](../adr/ADR-021-content-and-learning-domain-split.md) |
+| Audio Production 契约同步 | 文本/正确发音要求/Content Revision 由 Content 拥有；依赖 `Audio Production → Content`（而非 → Learning）；Content 提供 `content_entity_id/content_revision_id` 稳定 logical UUID；Audio 仍只负责生产 | [Audio 域](../domains/audio/index.md)、[设计台账](design-register.md) D-148、[ADR-020](../adr/ADR-020-audio-production-domain.md) |
+| 事件归属与跨域引用 | 内容事件归 Content（content_created/updated/published/revision_created、lesson_published）；学习行为事件归 Learning（learning_started/lesson_completed/vocabulary_learned/review_completed/progress_updated）；他域引用教学内容 → Content logical UUID、引用学习事实 → Learning logical UUID；`content_id` 与 `learning_record_id/progress_id` 不得混用 | [Content 域](../domains/content/index.md)、[Domain Map](../architecture/domain-map.md)、[设计台账](design-register.md) D-149 |
+| 显式保留 | 原有已定稿业务模型继续有效；除 Domain ownership / Schema 名 / 跨域 logical reference 调整外，不增加、删除或重新设计业务表；全域其他已定稿 Domain 保持不变 | [设计台账](design-register.md) D-147、[未决事项](open-questions.md) |

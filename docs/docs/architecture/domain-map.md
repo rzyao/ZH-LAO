@@ -10,7 +10,8 @@ last_updated: 2026-08-30
 | Domain | 负责 | 明确不负责 |
 | --- | --- | --- |
 | Identity | 用户根、登录身份、基础资料、Locale、学习方向、OTP、Session、Device | 社交资料、真人认证、会员、学习进度、Follow、聊天 |
-| Learning | 中文/老挝语知识、课程、练习、进度、收藏、学习记录、词典、发音、TTS、翻译 | 社交关系 |
+| Content | 中文/老挝语 canonical 教学内容：课程体系、单元、Lesson、词汇、句子、教学文本、内容组织关系、内容语言信息、标准答案、标准发音要求、教学内容版本、Content Revision、内容发布状态（「零用户时依然存在」的数据） | 用户学习进度、掌握程度、完成记录、复习状态、学习行为（归 Learning）；业务音频生产（Slot/Task/Asset Version/Review 归 Audio Production） |
+| Learning | 用户 × Content 的学习状态与学习事实：课程/Lesson/Unit 进度、词汇/句子学习状态、完成记录、掌握状态、学习历史、复习状态、学习统计 canonical facts（「用户开始学习后才产生」的数据） | canonical 教学内容本身（归 Content，不复制第二份内容事实）；社交关系；业务音频生产（归 Audio Production） |
 | Social | 社交资料、照片、偏好、发现、Follow、Match、Block、社区/动态能力（公开动态/点赞/评论/Feed/举报入口） | 消息内容、礼物交易、审核历史、媒体文件存储 |
 | Chat | 会话实体与 Direct 身份、成员与已读游标、消息身份与会话内顺序、文本内容、图片资源引用、用户侧会话状态（置顶/免打扰/隐藏/清空）、撤回事实、聊天领域事件发布 | 媒体文件存储与 URL、礼物交易与资产变化、推送与 WebSocket 传输实现、社交关系与匹配状态、翻译结果存储 |
 | Commerce | 商品、价格、会员、权益、订单、支付、退款、礼物和虚拟资产账本 | 贡献评分 |
@@ -18,6 +19,7 @@ last_updated: 2026-08-30
 | Trust & Safety | 真人认证、审核案件、证据、审核决定、内容处置指令、跨域限制、封禁、申诉（只产生治理处置与处置历史，经领域事件由属主域执行） | 用户根状态、`social_blocks` 当前关系事实、被审核业务对象正文 |
 | Operations | 后台运营主体、RBAC 后台授权（角色/权限 key/关系）、后台操作审计（append-only） | 各业务实体所有权、业务域状态机（封禁/退款/补发）、认证凭据（登录/MFA/Session）、业务内容、Feature Flag/系统参数（归 Platform） |
 | Platform | Product Runtime Control Plane：Feature Flag 定义与地区/客户端覆盖、真正跨域的运行参数（仅 current state）、客户端版本与升级策略、平台公告、产品支持地区（六张业务表；Media/Asset 与 Outbox 属 Platform Infrastructure，不计入业务域） | 可明确归属业务域的配置与规则（各 Domain）、用户/账号/权限/封禁（Identity/Trust）、后台操作者与操作审计（Operations）、Push/Chat 系统消息/营销 Campaign、GIS/行政区划、发布包与部署 |
+| Audio Production | 业务音频的生产、生产版本、审核、发布、正式版本指针（`official_asset_version_id`）、失败重试、批量生产与生产审计（Slot → Task → Generation Attempt → Asset Version → Review，`audio` Schema 固定 9 张业务表） | 通用媒体文件存储与 asset_id 技术属主（归 Media/Asset Infrastructure，边界衔接见 D-146）、TTS Provider/Model/Voice/Preset 参数与历史（归 TTS 服务自维护）、被生产内容本身与规范发音（归 Content，D-148）、翻译与文字转写、非音频资产、聊天语音消息 |
 
 ## Domain → Subdomain → Core Entity
 
@@ -25,10 +27,13 @@ last_updated: 2026-08-30
 | --- | --- | --- |
 | Identity | Account / Auth | User, Account, AuthIdentity, OtpChallenge, Session, Device |
 | Identity | Locale / Learning Identity / Basic Profile | LocalePreference, LearningProfile, BasicProfile |
-| Learning | Chinese Content | Pinyin, Hanzi, Vocabulary, Sentence |
-| Learning | Lao Content | LaoLetter, Syllable, Word, Sentence |
-| Learning | Course / Practice / Progress | Course, Unit, Lesson, LessonItem, Exercise, Question, Option, Answer, LearningProgress, LessonProgress, PracticeAttempt |
-| Learning | Dictionary / Pronunciation / Translation | DictionaryEntry, Meaning, Example, Pronunciation, AudioAsset, TranslationRequest, TranslationResult |
+| Content | Chinese Content | Pinyin, Hanzi, Vocabulary, Sentence |
+| Content | Lao Content | LaoLetter, Syllable, Word, Sentence |
+| Content | Curriculum / Content Revision | Course, Unit, Lesson, LessonItem, ContentRevision（教学内容版本/发布状态） |
+| Content | Practice Definition | Exercise, Question, Option, Answer |
+| Content | Dictionary / Pronunciation / Translation | DictionaryEntry, Meaning, Example, Pronunciation, TranslationRequest, TranslationResult（~~AudioAsset~~ 音频生产事实已移入 Audio Production） |
+| Learning | Progress / Mastery / Review | LearningProgress, LessonProgress, PracticeAttempt, ContentMastery, ContentReview, ContentBookmark |
+| Learning | Learning Activity / Stats | LearningActivity（学习行为与统计 canonical facts） |
 | Social | Social Profile / Discovery | SocialProfile, SocialPhoto, Interest, SocialLanguage, Prompt, Preference, DiscoveryExposure |
 | Social | Follow / Match / Safety | Follow, Match, SocialBlock（~~Report~~ 已删除：举报事实唯一归 `trust.reports`，D-115/D-135） |
 | Social | Public Content / Interaction | SocialPost, SocialPostMedia, SocialPostLike, SocialPostComment |
@@ -46,6 +51,7 @@ last_updated: 2026-08-30
 | Platform | Feature Flags / Runtime Config | FeatureFlag, FeatureFlagOverride, RuntimeConfig |
 | Platform | App Version / Announcement / Region | AppVersion, Announcement, Region |
 | Platform | _旧实体名 `FeatureRule`/`ConfigItem`/`ConfigVersion`/`RegionPolicy`/`VersionPolicy`/`AuditLog`/`Notification`/`NotificationTemplate`/`MediaAsset` 已被六表模型取代（`superseded`）：覆盖规则归 `feature_flag_overrides`；V1 无配置版本模型；Audit 归 Operations（`operator_audit_logs`）；Notification 不建；Media/Asset 归 Platform Infrastructure_ | — |
+| Audio Production | Slot / Task / Generation / Asset Version / Review / Batch / Audit | AudioSlot, AudioTask, GenerationAttempt, AudioAssetVersion, AudioReview, AudioTaskEvent, AudioTaskBatch, AudioTaskBatchItem, AudioDefaultPreset |
 | Platform Infrastructure（非业务域，不计入业务表数量） | Outbox / Media / Asset | `system_outbox_events`（全系统唯一一套，`source_domain` 区分来源，不按域分表）；统一 Asset/Media 基础设施（asset_id UUID、storage provider、bucket、object key、checksum 等；业务域只存 `asset_id`） |
 
 实体名称是业务模型基线，不自动等同于一实体一张表；只有已进入数据库设计的实体才能形成字段契约。
@@ -53,15 +59,16 @@ last_updated: 2026-08-30
 ## 关键协作链
 
 ```text
-User → LearningProfile → Course → Lesson → Exercise → Progress
+User → LearningProfile → Content（Course → Unit → Lesson → Exercise）→ Learning（Progress / Mastery / Review）
 User → SocialProfile → Follow → Mutual Follow → Match → Conversation → Message
 SocialProfile → SocialPost → Like / Comment
 User → Verification
 Commerce / Rewards / Promotion → Entitlement
-Learning / Social / Identity → RewardEvent → RewardRule → RewardGrant → RewardDelivery → Commerce → Wallet（V1）
+Content / Learning / Social / Identity → RewardEvent → RewardRule → RewardGrant → RewardDelivery → Commerce → Wallet（V1）
 ```
 
 - 首期公开动态、点赞、评论和举报入口属于 Social；**Community 不再作为独立 Domain**，其能力已并入 Social，不重复拥有这些事实表（全局最终版 [ADR-018](../adr/ADR-018-global-database-design-principles-final.md)）。
+- **Content 与 Learning 的拆分（「拆分学习域」会话最终裁决，[ADR-021](../adr/ADR-021-content-and-learning-domain-split.md)，D-147~D-149）**：Content Domain = Canonical Learning Content（用户学什么：课程/单元/Lesson/词汇/句子/教学文本/标准答案/标准发音要求/Content Revision/发布状态），Learning Domain = User Learning State & Facts（用户学得怎么样：进度/完成/掌握/复习/学习统计）；判断标准分别是「零用户时依然存在」与「用户开始学习后才产生」；依赖 `Identity → Learning → Content`（逻辑箭头，非物理 FK）；Learning 只存 `content_id` 等 logical references，**不建跨域物理 FK、不得引用 Content 内部 BIGINT PK**；被其他域引用的 Content 实体必须有稳定 UUID logical/public ID；事件归属：内容事件归 Content、学习行为事件归 Learning；其他域引用教学内容用 Content logical UUID、引用用户学习事实才用 Learning logical UUID，`content_id` 与 `learning_record_id/progress_id` 不得混用。Schema 拆分为 `content.*` / `learning.*`，不重新设计已定稿业务表。
 - Match 是双向 Follow 的业务结果，由应用服务创建，不由数据库触发器隐式生成。
 - `social_blocks` 是 Social 的用户主动 Block 关系（Social relationship fact）；Trust & Safety 的 `enforcement_actions` 是平台处罚事实（Ban / Suspend / Restrict），可跨域限制 Discover、Follow、公开互动和 Chat。**`social_blocks ≠ enforcement_actions`，两者永不合并、不互为实现**（D-034，正式冻结于 D-116）。
 - Gift 交易属于 Commerce。**Chat 与礼物的集成属 `deferred`，当前不存在 `GiftMessageReference` 或任何 Chat 侧礼物实体；**领域边界原则仍然成立——礼物交易真相属于 Commerce，Chat 最多只消费已完成的送礼结果，但该原则在集成被正式设计前不产生任何 Chat 实体或字段。
@@ -73,4 +80,5 @@ Learning / Social / Identity → RewardEvent → RewardRule → RewardGrant → 
 - Trust & Safety 的域边界（设计 Trust & Safety 会话，全域审计最终确认）：Trust 只拥有举报→审核案件→证据→决定→处置→申诉的治理事实，只引用跨域对象稳定逻辑 ID（**`subject_domain + subject_type + subject_id` 三元组**，证据侧对应 `reference_domain + reference_type + reference_id`），不建跨域 FK、不持有被审核业务对象正文；**`trust.reports` 是全系统唯一举报事实源**，Social / Chat / Commerce 只提供举报入口 API，原 Social `social_reports` / `post_reports` / `profile_reports` 已删除；所有 moderator / reviewer / operator 字段引用 **Operations logical UUID（`operations.operators.id`）**，普通用户字段引用 Identity logical UUID；`content_remove` / `social_post_restrict` / `chat_send_restrict` 等处置统一经 **`system_outbox_events`**（不建 Trust 专属 Outbox）由 Social / Chat 自行变更自身状态，Trust 不直接 `UPDATE` 他域。完整契约见 [Trust & Safety 域](../domains/trust/index.md) 与 [Trust 数据库](../domains/trust/database.md)。
 - Operations 的域边界（设计运营域会话）：Operations 是后台控制平面（Backoffice Control Plane），只负责「后台运营主体 + RBAC 后台授权 + 后台操作审计」，**不承接任何业务域状态机**（封禁/举报归 Trust、退款归 Commerce、奖励补发归 Rewards）；C 端 User 与后台 Operator 是两个主体；权限能力由应用代码 Permission Registry 定义（不建 `permissions` 表），数据库只配置 Role ↔ permission key；`operators.auth_subject_id` 引用 Identity/Auth 认证主体逻辑 ID、`operator_audit_logs.target_*` 引用他域实体逻辑 ID，均不建跨域 FK。完整契约见 [Operations 域](../domains/operations/index.md) 与 [Operations 数据库](../domains/operations/database.md)。
 - Platform 的域边界（设计 Platform Domain 会话）：Platform 是产品运行控制面，只拥有跨业务域的产品运行控制数据；**能明确归属某业务域的配置一律回该域**（Business Rule ≠ Platform Config）；Feature Flag 不代替领域状态机（`user_123_banned` 属错误设计）；Operations 管理 Platform 但不拥有 Platform 数据，`created_by`/`updated_by` 等审计字段不进 Platform；V1 冻结六表（`feature_flags`/`feature_flag_overrides`/`runtime_configs`/`app_versions`/`announcements`/`regions`），`runtime_configs` 仅 current-state（无版本/回滚），其他域不建指向 `platform.regions` 的跨域 FK（跨域用 `region_code` 逻辑引用）。完整契约见 [Platform 域](../domains/platform/index.md) 与 [Platform 数据库](../domains/platform/database.md)。
-- 全局最终版（[ADR-018](../adr/ADR-018-global-database-design-principles-final.md)）：9 个业务 Domain；**一个业务事实只有一个 authoritative owner**；跨域只通过 logical UUID + Domain Service / Event / Outbox 协作，禁止跨域直接写库与跨域物理 FK；历史事实不物理删除、当前关系按业务语义删除、字典/配置优先 `disabled`/`inactive`/`retired`、临时高容量数据按 retention 清理；Media/Asset 与 `system_outbox_events` 属 Platform Infrastructure，不侵占业务 Domain ownership。
+- Audio Production 的域边界（设计音频生产域会话，[ADR-020](../adr/ADR-020-audio-production-domain.md)）：业务音频需求统一用 **Slot** 定位（`source_domain + content_entity_type + content_entity_id + language_code + audio_role` 唯一）；`audio_slots.official_asset_version_id` 是某 Slot 当前正式音频的**唯一 canonical pointer**；技术失败 = 同 Task 新 Attempt、审核 Reject = 旧 Task 结束 + successor Task；审核（Review）append-only，approved ≠ published，发布为原子事务；**Content 与 Audio 为 C 模式协作（Content 拥有 canonical 内容与规范发音，D-148 修订自原 Learning 表述；Audio 独立生产并保存输入快照，内容变化不篡改历史 Task/Asset）**；TTS Provider/Model/Voice/Preset 参数归 TTS 服务自维护，Audio 只存 `tts_preset_key` 使用事实与 `audio_default_presets` 默认映射；`audio_asset_versions` 自持文件事实（R2 直连）与 D-127「Media/Asset Infrastructure 为 asset_id 权威属主」的边界衔接待主会话裁决（D-146）。完整契约见 [Audio 域](../domains/audio/index.md) 与 [Audio 数据库](../domains/audio/database.md)。
+- 全局最终版（[ADR-018](../adr/ADR-018-global-database-design-principles-final.md)）：原 9 个业务 Domain，**D-139 新增 Audio Production 后为 10 个，D-147 拆分 Learning 为 Content + Learning 后为 11 个**（Community 并入 Social、Notification 不独立成域的结论不变）；**一个业务事实只有一个 authoritative owner**；跨域只通过 logical UUID + Domain Service / Event / Outbox 协作，禁止跨域直接写库与跨域物理 FK；历史事实不物理删除、当前关系按业务语义删除、字典/配置优先 `disabled`/`inactive`/`retired`、临时高容量数据按 retention 清理；Media/Asset 与 `system_outbox_events` 属 Platform Infrastructure，不侵占业务 Domain ownership。

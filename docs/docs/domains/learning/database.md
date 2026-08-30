@@ -6,16 +6,20 @@ schema: learning
 
 # Learning 数据库总览
 
+> **「拆分学习域」会话裁决（D-147）**：原 Learning 域拆分为 Content + Learning 两域，本页 43 张必建表按职责归属 `content.*` / `learning.*` 两个 Schema（定义类 → content、用户状态/行为类 → learning），**不重新设计已定稿表**。下表新增「建议 Schema 归属」列（`designing`，逐表归属清单待主会话确认；建议映射汇总见 [Content 数据库](../content/database.md)）。
+
 第一版共 **43 张必建表**，另有 1 张可选 `question_reviews`。会话曾称 44 张，但最终列出的表名去重后为 43 张；本页按明确实体清单计数。各表字段和约束只在下列分层规格页完整定义。
 
-| 分层 | 表数 | 表 |
-| --- | ---: | --- |
-| Knowledge | 18 | `contents`、中文/老挝语知识表、`meanings`、`translations`、`examples`、`pronunciations` |
-| Dictionary | 5 | `content_equivalents`、`content_relations`、`tags`、`content_tags`、`dictionary_search_history` |
-| Curriculum | 5 | `courses`、`units`、`lessons`、`lesson_sections`、`lesson_items` |
-| Practice | 7 | `exercises`、`questions`、`question_contents`、`question_options`、`answer_rules`、`exercise_attempts`、`question_attempts` |
-| Progress | 6 | `learning_activities`、`course_progress`、`lesson_progress`、`content_mastery`、`content_reviews`、`content_bookmarks` |
-| Audio & AI | 3 | `pronunciation_audios`、`tts_jobs`、`translation_requests` |
+> **取代说明（2026-08-30）**：`pronunciation_audios` 与 `tts_jobs` 两表的表级设计已被 Audio Production Domain（`audio` Schema 9 张表）取代，`superseded`（D-145）；本页计数暂维持 43 张不变，删除/迁移方式与计数调整待主会话确认（见 [未决事项](../../governance/open-questions.md)）。
+
+| 分层 | 表数 | 表 | 建议 Schema 归属 |
+| --- | ---: | --- | --- |
+| Knowledge | 18 | `contents`、中文/老挝语知识表、`meanings`、`translations`、`examples`、`pronunciations` | `content` |
+| Dictionary | 5 | `content_equivalents`、`content_relations`、`tags`、`content_tags`、`dictionary_search_history` | 前 4 张 `content`；`dictionary_search_history` `learning` |
+| Curriculum | 5 | `courses`、`units`、`lessons`、`lesson_sections`、`lesson_items` | `content` |
+| Practice | 7 | `exercises`、`questions`、`question_contents`、`question_options`、`answer_rules`、`exercise_attempts`、`question_attempts` | 前 5 张 `content`（定义）；后 2 张 `learning`（作答历史） |
+| Progress | 6 | `learning_activities`、`course_progress`、`lesson_progress`、`content_mastery`、`content_reviews`、`content_bookmarks` | `learning` |
+| Audio & AI | 3 | ~~`pronunciation_audios`~~、~~`tts_jobs`~~（均已被 Audio Production Domain 取代，D-145）、`translation_requests` | `pronunciation_audios`/`tts_jobs` `superseded`（归 Audio 域）；`translation_requests` `designing`（倾向 `learning`） |
 
 ## 规格页
 

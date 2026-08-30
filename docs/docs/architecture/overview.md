@@ -5,13 +5,13 @@ last_updated: 2026-08-30
 
 # 总体架构
 
-ZH-LAO 采用模块化单体：一个后端、一个 PostgreSQL 主数据库、一套部署体系，内部按十个业务域隔离代码模块和数据 Schema。Domain 是业务边界，不等同于微服务。
+ZH-LAO 采用模块化单体：一个后端、一个 PostgreSQL 主数据库、一套部署体系，内部按十一个业务域隔离代码模块和数据 Schema（Identity、Content、Learning、Social、Chat、Commerce、Rewards、Trust & Safety、Operations、Platform、Audio Production；Community 并入 Social）。Domain 是业务边界，不等同于微服务。
 
 ```text
 Android Client
       ↓
 Modular Backend / API
-      ├─ Identity / Learning / Social / Community / Chat
+      ├─ Identity / Learning / Audio / Social / Chat
       └─ Commerce / Rewards / Trust / Operations / Platform
       ↓
 PostgreSQL：一个实例、一个主库、十个 Schema

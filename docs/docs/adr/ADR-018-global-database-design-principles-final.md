@@ -129,3 +129,5 @@ Domain C: id BIGINT PRIMARY KEY  + logical_id UUID UNIQUE
 - 若某表使用**跨 Domain BIGINT FK**：修订为"保存对方 logical UUID + 删除 physical FK"，不重新设计整个 Domain。
 - 若某早期 Domain 使用 BIGINT 内部主键：继续保留，不因其他 Domain 用 UUID 而做无业务价值的主键迁移。
 - 若某表缺 logical UUID 却会被跨域引用/暴露客户端/出现在事件中：补 `public_id uuid unique` 或等价 logical ID。
+
+> **修订记录**：本节「最终 Domain Map（9 个业务域）」的业务域/Schema 计数此后两次演进——[ADR-020](ADR-020-audio-production-domain.md) 新增 Audio Production（D-139，10 个）；[ADR-021](ADR-021-content-and-learning-domain-split.md) 拆分 Learning 为 Content + Learning（D-147，**11 个**）。本节其余原则（混合主键、跨域 logical UUID、域内 FK/跨域禁 FK、canonical fact 单一归属、统一删除策略、Infrastructure 边界）不变。
