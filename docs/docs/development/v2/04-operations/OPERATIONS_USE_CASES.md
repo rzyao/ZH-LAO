@@ -4,6 +4,7 @@ phase: 4
 phase_name: Operations Domain
 document: OPERATIONS_USE_CASES
 last_updated: 2026-08-31
+repository_commit_audited: 000f4c4aafacf4938d74902eddc4d78323196a89
 depends_on:
   - OPERATIONS_RBAC_CONTRACTS.md
 database_authority:
@@ -13,7 +14,7 @@ implementation_started: false
 
 # ZH-LAO V2 — Operations Use Cases
 
-> Use Cases 从 Admin/Operator 产品行为推导，不从 5 张表机械生成 CRUD。
+> Use Cases 从 Admin / Operator 产品行为推导，不从 5 张表机械生成 CRUD。
 
 ## 1. Classification
 
@@ -23,15 +24,13 @@ DEFERRED      = 4
 NOT_SUPPORTED = 11
 ```
 
-## 2. Product Actors
+## 2. Actors
 
-### Authenticated User
+### Authenticated Identity Subject
 
-Identity 已认证但不一定是 Operator。
+由 Foundation / Identity AuthenticationProvider 认证；可能还不是 Operator。
 
 ### Active Operator
-
-满足：
 
 ```text
 Identity authenticated
@@ -41,21 +40,21 @@ AND operator.status = active
 
 ### Authorized Operator
 
-Active Operator 且 exact required Permission 存在于 active Role permission union。
+Active Operator 且所需 exact Permission 存在于所有 active assigned Roles 的 permission union。
 
 ### Bootstrap Actor
 
-只有系统第一次初始化时，由受控 CLI 指定的 active Identity subject。不是长期 HTTP actor。
+仅系统第一次初始化时，由 controlled CLI 指定的 active Identity subject；不是长期 HTTP actor。
 
 ## 3. REQUIRED — Current Operator / Authorization
 
 ### OPS-UC-01 GetCurrentOperator
 
-**Goal**：让 Admin Foundation 获取当前 Operator identity、roles、effective permissions，用于 permission-aware navigation / route/action guards。
+**Goal**：给 Admin Foundation 提供当前 Operator、active Roles 与 effective permissions，用于 permission-aware navigation / route/action guards。
 
-Auth：Identity authenticated + active Operator；不要求额外 Permission。
+**Auth**：Identity authenticated + active Operator；无需额外 Permission。
 
-Returns conceptually：
+Output：
 
 ```text
 operator_id UUID
@@ -67,14 +66,14 @@ permissions: exact key[]
 
 Rules：
 
-- no Operator → access denied；
-- disabled Operator → denied；
-- disabled Roles 不出 effective permissions；
-- 不暴露 repository row / internal persistence model。
+- no Operator -> denied；
+- disabled Operator -> denied；
+- disabled Role permissions 不进入 effective set；
+- 不暴露 DB row/repository/internal persistence types。
 
 ### OPS-UC-02 AuthorizeOperator
 
-**Goal**：为所有 Admin management API 提供统一 exact-permission authorization。
+**Goal**：为所有 Admin management APIs 提供唯一 RBAC enforcement path。
 
 Input：
 
@@ -83,9 +82,9 @@ AuthContext
 OperatorPermissionKey
 ```
 
-Output：authorized Operator context or stable denial error。
+Output：`AuthorizedOperatorContext` 或稳定 denial error。
 
-No wildcard / superadmin bypass / cross-domain SQL。
+No wildcard / deny / super-admin bypass / cross-domain SQL。
 
 ## 4. REQUIRED — Operator Management
 
@@ -93,7 +92,7 @@ No wildcard / superadmin bypass / cross-domain SQL。
 
 Permission：`operations.operators.read`
 
-支持小规模分页与 status filter；不提供 arbitrary search engine。
+支持 bounded pagination + `status=active|disabled`；V1 不引入全文检索。
 
 ### OPS-UC-04 GetOperator
 
@@ -114,12 +113,12 @@ display_name
 
 Rules：
 
-1. `identity/public` subject 必须存在且 active；
-2. `auth_subject_id` 不得已绑定其他 Operator；
-3. 新 Operator status 固定 active；
-4. 不在 CreateOperator 内创建密码/session/JWT；
-5. 不自动赋任何 Role；
-6. create + Operations audit 同 transaction。
+1. 使用 `IdentityPublicQueries` 验证 subject 存在且 active；
+2. `auth_subject_id` 不得已绑定另一个 Operator；
+3. initial status 固定 active；
+4. 不创建 password/session/JWT；
+5. 不自动赋 Role；
+6. create + Audit 同一个 Operations transaction。
 
 Audit：`operations.operators.create`。
 
@@ -129,7 +128,7 @@ Permission：`operations.operators.update`
 
 V1 只允许修改 `display_name`。
 
-不允许修改：
+不可修改：
 
 ```text
 id
@@ -137,7 +136,7 @@ auth_subject_id
 status through generic patch
 ```
 
-Audit：只有真实变化时写 `operations.operators.update`。
+只有真实变化写 `operations.operators.update` Audit。
 
 ### OPS-UC-07 DisableOperator
 
@@ -145,10 +144,10 @@ Permission：`operations.operators.disable`
 
 Rules：
 
-- idempotent already-disabled => success/no-op；
+- already disabled -> success/no-op；
 - 不删除 roles/audit；
-- 如果目标是 active `super_admin` operator，执行 last-super-admin protection；
-- 真实 active→disabled 与 audit 同 transaction。
+- 若目标当前拥有 active `super_admin` assignment，执行 last-super-admin protection；
+- real active->disabled + Audit 同 transaction。
 
 Audit：`operations.operators.disable`。
 
@@ -159,9 +158,9 @@ Permission：`operations.operators.enable`
 Rules：
 
 - Identity subject 必须当前 active；
-- idempotent already-active => success/no-op；
-- 原有 active Role assignments 会重新参与 authorization；
-- mutation + audit same transaction。
+- already active -> success/no-op；
+- 原 active Role assignments 重新参与权限计算；
+- mutation + Audit 同 transaction。
 
 Audit：`operations.operators.enable`。
 
@@ -171,7 +170,7 @@ Audit：`operations.operators.enable`。
 
 Permission：`operations.roles.read`
 
-支持 status filter；role code/name 可作为简单管理筛选，但不引入全文检索。
+支持 status filter。
 
 ### OPS-UC-10 GetRole
 
@@ -194,11 +193,11 @@ description optional
 Rules：
 
 - lower_snake_case；
-- code unique；
-- `super_admin` 保留，不能通过普通 CreateRole 重建/抢占；
+- code UNIQUE；
+- reserved `super_admin` 不允许通过普通 CreateRole 抢占/重建；
 - initial status=active；
-- permissions 初始为空；
-- mutation + audit same transaction。
+- initial permission set empty；
+- mutation + Audit same transaction。
 
 Audit：`operations.roles.create`。
 
@@ -206,22 +205,11 @@ Audit：`operations.roles.create`。
 
 Permission：`operations.roles.update`
 
-可改：
+可改：`name`, `description`。
 
-```text
-name
-description
-```
+不可改：`id`, `code`, generic `status`。
 
-不可改：
-
-```text
-id
-code
-status through generic patch
-```
-
-`super_admin` 允许修改 display metadata，但 code 固定。
+`super_admin` 允许修改 display metadata。
 
 Audit：真实变化时 `operations.roles.update`。
 
@@ -229,26 +217,18 @@ Audit：真实变化时 `operations.roles.update`。
 
 Permission：`operations.roles.disable`
 
-Rules：
-
-- idempotent already-disabled => success/no-op；
-- `super_admin` => `SYSTEM_ROLE_PROTECTED`；
-- assignment/permissions 保留；
-- mutation + audit same transaction。
-
-Audit：`operations.roles.disable`。
+- already disabled -> success/no-op；
+- `super_admin` -> `SYSTEM_ROLE_PROTECTED`；
+- assignments/permissions 保留；
+- real mutation + Audit same transaction。
 
 ### OPS-UC-14 EnableRole
 
 Permission：`operations.roles.enable`
 
-Rules：
-
-- idempotent already-active => success/no-op；
-- re-enable 后现有 assignment/permission 恢复生效；
-- mutation + audit same transaction。
-
-Audit：`operations.roles.enable`。
+- already active -> success/no-op；
+- re-enable 后现有 assignments/permissions 恢复参与 RBAC；
+- mutation + Audit same transaction。
 
 ## 6. REQUIRED — Role Assignment
 
@@ -256,7 +236,7 @@ Audit：`operations.roles.enable`。
 
 Permission：`operations.operator_roles.read`
 
-返回当前 assignment，包括 Role 当前 status，便于 Admin 识别“已分配但 disabled”的 Role。
+返回当前 assignment，并带 Role status，使 Admin 可看到“已分配但当前 disabled”的 Role。
 
 ### OPS-UC-16 AssignRoleToOperator
 
@@ -264,15 +244,14 @@ Permission：`operations.operator_roles.assign`
 
 Rules：
 
-- target Operator 必须 active；
-- target Role 必须 active；
-- duplicate assignment => success/no-op；
+- target Operator active；
+- target Role active；
+- duplicate assignment -> success/no-op；
 - multiple roles supported；
 - composite PK 是并发最终保护；
-- real insert + audit same transaction；
-- 分配 `super_admin` 时参与统一 super-admin serialization lock。
+- real insert + Audit same transaction。
 
-Audit：`operations.operator_roles.assign`，target=Operator UUID，details 包含 role_id/code。
+Audit：`operations.operator_roles.assign`，target=Operator UUID，safe details 包含 role_id/code。
 
 ### OPS-UC-17 RemoveRoleFromOperator
 
@@ -280,8 +259,8 @@ Permission：`operations.operator_roles.revoke`
 
 Rules：
 
-- absent assignment => success/no-op；
-- real delete + audit same transaction；
+- absent -> success/no-op；
+- real delete + Audit same transaction；
 - revoke `super_admin` 前执行 last-super-admin invariant。
 
 Audit：`operations.operator_roles.revoke`。
@@ -292,7 +271,7 @@ Audit：`operations.operator_roles.revoke`。
 
 Permission：`operations.role_permissions.read`
 
-Source：code-level canonical catalog，不查 permission dictionary table。
+Source：code-level canonical catalog，不查询 permission dictionary table。
 
 Returns：
 
@@ -303,34 +282,45 @@ resource
 action
 ```
 
-V1 不要求数据库可编辑 description/localization。
-
 ### OPS-UC-19 ListRolePermissions
 
 Permission：`operations.role_permissions.read`
 
-返回 exact assigned keys，并标识 Role status。
+返回 Role 当前 exact assigned keys。
 
 ### OPS-UC-20 SetRolePermissions
 
 Permission：`operations.role_permissions.set`
 
-这是 V1 唯一 Role permission mutation。
+V1 唯一 Role permission mutation。
 
 Input：完整 `permission_keys[]`。
 
 Rules：
 
 1. exact catalog validation；
-2. duplicates rejected；
+2. duplicate rejected；
 3. custom Role 可空；
 4. `SELECT role FOR UPDATE`；
-5. transaction 内 replace；
-6. no change => success/no-op；
-7. `super_admin` 只允许完整 catalog set；
-8. mutation + audit same transaction。
+5. transaction 内 complete replace；
+6. no change -> success/no-op；
+7. `super_admin` 只允许 current full catalog；
+8. mutation + Audit same transaction。
 
-Audit：`operations.role_permissions.set`，target=Role UUID，details 只记录 added/removed key arrays。
+Audit：`operations.role_permissions.set`，target=Role UUID，safe details 只保留 added/removed key arrays。
+
+### Catalog Evolution Rule
+
+新增 permission 时不自动写 DB：
+
+```text
+code catalog deployed
+→ active super_admin uses existing operations.role_permissions.set
+→ reconcile its explicit set to full current catalog
+→ enable/use newly protected behavior
+```
+
+Bootstrap 对空系统直接写 full current catalog。
 
 ## 8. REQUIRED — Audit Query / Recording
 
@@ -351,9 +341,9 @@ created_from
 created_to
 ```
 
-Pagination：bounded cursor，default newest first。
+Pagination：bounded cursor，newest first。
 
-`result` filter 不支持，因为 frozen audit row 的 persisted result 固定隐含 SUCCESS。
+不支持 `result` filter，因为 persisted row 的结果语义固定为 success。
 
 ### OPS-UC-22 GetOperatorAuditLog
 
@@ -361,23 +351,21 @@ Permission：`operations.audit_logs.read`
 
 Identifier：Audit UUID。
 
-返回 whitelisted details，不对 details 做自由 JSON 查询。
-
 ### OPS-UC-23 RecordSuccessfulOperatorAction
 
-HTTP：无独立公开 endpoint。
+HTTP：无独立 endpoint。
 
-Purpose：Operations public/application contract，供 owner Domain management orchestration 记录成功 Operator action。
+用途：Operations public/application contract，供 Owner Domain management orchestration 记录 successful Operator action。
 
 Rules：
 
-- caller 必须提供已授权 Operator context；
-- action key 必须代码定义，不允许来自任意 client string；
-- request context 只取 request_id / source IP / action-specific safe details；
+- caller 提供已授权 Operator context；
+- action key 来自 code-defined action，不接受任意 client string；
+- request context 只保留 request_id / normalized source IP / safe details；
 - 不记录 failed/denied attempt；
-- 不成为业务事实 source。
+- 不成为 Owner Domain business fact source。
 
-Operations 自身 mutations 不通过“事后跨域调用”实现，而是在本域 transaction 内直接写同一 canonical audit 表。
+Operations 自身 mutation 在本域 transaction 内直接写同一 audit table，不走事后跨域调用。
 
 ## 9. REQUIRED — Bootstrap
 
@@ -397,9 +385,9 @@ Effects in one Operations transaction：
 ```text
 ensure reserved super_admin
 set explicit full catalog permissions
-create first operator
+create first Operator
 assign super_admin
-write bootstrap audit
+write bootstrap Audit
 ```
 
 No HTTP route / no default password / no permanent bootstrap secret。
@@ -408,21 +396,21 @@ No HTTP route / no default password / no permanent bootstrap secret。
 
 ### OPS-D01 ReliableCrossDomainAuditDelivery
 
-Future option：shared outbox-backed delivery for owner-domain admin writes。
+Future option：owner-domain outbox-backed reliable success Audit delivery。
 
-Reason deferred：Platform design currently freezes `Platform Outbox events = NONE REQUIRED IN V1`; Operations design will not silently invalidate that contract.
+Reason：当前 Owner Domain（包括已经 COMPLETE/PASS 的 Platform）没有冻结这个跨域 Audit event contract；本 Operations 设计不隐式重写另一个 Domain 的 outbox contract。
 
 ### OPS-D02 AuditSensitiveReadOrExport
 
-Routine read-only admin access is not audited in V1。Future compliance requirements may classify exports or sensitive reads as auditable actions。
+Routine read-only Admin access V1 不写 canonical Operator Audit。未来合规需求可将特定 export/sensitive read 明确升级为 audited action。
 
 ### OPS-D03 InviteOperator
 
-Invitation/pending onboarding workflow is deferred。Frozen Operator schema has no invite/pending lifecycle and V1 can create Operator after Identity subject exists。
+邀请/pending onboarding deferred。Frozen Operator schema 没有 invite/pending lifecycle；V1 在 Identity subject 已存在后直接创建 Operator。
 
 ### OPS-D04 EnforceAdminMfaPolicy
 
-Admin MFA is Identity/Auth ownership。Operations may later require an Authentication Assurance contract, but V1 does not invent MFA/session state。
+MFA/session assurance 属 Identity/Auth。未来如需要，Operations 只消费正式 authentication-assurance public contract，不创建自己的 MFA state。
 
 ## 11. NOT_SUPPORTED
 
@@ -440,7 +428,7 @@ OPS-N10 ResourceLevelACL in Operations
 OPS-N11 ApprovalWorkflow / four-eyes engine
 ```
 
-These are not hidden implementation TODOs. They are deliberately outside Operations V1.
+这些不是隐藏 TODO，而是 V1 明确不支持。
 
 ## 12. Idempotency Matrix
 
@@ -456,50 +444,61 @@ These are not hidden implementation TODOs. They are deliberately outside Operati
 | SetRolePermissions | repeated identical complete set -> success/no-op |
 | Bootstrap | once any Operator exists -> hard conflict |
 
-No-op retries do not create duplicate Audit facts。
+No-op retries 不产生重复 Audit facts。
 
-## 13. Cross-Domain Use Case Boundary
+## 13. Cross-Domain Boundary
 
 ### Identity
 
-Operations may call only `identity/public` for subject existence/status checks needed by Create/Enable/Bootstrap。
+Operations 只使用当前 `identity/public` 的 `IdentityPublicQueries` 做 Create/Enable/Bootstrap subject validation。
 
-Authorization of an HTTP request starts from Foundation `AuthContext` produced by Identity AuthenticationProvider。
+HTTP authorization 从 Foundation `AuthContext` 开始。
 
 ### Platform
 
-Platform Design Gate is PASS but implementation is not started at the audited commit。
+Repository re-audit 当前状态：
 
-Operations can freeze and implement the Platform permission keys now，but Platform management route integration remains an implementation dependency。
+```text
+PLATFORM_DESIGN_GATE = PASS
+PLATFORM_IMPLEMENTATION = COMPLETE
+PLATFORM_GATE = PASS
+PLATFORM_DOMAIN = FROZEN
+```
 
-Operations never updates `platform.*` directly。
+Platform 已实现 33 个 required application use cases，且 runtime HTTP 已注册。Operations 可以直接冻结并未来实现其 10 个 permission keys。
+
+Platform management HTTP authorization wiring 仍需要 Operations public authorizer；这是 **Operations/Platform integration work**，不是外部 implementation blocker。
+
+Operations 永远不直接更新 `platform.*`。
 
 ### Future Owner Domains
-
-Future Content/Learning/Audio/Social/Chat/Commerce/Rewards/Trust management actions follow：
 
 ```text
 Operations authorize exact key
 → Owner Domain command
-→ Operator audit according to frozen audit policy
+→ Operator Audit according to frozen policy
 ```
 
-This document does not define those Domain management APIs。
+本文件不越界设计 Content/Learning/Audio/Social/Chat/Commerce/Rewards/Trust 的完整 Admin APIs。
 
 ## 14. Final Use Case Gate
 
 ```text
-Table-driven CRUD smell                    = 0
-Duplicate auth system                      = 0
-Cross-domain SQL                           = 0
-Direct operator permission path            = 0
-Wildcard/deny/hierarchy ambiguity          = 0
-Unresolved Operator lifecycle decision     = 0
-Unresolved Role model decision             = 0
-Unresolved Permission mutation decision    = 0
-Unresolved Bootstrap decision              = 0
+REQUIRED                                     = 24
+DEFERRED                                     = 4
+NOT_SUPPORTED                                = 11
+Table-driven CRUD smell                      = 0
+Duplicate auth system                        = 0
+Cross-domain SQL                             = 0
+Direct operator permission path              = 0
+Wildcard/deny/hierarchy ambiguity            = 0
+Unresolved Operator lifecycle decision       = 0
+Unresolved Role model decision               = 0
+Unresolved Permission mutation decision      = 0
+Unresolved Bootstrap decision                = 0
+Platform external implementation blocker     = 0
 
 OPERATIONS_USE_CASES = FROZEN
 ```
 
-STOP: no Operations implementation starts here.
+STOP: 本文件不开始 Operations Implementation。
