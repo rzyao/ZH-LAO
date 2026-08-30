@@ -83,7 +83,7 @@ export const NAV_GROUPS: NavGroup[] = [
     label: 'System',
     items: [
       { key: 'operations', label: 'Operations', href: '/operations', icon: Settings, domain: 'operations', placeholder: true },
-      { key: 'platform', label: 'Platform', href: '/platform', icon: Database, domain: 'platform', placeholder: true },
+      { key: 'platform', label: 'Platform', href: '/platform', icon: Database, domain: 'platform' },
     ],
   },
 ]
