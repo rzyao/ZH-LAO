@@ -7,47 +7,20 @@ import { createLogger } from './logging/logger.js';
 import { identityModule } from './modules/identity/index.js';
 import { createIdentityHttpDependencies } from './modules/identity/http/composition.js';
 import { createIdentityRepositories } from './modules/identity/infrastructure/index.js';
+import { createIdentityPublicQuery } from './modules/identity/application/services/identity-public-query.js';
 import { ConsoleOtpDeliveryProvider, UnavailableFacebookCredentialVerifier, UnavailableOtpDeliveryProvider } from './modules/identity/application/services/index.js';
 import { buildPlatformModule } from './modules/platform/http/composition.js';
 import { platformModule } from './modules/platform/index.js';
+import { registerPlatformManagementRoutes } from './modules/platform/http/management-routes.js';
+import { buildOperationsModule } from './modules/operations/http/composition.js';
 
-const config = loadConfig();
-const logger = createLogger(config.logLevel);
-const pool = createPgPool(config.database, logger);
-const readinessState = { isShuttingDown: false };
-const app = buildApp({ logger, database: asExecutor(pool), readinessState });
-// Provider 装配原则：Fake provider = tests only。
-// 未接入真实 SMS/Facebook 适配器前，normal runtime 显式使用 Unavailable provider，
-// 对应端点失败安全返回 503 PROVIDER_UNAVAILABLE，绝不静默 fake-success。
-// Console OTP 仅限 development 且显式配置 IDENTITY_OTP_PROVIDER=console 时启用。
-const identityDependencies = createIdentityHttpDependencies({
-  transactionManager: new TransactionManager(pool, logger),
-  repositories: createIdentityRepositories,
-  executor: asExecutor(pool),
-  otpHmacSecret: config.identity.otpHmacSecret ?? '',
-  jwtHmacSecret: config.identity.jwtHmacSecret ?? '',
-  jwtIssuer: config.identity.jwtIssuer,
-  jwtAudience: config.identity.jwtAudience,
-  // TECH_DEBT：真实 Meta/Facebook verify adapter 属后续生产集成。
-  facebookVerifier: new UnavailableFacebookCredentialVerifier(),
-  otpDelivery: config.identity.otpProvider === 'console'
-    ? new ConsoleOtpDeliveryProvider({ info: (message, fields) => logger.info(fields, message) })
-    : new UnavailableOtpDeliveryProvider()
-});
-await identityModule.registerHttp(app, identityDependencies);
-
-const platformComposition = buildPlatformModule({
-  executor: asExecutor(pool),
-  transactionManager: new TransactionManager(pool, logger),
-});
-await platformModule.registerHttp(app, {
-  executor: asExecutor(pool),
-  featureFlagUseCases: platformComposition.featureFlagUseCases,
-  appVersionUseCases: platformComposition.appVersionUseCases,
-  announcementUseCases: platformComposition.announcementUseCases,
-  regionUseCases: platformComposition.regionUseCases,
-});
-
-logger.info({ config: configSummary(config) }, 'Starting ZH-LAO backend');
-await app.listen({ host: config.host, port: config.port });
-installShutdown({ logger, timeoutMs: config.shutdownTimeoutMs, markShuttingDown: () => { readinessState.isShuttingDown = true; }, close: async () => { await app.close(); await pool.end(); } });
+const config=loadConfig(); const logger=createLogger(config.logLevel); const pool=createPgPool(config.database,logger); const executor=asExecutor(pool); const transactionManager=new TransactionManager(pool,logger); const readinessState={isShuttingDown:false}; const app=buildApp({logger,database:executor,readinessState});
+const identityDependencies=createIdentityHttpDependencies({transactionManager,repositories:createIdentityRepositories,executor,otpHmacSecret:config.identity.otpHmacSecret??'',jwtHmacSecret:config.identity.jwtHmacSecret??'',jwtIssuer:config.identity.jwtIssuer,jwtAudience:config.identity.jwtAudience,facebookVerifier:new UnavailableFacebookCredentialVerifier(),otpDelivery:config.identity.otpProvider==='console'?new ConsoleOtpDeliveryProvider({info:(message,fields)=>logger.info(fields,message)}):new UnavailableOtpDeliveryProvider()});
+await identityModule.registerHttp(app,identityDependencies);
+const identityPublic=createIdentityPublicQuery(createIdentityRepositories,executor);
+const operations=buildOperationsModule({executor,transactionManager,identity:identityPublic,authentication:identityDependencies.authentication});
+await operations.registerHttp(app);
+const platform=buildPlatformModule({executor,transactionManager});
+await platformModule.registerHttp(app,{executor,featureFlagUseCases:platform.featureFlagUseCases,appVersionUseCases:platform.appVersionUseCases,announcementUseCases:platform.announcementUseCases,regionUseCases:platform.regionUseCases});
+if(platform.managementService)await registerPlatformManagementRoutes(app,{authentication:identityDependencies.authentication,authorizer:operations.service,audit:operations.service,management:platform.managementService,featureFlags:platform.featureFlagUseCases,runtimeConfigs:platform.runtimeConfigUseCases,appVersions:platform.appVersionUseCases,announcements:platform.announcementUseCases,regions:platform.regionUseCases});
+logger.info({config:configSummary(config)},'Starting ZH-LAO backend'); await app.listen({host:config.host,port:config.port}); installShutdown({logger,timeoutMs:config.shutdownTimeoutMs,markShuttingDown:()=>{readinessState.isShuttingDown=true;},close:async()=>{await app.close();await pool.end();}});
