@@ -4,12 +4,12 @@ phase: 4
 phase_name: Operations Domain
 document: OPERATIONS_RBAC_CONTRACTS
 last_updated: 2026-08-31
-repository_commit_audited: d7b4ed1f204164bde39bf4cf4db324101ef15651
+repository_commit_audited: 000f4c4aafacf4938d74902eddc4d78323196a89
 database_authority:
   - database/v2/migrations/0200_operations.sql
 depends_on:
   - ../02-identity/IDENTITY_IMPLEMENTATION_REPORT.md
-  - ../03-platform/PLATFORM_DESIGN_AUDIT.md
+  - ../03-platform/PLATFORM_IMPLEMENTATION_REPORT.md
 implementation_started: false
 ---
 
@@ -17,9 +17,33 @@ implementation_started: false
 
 > 本文冻结 Operations V1 的 Operator lifecycle、RBAC、Permission Catalog、Authorization、Audit 与 Bootstrap 契约。
 >
-> 本文不修改 frozen migration，不实现 Operations，不新增第 6 张表，不建立管理员独立认证系统。
+> 本文只做设计，不修改 frozen migration，不实现 Operations，不增加第 6 张表，不建立管理员独立认证系统。
 
-## 1. Domain Boundary
+## 1. Repository Re-Audit
+
+本设计开始时首次读取到的 `main` 为 Platform Design Gate 提交；在设计进行期间远程 `main` 又合入 Platform Phase 3 implementation 与 Identity regression hotfix。Operations 第一份文档真正写入前的代码基线提交为：
+
+```text
+000f4c4aafacf4938d74902eddc4d78323196a89
+feat(platform): implement Phase 3 platform domain and identity hotfixes
+```
+
+因此本文件最终以 `000f4c4...` 作为 **pre-Operations-design repository audit baseline**，并以当前 `main` 上更晚的 Operations 文档提交作为最终文档状态。
+
+增量审计确认：
+
+```text
+Identity Implementation = COMPLETE / PASS / FROZEN
+Platform Design Gate     = PASS
+Platform Implementation  = COMPLETE
+Platform Final Gate      = PASS
+Platform Domain          = FROZEN
+Operations Implementation= NOT_STARTED
+```
+
+Platform 已实现 33 个 required use cases、6 张 frozen tables、`modules/platform/public` 与 5 个 runtime HTTP endpoints；Platform management application use cases 已实现，但当前注册的 HTTP routes 仍只有 runtime routes，因此管理端 RBAC/HTTP wiring 正是 Operations 后续 integration 工作，而不是 Platform 未完成 blocker。
+
+## 2. Domain Boundary
 
 Operations canonical responsibilities：
 
@@ -43,7 +67,7 @@ Commerce canonical state
 Rewards canonical state
 ```
 
-跨 Domain 管理动作的规则固定为：
+跨 Domain 管理动作固定为：
 
 ```text
 Operations decides WHO MAY ACT
@@ -51,7 +75,9 @@ Owner Domain decides WHAT THE BUSINESS ACTION MEANS
 Operations records WHO ACTED after a successful accepted action
 ```
 
-## 2. Frozen Database Contract
+Operations 不代理或复制 Owner Domain canonical state。
+
+## 3. Frozen Database Contract
 
 Operations 仍严格为 5 张表：
 
@@ -63,7 +89,7 @@ operations.role_permissions
 operations.operator_audit_logs
 ```
 
-`0200_operations.sql` 不修改。
+`database/v2/migrations/0200_operations.sql` 不修改。
 
 关键物理事实：
 
@@ -73,149 +99,124 @@ operations.operator_audit_logs
 - `role_permissions` 使用 `PK(role_id, permission_key)`。
 - Audit target 是 polymorphic logical reference；跨 Domain 无 physical FK。
 - Operator / Role 只有 `active | disabled`。
-- Audit 表无 `result/status` 字段；V1 不通过迁移补字段。
+- Audit 表没有 `result/status` 字段；V1 不通过迁移补字段。
 
-## 3. Operator Lifecycle — FROZEN
+```text
+DATABASE_CONTRACT_CONFLICT = 0
+```
 
-### 3.1 Becoming an Operator
+## 4. Operator Lifecycle — FROZEN
+
+### 4.1 如何成为 Operator
 
 V1 不允许 Operator 自助注册。
 
 成为 Operator 只有两条受控路径：
 
-1. 系统第一次初始化：本地/部署环境中的 one-time bootstrap CLI。
-2. 初始化以后：已认证且拥有 `operations.operators.create` 的 active Operator 通过 Admin Management API 创建。
+1. 系统第一次初始化：one-time controlled CLI bootstrap。
+2. 初始化以后：已认证、active 且拥有 `operations.operators.create` 的 Operator 通过 Admin Management API 创建。
 
-创建 Operator 必须提供 Identity `auth_subject_id`。Operations 只能通过 `identity/public` 验证：
+Create/Enable/Bootstrap 需要 Identity subject validation。Operations **只依赖** `apps/backend/src/modules/identity/public/` 当前冻结的 `IdentityPublicQueries`：
 
 ```text
 Identity subject exists
 AND Identity status = active
 ```
 
-Operations 禁止读取 `identity.*` 表、Identity repository、Identity internal BIGINT。
+禁止读取：
 
-### 3.2 Self Registration
+```text
+identity.* SQL
+identity/application
+identity/infrastructure
+Identity repositories
+Identity internal BIGINT
+```
+
+### 4.2 Self Registration
 
 ```text
 Operator self-registration = NOT_SUPPORTED
 Public operator signup endpoint = FORBIDDEN
 ```
 
-### 3.3 Operator Mutable Fields
-
-创建后：
+### 4.3 Mutable / Immutable
 
 ```text
 id              immutable
 auth_subject_id immutable
 display_name    mutable
-status          active <-> disabled
+status          active <-> disabled through explicit commands
 ```
 
-不允许把一个已有 Operator 重新绑定到另一个 Identity subject；否则历史 Audit actor identity 会失去稳定含义。
+`auth_subject_id` 不允许重绑，否则历史 Audit actor identity 会失去稳定含义。
 
-### 3.4 Disable
+### 4.4 Disable
 
-`disabled` 立即使该 Operator 在新的 authorization decision 中失去全部权限。
+`disabled` 使该 Operator 在新的 authorization decision 中立即失去全部权限。
 
 禁用时：
 
 - 不删除 Operator；
 - 不删除 `operator_roles`；
-- 不删除历史 audit；
-- 不撤销 Identity account/session；
-- 未来重新 enable 后，原有 active Role assignment 会再次参与权限计算。
+- 不删除历史 Audit；
+- 不修改 Identity account/session；
+- 未来重新 enable 后，原 active Role assignment 再次参与权限计算。
 
-### 3.5 Enable
+### 4.5 Enable
 
-Enable 前必须通过 `identity/public` 再确认对应 Identity subject 当前存在且 `active`。
+Enable 前必须使用 `IdentityPublicQueries` 确认对应 Identity subject 当前存在且 `active`；否则拒绝。
 
-如果 Identity account inactive/closed：
+### 4.6 Identity Account State
 
-```text
-EnableOperator = rejected
-```
+当前生产 `IdentityAuthenticationProvider` 在每个受保护请求中验证 token 后重新读取 Identity user，并且只有 `status=active` 才产生 `AuthContext`。
 
-### 3.6 Identity Account Status
-
-Foundation/Identity AuthenticationProvider 已在每个受保护请求中校验 Identity subject 当前为 `active`。因此：
+因此：
 
 ```text
 Identity inactive/closed
-→ authentication produces no AuthContext
-→ Admin authorization cannot start
+→ no usable AuthContext
+→ Operations authorization does not start
 ```
 
-Operations 不复制 Identity account status，也不缓存第二份状态。
+Operations 不复制 Identity status，也不缓存第二份身份状态。
 
-### 3.7 Delete
+### 4.7 Delete
 
 ```text
 Operator physical delete = NOT_SUPPORTED
 Operator soft delete     = NOT_SUPPORTED
 ```
 
-生命周期终止只使用 `status=disabled`。
+生命周期退出只使用 `status=disabled`。
 
-## 4. Role Model — FROZEN
+## 5. Role Model — FROZEN
 
-### 4.1 Flat RBAC
-
-Role 是 permission 的平面集合：
+### 5.1 Flat RBAC
 
 ```text
 Operator
-  -> zero or more Roles
-  -> zero or more exact Permission keys per Role
+→ zero or more Roles
+→ zero or more exact Permission keys per Role
 ```
 
-V1 无 role hierarchy、priority、deny rule、direct operator permission。
+V1 无 Role hierarchy、priority、deny rule、direct operator permission。
 
-### 4.2 Built-in Role
-
-V1 只冻结一个 code-level reserved role：
-
-```text
-super_admin
-```
-
-`super_admin` 的 authorization semantics 与普通 Role 完全相同：
-
-```text
-NO bypass
-NO is_super_admin flag
-NO wildcard
-NO implicit allow
-```
-
-它必须通过 `role_permissions` 显式拥有 Permission Catalog 中的全部当前权限。
-
-保护策略：
-
-- `code=super_admin` 保留；
-- 不允许 disable；
-- 不允许把其 permission set 改成“少于完整 catalog”；
-- name/description 可修改；
-- code 不可修改；
-- 可分配给多个 Operator。
-
-### 4.3 Custom Roles
+### 5.2 Custom Roles
 
 ```text
 Custom roles = SUPPORTED
 ```
 
-有权限的 Operator 可以创建自定义 Role。
+创建规则：
 
-创建：
+- code lower_snake_case；
+- code UNIQUE；
+- initial status = active；
+- initial permission set 可为空；
+- 后续统一使用 `SetRolePermissions` 配置。
 
-- code 必须 lower_snake_case；
-- code 唯一；
-- 初始 status=active；
-- permission 初始可为空，随后使用 SetRolePermissions 配置。
-
-### 4.4 Role Mutation
+### 5.3 Role Mutation
 
 ```text
 code        immutable
@@ -226,22 +227,57 @@ status      active <-> disabled
 
 Role disabled 后：
 
-- 已有 `operator_roles` 保留；
-- 已有 `role_permissions` 保留；
-- authorization 立即忽略该 Role 的所有 Permission；
+- `operator_roles` 保留；
+- `role_permissions` 保留；
+- authorization 立即忽略该 Role；
 - re-enable 后原关系重新生效。
 
-Role physical delete / soft delete 均不支持。
+Role hard/soft delete 均不支持。
 
-## 5. Role Assignment — FROZEN
+## 6. `super_admin` — FROZEN
 
-### 5.1 Multiple Roles
+V1 唯一 reserved Role code：
+
+```text
+super_admin
+```
+
+它的 authorization semantics 与普通 Role 完全相同：
+
+```text
+NO bypass
+NO wildcard
+NO implicit allow
+NO is_super_admin column
+```
+
+它必须通过 `role_permissions` 显式拥有当前 canonical Permission Catalog 的全部 keys。
+
+保护策略：
+
+- code 不可修改；
+- 不允许 disable；
+- permission set 必须恰好等于完整 current catalog；
+- name/description 可修改；
+- 可分配给多个 Operator。
+
+### 6.1 Catalog Evolution
+
+不设计隐式 super-admin bypass 来解决新 permission 上线。
+
+权限 catalog 新增 key 时，发布流程必须先让已有 active `super_admin` 使用仍然存在的 `operations.role_permissions.set` 执行完整集合 reconciliation，再开放依赖新 key 的管理行为。Bootstrap 对空系统直接写入当时完整 catalog。
+
+V1 不做后台自动 permission seeding，也不在应用启动时偷偷改 RBAC 数据。
+
+## 7. Role Assignment — FROZEN
+
+### 7.1 Multiple Roles
 
 ```text
 Multiple roles per Operator = YES
 ```
 
-### 5.2 Assign
+### 7.2 Assign
 
 只有：
 
@@ -252,17 +288,17 @@ AND target Role active
 
 时允许建立新 assignment。
 
-重复 Assign 使用 idempotent semantics：
+重复 Assign：
 
 ```text
 already assigned -> success/no-op
 ```
 
-数据库 `PK(operator_id, role_id)` 是最终并发唯一性保护。
+数据库 composite PK 是并发最终唯一性保护。
 
-### 5.3 Revoke
+### 7.3 Revoke
 
-Role assignment 可以撤销，物理删除 `operator_roles` 当前关系。
+解绑即删除 `operator_roles` 当前关系。
 
 重复 revoke：
 
@@ -270,26 +306,24 @@ Role assignment 可以撤销，物理删除 `operator_roles` 当前关系。
 already absent -> success/no-op
 ```
 
-只有真实发生关系变化时写 Operator Audit。
+只有真实关系变化才写 Audit。
 
-### 5.4 Last Super Admin Protection
+### 7.4 Last Super Admin Protection
 
-V1 必须防止 Operations 自己把系统锁死。
-
-会减少可用 `super_admin` 的操作包括：
+会减少 active super-admin 的 Operations 动作：
 
 ```text
 DisableOperator(super-admin operator)
 RemoveRoleFromOperator(super_admin)
 ```
 
-这些路径必须共享同一 serialisation point：
+必须共享同一 serialisation point：
 
 ```text
 SELECT super_admin role FOR UPDATE
 ```
 
-然后在同一 Operations transaction 中确认：
+然后在同一 Operations transaction 重新计算：
 
 ```text
 remaining active operators assigned to active super_admin >= 1
@@ -301,30 +335,28 @@ remaining active operators assigned to active super_admin >= 1
 409 LAST_SUPER_ADMIN_REQUIRED
 ```
 
-因为 `super_admin` 本身不可 disabled，且其权限不可被裁减为不完整 catalog，所以无需为另外两条路径建立分叉规则。
+由于 `super_admin` Role 自身禁止 disable 且权限必须完整，不再额外设计 Role-disable/permission-reduction 分支。
 
-此 invariant 只覆盖 Operations 可控制的状态。Identity 独立关闭最后一个 super-admin 的 Identity account 属于跨域身份恢复事件，Operations 不得通过认证后门绕过 Identity。
+Identity 独立关闭最后一个 super-admin 对应 account 是 Identity recovery 问题；Operations 不允许认证后门绕过 Identity。
 
-## 6. Permission Grammar — FROZEN
+## 8. Permission Grammar — FROZEN
 
-Canonical grammar：
+Canonical application grammar：
 
 ```text
 <domain>.<resource>.<action>
 ```
 
-Application-level contract **严格三段**。数据库 regex 允许三段以上只是物理层的宽格式保护；Operations application/catalog 不接受四段或更多段。
+**严格三段**。数据库 regex 允许三段以上只是较宽的物理格式保护；Operations application/catalog 只接受被注册的 exact 三段 key。
 
 每段：
 
 ```text
-lower_snake_case
 ^[a-z][a-z0-9_]*$
+lower_snake_case
 ```
 
-### 6.1 Domain Token
-
-Domain token 使用稳定的 code/schema namespace：
+### 8.1 Domain Token
 
 ```text
 identity
@@ -340,43 +372,39 @@ rewards
 trust
 ```
 
-`Audio Production` 的 permission domain token 固定为 `audio`；`Trust & Safety` 固定为 `trust`。
+`Audio Production` token = `audio`；`Trust & Safety` token = `trust`。
 
-### 6.2 Resource Token
+### 8.2 Resource Token
 
 Resource 使用 **plural lower_snake_case capability/resource family**。
 
-例如已冻结 Platform contract 使用：
+已冻结示例：
 
 ```text
-feature_flags
-runtime_configs
-app_versions
-announcements
-regions
+platform.feature_flags.*
+platform.runtime_configs.*
+platform.app_versions.*
+platform.announcements.*
+platform.regions.*
+
+operations.operators.*
+operations.roles.*
+operations.operator_roles.*
+operations.role_permissions.*
+operations.audit_logs.*
 ```
 
-Operations V1 使用：
+上面的 `*` 仅表示文档中的 action 占位，不是合法 permission wildcard。
 
-```text
-operators
-roles
-operator_roles
-role_permissions
-audit_logs
-```
+### 8.3 Action Token
 
-禁止同一资源同时出现 singular/plural 两套 key。
+Action 不是全系统固定 CRUD enum，而是 Owner Domain 设计时注册的 exact lower_snake_case capability action，例如 `read`, `write`, `publish`, `review`。
 
-### 6.3 Action Token
+任何未进入 canonical catalog 的 action 都无效。
 
-Action 也是 exact lower_snake_case token，但不是一个全系统固定 CRUD enum。
+### 8.4 Wildcards
 
-每个 action 必须由 canonical Permission Catalog 明确注册。Owner Domain 的产品语义可以使用 `publish`, `review`, `resolve` 等具体行为；未注册 action 一律无效。
-
-### 6.4 Wildcards
-
-以下全部不支持：
+全部禁止：
 
 ```text
 *
@@ -385,21 +413,11 @@ platform.feature_flags.*
 *.roles.read
 ```
 
-Authorization 只比较 exact Permission key。
+Authorization 只做 exact key membership。
 
-### 6.5 No Super Admin Bypass
+## 9. Canonical Permission Catalog — FROZEN
 
-```text
-if role.code == super_admin -> allow all
-```
-
-这种逻辑明确禁止。
-
-Super Admin 只是显式拥有全部 catalog rows 的受保护 Role。
-
-## 7. Canonical Permission Catalog — FROZEN STRATEGY
-
-Permission 的权威是代码，不是数据库自由字符串。
+权威是 **code-level static/typed catalog**，不是数据库任意字符串，也不建 permission dictionary table。
 
 目标位置：
 
@@ -407,7 +425,7 @@ Permission 的权威是代码，不是数据库自由字符串。
 apps/backend/src/modules/operations/public/permissions.ts
 ```
 
-建议导出：
+概念 exports：
 
 ```text
 OperatorPermissionKey
@@ -416,9 +434,7 @@ isOperatorPermissionKey()
 assertOperatorPermissionKey()
 ```
 
-其他 Domain 只能依赖 `operations/public` 中的 permission constants/types，不得自己复制字符串 registry，也不得查 `operations.role_permissions`。
-
-### 7.1 Operations V1 Keys
+### 9.1 Operations V1 — 16 keys
 
 ```text
 operations.operators.read
@@ -443,9 +459,9 @@ operations.role_permissions.set
 operations.audit_logs.read
 ```
 
-### 7.2 Platform Keys Already Frozen by Platform Design
+### 9.2 Platform — 10 frozen keys
 
-Operations 必须原样接纳 Platform 已冻结的 10 个 keys：
+Operations 原样接纳 Platform 已冻结 requirement：
 
 ```text
 platform.feature_flags.read
@@ -460,48 +476,55 @@ platform.regions.read
 platform.regions.write
 ```
 
-### 7.3 Future Domains
+当前 catalog：
 
-Content / Learning / Audio / Social / Chat / Commerce / Rewards / Trust 的 exact admin permission keys **本会话不提前发明**。
+```text
+Operations = 16
+Platform   = 10
+Total      = 26
+```
 
-规则是：
+### 9.3 Future Domains
+
+Content / Learning / Audio / Social / Chat / Commerce / Rewards / Trust exact admin keys 不在本会话提前发明。
+
+新增流程：
 
 ```text
 Owner Domain freezes management capability/API
-→ exact permission requirement is added to Operations catalog
-→ super_admin explicit set is synchronized to full catalog
+→ exact permission requirement added to Operations code catalog
+→ super_admin explicit permission set reconciled
+→ protected route enabled
 ```
 
-数据库不允许任意“创建 permission”。
+## 10. Permission Assignment Mutation Model — FROZEN
 
-## 8. Permission Assignment Mutation Model — FROZEN
-
-V1 只提供一种 Role permission mutation：
+V1 只提供：
 
 ```text
 SetRolePermissions(role_id, complete_permission_set)
 ```
 
-不同时再提供 GrantPermissionToRole / RemovePermissionFromRole，避免三套等价 mutation semantics。
+不同时提供 Grant/Remove/Replace 三套等价 mutation。
 
 规则：
 
-1. request 必须是完整 exact key set；
-2. 所有 key 必须存在于 code catalog；
-3. array 内不允许重复；
-4. custom Role 允许空 set；
+1. request 是完整 exact key set；
+2. 每个 key 必须在 current catalog；
+3. duplicates rejected；
+4. custom Role 可空；
 5. transaction 内 `SELECT role FOR UPDATE`；
 6. 计算 added / removed；
-7. 删除 removed rows；
-8. 插入 added rows；
-9. 无变化时 success/no-op，不写 mutation audit；
-10. `super_admin` 只接受“恰好等于当前完整 catalog”的 set。
+7. 删除 removed；
+8. 插入 added；
+9. no change => success/no-op，不写 mutation Audit；
+10. `super_admin` 只接受恰好等于 current full catalog 的 set。
 
-并发 replace 因 Role row lock 串行化；V1 采用 serialized last-completed-write semantics，不增加 version 字段。
+并发 replace 被 Role row lock 串行化；不增加 version 字段。
 
-## 9. Authorization Algorithm — FROZEN
+## 11. Authorization Algorithm — FROZEN
 
-管理请求统一流程：
+统一链路：
 
 ```text
 Request
@@ -516,61 +539,49 @@ operator exists?
 ↓
 operator.status == active?
 ↓
-load active roles
+load active assigned roles
 ↓
 load role_permissions
 ↓
-union exact permissions
+UNION exact permissions
 ↓
-required key exists?
+required exact key exists?
 ↓
 Owner Application Use Case
 ↓
-Audit successful accepted mutation when required
+required success Audit
 ```
 
 Effective permissions：
 
 ```text
-if operator.status != active:
-    DENY ALL
-
-permissions = UNION(permission keys of every active assigned role)
+operator.status != active -> DENY ALL
+otherwise -> UNION(permission keys of every active assigned Role)
 ```
 
-No Role => empty permission set.
+- no Role => empty set；
+- disabled Role => ignored；
+- duplicate key through multiple Roles => one effective key；
+- Identity inactive/closed => authentication denies before Operations；
+- `super_admin` 不存在特殊 allow branch。
 
-Disabled Role => ignored.
-
-Duplicate permission through multiple Roles => one effective key.
-
-Identity disabled/closed => AuthenticationProvider rejects before Operations authorization.
-
-### 9.1 Authorization Linearization
+### 11.1 Authorization Linearization
 
 V1 不缓存 authorization。
 
-每次受保护请求从 PostgreSQL 读取当前 Operator/Role/Permission state。
+每个受保护请求读取 PostgreSQL current RBAC state。
 
-对于 Operations 自己的 mutation，应尽量在同一 Operations transaction 中授权/锁定 actor 与执行 mutation。
+跨 Domain owner write 的 admission linearization point 是成功 authorization decision。若 Operator/Role 在其后并发 disabled，已经进入 Owner Domain 的 in-flight action 不做 distributed rollback；下一次请求使用新状态并拒绝。
 
-对于跨 Domain owner write：
+## 12. Operations Public Contract — FROZEN
 
-```text
-authorization decision is the admission linearization point
-```
-
-如果 Operator/Role 在该 decision 之后被并发禁用，已经被接纳并进入 owner Domain 的 in-flight action 不做跨域 distributed rollback；后续请求立即使用新状态并拒绝。
-
-## 10. Public Authorization Contract — FROZEN
-
-未来稳定 public boundary：
+目标路径：
 
 ```text
 apps/backend/src/modules/operations/public/
 ```
 
-应至少暴露概念能力：
+稳定概念能力：
 
 ```text
 OperationsAuthorizer
@@ -582,10 +593,16 @@ OperationsOperatorResolver
 OperationsAuditRecorder
   recordSuccessfulAction(...)
 
+AuthorizedOperatorContext
 OperatorPermissionKey + catalog constants/validator
 ```
 
-`requirePermission()` 返回安全的 `AuthorizedOperatorContext`，至少包含 stable `operatorId` 与 `authSubjectId`，用于 owner Domain attribution。
+`AuthorizedOperatorContext` 至少包含：
+
+```text
+operatorId UUID
+authSubjectId UUID
+```
 
 禁止 public export：
 
@@ -596,14 +613,14 @@ TransactionManager
 DB rows
 SQL
 internal persistence models
-Fastify request handlers
+Fastify handlers
 ```
 
-其他 Domain 禁止直接查 operations tables。
+其他 Domain 禁止直接查询 operations tables。
 
-## 11. Admin Backend Authorization Contract — FROZEN
+## 13. Admin Backend Authorization Contract — FROZEN
 
-所有 `/api/v1/admin/**` 业务管理路由的安全模型：
+所有 `/api/v1/admin/**` 管理能力：
 
 ```text
 Authentication = Foundation/Identity
@@ -612,27 +629,27 @@ Business write = Owner Domain
 Audit actor    = Operations Operator UUID
 ```
 
-Backend 是最终权限执行点。Admin 前端 `PermissionGuard/can()` 只改善 UI，不构成安全边界。
+Backend 是最终权限执行点。Admin 前端 `PermissionGuard/can()` 只负责 UI visibility/UX，不构成安全边界。
 
-概念性 route composition：
+概念 route composition：
 
 ```text
 requireAuthentication
-→ require exact Operations permission
-→ invoke owner use case
-→ record required successful operator action
+→ Operations require exact permission
+→ owner use case
+→ record required success Audit
 ```
 
-不得在每个 Domain 重新实现一套 Role/Permission SQL。
+不得在每个 Domain 各写一套 RBAC SQL。
 
-## 12. Audit Contract — FROZEN
+## 14. Audit Contract — FROZEN
 
-### 12.1 What `operator_audit_logs` Means
+### 14.1 Canonical Meaning
 
-它是：
+`operator_audit_logs` 表示：
 
 ```text
-canonical fact that an authenticated/authorized Operator action
+an authenticated/authorized Operator action
 was accepted and successfully executed by the application
 ```
 
@@ -643,14 +660,12 @@ HTTP access log
 login log
 security denial log
 exception log
-business fact store
+business canonical fact store
 ```
 
-Trust Decision/Enforcement、Commerce Refund、Platform Feature Flag state 等 canonical fact 仍由 owner Domain 保存。
+Trust Decision/Enforcement、Commerce Refund、Platform Feature Flag state 等事实仍归 Owner Domain。
 
-### 12.2 Who / Did What / To What / When / Request Context
-
-映射：
+### 14.2 Who / What / Target / When / Context
 
 ```text
 who             -> operator_id
@@ -660,33 +675,37 @@ when            -> created_at
 request context -> request_id + ip_address + whitelisted details
 ```
 
-### 12.3 Result Semantics Under Frozen Schema
+`ip_address` 必须来自 Foundation/Fastify 在正确 trusted-proxy 配置下解析的 remote address；不得盲信任任意客户端 `X-Forwarded-For`。
 
-Frozen DB **没有 result/status 字段**，现有 frozen database semantics 也明确 Audit 只记录已接受并执行动作。
+### 14.3 Result Semantics
 
-因此 V1 result contract 冻结为：
+Frozen DB 没有 result/status 字段，且 frozen database semantics 已明确只记录成功动作。
+
+因此 V1：
 
 ```text
-persisted operator_audit_logs row => result is implicitly SUCCESS
+persisted operator_audit_logs row => implicit result = SUCCESS
 ```
 
-以下不会伪装成 Audit row：
+不会创建 canonical Audit row 的情况：
 
 ```text
 authentication failure
 authorization denial
 validation rejection
 owner-domain business failure
-unexpected exception before successful commit
+unexpected failure before successful business commit
 ```
 
-它们进入 Foundation security/application/observability logs。
+这些由 security/application/observability logs 承担。
 
-`result=failed` filter 因数据库契约无法表达，V1 `NOT_SUPPORTED`。
+```text
+result=failed filter = NOT_SUPPORTED
+```
 
-禁止把 `result` 偷塞进 `details` 来制造第二套隐式字段。
+禁止把 `result` 偷塞进 `details`。
 
-### 12.4 Actions That MUST Audit
+### 14.4 MUST Audit
 
 Operations 自身所有真实 state mutation：
 
@@ -701,13 +720,13 @@ initial bootstrap
 其他 Domain：
 
 ```text
-state-changing Admin management commands MUST audit
-read-only list/detail does not audit by default
+state-changing Admin management command = MUST audit
+routine read-only list/detail            = no canonical Operator audit by default
 ```
 
-未来敏感 export/read 如确有合规需求，再单独冻结为 audited read use case。
+敏感 export/read 如未来有合规需求，再单独冻结。
 
-### 12.5 Operations Audit Action Keys
+### 14.5 Operations Audit Action Keys
 
 ```text
 operations.operators.create
@@ -724,32 +743,32 @@ operations.role_permissions.set
 operations.bootstrap.initialize
 ```
 
-Audit action key 与 permission key 都使用三段 grammar，但不要求一一相同；例如 Platform 可能用 broad `platform.feature_flags.write` 授权，而 Audit 使用具体 `platform.feature_flags.create/update/retire` action。
+Audit action key 与 permission key 共用三段 grammar，但无需一一相同；例如 broad `platform.feature_flags.write` 可授权多个具体 Platform audit actions。
 
-### 12.6 Target Semantics
+### 14.6 Target Semantics
 
 Operations targets：
 
 - Operator mutation：`operations / operator / operator UUID`
 - Role mutation：`operations / role / role UUID`
-- Role assignment：target Operator UUID，Role UUID 放 whitelisted details
-- Permission set：target Role UUID，added/removed keys 放 whitelisted details
+- Role assignment：target Operator UUID；Role UUID/code 放 safe details
+- Permission set：target Role UUID；added/removed keys 放 safe details
 
-跨 Domain target 如果 owner 有 stable UUID logical/public ID，则写 `target_id`。
+跨 Domain target 有 stable UUID logical/public ID 时写 `target_id`。
 
-如果 owner 的稳定管理 identifier 是 natural key/composite key 且 frozen schema 没有 public UUID（例如部分 Platform resources）：
+若 Owner resource 的稳定管理标识是 natural/composite key，且 frozen schema 没有 public UUID：
 
 ```text
-target_domain + target_type are set
+target_domain + target_type set
 target_id = NULL
-stable natural key is stored only in small whitelisted details
+stable natural key stored in small whitelisted details
 ```
 
 不得发明外域 UUID。
 
-### 12.7 Details Policy
+### 14.7 Details Policy
 
-`details` 只能存 action-specific 小型安全上下文：
+允许小型 action-specific safe context，例如：
 
 ```text
 role_id
@@ -757,54 +776,56 @@ added_permission_keys
 removed_permission_keys
 feature_flag_key
 region_code
-client_platform/build_number
+client_platform
+build_number
 reason_code
 ```
 
 禁止：
 
 ```text
-password/token/authorization header
-OTP/session secret
+password/token/authorization header/OTP/session secret
 complete user profile/order/chat message
-payment credential/card data
+payment/card credential
 raw request body dump
 large before/after business object snapshot
 ```
 
-### 12.8 Transaction Boundary
+### 14.8 Transaction Boundary
 
-Operations 自身 mutation：
+Operations-owned mutation：
 
 ```text
-Operations canonical write
+Operations state write
 +
 operator_audit_logs INSERT
 = SAME Operations transaction
 ```
 
-跨 Domain mutation：
+跨 Domain owner mutation：
 
 ```text
 Operations authorize
 → Owner Domain commits canonical state
-→ Operations synchronously records success audit
+→ Operations synchronously records success Audit
 ```
 
-禁止 Operations transaction 包住另一个 Domain 的 database write；禁止 direct SQL 写 `platform.*` / `trust.*` 等。
+禁止跨 Domain distributed DB transaction，禁止 Operations 直接写 `platform.*` / `trust.*` / 其他外域表。
 
-当前 Platform Design 明确 `Platform Outbox events = NONE REQUIRED IN V1`，本会话不反向修改该冻结结论。因此 V1 不新增跨域 audit outbox contract。
+Platform 当前实现仍明确未引入 premature outbox；Operations 本设计不反向强行改变其冻结实现。
 
 如果 owner write 已 commit 而 Audit insert 随后失败：
 
 - 不伪造 owner rollback；
-- server 必须 critical log `request_id`、operator、action、target；
-- Admin response 使用稳定 internal error 表达“canonical action may already be committed; refresh before retry”；
-- 该 durability gap 记录为 V1 TECH_DEBT；未来若要 outbox-backed audit，必须作为显式跨域 contract revision 设计。
+- critical log `request_id/operator/action/target`；
+- 返回稳定 internal error，明确 canonical action 可能已提交，Admin 应 refresh 后再决定是否 retry；
+- 记录为 V1 MEDIUM TECH_DEBT。
 
-## 13. Audit Query Contract
+未来如要求强可靠跨域 Audit，必须单独冻结 owner-domain outbox event contract；不得隐式引入。
 
-Schema 支持的 V1 filters：
+## 15. Audit Query Contract
+
+V1 schema-supported filters：
 
 ```text
 operator_id
@@ -824,13 +845,13 @@ free-text details search
 arbitrary JSONPath query
 ```
 
-默认 `created_at DESC`，使用 bounded cursor pagination。
+默认 newest first，bounded cursor pagination。
 
-## 14. Bootstrap First Operator — FROZEN
+## 16. Bootstrap First Operator — FROZEN
 
-### 14.1 Mechanism
+### 16.1 Surface
 
-只使用 one-time controlled CLI，不提供 HTTP bootstrap endpoint，不使用默认账号密码。
+只使用 one-time controlled CLI；不提供 HTTP bootstrap endpoint，不使用默认账号密码。
 
 概念 command：
 
@@ -838,9 +859,9 @@ arbitrary JSONPath query
 pnpm operations:bootstrap --auth-subject-id <uuid> --display-name <name>
 ```
 
-正式命令名在 Implementation 阶段按 backend scripts convention 落地，但 contract 不改变。
+正式 script 名在 Implementation 阶段按仓库 convention 落地。
 
-### 14.2 Preconditions
+### 16.2 Preconditions
 
 ```text
 operations.operators count == 0
@@ -848,74 +869,63 @@ Identity public summary exists
 Identity status == active
 ```
 
-只要已有任何 Operator：
+已有任何 Operator：
 
 ```text
 BOOTSTRAP_ALREADY_COMPLETED
 ```
 
-因此 bootstrap 不能长期充当创建管理员后门。
+### 16.3 Atomic State
 
-### 14.3 Atomic Operations State
+一个 Operations transaction：
 
-在一个 Operations transaction 中：
-
-1. ensure/create reserved `super_admin` Role；
-2. set its explicit permission rows to full current catalog；
+1. create/ensure reserved `super_admin` Role；
+2. set explicit permission rows to full current catalog；
 3. create first Operator；
-4. assign super_admin；
-5. insert `operations.bootstrap.initialize` audit row，actor 为刚创建的 Operator。
+4. assign `super_admin`；
+5. insert `operations.bootstrap.initialize` Audit，actor 为新 Operator。
 
-无默认用户名/password；认证能力仍完全来自 Identity。
+无默认 username/password，无 public bootstrap route，无长期后门。
 
-## 15. Cache / Performance Decision
-
-V1：
+## 17. Cache / Performance — FROZEN
 
 ```text
 PostgreSQL direct authorization read = YES
-Redis = NO
-in-process permission cache = NO
+Redis                              = NO
+in-process permission cache         = NO
 ```
 
-理由：
+理由：Operator 数量/Admin QPS 小；RBAC 是安全控制面；stale permission 风险高于当前性能收益；一次 join/query 足够完成 operator + active roles + permissions resolution。
 
-- Operator 数量与 Admin QPS 很小；
-- RBAC 是安全控制面，stale permission 风险大于当前性能收益；
-- 一个 join/query 可完成 operator + active roles + permissions resolution；
-- no-cache 自动获得 disable/role/permission 更新的下一请求可见性。
-
-只有 profiling 证明需要时才重新设计 bounded cache + explicit invalidation。
-
-## 16. Concurrency Rules — FROZEN
+## 18. Concurrency — FROZEN
 
 | Race | V1 rule |
 |---|---|
-| same role concurrent assignment | composite PK guarantees uniqueness; idempotent assign |
-| same role concurrent revoke | DELETE 0/1 row; idempotent revoke |
-| role disabled during authorization | DB current state at authorization linearization point; next request sees disabled |
-| operator disabled during authorization | same as above; no auth cache |
-| concurrent SetRolePermissions | `SELECT role FOR UPDATE`, serialized replacement |
-| concurrent last-super-admin reduction | lock `super_admin` role row, then re-count before mutation |
-| duplicate operator for same auth subject | UNIQUE(auth_subject_id), map to stable conflict |
-| duplicate role code | UNIQUE(code), map to stable conflict |
+| same role concurrent assignment | composite PK；idempotent assign |
+| same role concurrent revoke | DELETE 0/1；idempotent revoke |
+| duplicate auth subject | `UNIQUE(auth_subject_id)` |
+| duplicate role code | `UNIQUE(code)` |
+| concurrent SetRolePermissions | `SELECT role FOR UPDATE`；serialized replacement |
+| last-super-admin reduction | lock reserved `super_admin` role row + re-count |
+| role disabled during authorization | current DB state at decision point；next request sees disabled |
+| operator disabled during authorization | same；no RBAC cache |
 
-Raw PostgreSQL constraint names / SQLSTATE must not escape API boundary.
+Raw PostgreSQL SQLSTATE/constraint names 不得泄漏到 API。
 
-## 17. REQUIRED / DEFERRED / NOT_SUPPORTED Policy Summary
+## 19. REQUIRED / DEFERRED / NOT_SUPPORTED Policy
 
-REQUIRED V1 capabilities are detailed in `OPERATIONS_USE_CASES.md`.
+详细 Use Cases 见 `OPERATIONS_USE_CASES.md`。
 
-Explicitly DEFERRED：
+DEFERRED：
 
 ```text
-reliable outbox-backed cross-domain audit delivery
+reliable outbox-backed cross-domain Audit delivery
 sensitive read/export auditing policy
 operator invitation workflow
 admin MFA policy enforcement (Identity-owned)
 ```
 
-Explicitly NOT_SUPPORTED in Operations V1：
+NOT_SUPPORTED V1：
 
 ```text
 Operator physical deletion
@@ -923,7 +933,7 @@ Role physical deletion
 Custom permission creation
 Wildcard permissions
 Per-operator direct permissions
-Temporary/expiring role assignments
+Temporary/expiring roles
 Role hierarchy
 Permission deny rules
 ABAC
@@ -931,19 +941,23 @@ Resource-level ACL
 Approval workflow
 ```
 
-## 18. Frozen Result
+## 20. Frozen Result
 
 ```text
-Operator Lifecycle        = FROZEN
-Role Model                = FROZEN
-Role Assignment           = FROZEN
-Permission Grammar        = FROZEN
-Permission Catalog        = FROZEN
-Authorization Algorithm   = FROZEN
-Audit Contract            = FROZEN
-Bootstrap Strategy        = FROZEN
-Cache Decision            = NO CACHE
-Outbox Decision           = NO NEW V1 OUTBOX CONTRACT
+Operator Lifecycle       = FROZEN
+Role Model               = FROZEN
+Role Assignment          = FROZEN
+Permission Grammar       = FROZEN
+Permission Catalog       = FROZEN
+Authorization Algorithm  = FROZEN
+Audit Contract           = FROZEN
+Bootstrap Strategy       = FROZEN
+Cache Decision           = NO CACHE
+Outbox Decision          = NO NEW V1 OUTBOX CONTRACT
+Platform Design          = PASS
+Platform Implementation  = COMPLETE / PASS / FROZEN
+Platform Integration     = READY, not externally blocked
+Operations Implementation= NOT_STARTED
 ```
 
-STOP: this document does not start Operations Implementation.
+STOP: 本文不开始 Operations Implementation。
