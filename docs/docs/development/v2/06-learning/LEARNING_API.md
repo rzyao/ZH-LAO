@@ -10,52 +10,48 @@ last_updated: 2026-08-31
 
 # ZH-LAO V2 — Learning HTTP/API Contract
 
-> 本文冻结 Learning V1 HTTP contract，不实现 route。API 从用户学习 Use Cases 推导，不按 10 张表生成 CRUD。
+> Frozen Learning V1 HTTP contract。No routes are implemented by this design task。API从 Use Cases推导，不暴露 10-table CRUD。
 
 ## 1. Conventions
 
-Base paths：
-
 ```text
-Runtime: /api/v1/learning/...
-Admin:   /api/v1/admin/learning/...
+Runtime base = /api/v1/learning
+Admin base   = /api/v1/admin/learning
 ```
 
-Runtime 通用规则：
+Runtime rules：
 
-- 全部 learner endpoint 要求 authenticated user；
-- `AuthContext.userPublicId` 是唯一 user scope 来源，request body/query/path 不接受 `userId`；
-- JSON 使用 camelCase；时间为 RFC3339 UTC；
-- Content/Identity references 只使用 stable UUID；
-- `exercise_attempts.id`、`question_attempts.id`、`dictionary_search_history.id`、`translation_requests.id` 永不出现在 URL/body/response；
-- request object strict parse，unknown field -> `400`；
-- invalid UUID/schema -> `400`；owner resource不可访问/opaque token无效 -> `404`；状态/stale conflict -> `409`；rate limit -> `429`；
-- response不得返回数据库 constraint、SQL、provider stack trace、internal BIGINT；
-- list endpoint使用 opaque cursor；cursor不得泄漏 raw BIGINT/offset；
-- no Redis/Kafka requirement。
+- authenticated only；
+- user scope only from `AuthContext.userPublicId`；request path/query/body不接受 userId；
+- JSON camelCase；RFC3339 UTC；strict unknown-field rejection；
+- cross-domain identities = stable UUID；
+- attempt/question/history/translation internal BIGINT = never HTTP identity；
+- lists use opaque cursor；
+- invalid input 400；unauthenticated 401；foreign/invalid opaque owner handle 404；state/stale conflict 409；rate limit 429；required upstream/provider unavailable 503；
+- no SQL/constraint/provider stack/internal key leakage。
 
-Sensitive opaque capability token：
+Sensitive headers：
 
 ```text
 X-Learning-Attempt-Token
 X-Learning-Translation-Token
 ```
 
-规则：
+Token：authenticated-encrypted；max2048 chars；never URL；all access/application logs redact them；invalid/tampered/foreign token -> same `404 LEARNING_RESOURCE_NOT_FOUND`。
 
-- token是 authenticated-encrypted secret capability；
-- header值 max 2048 chars；
-- request/access/application logs必须 redact上述 headers；
-- token不能进入 URL、analytics、outbox；
-- invalid/tampered/not-owned统一返回 `404 LEARNING_RESOURCE_NOT_FOUND`，避免枚举。
+Learning current-state response default：
 
-## 2. Learning home
+```http
+Cache-Control: private, no-store
+```
+
+## 2. Home
 
 ```http
 GET /api/v1/learning/home
 ```
 
-Response：
+Returns：
 
 ```json
 {
@@ -66,37 +62,31 @@ Response：
       "progressPercent": 42.86,
       "lastLessonId": "uuid|null",
       "lastSectionId": "uuid|null",
-      "updatedAt": "2026-08-31T00:00:00Z"
+      "updatedAt": "..."
     }
   ],
   "dueReviews": {
     "count": 12,
-    "items": [
-      {
-        "contentId": "uuid",
-        "masteryStatus": "familiar",
-        "nextReviewAt": "...",
-        "priority": 50,
-        "expectedUpdatedAt": "...",
-        "content": { "id": "uuid", "language": "zh", "type": "zh_word", "display": "..." }
-      }
-    ]
+    "items": []
   },
   "recentActivities": []
 }
 ```
 
-Limits：continue courses <=3, review preview <=5, recent activities <=10。Content display metadata由 server batch resolve，客户端不 N+1 拼装。
+Limits：continue<=3, due preview<=5, recent activities<=10。Content metadata server-side batch resolve。
 
 ## 3. Course progress
 
-### Get
-
 ```http
-GET /api/v1/learning/courses/{courseId}/progress
+GET  /api/v1/learning/courses/{courseId}/progress
+POST /api/v1/learning/courses/{courseId}/start
+GET  /api/v1/learning/courses/{courseId}/resume
+POST /api/v1/learning/courses/{courseId}/complete
 ```
 
-Response：
+Start/Complete body `{}`。
+
+Progress view：
 
 ```json
 {
@@ -110,33 +100,20 @@ Response：
 }
 ```
 
-缺数据库 row 仍返回 `200` virtual `not_started`。
+No DB row -> 200 virtual not_started。
 
-### Start / Resume / Complete
+Completion semantics：all Lessons in resolved published Course structure are required；0-Lesson course -> `409 LEARNING_COURSE_NOT_COMPLETABLE`。
 
-```http
-POST /api/v1/learning/courses/{courseId}/start
-GET  /api/v1/learning/courses/{courseId}/resume
-POST /api/v1/learning/courses/{courseId}/complete
-```
-
-Start/Complete body必须为空 object `{}`；unknown fields rejected。
-
-`resume` response：
+Resume：
 
 ```json
 {
   "courseId": "uuid",
   "status": "in_progress",
   "progressPercent": 42.86,
-  "resume": {
-    "lessonId": "uuid|null",
-    "sectionId": "uuid|null"
-  }
+  "resume": { "lessonId": "uuid|null", "sectionId": "uuid|null" }
 }
 ```
-
-Start/Complete都是 idempotent state commands。
 
 ## 4. Lesson progress
 
@@ -153,17 +130,11 @@ Progress body：
 { "sectionId": "uuid" }
 ```
 
-禁止客户端提交：
+Never accepted from client：`progressPercent/status/timestamps/internal IDs`。
 
-```text
-progressPercent
-status
-startedAt
-completedAt
-lastSection internal ID
-```
+Complete checks server-side：final Section reached + all required Exercise lesson items completed。Failure -> `409 LEARNING_LESSON_NOT_COMPLETABLE`。
 
-Response统一返回 server current state：
+State response：
 
 ```json
 {
@@ -177,11 +148,9 @@ Response统一返回 server current state：
 }
 ```
 
-重复完成返回同一 completion state，不重复 owner event。
+Repeat complete returns same state and does not duplicate owner event。
 
 ## 5. Mastery
-
-### Single/batch resolve
 
 ```http
 GET  /api/v1/learning/mastery/{contentId}
@@ -194,7 +163,7 @@ Batch body：
 { "contentIds": ["uuid"] }
 ```
 
-`contentIds` 1..100，去重后处理。
+1..100 unique IDs。
 
 View：
 
@@ -212,45 +181,33 @@ View：
 }
 ```
 
-无 row返回 virtual `new`，`masteryScore=null`、timestamps null，不为读创建 row。
+No row -> virtual `new`, score/timestamps null。
 
 ## 6. Reviews
 
-### Due list
-
 ```http
-GET /api/v1/learning/reviews/due?cursor=<opaque>&limit=20
-```
-
-`limit` default 20/max 50。
-
-Response：
-
-```json
-{
-  "items": [
-    {
-      "contentId": "uuid",
-      "nextReviewAt": "...",
-      "priority": 50,
-      "reviewCount": 2,
-      "lastReviewedAt": "...",
-      "expectedUpdatedAt": "...",
-      "mastery": { "status": "familiar", "score": 55 },
-      "content": { "id": "uuid", "language": "zh", "type": "zh_word", "display": "..." }
-    }
-  ],
-  "nextCursor": null
-}
-```
-
-### Submit result
-
-```http
+GET  /api/v1/learning/reviews/due?cursor=<opaque>&limit=20
 POST /api/v1/learning/reviews/{contentId}/results
 ```
 
-Body：
+Due list default20/max50；sort priority DESC, nextReviewAt ASC, contentId。
+
+Item includes：
+
+```json
+{
+  "contentId": "uuid",
+  "nextReviewAt": "...",
+  "priority": 50,
+  "reviewCount": 2,
+  "lastReviewedAt": "...",
+  "expectedUpdatedAt": "...",
+  "mastery": { "status": "familiar", "score": 55 },
+  "content": { "id": "uuid", "language": "zh", "type": "zh_word", "display": "..." }
+}
+```
+
+Submit body：
 
 ```json
 {
@@ -259,24 +216,9 @@ Body：
 }
 ```
 
-Success `200`：
+Rules：review must exist and be due；not scheduled -> `409 LEARNING_REVIEW_NOT_SCHEDULED`；not due -> `409 LEARNING_REVIEW_NOT_DUE`；stale token -> `409 LEARNING_REVIEW_CONFLICT`。
 
-```json
-{
-  "contentId": "uuid",
-  "outcome": "good",
-  "mastery": { "status": "familiar", "score": 70 },
-  "review": {
-    "reviewCount": 3,
-    "lastReviewedAt": "...",
-    "nextReviewAt": "...",
-    "priority": 50,
-    "updatedAt": "..."
-  }
-}
-```
-
-Stale `expectedUpdatedAt` -> `409 LEARNING_REVIEW_CONFLICT`。不自动把 uncertain retry当作第二次 review。
+Success returns updated mastery + review schedule。
 
 ## 7. Bookmarks
 
@@ -287,35 +229,13 @@ DELETE /api/v1/learning/bookmarks/{contentId}
 POST   /api/v1/learning/bookmarks/resolve
 ```
 
-PUT body `{}`，idempotent。DELETE不存在也 `204`。
+PUT body `{}` and idempotent。DELETE missing -> 204。Batch resolve body `{contentIds:[...]}` max100。
 
-Batch resolve：
+List item returns Content safe summary + `availability=current|disabled|archived|unavailable`。Old bookmark not silently deleted on Content retirement。
 
-```json
-{ "contentIds": ["uuid"] }
-```
+## 8. Practice
 
-Response：
-
-```json
-{
-  "items": [
-    { "contentId": "uuid", "isBookmarked": true }
-  ]
-}
-```
-
-List item包含 Content safe summary与：
-
-```text
-availability = current | disabled | archived | unavailable
-```
-
-历史 bookmark不因 Content下架自动删除。
-
-## 8. Practice attempts
-
-### Start
+### 8.1 Start
 
 ```http
 POST /api/v1/learning/exercises/{exerciseId}/attempts
@@ -323,7 +243,7 @@ POST /api/v1/learning/exercises/{exerciseId}/attempts
 
 Body `{}`。
 
-Success `201` when created / `200` when existing in-progress reused：
+Created -> `201`：
 
 ```json
 {
@@ -332,20 +252,33 @@ Success `201` when created / `200` when existing in-progress reused：
   "attemptToken": "opaque-secret",
   "status": "in_progress",
   "startedAt": "...",
-  "exercise": { "id": "uuid", "revisionId": "uuid", "questions": [] }
+  "exercise": {
+    "id": "uuid",
+    "revisionId": "uuid",
+    "maxAttempts": 3,
+    "passingScore": 80,
+    "questions": []
+  }
 }
 ```
 
-`exercise.questions` 是 Content public-safe definition，不含 correct answer/answer rules。
+`exercise.questions` is client-safe Content definition；no answer keys。
 
-### Submit question
+Start semantics：
+
+- active attempt already exists -> `409 LEARNING_ATTEMPT_ALREADY_IN_PROGRESS`；
+- server **must not reissue** a token for that row because frozen DB does not persist its exact revision；
+- total prior created rows >= Content maxAttempts -> `409 LEARNING_MAX_ATTEMPTS_REACHED`；
+- Start is therefore not transport-idempotent in V1 after a lost success response。
+
+### 8.2 Submit answer
 
 ```http
 POST /api/v1/learning/exercise-attempt/questions/{questionId}/answers
 X-Learning-Attempt-Token: <opaque>
 ```
 
-Body 是 question-type discriminated union：
+Discriminated bodies：
 
 ```json
 { "type": "single_choice", "selectedOptionPosition": 2 }
@@ -370,13 +303,11 @@ Body 是 question-type discriminated union：
 ```json
 {
   "type": "matching",
-  "pairs": [
-    { "leftPosition": 1, "rightPosition": 2 }
-  ]
+  "pairs": [{ "leftPosition": 1, "rightPosition": 2 }]
 }
 ```
 
-Response：
+Response after server trusted scoring：
 
 ```json
 {
@@ -384,24 +315,23 @@ Response：
   "isCorrect": false,
   "earnedScore": 0.5,
   "maxScore": 1,
-  "explanation": "post-answer safe explanation or null"
+  "explanation": "safe post-answer explanation or null"
 }
 ```
 
-不得返回 `correctOptionPosition(s)`、expectedText、answerRules或matching solution。
+Never return correctOption(s), expectedText, answerRules, matching/sequence solution。
 
-同 question：相同 normalized answer retry返回 same result；不同 answer -> `409 LEARNING_ANSWER_ALREADY_SUBMITTED`。
+Same normalized answer retry -> same stored result；different answer -> `409 LEARNING_ANSWER_ALREADY_SUBMITTED`。
 
-### Complete / abandon / result
+### 8.3 Result / complete
 
 ```http
-POST /api/v1/learning/exercise-attempt/complete
-POST /api/v1/learning/exercise-attempt/abandon
 GET  /api/v1/learning/exercise-attempt/result
+POST /api/v1/learning/exercise-attempt/complete
 X-Learning-Attempt-Token: <opaque>
 ```
 
-Complete/abandon body `{}`。
+Complete body `{}`。All Questions in pinned revision are required。Missing answer -> `409 LEARNING_EXERCISE_INCOMPLETE`。
 
 Final result：
 
@@ -413,6 +343,7 @@ Final result：
   "totalScore": 10,
   "earnedScore": 8.5,
   "scorePercent": 85,
+  "passed": true,
   "startedAt": "...",
   "completedAt": "...",
   "questions": [
@@ -426,61 +357,58 @@ Final result：
 }
 ```
 
-No attempt ID。No raw answer key。
+`passed` is derived from pinned Content `passingScore`; it is not a new persisted Learning column。If passingScore null, `passed=null`。
+
+### 8.4 Abandon
+
+Normal token path：
+
+```http
+POST /api/v1/learning/exercise-attempt/abandon
+X-Learning-Attempt-Token: <opaque>
+```
+
+Lost-token recovery path：
+
+```http
+POST /api/v1/learning/exercises/{exerciseId}/attempts/abandon-active
+```
+
+Both body `{}`。Recovery uses current AuthContext + exercise UUID + advisory lock and never needs the lost revision token。Abandoned attempt remains counted against maxAttempts。
+
+Repeated abandoned -> success；completed -> `409 LEARNING_ATTEMPT_ALREADY_COMPLETED`。
 
 ## 9. Dictionary history
 
-### Record
+Actual dictionary query remains Content API。
+
+Record：
 
 ```http
 POST /api/v1/learning/dictionary/history
 ```
 
-Body：
-
 ```json
-{
-  "queryText": "你好",
-  "selectedContentId": "uuid|null"
-}
+{ "queryText": "你好", "selectedContentId": "uuid|null" }
 ```
 
-`queryText` trimmed length 1..256。This endpoint does not perform dictionary search；actual search remains Content API。Recommended Mobile flow：Content search/lookup -> record user intent/selection。
+query trimmed 1..256；success 204。selected ID non-null requires Content validation。History failure must not change an already successful Content search response semantics。
 
-Success `204`。History write failure should not retroactively change a successful Content search result at client layer；client may treat it as non-critical telemetry-like UX failure, but server仍把它作为 Learning canonical history operation rather than clickstream。
-
-### List
+List：
 
 ```http
 GET /api/v1/learning/dictionary/history?cursor=<opaque>&limit=20
 ```
 
-Response不含 history row id：
-
-```json
-{
-  "items": [
-    {
-      "queryText": "你好",
-      "selectedContentId": "uuid|null",
-      "searchedAt": "..."
-    }
-  ],
-  "nextCursor": null
-}
-```
-
-limit max 50。
+max50；no history row ID in response。
 
 ## 10. Runtime translation
 
-### Request
+Request：
 
 ```http
 POST /api/v1/learning/translations
 ```
-
-Body：
 
 ```json
 {
@@ -490,9 +418,9 @@ Body：
 }
 ```
 
-Only `zh->lo` / `lo->zh`。`sourceText` 1..1000 Unicode code points。Client cannot choose provider/model。
+Only zh->lo/lo->zh；source 1..1000 Unicode code points；provider/model not client-selectable。
 
-Success `202`：
+Success 202：
 
 ```json
 {
@@ -502,56 +430,24 @@ Success `202`：
 }
 ```
 
-Rate limit violation：`429 LEARNING_TRANSLATION_RATE_LIMITED`。
+Rate limit -> 429 `LEARNING_TRANSLATION_RATE_LIMITED`。
 
-### Status/result
+Status/result：
 
 ```http
 GET /api/v1/learning/translation
 X-Learning-Translation-Token: <opaque>
 ```
 
-Response pending/processing：
+Pending/processing returns status/times；succeeded returns sourceLanguage,targetLanguage,translatedText,times；failed returns stable errorCode/times。No provider/model/raw provider error by default。No V1 list/history endpoint。
 
-```json
-{ "status": "processing", "createdAt": "...", "completedAt": null }
-```
+## 11. Admin support
 
-Succeeded：
-
-```json
-{
-  "status": "succeeded",
-  "sourceLanguage": "zh",
-  "targetLanguage": "lo",
-  "translatedText": "...",
-  "createdAt": "...",
-  "completedAt": "..."
-}
-```
-
-Failed：
-
-```json
-{
-  "status": "failed",
-  "errorCode": "PROVIDER_UNAVAILABLE",
-  "createdAt": "...",
-  "completedAt": "..."
-}
-```
-
-No provider/model/raw provider error in public response by default。No list/history endpoint in V1。
-
-## 11. Admin support API
-
-Permission for every endpoint：
+All require exact permission：
 
 ```text
 learning.support.read
 ```
-
-Admin base：
 
 ```http
 GET /api/v1/admin/learning/users/{userId}/summary
@@ -561,49 +457,38 @@ GET /api/v1/admin/learning/users/{userId}/reviews?cursor=&limit=50
 GET /api/v1/admin/learning/users/{userId}/attempts?cursor=&limit=20
 ```
 
-Rules：
-
-- Identity authentication + active Operations operator + exact permission；
-- `userId` here is explicitly the target Identity public UUID because this is support context, not learner self-service；
-- no mutation endpoint；
-- attempt list uses opaque cursor and nested result summaries, never returns raw attempt BIGINT；
-- raw translation source/translated text excluded；
-- dictionary history may be omitted from default summary unless support use case explicitly requests it；
-- any answer payload shown to support UI must be user-submitted answer only, never trusted answer rule/key。
+Here `userId` is explicitly target Identity public UUID in support context。Identity auth + active Operations operator + exact permission。No Learning mutation route。No translation plaintext。Support answer data, if exposed, is user-submitted answer only, never trusted answer key。
 
 ## 12. Pagination
 
-Generic list envelope：
+Envelope：
 
 ```json
-{
-  "items": [],
-  "nextCursor": "opaque|null"
-}
+{ "items": [], "nextCursor": "opaque|null" }
 ```
 
-Cursor is authenticated/encrypted or signed opaque state containing only what server requires for resume；raw internal ID must not be human-readable or contractually meaningful。
-
-Default/max：
+Cursor signed/encrypted or otherwise opaque；raw internal IDs not contractually visible。
 
 ```text
-reviews/bookmarks/dictionary = 20 / 50
-admin activities/reviews     = 50 / 100
-admin attempts               = 20 / 50
+reviews/bookmarks/dictionary default/max = 20/50
+admin activities/reviews = 50/100
+admin attempts = 20/50
 ```
 
-## 13. Error contract
-
-Learning-specific codes：
+## 13. Error codes
 
 ```text
 LEARNING_RESOURCE_NOT_FOUND
 LEARNING_CONTENT_NOT_AVAILABLE
 LEARNING_COURSE_NOT_COMPLETABLE
 LEARNING_LESSON_SECTION_INVALID
+LEARNING_LESSON_NOT_COMPLETABLE
 LEARNING_PROGRESS_CONFLICT
 LEARNING_REVIEW_NOT_SCHEDULED
+LEARNING_REVIEW_NOT_DUE
 LEARNING_REVIEW_CONFLICT
+LEARNING_ATTEMPT_ALREADY_IN_PROGRESS
+LEARNING_MAX_ATTEMPTS_REACHED
 LEARNING_ATTEMPT_NOT_IN_PROGRESS
 LEARNING_ATTEMPT_ALREADY_COMPLETED
 LEARNING_ATTEMPT_ABANDONED
@@ -617,50 +502,34 @@ LEARNING_TRANSLATION_UNAVAILABLE
 PROVIDER_UNAVAILABLE
 ```
 
-Mapping：
+Mapping：400 validation；401 unauthenticated；403 Admin permission；404 hidden/foreign opaque resource；409 lifecycle/stale；429 rate limit；503 required upstream/provider unavailable；500 unexpected invariant/infrastructure。
 
-- 400：input/domain validation；
-- 401：runtime/admin unauthenticated；
-- 403：admin authenticated但缺 exact permission；
-- 404：Content/public logical ref不可用，或 opaque user-owned resource不存在/不属于当前用户；
-- 409：state/stale/concurrent conflict；
-- 429：translation rate limit；
-- 503：required upstream/provider temporarily unavailable when operation cannot safely proceed；
-- 500：unexpected invariant/infrastructure failure。
+## 14. Required security tests
 
-## 14. IDOR / privacy tests required
+Implementation must prove：
 
-Implementation tests必须证明：
+- runtime userId override impossible；
+- user A attempt/translation token unusable by B；
+- invalid token and foreign token externally indistinguishable；
+- every progress/mastery/review/bookmark/history query scopes current user；
+- token headers redacted；
+- translation source/result absent from ordinary logs；
+- trusted scoring fields cannot serialize through runtime mapper；
+- no internal BIGINT appears in HTTP contracts。
 
-- runtime route不能通过 body/query覆盖 userId；
-- user A attempt token对 user B永远不可用；
-- user A translation token对 user B永远不可用；
-- bookmark/mastery/progress/history全部 repository predicate包含 current user；
-- invalid token与foreign token response不可区分；
-- sensitive token headers从 logs redacted；
-- translation source/result不进 ordinary logs；
-- trusted scoring fields无法被 Runtime mapper序列化。
-
-## 15. Cache contract
-
-Learning current-state response默认：
-
-```http
-Cache-Control: private, no-store
-```
-
-Published Content metadata由 Content自行决定 cache semantics。Learning API不建立 Redis long-TTL current-state cache。
-
-## 16. API Freeze
+## 15. API Freeze
 
 ```text
 Runtime API = FROZEN
-Admin support API = FROZEN
+Admin Support API = FROZEN
+Course all-Lesson completion = FROZEN
+Lesson completion guard = FROZEN
+Attempt Start active=409/no-reissue = FROZEN
+maxAttempts = FROZEN
+Exercise all-Question completion = FROZEN
 Ownership/IDOR = FROZEN
-Stable ID strategy = FROZEN
-Attempt/Translation token strategy = FROZEN
 Answer visibility = FROZEN
-Pagination = FROZEN
+Stable ID strategy = FROZEN
 Implementation = NOT_STARTED
 Implementation dependency = CONTENT_GATE
 ```
