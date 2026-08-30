@@ -10,9 +10,9 @@ last_updated: 2026-08-31
 
 # ZH-LAO V2 — Learning Use Cases
 
-> Use Cases 从 Mobile 学习路径与用户事实语义推导，不是一表一 CRUD。所有 runtime use case 默认 authenticated、user-owned；客户端不提交 `userId`。
+> Use Cases 从 learner journey 与用户事实推导，不是一表一 CRUD。Runtime全部 authenticated + user-owned；客户端不提交 `userId`。
 
-## 1. Classification Summary
+## 1. Classification
 
 ```text
 REQUIRED      = 25
@@ -23,73 +23,73 @@ NOT_SUPPORTED = 14
 ## 2. Actors
 
 - Learner：authenticated Mobile/Web user；
-- Learning Worker：translation execution/retention cleanup；
-- Content Domain：trusted dependency，提供 entity/revision/scoring contract；
-- Identity Domain：trusted dependency，提供 user active-state contract；
-- Rewards：未来消费 completion owner events；
-- Operations/Admin Support：只读 diagnostics，经 exact permission授权。
+- Learning Worker：translation execution / retention cleanup；
+- Content Domain：trusted entity/structure/revision/scoring owner；
+- Identity Domain：trusted account owner；
+- Rewards：future completion-event consumer；
+- Operations/Admin Support：exact-permission read-only diagnostics。
 
-## 3. REQUIRED — Home / progress
+## 3. REQUIRED — Home / Course / Lesson
 
 ### LRN-R01 GetMyLearningHome
 
-返回最多 3 个 continue courses、resume anchors、due review count/preview、recent activities。Application query聚合现有 Learning tables + batched Content public reads，不新增 read-model table。
+聚合最多3个 continue Courses、resume anchors、due review count/preview、recent activities；batched Content enrichment；不新增 read-model table。
 
 ### LRN-R02 GetCourseProgress
 
-Input：`courseId` UUID。不存在 row时返回虚拟 `not_started/0`。只能查当前用户。
+Input Course UUID；只查 current user；missing row -> virtual `not_started/0`。
 
 ### LRN-R03 StartCourse
 
-验证 active/published Course；首次创建 `in_progress` + `course_started` activity。重复调用返回现状，不重复 fact。
+验证 current published Course；首次 `in_progress + course_started`；repeat idempotent。
 
 ### LRN-R04 ResumeCourse
 
-返回 server-owned `lastLessonId` 及可解析的 current/historical Content summary。没有 progress则返回 not-started state，不擅自 start。
+返回 server-owned progress + lastLesson/lastSection；无 progress不自动 Start。
 
 ### LRN-R05 CompleteCourse
 
-Server验证所有 required published Lessons 已完成。首次完成写 terminal state + completion outbox；重复 complete idempotent。
+V1 published Course structure中的 **全部 Lessons** 都是 completion-required（Content无 optional Lesson flag）。全部完成后首次 terminal transition + outbox；repeat idempotent；0-Lesson Course fail closed。
 
 ### LRN-R06 GetLessonProgress
 
-按 Lesson UUID返回当前用户 progress；缺行返回虚拟 not_started。
+Lesson UUID；missing -> virtual not_started。
 
 ### LRN-R07 StartLesson
 
-验证 Lesson及其 Course关系；确保 Course progress 已 started；首次 Lesson start写 activity。不会让 Course resume anchor向后退。
+验证 Lesson + parent Course；确保 Course started；首次写 lesson_started；resume anchor forward-only。
 
 ### LRN-R08 UpdateLessonProgress
 
-输入 `lessonId + sectionId`，不接收 percentage。Server验证 Section parent/order并计算 monotonic progress。
+Input Lesson UUID + Section UUID；server验证 parent/order并计算 monotonic percent；客户端不能提交 percentage。
 
 ### LRN-R09 CompleteLesson
 
-首次完成 Lesson；同 transaction更新 Course progress，必要时自动 complete Course；写 activity + lesson/course outbox。重复调用 idempotent。
+要求 lastSection已到最后 Section，并验证所有 `is_required=true` Exercise lesson items均有 completed attempt。首次完成同 transaction：Lesson terminal state、activity、required Knowledge mastery/review初始化、Course recalc、Lesson/Course completion outbox。Repeat idempotent。
 
-## 4. REQUIRED — Mastery / review
+## 4. REQUIRED — Mastery / Review
 
 ### LRN-R10 GetContentMastery
 
-支持单个或 batch（max 100）Content UUID。无 row返回 `new` virtual view。
+Single/batch max100 Content UUID；no row -> virtual `new`。
 
 ### LRN-R11 GetDueReviews
 
-仅当前用户；`next_review_at <= now`；排序 `priority DESC, next_review_at ASC, content_id`；cursor pagination，limit default 20/max 50。Content metadata batched resolve。
+Current user；`next_review_at <= now`；sort `priority DESC,next_review_at ASC,content_id`；cursor；default20/max50；batch Content metadata。
 
 ### LRN-R12 SubmitReviewResult
 
-Input：`contentId`, `outcome=again|hard|good|easy`, `expectedUpdatedAt`。锁 mastery/review，应用 deterministic V1 policy，同 transaction写 mastery + review + `review_completed` activity。Stale concurrent submit -> 409。
+Input contentId + `again|hard|good|easy` + expectedUpdatedAt。Review row必须已存在且 due；mastery then review lock；apply frozen deterministic policy；same tx update mastery/review + review_completed activity。Stale -> 409。
 
 ## 5. REQUIRED — Bookmarks
 
 ### LRN-R13 ListBookmarks
 
-`created_at DESC, content_id` cursor pagination；disabled/archived历史 bookmark保留并返回 availability。
+Sort `created_at DESC,content_id`；historical disabled/archived bookmark保留 availability。
 
 ### LRN-R14 AddBookmark
 
-验证 Content current-public；idempotent add。
+Content current-public validation；idempotent add。
 
 ### LRN-R15 RemoveBookmark
 
@@ -97,141 +97,155 @@ Input：`contentId`, `outcome=again|hard|good|easy`, `expectedUpdatedAt`。锁 m
 
 ### LRN-R16 ResolveBookmarkStatus
 
-Batch max 100 UUID，返回当前用户 `isBookmarked` map，避免 Mobile N+1。
+Batch max100 UUID；返回 current user status map。
 
 ## 6. REQUIRED — Practice
 
 ### LRN-R17 StartExerciseAttempt
 
-验证 current published Exercise并读取 current published revision。对 `(userId,exerciseId)` advisory-lock；已有 in-progress则复用，否则创建 attempt + activity。返回 opaque `attemptToken` + safe exercise revision context。
+Validate current published Exercise + revision；advisory-lock `(user,exercise)`；如果已有 in-progress -> `409 LEARNING_ATTEMPT_ALREADY_IN_PROGRESS`，**不重签 token**；否则 enforce Content `maxAttempts`（所有已创建 rows，包括 abandoned，都计数）、创建 attempt + activity，返回 encrypted attemptToken + safe pinned revision context。
 
 ### LRN-R18 SubmitQuestionAnswer
 
-使用 attemptToken定位 owner + pinned exercise revision。Typed validate user answer；通过 Content trusted scoring contract评分；insert `question_attempts`。同 question相同 normalized answer重试返回已有结果，不同答案冲突。
+Attempt token提供 owner + exact Exercise revision；typed answer validation；Content trusted scoring；每 `(attempt,question)` 一次 canonical answer。Same normalized retry -> stored result；different -> 409。
 
 ### LRN-R19 CompleteExerciseAttempt
 
-锁 attempt；校验状态/required questions；汇总 decimal scores；`in_progress -> completed`；写 `exercise_completed` activity + owner outbox。重复 complete返回同一 final result。
+Pinned Exercise中的 **全部 Questions** 都是 completion-required（Content Question无 optional flag）。锁 attempt，验证全部 answers，decimal-safe aggregate，首次 completed + activity + outbox；repeat returns same final result。
 
 ### LRN-R20 AbandonExerciseAttempt
 
-`in_progress -> abandoned`；重复 abandon成功；completed -> conflict。
+支持：
+
+- token-specific abandon；
+- lost-token recovery：authenticated user + Exercise UUID abandon current active attempt under advisory lock。
+
+Repeated abandoned is idempotent；completed conflicts。Abandoned row仍计入 maxAttempts。
 
 ### LRN-R21 GetAttemptResult
 
-只通过 current-user-bound opaque attemptToken获取。返回 stored answers/result + safe explanation（如 Content pinned revision仍可由 token解析）。不暴露 attempt/question attempt BIGINT。
+仅 current-user-bound attemptToken；返回 stored user answers/result与 token仍可解析时的 safe post-answer explanation；no attempt/question BIGINT；no answer key。
 
-## 7. REQUIRED — Dictionary history
+## 7. REQUIRED — Dictionary History
 
 ### LRN-R22 RecordDictionarySearch
 
-Content继续负责真正 dictionary search；本 use case只记录一次用户 search intent。Input `queryText` + optional `selectedContentId`。selected ID须经 Content验证。零结果/未选择允许 null。
+Actual lookup/search仍由 Content执行；Learning记录一次 authenticated user intent。`queryText + optional selectedContentId`；零结果可记录；selected ID由 Content验证。
 
 ### LRN-R23 ListDictionaryHistory
 
-当前用户、cursor pagination，limit default 20/max 50。History entries无 public row identity，不提供按 entry ID detail/update/delete。
+Current user；cursor；default20/max50；entry没有 public row ID，不提供 entry CRUD。
 
-## 8. REQUIRED — Runtime translation
+## 8. REQUIRED — Runtime Translation
 
 ### LRN-R24 RequestTranslation
 
-Authenticated only。Input zh->lo/lo->zh、sourceText <=1000 code points。Rate limit后创建 pending row，返回 `202 + translationToken`；worker异步执行 provider。
+Authenticated only；zh->lo / lo->zh；source <=1000 Unicode code points；rate limit后创建 pending row，返回 `202 + translationToken`；worker异步执行。每个 accepted HTTP request是独立 fact，V1不承诺 transport semantic dedupe。
 
 ### LRN-R25 GetTranslationRequest
 
-通过 header中的 translationToken查询当前 user-owned request状态。Succeeded返回 translatedText；failed返回 stable errorCode；不返回 provider内部错误/DB id。
+Token + current AuthContext ownership；succeeded返回 translatedText；failed返回 stable code；no provider raw error/DB id。
 
 ## 9. Internal application capabilities
 
-以下不是独立 public CRUD endpoint，但 Implementation必须有明确 application service：
+不是独立 table CRUD endpoint：
 
-- InitializeMasteryAndReviewFromCompletedLesson；
-- RecalculateCourseProgressAfterLessonCompletion；
-- WriteLearningActivity；
-- EmitLearningCompletionOutbox；
-- Claim/ProcessTranslationRequest；
-- CleanupDictionaryHistory；
-- CleanupTranslationRequests。
+```text
+InitializeMasteryAndReviewFromCompletedLesson
+RecalculateCourseProgressAfterLessonCompletion
+WriteLearningActivity
+EmitLearningCompletionOutbox
+ClaimProcessTranslationRequest
+CleanupDictionaryHistory
+CleanupTranslationRequests
+```
 
-## 10. REQUIRED — Admin support read
+Content final public module必须提供 typed trusted Lesson learning-structure view；若没有，implementation entry audit必须 BLOCK，而不是 direct SQL Content。
 
-Admin不纳入普通 learner API计数，属于同一 Learning phase的 support integration：
+## 10. Admin support reads
 
-- GetUserLearningSupportSummary；
-- ListUserLearningActivities；
-- InspectUserProgressAndReviews；
-- InspectExerciseAttemptSummaries / nested question result；
+不计入 learner REQUIRED=25：
 
-全部要求 `learning.support.read`。不允许通过 user runtime ownership shortcut访问其他用户。
+```text
+GetUserLearningSupportSummary
+ListUserLearningActivities
+InspectUserProgressAndReviews
+InspectExerciseAttemptSummaries
+```
+
+全部要求：
+
+```text
+learning.support.read
+```
+
+No generic user-fact mutation；translation plaintext excluded by default。
 
 ## 11. DEFERRED — 12
 
 | ID | Capability | Decision |
 | --- | --- | --- |
-| D01 | Persisted exercise attempt public UUID | frozen schema无字段；opaque token满足 V1 runtime |
-| D02 | Persisted Content revision pin on Learning rows | V1不要求 long-term exact replay |
-| D03 | Long-term exact historical question replay/explanation | requires persisted revision pin or new contract |
-| D04 | Cross-device recovery of lost in-progress attempt token | requires persistent external attempt identity |
-| D05 | Offline answer/progress sync | needs separate conflict model |
-| D06 | Cross-device merge beyond server-current-state semantics | no V1 need |
-| D07 | Manual progress correction | only if support evidence creates real need; must be narrow audited command |
-| D08 | Manual mastery correction | same as above |
-| D09 | Adaptive mastery algorithm | deterministic V1 policy first |
-| D10 | FSRS / SM-2 advanced scheduling | schema lacks ease/interval state |
-| D11 | Question review notebook / question_reviews table | explicitly excluded first phase |
-| D12 | Translation Request -> Review -> Promote to Content | Content contract marks automation deferred |
+| D01 | Persisted ExerciseAttempt public UUID | frozen schema无字段 |
+| D02 | Persisted Content revision pin in Learning rows | no physical field |
+| D03 | Long-term exact historical practice replay | requires persisted revision pin/new contract |
+| D04 | Non-destructive lost-token / cross-device attempt resume and Start transport idempotency | cannot safely reissue exact revision token from current schema |
+| D05 | Offline answer/progress sync | separate conflict model required |
+| D06 | Cross-device merge beyond server current-state semantics | no V1 requirement |
+| D07 | Manual progress correction | future narrow audited command only |
+| D08 | Manual mastery correction | future narrow audited command only |
+| D09 | Adaptive mastery algorithm | deterministic V1 first |
+| D10 | FSRS / SM-2 | schema lacks interval/ease state |
+| D11 | Question review notebook / `question_reviews` | first phase excluded |
+| D12 | Translation Request -> Review -> Promote to Content automation | Content marks deferred |
 
 ## 12. NOT_SUPPORTED — 14
 
 | ID | Capability | Reason |
 | --- | --- | --- |
-| N01 | Client supplies arbitrary `userId` for runtime reads/writes | IDOR risk |
-| N02 | Public/internal attempt BIGINT | global public-ID rule |
-| N03 | Public question_attempt BIGINT | aggregate internal fact |
+| N01 | Runtime client supplies arbitrary userId | IDOR |
+| N02 | Public attempt BIGINT | global ID rule |
+| N03 | Public question_attempt BIGINT | internal child fact |
 | N04 | Public dictionary-history BIGINT | no external identity needed |
-| N05 | Public translation-request BIGINT | opaque token only |
-| N06 | Learning direct SQL/repository access to Content | owner boundary |
-| N07 | Learning direct SQL/repository access to Identity | owner boundary |
-| N08 | Client-side trusted scoring / answer key delivery | answer leakage |
-| N09 | Generic table CRUD API | product/use-case architecture |
-| N10 | Generic Admin editing of score/mastery/progress | user-fact integrity |
-| N11 | Streak / XP / coins as Learning canonical tables | Rewards/product-later ownership |
-| N12 | Generic analytics/clickstream in learning_activities | activity boundary |
-| N13 | Anonymous dictionary history | physical `user_id NOT NULL` |
-| N14 | Redis/Kafka/microservice for V1 Learning | no evidence / hard-stop |
+| N05 | Public translation-request BIGINT | opaque capability only |
+| N06 | Learning direct SQL/repository Content | owner boundary |
+| N07 | Learning direct SQL/repository Identity | owner boundary |
+| N08 | Client trusted scoring/answer key | answer leakage |
+| N09 | Generic table CRUD API | product architecture |
+| N10 | Generic Admin edit progress/mastery/result | fact integrity |
+| N11 | XP/streak/coins as Learning canonical tables | separate product/Rewards ownership |
+| N12 | Generic clickstream in learning_activities | activity boundary |
+| N13 | Anonymous dictionary history | `user_id NOT NULL` |
+| N14 | Redis/Kafka/Learning microservice V1 | no evidence / hard-stop |
 
-## 13. Idempotency matrix
+## 13. Idempotency / retry matrix
 
 | Operation | V1 behavior |
 | --- | --- |
-| StartCourse | idempotent by PK/state |
-| StartLesson | idempotent by PK/state |
-| CompleteLesson | terminal state; repeat returns same completion |
-| CompleteCourse | terminal state; repeat returns same completion |
+| StartCourse | idempotent by natural state |
+| StartLesson | idempotent by natural state |
+| CompleteLesson | first terminal transition; repeat same result |
+| CompleteCourse | first terminal transition; repeat same result |
+| SubmitReviewResult | expectedUpdatedAt first-wins; stale retry 409 |
 | AddBookmark | ON CONFLICT no-op |
-| RemoveBookmark | missing row is success |
-| StartExerciseAttempt | advisory-lock + reuse active attempt |
-| SubmitQuestionAnswer | unique attempt+question; identical retry returns stored result; different answer 409 |
-| CompleteExerciseAttempt | terminal state; repeat returns stored result |
-| AbandonExerciseAttempt | repeated abandoned success; completed conflicts |
-| SubmitReviewResult | expectedUpdatedAt first-wins; stale retry 409 + refetch |
-| RecordDictionarySearch | separate user intents may duplicate; no false semantic dedupe |
-| RequestTranslation | each accepted call is independent; no schema-backed transport idempotency |
+| RemoveBookmark | missing = success |
+| StartExerciseAttempt | **not transport-idempotent** without persisted revision/request key; active -> 409, never guessed reissue |
+| SubmitQuestionAnswer | same normalized answer repeat same result; different 409 |
+| CompleteExerciseAttempt | terminal; repeat same result |
+| AbandonExerciseAttempt | abandoned repeat success; completed conflict |
+| RequestTranslation | each accepted request independent; rate-limit duplicates |
 
 ## 14. Authorization / ownership
 
-Every learner repository query includes current `AuthContext.userPublicId` in the predicate. Opaque tokens are additionally cryptographically bound to that same UUID.
-
-Rules：
+Every learner query/write predicate includes current `AuthContext.userPublicId`。Attempt/Translation token additionally binds same UUID。
 
 ```text
-404 for invalid/not-owned opaque resource handles
-409 for valid owned resource in incompatible state
-401 for missing/invalid authentication
-403 only where authenticated admin lacks Operations permission
+401 missing/invalid authentication
+404 invalid/tampered/foreign opaque handle
+409 owned resource incompatible state/stale write
+403 only Admin authenticated but exact permission missing
 ```
 
-Admin support path uses Operations authorization, not learner ownership shortcuts。
+Admin support uses Operations authorization, never learner ownership shortcut。
 
 ## 15. Freeze
 
@@ -240,6 +254,9 @@ REQUIRED = 25
 DEFERRED = 12
 NOT_SUPPORTED = 14
 Use Cases = FROZEN
+Attempt no-reissue = FROZEN
+Course all-Lesson completion = FROZEN
+Exercise all-Question completion = FROZEN
 Implementation = NOT_STARTED
 Implementation dependency = CONTENT_GATE
 ```
