@@ -5,7 +5,7 @@ import type {
   PlatformFeatureEvaluator,
   PlatformRegion,
   PlatformRegionReader,
-  PlatformRuntimeConfigDefinition,
+  PlatformRuntimeConfigHandle,
   PlatformRuntimeConfigReader,
   PlatformRuntimeContext,
 } from '../../public/index.js';
@@ -37,14 +37,17 @@ export class PlatformPublicService
     return this.featureFlagUseCases.resolveFeatures(this.executor, input);
   }
 
-  async getRuntimeConfig<T>(definition: PlatformRuntimeConfigDefinition<T>): Promise<T> {
-    return this.runtimeConfigUseCases.getRuntimeConfig<T>(this.executor, definition);
+  async getRuntimeConfig<T>(handle: PlatformRuntimeConfigHandle<T>): Promise<T> {
+    return this.runtimeConfigUseCases.getRuntimeConfig<T>(this.executor, handle.key);
   }
 
   async resolveRuntimeConfigs(
-    definitions: readonly PlatformRuntimeConfigDefinition<unknown>[],
+    handles: readonly PlatformRuntimeConfigHandle<unknown>[],
   ): Promise<Readonly<Record<string, unknown>>> {
-    return this.runtimeConfigUseCases.resolveRuntimeConfigs(this.executor, definitions);
+    return this.runtimeConfigUseCases.resolveRuntimeConfigs(
+      this.executor,
+      handles.map((handle) => handle.key),
+    );
   }
 
   async getRegion(code: string): Promise<PlatformRegion | null> {

@@ -9,6 +9,24 @@ import { buildPlatformModule } from '../../src/modules/platform/http/composition
 const adminUrl = process.env.ADMIN_DATABASE_URL;
 const integration = adminUrl ? describe : describe.skip;
 
+async function waitForAdvisoryLockWaiter(pool: pg.Pool): Promise<void> {
+  const deadline = Date.now() + 5_000;
+  while (Date.now() < deadline) {
+    const result = await pool.query<{ count: number }>(
+      `SELECT count(*)::int AS count
+       FROM pg_stat_activity
+       WHERE datname = current_database()
+         AND state = 'active'
+         AND wait_event_type = 'Lock'
+         AND query LIKE '%pg_advisory_xact_lock%'
+         AND query NOT LIKE '%pg_stat_activity%'`,
+    );
+    if ((result.rows[0]?.count ?? 0) > 0) return;
+    await new Promise((resolve) => setTimeout(resolve, 20));
+  }
+  throw new Error('Timed out waiting for a Platform advisory-lock waiter');
+}
+
 integration('Platform concurrency and race conditions on real PostgreSQL', () => {
   let database: TestDatabase;
   let pool: pg.Pool;
@@ -47,7 +65,6 @@ integration('Platform concurrency and race conditions on real PostgreSQL', () =>
       defaultEnabled: false,
     });
 
-    // Run 10 concurrent upserts on the same region+client scope via transaction manager
     const promises = Array.from({ length: 10 }).map((_, i) =>
       platform.managementService!.setFeatureFlagOverride({
         key: 'race_flag_1',
@@ -67,7 +84,7 @@ integration('Platform concurrency and race conditions on real PostgreSQL', () =>
     expect(countRes.rows[0]?.count).toBe(1);
   });
 
-  it('concurrent set vs remove override leaves deterministic final state without errors', async () => {
+  it('concurrent set vs remove override leaves at most one canonical row without errors', async () => {
     const platform = buildPlatformModule({
       executor: asExecutor(pool),
       transactionManager: transactions,
@@ -106,7 +123,7 @@ integration('Platform concurrency and race conditions on real PostgreSQL', () =>
     expect(countRes.rows[0]?.count).toBeLessThanOrEqual(1);
   });
 
-  it('Race A: concurrent policy commands modifying the same platform/build serialize cleanly under transaction advisory lock', async () => {
+  it('Race A: app-version management command actually waits for the platform transaction advisory lock', async () => {
     const platform = buildPlatformModule({
       executor: asExecutor(pool),
       transactionManager: transactions,
@@ -124,31 +141,54 @@ integration('Platform concurrency and race conditions on real PostgreSQL', () =>
       buildNumber: 200,
       releaseNotes: 'v2.0.0',
     });
-
     await platform.managementService!.publishAppVersion('ios', 100);
     await platform.managementService!.publishAppVersion('ios', 200);
 
-    // Concurrently set policy on build 100
-    const p1 = platform.managementService!.setAppVersionPolicy('ios', 100, {
-      status: 'deprecated',
-      updatePolicy: 'optional',
+    let releaseHolder!: () => void;
+    const holderRelease = new Promise<void>((resolve) => {
+      releaseHolder = resolve;
     });
-    const p2 = platform.managementService!.setAppVersionPolicy('ios', 100, {
-      status: 'blocked',
-      updatePolicy: 'required',
+    let holderLocked!: () => void;
+    const holderLockedPromise = new Promise<void>((resolve) => {
+      holderLocked = resolve;
     });
 
-    await Promise.allSettled([p1, p2]);
+    const holder = transactions.run(async (tx) => {
+      await tx.query('SELECT pg_advisory_xact_lock($1)', [3002]);
+      holderLocked();
+      await holderRelease;
+    });
+
+    await holderLockedPromise;
+
+    let commandSettled = false;
+    const command = platform.managementService!.setAppVersionPolicy('ios', 100, {
+      status: 'deprecated',
+      updatePolicy: 'optional',
+    }).finally(() => {
+      commandSettled = true;
+    });
+
+    await waitForAdvisoryLockWaiter(pool);
+    expect(commandSettled).toBe(false);
+
+    releaseHolder();
+    await holder;
+    await command;
 
     const res = await platform.appVersionUseCases.checkAppVersion(asExecutor(pool), {
       clientPlatform: 'ios',
       currentVersion: '1.0.0',
       buildNumber: 100,
     });
-    expect(['deprecated', 'blocked']).toContain(res.currentStatus);
+    expect(res).toMatchObject({
+      currentStatus: 'deprecated',
+      updatePolicy: 'optional',
+      latestBuildNumber: 200,
+    });
   });
 
-  it('Race B: concurrent block(100) vs modifying(200) strictly protects higher-active-target invariant under advisory lock', async () => {
+  it('Race B: same-platform policy commands preserve the higher-active-target invariant', async () => {
     const platform = buildPlatformModule({
       executor: asExecutor(pool),
       transactionManager: transactions,
@@ -166,38 +206,37 @@ integration('Platform concurrency and race conditions on real PostgreSQL', () =>
       buildNumber: 200,
       releaseNotes: 'v2.0.0',
     });
-
     await platform.managementService!.publishAppVersion('android', 100);
     await platform.managementService!.publishAppVersion('android', 200);
 
-    // Concurrently:
-    // A: try to set 100 to blocked/required
-    // B: try to set 200 to blocked/required (which will fail because 200 has no higher active target, or if attempted, advisory lock serializes them)
-    const taskA = platform.managementService!.setAppVersionPolicy('android', 100, {
-      status: 'blocked',
-      updatePolicy: 'required',
-    });
-    const taskB = platform.managementService!.setAppVersionPolicy('android', 200, {
-      status: 'blocked',
-      updatePolicy: 'required',
-    });
+    const [lowerResult, highestResult] = await Promise.allSettled([
+      platform.managementService!.setAppVersionPolicy('android', 100, {
+        status: 'blocked',
+        updatePolicy: 'required',
+      }),
+      platform.managementService!.setAppVersionPolicy('android', 200, {
+        status: 'blocked',
+        updatePolicy: 'required',
+      }),
+    ]);
 
-    const results = await Promise.allSettled([taskA, taskB]);
+    expect(lowerResult.status).toBe('fulfilled');
+    expect(highestResult.status).toBe('rejected');
 
-    // Task B MUST be rejected because 200 has no higher active target
-    expect(results[1].status).toBe('rejected');
+    const rows = await pool.query<{
+      build_number: string;
+      status: string;
+      update_policy: string;
+    }>(
+      `SELECT build_number::text, status, update_policy
+       FROM platform.app_versions
+       WHERE client_platform = 'android'
+       ORDER BY build_number ASC`,
+    );
 
-    // Verify invariant in database: 100 is blocked, but 200 remains active (the valid upgrade target)
-    const check100 = await platform.appVersionUseCases.checkAppVersion(asExecutor(pool), {
-      clientPlatform: 'android',
-      currentVersion: '1.0.0',
-      buildNumber: 100,
-    });
-    expect(check100).toMatchObject({
-      supported: false,
-      updateRequired: true,
-      latestBuildNumber: 200,
-      reason: 'blocked',
-    });
+    expect(rows.rows).toEqual([
+      { build_number: '100', status: 'blocked', update_policy: 'required' },
+      { build_number: '200', status: 'active', update_policy: 'none' },
+    ]);
   });
 });
