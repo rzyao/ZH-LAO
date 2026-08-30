@@ -6,9 +6,11 @@ export type AssignedRoleRecord = Readonly<RoleRecord & {assignedAt:Date}>;
 export type AuditRecord = Readonly<{id:string;operatorId:string;actionKey:string;targetDomain:string|null;targetType:string|null;targetId:string|null;requestId:string|null;ipAddress:string|null;details:Readonly<Record<string,unknown>>;createdAt:Date}>;
 export type Page<T> = Readonly<{items:readonly T[];total:number}>;
 export type AuditPage = Readonly<{items:readonly AuditRecord[];nextCursor:string|null}>;
+export type AuthorizationSnapshot = Readonly<{operator:OperatorRecord;hasPermission:boolean}>;
 
 export interface OperationsRepository {
   lockBootstrap(db:DatabaseExecutor):Promise<void>;
+  getAuthorizationSnapshot(db:DatabaseExecutor,authSubjectId:string,permissionKey:string):Promise<AuthorizationSnapshot|null>;
   findOperatorById(db:DatabaseExecutor,id:string,lock?:boolean):Promise<OperatorRecord|null>;
   findOperatorByAuthSubjectId(db:DatabaseExecutor,id:string,lock?:boolean):Promise<OperatorRecord|null>;
   listOperators(db:DatabaseExecutor,input:{page:number;pageSize:number;status?:'active'|'disabled'|undefined}):Promise<Page<OperatorRecord>>;
