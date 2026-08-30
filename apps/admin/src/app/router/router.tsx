@@ -27,6 +27,25 @@ const DesignSystemPage = React.lazy(() =>
   import('@/pages/system/design-system').then((module) => ({ default: module.DesignSystemPage })),
 )
 
+const PlatformLandingPage = React.lazy(() =>
+  import('@/features/platform/pages/landing').then((module) => ({ default: module.PlatformLandingPage })),
+)
+const FeatureFlagsPage = React.lazy(() =>
+  import('@/features/platform/pages/feature-flags').then((module) => ({ default: module.FeatureFlagsPage })),
+)
+const RuntimeConfigsPage = React.lazy(() =>
+  import('@/features/platform/pages/runtime-configs').then((module) => ({ default: module.RuntimeConfigsPage })),
+)
+const AppVersionsPage = React.lazy(() =>
+  import('@/features/platform/pages/app-versions').then((module) => ({ default: module.AppVersionsPage })),
+)
+const AnnouncementsPage = React.lazy(() =>
+  import('@/features/platform/pages/announcements').then((module) => ({ default: module.AnnouncementsPage })),
+)
+const RegionsPage = React.lazy(() =>
+  import('@/features/platform/pages/regions').then((module) => ({ default: module.RegionsPage })),
+)
+
 /* ---------- Root ---------- */
 
 function RootComponent() {
@@ -42,9 +61,7 @@ function RootComponent() {
   )
 }
 
-export const rootRoute = createRootRoute({
-  component: RootComponent,
-})
+export const rootRoute = createRootRoute({ component: RootComponent })
 
 /* ---------- App shell (authenticated back-office layout) ---------- */
 
@@ -60,11 +77,7 @@ const shellRoute = createRoute({
 
 /* ---------- Routes inside the shell ---------- */
 
-const indexRoute = createRoute({
-  getParentRoute: () => shellRoute,
-  path: '/',
-  component: OverviewPage,
-})
+const indexRoute = createRoute({ getParentRoute: () => shellRoute, path: '/', component: OverviewPage })
 
 function makeDomainRoute(path: string, domain: string, title: string, description: string) {
   return createRoute({
@@ -84,21 +97,18 @@ const commerceRoute = makeDomainRoute('/commerce', 'commerce', 'Commerce', '商�
 const rewardsRoute = makeDomainRoute('/rewards', 'rewards', 'Rewards', '奖励资格与发放（Rewards Domain）')
 const trustRoute = makeDomainRoute('/trust', 'trust', 'Trust & Safety', '举报与治理（Trust & Safety Domain）')
 const operationsRoute = makeDomainRoute('/operations', 'operations', 'Operations', '运营人员与权限（Operations Domain）')
-const platformRoute = makeDomainRoute('/platform', 'platform', 'Platform', '平台运行配置（Platform Domain）')
 
-/**
- * URL State Rule demo (ADM-F14 / PLAN §15): list state belongs in the URL.
- * Here `?section=` is a minimal search-param example.
- */
-const designSystemSearchSchema = z.object({
-  section: z.string().default('overview'),
-})
+const platformRoute = createRoute({ getParentRoute: () => shellRoute, path: '/platform', component: PlatformLandingPage })
+const platformFeatureFlagsRoute = createRoute({ getParentRoute: () => shellRoute, path: '/platform/feature-flags', component: FeatureFlagsPage })
+const platformRuntimeConfigsRoute = createRoute({ getParentRoute: () => shellRoute, path: '/platform/runtime-configs', component: RuntimeConfigsPage })
+const platformAppVersionsRoute = createRoute({ getParentRoute: () => shellRoute, path: '/platform/app-versions', component: AppVersionsPage })
+const platformAnnouncementsRoute = createRoute({ getParentRoute: () => shellRoute, path: '/platform/announcements', component: AnnouncementsPage })
+const platformRegionsRoute = createRoute({ getParentRoute: () => shellRoute, path: '/platform/regions', component: RegionsPage })
+
+const designSystemSearchSchema = z.object({ section: z.string().default('overview') })
 
 function DesignSystemRouteComponent() {
-  const search = useRouterState({
-    select: (state): Record<string, unknown> =>
-      state.location.search as Record<string, unknown>,
-  })
+  const search = useRouterState({ select: (state): Record<string, unknown> => state.location.search as Record<string, unknown> })
   const section = typeof search.section === 'string' ? search.section : 'overview'
   return <DesignSystemPage section={section} />
 }
@@ -112,25 +122,12 @@ const designSystemRoute = createRoute({
 
 /* ---------- Standalone routes ---------- */
 
-const loginRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/login',
-  component: LoginPage,
-})
-
-const unauthorizedRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/unauthorized',
-  component: UnauthorizedPage,
-})
+const loginRoute = createRoute({ getParentRoute: () => rootRoute, path: '/login', component: LoginPage })
+const unauthorizedRoute = createRoute({ getParentRoute: () => rootRoute, path: '/unauthorized', component: UnauthorizedPage })
 
 /* ---------- Catch-all (renders inside the app shell) ---------- */
 
-const notFoundRoute = createRoute({
-  getParentRoute: () => shellRoute,
-  path: '$',
-  component: NotFoundPage,
-})
+const notFoundRoute = createRoute({ getParentRoute: () => shellRoute, path: '$', component: NotFoundPage })
 
 /* ---------- Tree + router ---------- */
 
@@ -148,6 +145,11 @@ const routeTree = rootRoute.addChildren([
     trustRoute,
     operationsRoute,
     platformRoute,
+    platformFeatureFlagsRoute,
+    platformRuntimeConfigsRoute,
+    platformAppVersionsRoute,
+    platformAnnouncementsRoute,
+    platformRegionsRoute,
     designSystemRoute,
     notFoundRoute,
   ]),
@@ -155,10 +157,6 @@ const routeTree = rootRoute.addChildren([
   unauthorizedRoute,
 ])
 
-export const router = createRouter({
-  routeTree,
-  defaultPreload: 'intent',
-  scrollRestoration: true,
-})
+export const router = createRouter({ routeTree, defaultPreload: 'intent', scrollRestoration: true })
 
 export { designSystemSearchSchema, routeTree }
