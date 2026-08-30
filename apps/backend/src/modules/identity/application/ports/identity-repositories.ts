@@ -1,0 +1,36 @@
+import type {
+  AuthIdentityInternalId, AvatarMediaId, DeviceInternalId, DevicePlatform, E164PhoneNumber,
+  IdentityAccountStatus, IdentityAuthProvider, IdentityGender, InstallationId, LearningDirection,
+  OtpChallengeInternalId, OtpChallengeStatus, OtpCodeHash, OtpPurpose, RefreshTokenHash,
+  SessionInternalId, SessionStatus, UserInternalId, UserPublicId
+} from '../../domain/index.js';
+
+export interface UserRecord { id: UserInternalId; publicId: UserPublicId; status: IdentityAccountStatus; registeredAt: Date; lastActiveAt: Date | null; createdAt: Date; updatedAt: Date }
+export interface AuthIdentityRecord { id: AuthIdentityInternalId; userId: UserInternalId; provider: IdentityAuthProvider; providerSubject: string; verifiedAt: Date | null; lastLoginAt: Date | null; createdAt: Date; updatedAt: Date }
+export interface BasicProfileRecord { userId: UserInternalId; displayName: string | null; gender: IdentityGender | null; birthDate: string | null; countryCode: string | null; regionCode: string | null; avatarMediaId: AvatarMediaId | null; createdAt: Date; updatedAt: Date }
+export interface LearningProfileRecord { userId: UserInternalId; direction: LearningDirection; createdAt: Date }
+export interface OtpChallengeRecord { id: OtpChallengeInternalId; userId: UserInternalId | null; phoneNumber: E164PhoneNumber; purpose: OtpPurpose; codeHash: OtpCodeHash; status: OtpChallengeStatus; attemptCount: number; maxAttempts: number; expiresAt: Date; verifiedAt: Date | null; createdAt: Date }
+export interface DeviceRecord { id: DeviceInternalId; userId: UserInternalId; installationId: InstallationId; platform: DevicePlatform; deviceName: string | null; appVersion: string | null; pushToken: string | null; firstSeenAt: Date; lastSeenAt: Date | null; revokedAt: Date | null; createdAt: Date; updatedAt: Date }
+export interface SessionRecord { id: SessionInternalId; userId: UserInternalId; deviceId: DeviceInternalId | null; refreshTokenHash: RefreshTokenHash; status: SessionStatus; expiresAt: Date; lastActiveAt: Date | null; createdAt: Date; revokedAt: Date | null; revocationReason: string | null }
+
+export interface UserRepository {
+  findByPublicId(id: UserPublicId): Promise<UserRecord | null>; findByInternalId(id: UserInternalId): Promise<UserRecord | null>;
+  create(input: { publicId: UserPublicId; status: IdentityAccountStatus; registeredAt?: Date; lastActiveAt?: Date | null }): Promise<UserRecord>;
+  lockByInternalId(id: UserInternalId): Promise<UserRecord | null>; updateLastActiveAt(id: UserInternalId, at: Date): Promise<UserRecord | null>; updateStatus(id: UserInternalId, status: IdentityAccountStatus): Promise<UserRecord | null>;
+}
+export interface AuthIdentityRepository {
+  findByProviderAndSubject(provider: IdentityAuthProvider, subject: string): Promise<AuthIdentityRecord | null>; findPhoneByUserId(userId: UserInternalId): Promise<AuthIdentityRecord | null>;
+  create(input: { userId: UserInternalId; provider: IdentityAuthProvider; providerSubject: string; verifiedAt?: Date | null }): Promise<AuthIdentityRecord>;
+  updateProviderSubject(id: AuthIdentityInternalId, subject: string): Promise<AuthIdentityRecord | null>; touchLastLogin(id: AuthIdentityInternalId, at: Date): Promise<AuthIdentityRecord | null>;
+}
+export interface BasicProfileRepository { findByUserId(userId: UserInternalId): Promise<BasicProfileRecord | null>; create(input: { userId: UserInternalId; displayName?: string | null; gender?: IdentityGender | null; birthDate?: string | null; countryCode?: string | null; regionCode?: string | null; avatarMediaId?: AvatarMediaId | null }): Promise<BasicProfileRecord>; update(userId: UserInternalId, changes: { displayName?: string | null; gender?: IdentityGender | null; birthDate?: string | null; countryCode?: string | null; regionCode?: string | null; avatarMediaId?: AvatarMediaId | null }): Promise<BasicProfileRecord | null> }
+export interface LearningProfileRepository { findByUserId(userId: UserInternalId): Promise<LearningProfileRecord | null>; create(input: { userId: UserInternalId; direction: LearningDirection }): Promise<LearningProfileRecord> }
+export interface OtpChallengeRepository {
+  create(input: { userId?: UserInternalId | null; phoneNumber: E164PhoneNumber; purpose: OtpPurpose; codeHash: OtpCodeHash; maxAttempts: number; expiresAt: Date }): Promise<OtpChallengeRecord>;
+  findLatestPending(phone: E164PhoneNumber, purpose: OtpPurpose): Promise<OtpChallengeRecord | null>; lockLatestPending(phone: E164PhoneNumber, purpose: OtpPurpose): Promise<OtpChallengeRecord | null>;
+  acquireRequestAdvisoryLock(phone: E164PhoneNumber, purpose: OtpPurpose): Promise<void>; countRecentRequests(phone: E164PhoneNumber, purpose: OtpPurpose, since: Date): Promise<number>;
+  incrementAttemptCount(id: OtpChallengeInternalId): Promise<OtpChallengeRecord | null>; updateStatus(id: OtpChallengeInternalId, status: OtpChallengeStatus): Promise<OtpChallengeRecord | null>; markVerified(id: OtpChallengeInternalId, at: Date): Promise<OtpChallengeRecord | null>; cancelPending(id: OtpChallengeInternalId): Promise<OtpChallengeRecord | null>; listExpiredPending(now: Date, limit: number): Promise<OtpChallengeRecord[]>;
+}
+export interface DeviceRepository { findByInstallationId(id: InstallationId): Promise<DeviceRecord | null>; findByUserId(userId: UserInternalId): Promise<DeviceRecord[]>; create(input: { userId: UserInternalId; installationId: InstallationId; platform: DevicePlatform; deviceName?: string | null; appVersion?: string | null; pushToken?: string | null; firstSeenAt?: Date }): Promise<DeviceRecord>; updateMetadata(id: DeviceInternalId, values: { deviceName: string | null; appVersion: string | null; pushToken: string | null }): Promise<DeviceRecord | null>; touchLastSeen(id: DeviceInternalId, at: Date): Promise<DeviceRecord | null>; revoke(id: DeviceInternalId, at: Date): Promise<DeviceRecord | null>; restoreForSameUser(id: DeviceInternalId, userId: UserInternalId): Promise<DeviceRecord | null>; findByPushToken(token: string): Promise<DeviceRecord | null> }
+export interface SessionRepository { create(input: { userId: UserInternalId; deviceId?: DeviceInternalId | null; refreshTokenHash: RefreshTokenHash; expiresAt: Date }): Promise<SessionRecord>; findByRefreshTokenHash(hash: RefreshTokenHash): Promise<SessionRecord | null>; lockByRefreshTokenHash(hash: RefreshTokenHash): Promise<SessionRecord | null>; listByUserId(userId: UserInternalId): Promise<SessionRecord[]>; listActiveByUserId(userId: UserInternalId): Promise<SessionRecord[]>; listActiveByDeviceId(deviceId: DeviceInternalId): Promise<SessionRecord[]>; updateRefreshTokenHash(id: SessionInternalId, hash: RefreshTokenHash): Promise<SessionRecord | null>; touchLastActive(id: SessionInternalId, at: Date): Promise<SessionRecord | null>; extendExpiry(id: SessionInternalId, expiresAt: Date): Promise<SessionRecord | null>; revoke(id: SessionInternalId, at: Date, reason: string): Promise<SessionRecord | null>; revokeAllByUserId(userId: UserInternalId, at: Date, reason: string): Promise<number>; revokeAllByDeviceId(deviceId: DeviceInternalId, at: Date, reason: string): Promise<number>; markExpired(id: SessionInternalId): Promise<SessionRecord | null> }
+
