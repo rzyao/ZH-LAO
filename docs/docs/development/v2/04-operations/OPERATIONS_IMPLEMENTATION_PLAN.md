@@ -1,12 +1,14 @@
 ---
-status: ready
+status: complete
 phase: 4
 phase_name: Operations Domain
 document: OPERATIONS_IMPLEMENTATION_PLAN
 last_updated: 2026-08-31
-design_only: true
-implementation_started: false
-repository_commit_audited: 000f4c4aafacf4938d74902eddc4d78323196a89
+design_only: false
+implementation_started: true
+implementation_complete: true
+implementation_gate: PASS
+repository_commit_audited: e1330ba7db6de6b946ec529a84a8cca26f1ea8e9
 depends_on:
   - OPERATIONS_USE_CASES.md
   - OPERATIONS_RBAC_CONTRACTS.md
@@ -16,7 +18,42 @@ depends_on:
 
 # ZH-LAO V2 — Operations Implementation Plan
 
-> 本文件只冻结未来执行顺序。当前会话不得执行任何 OPS Implementation task。
+## 0. Implementation Closure Status
+
+本计划最初作为 Design Gate 后的执行顺序冻结文件。以下状态是 2026-08-31 完成 `OPERATIONS_EXECUTION_BRIEF.md` 最终实施审计后的权威收口状态；下文保留的“未来执行 / 当前设计会话不得实现”等文字属于设计时历史语境，不再覆盖本节最终状态。
+
+```text
+Tested implementation head = e1330ba7db6de6b946ec529a84a8cca26f1ea8e9
+OPS-00 ~ OPS-17            = COMPLETE
+OPERATIONS_IMPLEMENTATION  = COMPLETE
+OPERATIONS_GATE            = PASS
+OPERATIONS_DOMAIN          = FROZEN
+```
+
+| Task | Status |
+| --- | --- |
+| OPS-00 Design Freeze | `COMPLETE / PASS` |
+| OPS-01 Module Skeleton | `COMPLETE / PASS` |
+| OPS-02 Domain Types / Permission Catalog | `COMPLETE / PASS` |
+| OPS-03 Repository Layer | `COMPLETE / PASS` |
+| OPS-04 Identity Public Adapter / Operator Resolution | `COMPLETE / PASS` |
+| OPS-05 Authorization / RBAC | `COMPLETE / PASS` |
+| OPS-06 Operator Management | `COMPLETE / PASS` |
+| OPS-07 Role Management | `COMPLETE / PASS` |
+| OPS-08 Role Assignment / Permission Set | `COMPLETE / PASS` |
+| OPS-09 Audit Logging | `COMPLETE / PASS` |
+| OPS-10 Public Contracts | `COMPLETE / PASS` |
+| OPS-11 Operations HTTP/API | `COMPLETE / PASS` |
+| OPS-12 Bootstrap First Operator | `COMPLETE / PASS` |
+| OPS-13 Operations Core Integration / E2E | `COMPLETE / PASS` |
+| OPS-14 Platform Management RBAC/Audit Integration | `COMPLETE / PASS` |
+| OPS-15 Security / Race | `COMPLETE / PASS` |
+| OPS-16 Final Implementation Conformance Audit | `COMPLETE / PASS` |
+| OPS-17 Final Report / Exit Gate | `COMPLETE / PASS` |
+
+最终实现、测试、finding 与 Exit Gate 证据见 `OPERATIONS_IMPLEMENTATION_REPORT.md`。
+
+> 以下内容保留为 implementation execution specification / historical plan，不重写设计历史。
 
 ## 1. Entry State
 
