@@ -4,6 +4,7 @@ phase: 4
 phase_name: Operations Domain
 document: OPERATIONS_API
 last_updated: 2026-08-31
+repository_commit_audited: 000f4c4aafacf4938d74902eddc4d78323196a89
 depends_on:
   - OPERATIONS_USE_CASES.md
   - OPERATIONS_RBAC_CONTRACTS.md
@@ -12,35 +13,33 @@ implementation_started: false
 
 # ZH-LAO V2 — Operations API / Public Contract
 
-> 本文冻结 Operations V1 HTTP/API 与 backend public boundary。API 从 Use Cases 推导，不从数据库表生成 CRUD。
+> 本文冻结 Operations V1 HTTP/API 与 backend public boundary。API 从 Use Cases 推导，不从数据库表机械生成 CRUD。
 
-## 1. API Conventions
+## 1. Conventions
 
-现有 Platform Management contract 已冻结统一 Admin prefix：
+Platform 已冻结管理 API 统一 convention：
 
 ```text
 /api/v1/admin/<domain>
 ```
 
-因此 Operations V1 base 固定为：
+Operations base：
 
 ```text
 /api/v1/admin/operations
 ```
 
-不采用 `/api/v1/operations` 暴露后台管理接口，避免与 public/runtime API 混淆。
-
 JSON：`snake_case`。
 
-UUID：标准 string UUID。
+IDs：外部只使用 stable UUID / Owner Domain 已冻结的 stable public/natural identifier。
 
 Time：ISO 8601 UTC。
 
-Error envelope：复用 Foundation `AppError` / HTTP error handler，不建立第二套 envelope。
+Errors：复用 Foundation `AppError` / error envelope，不建立第二套 envelope。
 
 ## 2. Authentication / Authorization Pipeline
 
-所有 Operations HTTP endpoint 都需要 Identity Authentication：
+所有 Operations HTTP endpoints 都需要当前 Identity AuthenticationProvider：
 
 ```text
 Authorization: Bearer <Identity access token>
@@ -52,13 +51,13 @@ Authorization: Bearer <Identity access token>
 requireAuthentication(Identity AuthenticationProvider)
 → request.authContext.subjectId
 → Operations resolve current Operator
-→ active check
-→ exact permission check when endpoint requires one
-→ Use Case
+→ operator active?
+→ exact permission check when required
+→ Operations Use Case
 → required success Audit
 ```
 
-Backend 是最终安全边界。Admin 前端 permission guard 不能替代 backend authorization。
+Backend 是最终安全边界。Admin frontend PermissionGuard/can() 只负责 UI visibility/UX。
 
 ## 3. Endpoint Summary
 
@@ -90,7 +89,7 @@ Backend 是最终安全边界。Admin 前端 permission guard 不能替代 backe
 | POST | `/api/v1/admin/operations/roles/:role_id/disable` | `operations.roles.disable` |
 | POST | `/api/v1/admin/operations/roles/:role_id/enable` | `operations.roles.enable` |
 
-### Role Assignments
+### Assignments
 
 | Method | Endpoint | Permission |
 |---|---|---|
@@ -113,7 +112,7 @@ Backend 是最终安全边界。Admin 前端 permission guard 不能替代 backe
 | GET | `/api/v1/admin/operations/audit-logs` | `operations.audit_logs.read` |
 | GET | `/api/v1/admin/operations/audit-logs/:audit_log_id` | `operations.audit_logs.read` |
 
-Bootstrap has **no HTTP endpoint**。
+Bootstrap **没有 HTTP endpoint**。
 
 ## 4. GET Current Operator
 
@@ -121,7 +120,7 @@ Bootstrap has **no HTTP endpoint**。
 GET /api/v1/admin/operations/me
 ```
 
-Requires authenticated active Operator but no extra permission。
+Requires authenticated active Operator，no extra Permission。
 
 Response：
 
@@ -148,12 +147,10 @@ Response：
 
 Rules：
 
-- effective permissions only；
-- disabled Role permissions omitted；
-- permission list deterministic sorted ASC；
-- no internal DB row / repository details。
-
-This endpoint is the Admin Foundation source for `can()` / navigation / route/action guards。
+- only effective active-role permissions；
+- permission list deterministic key ASC；
+- no repository/DB internals；
+- 这是 Admin Foundation `can()` / permission-aware navigation 的真实数据源。
 
 ## 5. Operators API
 
@@ -169,7 +166,7 @@ V1 filters：
 status = active|disabled optional
 ```
 
-Pagination：offset/page contract already supported by Admin Foundation。
+使用 Admin Foundation 已有 offset/page contract。
 
 Default sort：
 
@@ -178,7 +175,7 @@ created_at DESC
 id ASC
 ```
 
-Response concept：
+Response：
 
 ```json
 {
@@ -198,7 +195,7 @@ Response concept：
 }
 ```
 
-`auth_subject_id` is Identity stable public UUID and is safe for authorized Operations management surfaces；it is not an Identity internal PK。
+`auth_subject_id` 是 Identity stable public UUID，不是 internal BIGINT。
 
 ### 5.2 Detail
 
@@ -206,7 +203,7 @@ Response concept：
 GET /api/v1/admin/operations/operators/:operator_id
 ```
 
-May include assigned role summaries。
+可包含 assigned Role summaries。
 
 ### 5.3 Create
 
@@ -222,15 +219,15 @@ Content-Type: application/json
 }
 ```
 
-Server rules：
+Rules：
 
-- subject must exist and be active via `identity/public`；
-- unknown fields rejected；
-- status cannot be supplied；
-- role_ids cannot be supplied；assignment is a separate use case；
-- `auth_subject_id` cannot later be changed。
+- `IdentityPublicQueries` 确认 subject exists + active；
+- strict body / unknown fields rejected；
+- caller 不能提供 status；
+- caller 不能在同一 request 提供 role_ids；
+- `auth_subject_id` immutable after create。
 
-Response：`201` with Operator representation。
+Response：`201`。
 
 ### 5.4 Update
 
@@ -244,24 +241,22 @@ PATCH /api/v1/admin/operations/operators/:operator_id
 }
 ```
 
-Only `display_name` is mutable here。
-
-No generic status patch。
+Only `display_name` mutable。
 
 ### 5.5 Disable / Enable
 
-```http
+```text
 POST /api/v1/admin/operations/operators/:operator_id/disable
 POST /api/v1/admin/operations/operators/:operator_id/enable
 ```
 
 Empty body V1。
 
-Already in requested state => `200` current representation/no-op。
+Already requested state -> `200` current representation / no-op。
 
-Last active super-admin protection may return `409 LAST_SUPER_ADMIN_REQUIRED`。
+Last-super-admin protection -> `409 LAST_SUPER_ADMIN_REQUIRED`。
 
-Enable may return conflict if Identity subject is no longer active。
+Enable with inactive/missing Identity subject -> stable conflict/error。
 
 ## 6. Roles API
 
@@ -272,9 +267,7 @@ GET /api/v1/admin/operations/roles
 GET /api/v1/admin/operations/roles/:role_id
 ```
 
-Optional filter：`status=active|disabled`。
-
-Response fields use Role UUID + stable code；never expose persistence-specific objects。
+Optional：`status=active|disabled`。
 
 ### 6.2 Create
 
@@ -286,16 +279,16 @@ POST /api/v1/admin/operations/roles
 {
   "code": "content_operator",
   "name": "Content Operator",
-  "description": "Can manage content according to assigned permissions"
+  "description": "..."
 }
 ```
 
 Rules：
 
-- code lower_snake_case；
-- code immutable after create；
+- lower_snake_case code；
+- code immutable；
 - initial status active；
-- normal API cannot create reserved `super_admin`；
+- normal API 不创建 reserved `super_admin`；
 - initial permission set empty。
 
 ### 6.3 Update
@@ -320,7 +313,7 @@ POST /api/v1/admin/operations/roles/:role_id/disable
 POST /api/v1/admin/operations/roles/:role_id/enable
 ```
 
-`super_admin` disable => `409 SYSTEM_ROLE_PROTECTED`。
+Disable `super_admin` -> `409 SYSTEM_ROLE_PROTECTED`。
 
 ## 7. Role Assignment API
 
@@ -329,8 +322,6 @@ POST /api/v1/admin/operations/roles/:role_id/enable
 ```http
 GET /api/v1/admin/operations/operators/:operator_id/roles
 ```
-
-Response：
 
 ```json
 {
@@ -346,7 +337,7 @@ Response：
 }
 ```
 
-`assigned_at` is API naming for frozen `operator_roles.created_at` semantics，不引入数据库字段。
+`assigned_at` 是 API semantic name，对应 frozen `operator_roles.created_at`，不增加 DB 字段。
 
 ### 7.2 Assign
 
@@ -356,14 +347,12 @@ PUT /api/v1/admin/operations/operators/:operator_id/roles/:role_id
 
 No body。
 
-Semantics：
-
 ```text
-missing assignment -> create + audit
-existing assignment -> 200 no-op, no duplicate audit
+missing -> create + Audit
+existing -> 200 no-op, no duplicate Audit
 ```
 
-Target Operator/Role must both be active。
+Target Operator/Role 必须 active。
 
 ### 7.3 Revoke
 
@@ -371,14 +360,12 @@ Target Operator/Role must both be active。
 DELETE /api/v1/admin/operations/operators/:operator_id/roles/:role_id
 ```
 
-Semantics：
-
 ```text
-existing -> delete + audit
+existing -> delete + Audit
 absent   -> 204 no-op
 ```
 
-Revoke last active `super_admin` assignment => `409 LAST_SUPER_ADMIN_REQUIRED`。
+Removing final active `super_admin` -> `409 LAST_SUPER_ADMIN_REQUIRED`。
 
 ## 8. Permission Catalog API
 
@@ -386,7 +373,7 @@ Revoke last active `super_admin` assignment => `409 LAST_SUPER_ADMIN_REQUIRED`�
 GET /api/v1/admin/operations/permissions
 ```
 
-Source = code catalog。
+Source：code catalog。
 
 Response：
 
@@ -409,9 +396,9 @@ Response：
 }
 ```
 
-Sorted by key ASC。
+Sorted key ASC。
 
-No permission create/update/delete endpoint。
+不存在 permission create/update/delete endpoint。
 
 ## 9. Role Permissions API
 
@@ -428,7 +415,7 @@ GET /api/v1/admin/operations/roles/:role_id/permissions
 }
 ```
 
-### 9.2 Set Complete Permission Set
+### 9.2 Set Complete Set
 
 ```http
 PUT /api/v1/admin/operations/roles/:role_id/permissions
@@ -445,16 +432,14 @@ PUT /api/v1/admin/operations/roles/:role_id/permissions
 
 Contract：
 
-- complete replacement, not patch；
+- complete replacement，not patch；
 - every key exact catalog member；
-- duplicate keys rejected；
-- custom role may use `[]`；
-- identical set => `200` no-op；
-- `super_admin` request must equal full current catalog or return `409 SYSTEM_ROLE_PROTECTED`。
+- duplicate rejected；
+- custom Role may use `[]`；
+- identical set -> `200` no-op；
+- `super_admin` request 必须恰好等于 current full catalog，否则 `409 SYSTEM_ROLE_PROTECTED`。
 
-Response returns final sorted set。
-
-No separate grant/remove permission endpoints in V1。
+不提供 separate grant/remove endpoints。
 
 ## 10. Audit Query API
 
@@ -468,28 +453,26 @@ Supported query params：
 
 ```text
 operator_id
- action_key
- target_domain
- target_type
- target_id
- request_id
- created_from
- created_to
- cursor
- limit
+action_key
+target_domain
+target_type
+target_id
+request_id
+created_from
+created_to
+cursor
+limit
 ```
-
-Whitespace above is illustrative only; actual parameter names are the snake_case tokens without leading spaces。
 
 Rules：
 
-- `limit` default 50, max 100；
-- sort `created_at DESC`, deterministic tie-break by `id DESC`；
+- limit default 50, max 100；
+- sort `created_at DESC, id DESC`；
 - cursor encodes last `(created_at,id)`；
-- no `result` filter；
-- no arbitrary details JSON search。
+- no result filter；
+- no arbitrary `details` JSON search。
 
-Response concept：
+Response：
 
 ```json
 {
@@ -514,9 +497,7 @@ Response concept：
 }
 ```
 
-Important：`result="success"` 是 API **derived constant**，用于向 Admin 清楚表达 frozen row semantics；数据库没有 result 字段，且 V1 不能查询/filter failure。
-
-如果不希望返回这个 derived field，Implementation 可省略，但不得暗示数据库存在 result column。Canonical semantic 仍是 persisted row = success。
+`result="success"` 如果返回，只是 API **derived constant**，用于表达 frozen row semantics；数据库没有 result column，也不能 filter failures。Implementation 可以省略这个 derived field，但不能暗示 DB 有 result。
 
 ### 10.2 Detail
 
@@ -524,45 +505,56 @@ Important：`result="success"` 是 API **derived constant**，用于向 Admin �
 GET /api/v1/admin/operations/audit-logs/:audit_log_id
 ```
 
-Returns one immutable Audit representation。
+返回 immutable Audit representation。
 
-## 11. Stable Error Contract
+## 11. Stable Errors
 
-Foundation errors继续复用：
+Foundation：
 
 ```text
-UNAUTHENTICATED                  401
-AUTHENTICATION_UNAVAILABLE       503
-FORBIDDEN                        403
+UNAUTHENTICATED            401
+AUTHENTICATION_UNAVAILABLE 503
+FORBIDDEN                  403
 ```
 
-Operations V1 stable errors：
+Operations：
 
 | Code | HTTP | Meaning |
 |---|---:|---|
 | `OPERATOR_ACCESS_DENIED` | 403 | authenticated Identity subject has no active Operator mapping |
-| `OPERATOR_DISABLED` | 403 | current Operator is disabled |
-| `OPERATOR_NOT_FOUND` | 404 | managed target Operator not found |
+| `OPERATOR_DISABLED` | 403 | current Operator disabled |
+| `OPERATOR_NOT_FOUND` | 404 | managed Operator not found |
 | `OPERATOR_ALREADY_EXISTS` | 409 | auth_subject_id already mapped |
 | `OPERATOR_AUTH_SUBJECT_NOT_FOUND` | 400 | Identity subject does not exist |
-| `OPERATOR_AUTH_SUBJECT_INACTIVE` | 409 | Identity subject is not active |
+| `OPERATOR_AUTH_SUBJECT_INACTIVE` | 409 | Identity subject not active |
 | `ROLE_NOT_FOUND` | 404 | Role not found |
-| `ROLE_DISABLED` | 409 | requested assignment target Role disabled |
-| `ROLE_CODE_CONFLICT` | 409 | Role code already exists |
-| `INVALID_PERMISSION` | 400 | permission key not in canonical catalog / grammar invalid |
+| `ROLE_DISABLED` | 409 | assignment target Role disabled |
+| `ROLE_CODE_CONFLICT` | 409 | Role code exists |
+| `INVALID_PERMISSION` | 400 | permission key not in canonical catalog / invalid |
 | `LAST_SUPER_ADMIN_REQUIRED` | 409 | mutation would remove final active super-admin |
-| `SYSTEM_ROLE_PROTECTED` | 409 | forbidden mutation of reserved super_admin policy |
+| `SYSTEM_ROLE_PROTECTED` | 409 | forbidden reserved super_admin mutation |
 | `AUDIT_LOG_NOT_FOUND` | 404 | Audit row not found |
-| `BOOTSTRAP_ALREADY_COMPLETED` | CLI/domain conflict | bootstrap may not run after first Operator exists |
-| `OPERATOR_AUDIT_PERSISTENCE_FAILED` | 500 | cross-domain canonical write may have committed but success audit persistence failed |
+| `BOOTSTRAP_ALREADY_COMPLETED` | CLI/domain conflict | bootstrap cannot run after first Operator exists |
+| `OPERATOR_AUDIT_PERSISTENCE_FAILED` | 500 | owner action may already be committed but success Audit persistence failed |
 
-Unknown request fields / malformed UUID / invalid pagination continue through Foundation validation/error mapping；不建立 Operations-specific envelope。
+Malformed UUID / unknown field / pagination errors continue through Foundation validation mapping。
 
-Raw PostgreSQL SQLSTATE/constraint names must never escape。
+Raw PostgreSQL SQLSTATE/constraint names 不得逃逸。
 
-## 12. Cross-Domain Platform Integration Contract
+## 12. Platform Integration Contract
 
-Platform Design Gate already froze these permission requirements：
+Current repository：
+
+```text
+PLATFORM_DESIGN_GATE = PASS
+PLATFORM_IMPLEMENTATION = COMPLETE
+PLATFORM_GATE = PASS
+PLATFORM_DOMAIN = FROZEN
+```
+
+Platform 已实现所有 33 required use cases 与 3 个 backend public readers；当前 `platform/http/routes.ts` 注册 5 个 runtime endpoints，未注册管理 HTTP routes。
+
+Platform 冻结的 permission requirements：
 
 ```text
 platform.feature_flags.read/write
@@ -572,9 +564,9 @@ platform.announcements.read/write
 platform.regions.read/write
 ```
 
-Once Platform management HTTP is implemented, its route composition must use Operations public authorizer rather than Platform-owned RBAC。
+Operations 实现后，管理路由应由 Platform HTTP/application adapter 使用 Operations public authorizer，而不是让 Operations 创建 Platform proxy CRUD。
 
-Example product flow：
+Concept flow：
 
 ```text
 PATCH /api/v1/admin/platform/feature-flags/:key
@@ -582,22 +574,20 @@ PATCH /api/v1/admin/platform/feature-flags/:key
 → Operations require platform.feature_flags.write
 → Platform UpdateFeatureFlag
 → Platform commits canonical state
-→ Operations record success audit
+→ Operations record success Audit
 ```
 
-Operations does not expose proxy CRUD endpoints for Platform and does not write `platform.*`。
+**Integration blocker = NO**：Platform application implementation 已可用。剩余工作是 Operations Phase 的 RBAC/Audit integration wiring。
 
-Platform Implementation is not present at the repository commit audited for this design；this is an `IMPLEMENTATION_DEPENDENCY`, not an Operations Design blocker。
+Operations 不写 `platform.*`。
 
 ## 13. Backend Public Contract
 
-Target path：
+Target：
 
 ```text
 apps/backend/src/modules/operations/public/
 ```
-
-Canonical conceptual exports：
 
 ### 13.1 Permission Types / Catalog
 
@@ -609,7 +599,7 @@ isOperatorPermissionKey
 
 ### 13.2 OperationsAuthorizer
 
-Concept signature：
+Concept：
 
 ```text
 requirePermission(
@@ -618,24 +608,18 @@ requirePermission(
 ) -> AuthorizedOperatorContext
 ```
 
-`AuthorizedOperatorContext` is an immutable application/public DTO，not a DB row。
-
-Minimum fields：
+Minimum context：
 
 ```text
 operatorId UUID
 authSubjectId UUID
 ```
 
-It may also carry the authorized permission for diagnostics，but consumers must not mutate/reinterpret roles。
-
 ### 13.3 OperationsOperatorResolver
 
 ```text
 resolveCurrentOperator(authContext)
 ```
-
-Used where current Operator summary is needed without an additional permission requirement。
 
 ### 13.4 OperationsAuditRecorder
 
@@ -649,24 +633,22 @@ recordSuccessfulAction({
 })
 ```
 
-Consumers do not pass repository/transaction/SQL objects。
-
 ### 13.5 Forbidden Public Exports
 
 ```text
 OperationsRepositories
-Postgres rows
 DatabaseExecutor
 TransactionManager
+Postgres rows
 SQL builders
 operator_roles rows
 role_permissions rows
 Fastify route internals
 ```
 
-## 14. Admin Foundation Integration Contract
+## 14. Admin Foundation Integration
 
-Admin Foundation already has：
+Admin Foundation 已存在：
 
 ```text
 AuthProvider
@@ -675,45 +657,38 @@ PermissionGuard
 can()
 token store
 ApiClient
-Unauthorized/Forbidden error mapping
+UUID/time/pagination/error contracts
 ```
 
-Operations implementation later must bind real data as follows：
+Operations future binding：
 
 ```text
-Admin login/access token       -> Identity/Fundation auth
-GET /admin/operations/me       -> current Operator + exact permissions
-PermissionGuard/can()          -> UI visibility only
-Backend OperationsAuthorizer   -> actual enforcement
+Identity access token
+→ GET /api/v1/admin/operations/me
+→ exact effective permissions
+→ PermissionGuard/can() for UI
+→ backend OperationsAuthorizer for actual enforcement
 ```
 
-Future Operations Admin pages：
-
-```text
-Operator management
-Role management
-Permission editor
-Audit log view
-```
-
-are NOT implemented by this design session。
+本 Design Session 不开发 Admin 页面。
 
 ## 15. HTTP Audit Checklist
 
 ```text
-Admin prefix aligned with Platform        = YES
-Public operator registration              = NO
-Independent admin password/login API      = NO
-Internal BIGINT exposure                  = 0
-Cross-domain SQL                          = 0
-Generic permission CRUD                   = 0
-Wildcard API                              = 0
-Duplicate role-permission mutation APIs   = 0
-Bootstrap HTTP endpoint                   = 0
-Second error envelope                     = 0
+Admin prefix aligned                    = YES
+Public operator registration            = NO
+Independent admin password/login API    = NO
+Internal BIGINT exposure                = 0
+Cross-domain SQL                        = 0
+Generic permission CRUD                 = 0
+Wildcard API                            = 0
+Duplicate permission mutation APIs      = 0
+Bootstrap HTTP endpoint                 = 0
+Second error envelope                   = 0
+Platform external integration blocker   = 0
 
-OPERATIONS_HTTP_API = FROZEN
-OPERATIONS_PUBLIC_CONTRACT = FROZEN
+OPERATIONS_HTTP_API       = FROZEN
+OPERATIONS_PUBLIC_CONTRACT= FROZEN
 ```
 
-STOP: no route or public module implementation is performed in this document.
+STOP: 本文不实现 route/public module。
