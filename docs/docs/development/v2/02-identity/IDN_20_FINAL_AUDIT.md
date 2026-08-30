@@ -192,3 +192,26 @@ Full regression                  = PASS
 
 IDN-20 GATE = PASS
 ```
+
+---
+
+## Post-IDN-20 Regression Hotfix（2026-08-31）
+
+本报告为 IDN-20 发布时点的审计结论，保持原历史不变。
+
+IDN-20 之后，最新全量 GitHub 回归审查发现新的 `HIGH-01（Account status 并发 stale-read）+ MEDIUM-01 + MEDIUM-02 + LOW-01 + LOW-02`，已通过 [Identity Regression Hotfix](IDENTITY_REGRESSION_HOTFIX_REPORT.md) 修复并 Re-Audit：
+
+```text
+原 IDN-20 audit（HIGH-01 provider wiring 已修复）
+→ 后续全量回归发现 HIGH-01（changeStatus 锁前 stale-read 破坏 closed terminal）
+→ Regression Hotfix：
+    · UserRepository.lockByPublicId + changeStatus 裁决基于锁后状态
+    · 新增 Account Status Race A-D（真实 PostgreSQL，closed terminal = PASS）
+    · IdentityPublicQueries 公共接口硬化（public barrel 零 internal 暴露）
+    · CI 全仓回归补全（backend/admin/docs + mobile IN_PROGRESS 非阻塞）
+    · Mobile/进度文档漂移修正
+→ Re-Audit：BLOCKER=0、HIGH=0、MEDIUM=0、LOW=0
+→ IDENTITY_IMPLEMENTATION = COMPLETE / IDENTITY_GATE = PASS / IDENTITY_DOMAIN = FROZEN（恢复）
+```
+
+不删除本报告原有结论；两者共同构成 Identity 真实历史。

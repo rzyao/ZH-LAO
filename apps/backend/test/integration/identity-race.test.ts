@@ -265,3 +265,88 @@ integration('IDN-19 identity race hardening', () => {
     });
   });
 });
+
+integration('HOTFIX-01 account status race regression', () => {
+  it('Race A: closed vs disabled from active — closed is never overwritten', async () => {
+    await withApp(async (ctx) => {
+      const registered = await phoneLogin(ctx, '+8562071000021');
+      const publicId = parseUserPublicId(registered.json().user_id);
+      const state = new IdentityState(ctx.transactions, createIdentityRepositories, new IdentityEventWriter(new OutboxWriter()));
+      const results = await Promise.allSettled([
+        state.changeStatus(publicId, 'closed'),
+        state.changeStatus(publicId, 'disabled')
+      ]);
+      expect(results.some((result) => result.status === 'fulfilled' && result.value.status === 'closed')).toBe(true);
+      const finalStatus = String((await ctx.pool.query('SELECT status FROM identity.users WHERE public_id=$1', [publicId])).rows[0]!.status);
+      expect(finalStatus).toBe('closed');
+      const transitions = (await ctx.pool.query<{ payload: Record<string, unknown> }>("SELECT payload FROM infrastructure.system_outbox_events WHERE event_type='identity.account_status_changed.v1' AND aggregate_id=$1 ORDER BY created_at", [publicId])).rows.map((row) => row.payload);
+      for (const t of transitions) {
+        expect(t.previous_status).not.toBe('closed');
+        expect(t.new_status === 'closed' || (t.previous_status === 'active' && t.new_status === 'disabled')).toBe(true);
+      }
+      expect(transitions.at(-1)!.new_status).toBe('closed');
+    });
+  });
+
+  it('Race B: disabled vs closed — closed stays terminal', async () => {
+    await withApp(async (ctx) => {
+      const registered = await phoneLogin(ctx, '+8562071000022');
+      const publicId = parseUserPublicId(registered.json().user_id);
+      const state = new IdentityState(ctx.transactions, createIdentityRepositories, new IdentityEventWriter(new OutboxWriter()));
+      await state.changeStatus(publicId, 'disabled');
+      const results = await Promise.allSettled([
+        state.changeStatus(publicId, 'closed'),
+        state.changeStatus(publicId, 'active')
+      ]);
+      expect(results.some((result) => result.status === 'fulfilled' && result.value.status === 'closed')).toBe(true);
+      const finalStatus = String((await ctx.pool.query('SELECT status FROM identity.users WHERE public_id=$1', [publicId])).rows[0]!.status);
+      expect(finalStatus).toBe('closed');
+      const transitions = (await ctx.pool.query<{ payload: Record<string, unknown> }>("SELECT payload FROM infrastructure.system_outbox_events WHERE event_type='identity.account_status_changed.v1' AND aggregate_id=$1 ORDER BY created_at", [publicId])).rows.map((row) => row.payload);
+      for (const t of transitions) expect(t.previous_status).not.toBe('closed');
+      expect(transitions.at(-1)!.new_status).toBe('closed');
+    });
+  });
+
+  it('Race C: concurrent identical disable emits exactly one real event', async () => {
+    await withApp(async (ctx) => {
+      const registered = await phoneLogin(ctx, '+8562071000023');
+      const publicId = parseUserPublicId(registered.json().user_id);
+      const state = new IdentityState(ctx.transactions, createIdentityRepositories, new IdentityEventWriter(new OutboxWriter()));
+      const results = await Promise.allSettled([
+        state.changeStatus(publicId, 'disabled'),
+        state.changeStatus(publicId, 'disabled')
+      ]);
+      expect(results.filter((result) => result.status === 'fulfilled')).toHaveLength(1);
+      const finalStatus = String((await ctx.pool.query('SELECT status FROM identity.users WHERE public_id=$1', [publicId])).rows[0]!.status);
+      expect(finalStatus).toBe('disabled');
+      const events = (await ctx.pool.query<{ payload: Record<string, unknown> }>("SELECT payload FROM infrastructure.system_outbox_events WHERE event_type='identity.account_status_changed.v1'")).rows.map((row) => row.payload);
+      expect(events).toHaveLength(1);
+      expect(events[0]).toMatchObject({ previous_status: 'active', new_status: 'disabled' });
+    });
+  });
+
+  it('Race D: previous_status comes from the post-lock committed state, never stale', async () => {
+    await withApp(async (ctx) => {
+      const registered = await phoneLogin(ctx, '+8562071000024');
+      const publicId = parseUserPublicId(registered.json().user_id);
+      const state = new IdentityState(ctx.transactions, createIdentityRepositories, new IdentityEventWriter(new OutboxWriter()));
+      const client = await ctx.pool.connect();
+      try {
+        await client.query('BEGIN');
+        await client.query('SELECT id FROM identity.users WHERE public_id=$1 FOR UPDATE', [publicId]);
+        const changing = state.changeStatus(publicId, 'closed');
+        await client.query("UPDATE identity.users SET status='disabled', updated_at=now() WHERE public_id=$1", [publicId]);
+        await client.query('COMMIT');
+        const result = await changing;
+        expect(result.status).toBe('closed');
+      } finally {
+        await client.release();
+      }
+      const finalStatus = String((await ctx.pool.query('SELECT status FROM identity.users WHERE public_id=$1', [publicId])).rows[0]!.status);
+      expect(finalStatus).toBe('closed');
+      const events = (await ctx.pool.query<{ payload: Record<string, unknown> }>("SELECT payload FROM infrastructure.system_outbox_events WHERE event_type='identity.account_status_changed.v1' AND aggregate_id=$1", [publicId])).rows.map((row) => row.payload);
+      expect(events).toHaveLength(1);
+      expect(events[0]).toMatchObject({ previous_status: 'disabled', new_status: 'closed' });
+    });
+  });
+});

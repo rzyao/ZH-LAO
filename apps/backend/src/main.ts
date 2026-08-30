@@ -8,6 +8,8 @@ import { identityModule } from './modules/identity/index.js';
 import { createIdentityHttpDependencies } from './modules/identity/http/composition.js';
 import { createIdentityRepositories } from './modules/identity/infrastructure/index.js';
 import { ConsoleOtpDeliveryProvider, UnavailableFacebookCredentialVerifier, UnavailableOtpDeliveryProvider } from './modules/identity/application/services/index.js';
+import { buildPlatformModule } from './modules/platform/http/composition.js';
+import { platformModule } from './modules/platform/index.js';
 
 const config = loadConfig();
 const logger = createLogger(config.logLevel);
@@ -33,6 +35,16 @@ const identityDependencies = createIdentityHttpDependencies({
     : new UnavailableOtpDeliveryProvider()
 });
 await identityModule.registerHttp(app, identityDependencies);
+
+const platformComposition = buildPlatformModule(asExecutor(pool));
+await platformModule.registerHttp(app, {
+  executor: asExecutor(pool),
+  featureFlagUseCases: platformComposition.featureFlagUseCases,
+  appVersionUseCases: platformComposition.appVersionUseCases,
+  announcementUseCases: platformComposition.announcementUseCases,
+  regionUseCases: platformComposition.regionUseCases,
+});
+
 logger.info({ config: configSummary(config) }, 'Starting ZH-LAO backend');
 await app.listen({ host: config.host, port: config.port });
 installShutdown({ logger, timeoutMs: config.shutdownTimeoutMs, markShuttingDown: () => { readinessState.isShuttingDown = true; }, close: async () => { await app.close(); await pool.end(); } });

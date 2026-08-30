@@ -18,4 +18,5 @@ export const requiredMigrations = [
   { filename: '1220_identity_auth_runtime.sql', sha256: 'f8de46ddc9f570778fb0e4049cf3a9a6bb32be129a5363a4f1e47026bd31e100' },
   { filename: '1230_system_outbox.sql', sha256: 'e110b36048b6f842833601c86a4ab825ba8a044d0b708b7a3527b9391743cd29' },
   { filename: '1240_content_revision.sql', sha256: '89fca2f3e362f8e254167dae4a55edd27d5f320942b63a65c70fbd8f63569cb2' },
+  { filename: '1250_platform_override_indexes.sql', sha256: '3cab64c353926d8b5c9ae890d15e04789dcd1739a927812be876488792dc836f' },
 ] as const;

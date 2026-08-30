@@ -40,9 +40,11 @@ export class IdentityState {
   async changeStatus(id: UserPublicId, next: IdentityAccountStatus) {
     return this.tx.run(async executor => {
       const repos = this.repos(executor);
-      const current = await repos.users.findByPublicId(id);
+      // The transition decision must be based on the latest committed row state.
+      // `lockByPublicId` acquires the PostgreSQL row lock (SELECT ... FOR UPDATE) and
+      // returns the post-lock row, so a concurrent transition can never decide on a stale status.
+      const current = await repos.users.lockByPublicId(id);
       if (!current) throw new AppError({ code: 'UNAUTHENTICATED', message: 'Identity unavailable', httpStatus: 401 });
-      await repos.users.lockByInternalId(current.id);
       if (current.status === next || current.status === 'closed' || !((current.status === 'active' && ['disabled', 'closed'].includes(next)) || (current.status === 'disabled' && ['active', 'closed'].includes(next)))) throw new AppError({ code: 'INVALID_DATA', message: 'Invalid status transition', httpStatus: 409 });
       const updated = await repos.users.updateStatus(current.id, next);
       const occurredAt = this.now();

@@ -1,6 +1,5 @@
 import React from 'react';
-import { Text, View } from 'react-native';
-import { render, screen, fireEvent, act, waitFor } from '@testing-library/react-native';
+import { render, screen, fireEvent, act } from '@testing-library/react-native';
 
 import { ThemeProvider } from '../src/theme/ThemeProvider';
 import { I18nProvider } from '../src/i18n/I18nProvider';
@@ -18,18 +17,18 @@ const tokenStore = createTokenStore(createInMemorySecureStorage());
 
 type NavKey = 'Settings' | 'Theme' | 'LanguageSetting';
 function makeNavigation() {
-  const calls: Array<{ screen: NavKey; params?: unknown }> = [];
-  return {
-    calls,
-    navigation: {
-      navigate: (screen: NavKey, params?: unknown) => {
-        calls.push({ screen, params });
-      },
-      goBack: () => {
-        calls.push({ screen: 'Settings' });
-      },
+  const calls: { screen: NavKey; params?: unknown }[] = [];
+  const navigation = {
+    navigate: (screen: NavKey, params?: unknown) => {
+      calls.push({ screen, params });
     },
-  };
+    goBack: () => {
+      calls.push({ screen: 'Settings' });
+    },
+  } as unknown as import('@react-navigation/native-stack').NativeStackNavigationProp<
+    import('../src/navigation/types').RootStackParamList
+  >;
+  return { calls, navigation };
 }
 
 function Providers({ children }: { children: React.ReactNode }) {

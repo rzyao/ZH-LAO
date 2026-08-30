@@ -2,9 +2,11 @@
 
 **文件名：`MOBILE_FOUNDATION_PLAN.md`**  
 **Phase：Mobile Foundation**  
-**状态：PLANNING**  
+**状态：IN_PROGRESS**  
 **上级计划：`MASTER_DEVELOPMENT_PLAN.md`**  
 **技术依据：`MOBILE_TECH_STACK.md`**
+
+> 状态修正说明（Identity Regression Hotfix，HOTFIX-04）：`apps/mobile` 已存在大量 Foundation 实现代码（Expo 57 skeleton、API client、Auth/session skeleton、Storage、Audio/Asset/Realtime skeleton、Theme/Navigation、Jest 测试等），原计划标记 `PLANNING` 与代码状态漂移。但 `MOBILE_FOUNDATION_REPORT.md` 尚未生成、`MOBILE_FOUNDATION_GATE` 尚未执行，因此按实际开发状态标记为 `IN_PROGRESS`。禁止仅因“代码很多”就标记 `COMPLETE / PASS`；完整 Gate 证据齐备前不得声明 `MOBILE_FOUNDATION_GATE = PASS`。
 
 ---
 

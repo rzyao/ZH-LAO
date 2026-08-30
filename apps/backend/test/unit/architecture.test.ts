@@ -26,6 +26,12 @@ describe('architecture audit', () => {
     const illegal = await fixture('modules/social/application/use-case.ts', `import type { IdentityContract } from '../../identity/application/index.js'; export type X = IdentityContract;`);
     await expect(exec(process.execPath, [path.resolve('scripts/check-architecture.mjs'), illegal])).rejects.toMatchObject({ stderr: expect.stringContaining('cross-domain import'), code: 1 });
   });
+  it('permits Platform public imports and rejects Platform internals', async () => {
+    const legal = await fixture('modules/identity/application/use-case.ts', `import type * as PlatformPublic from '../../platform/public/index.js'; export type X = PlatformPublic;`);
+    await expect(exec(process.execPath, [path.resolve('scripts/check-architecture.mjs'), legal])).resolves.toMatchObject({ stdout: expect.stringContaining('PASS') });
+    const illegal = await fixture('modules/identity/application/use-case.ts', `import type { FeatureFlagRepository } from '../../platform/application/ports/index.js'; export type X = FeatureFlagRepository;`);
+    await expect(exec(process.execPath, [path.resolve('scripts/check-architecture.mjs'), illegal])).rejects.toMatchObject({ stderr: expect.stringContaining('cross-domain import'), code: 1 });
+  });
   it('rejects internal cross-domain imports and direct Pool usage', async () => {
     const root = await fixture('modules/learning/infrastructure/repository.ts', `import { Pool } from 'pg'; import { x } from '../../content/infrastructure/repository.js'; export const value = new Pool();`);
     await expect(exec(process.execPath, [path.resolve('scripts/check-architecture.mjs'), root])).rejects.toMatchObject({ stderr: expect.stringContaining('cross-domain import'), code: 1 });

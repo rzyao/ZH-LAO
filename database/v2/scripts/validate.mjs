@@ -80,6 +80,41 @@ async function runSmokeTests(connectionString) {
           'hash2', 'preset', gen_random_uuid(), 'smoke-2')
       `, [slotId]);
 
+      const flag = await client.query(`
+        INSERT INTO platform.feature_flags(key, name, default_enabled, status)
+        VALUES ('smoke_flag', 'Smoke Flag', false, 'active') RETURNING id
+      `);
+      const region = await client.query(`
+        INSERT INTO platform.regions(code, name, default_locale, timezone, status)
+        VALUES ('SM', 'Smoke Region', 'zh-CN', 'Asia/Shanghai', 'active') RETURNING id
+      `);
+      await client.query(`
+        INSERT INTO platform.feature_flag_overrides(feature_flag_id, region_id, enabled)
+        VALUES ($1, $2, true)
+      `, [flag.rows[0].id, region.rows[0].id]);
+      await expectRejected(client, 'platform_override_region_unique', `
+        INSERT INTO platform.feature_flag_overrides(feature_flag_id, region_id, enabled)
+        VALUES ($1, $2, false)
+      `, [flag.rows[0].id, region.rows[0].id]);
+
+      await client.query(`
+        INSERT INTO platform.feature_flag_overrides(feature_flag_id, client_platform, enabled)
+        VALUES ($1, 'android', true)
+      `, [flag.rows[0].id]);
+      await expectRejected(client, 'platform_override_client_unique', `
+        INSERT INTO platform.feature_flag_overrides(feature_flag_id, client_platform, enabled)
+        VALUES ($1, 'android', false)
+      `, [flag.rows[0].id]);
+
+      await client.query(`
+        INSERT INTO platform.feature_flag_overrides(feature_flag_id, region_id, client_platform, enabled)
+        VALUES ($1, $2, 'android', true)
+      `, [flag.rows[0].id, region.rows[0].id]);
+      await expectRejected(client, 'platform_override_region_client_unique', `
+        INSERT INTO platform.feature_flag_overrides(feature_flag_id, region_id, client_platform, enabled)
+        VALUES ($1, $2, 'android', false)
+      `, [flag.rows[0].id, region.rows[0].id]);
+
       await client.query('CREATE TABLE identity.__audit_fk_source(id integer PRIMARY KEY, target_id integer)');
       await client.query('CREATE TABLE content.__audit_fk_target(id integer PRIMARY KEY)');
       await client.query(`ALTER TABLE identity.__audit_fk_source ADD CONSTRAINT __audit_illegal_fk

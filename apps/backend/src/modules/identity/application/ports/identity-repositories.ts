@@ -16,7 +16,7 @@ export interface SessionRecord { id: SessionInternalId; userId: UserInternalId; 
 export interface UserRepository {
   findByPublicId(id: UserPublicId): Promise<UserRecord | null>; findByInternalId(id: UserInternalId): Promise<UserRecord | null>;
   create(input: { publicId: UserPublicId; status: IdentityAccountStatus; registeredAt?: Date; lastActiveAt?: Date | null }): Promise<UserRecord>;
-  lockByInternalId(id: UserInternalId): Promise<UserRecord | null>; updateLastActiveAt(id: UserInternalId, at: Date): Promise<UserRecord | null>; updateStatus(id: UserInternalId, status: IdentityAccountStatus): Promise<UserRecord | null>;
+  lockByPublicId(id: UserPublicId): Promise<UserRecord | null>; lockByInternalId(id: UserInternalId): Promise<UserRecord | null>; updateLastActiveAt(id: UserInternalId, at: Date): Promise<UserRecord | null>; updateStatus(id: UserInternalId, status: IdentityAccountStatus): Promise<UserRecord | null>;
 }
 export interface AuthIdentityRepository {
   findByProviderAndSubject(provider: IdentityAuthProvider, subject: string): Promise<AuthIdentityRecord | null>; findPhoneByUserId(userId: UserInternalId): Promise<AuthIdentityRecord | null>; listByUserId(userId: UserInternalId): Promise<AuthIdentityRecord[]>;

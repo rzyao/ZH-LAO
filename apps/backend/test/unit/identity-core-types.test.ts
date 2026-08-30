@@ -23,6 +23,7 @@ import {
   parseDevicePlatform
 } from '../../src/modules/identity/domain/index.js';
 import type { RawRefreshToken, RefreshTokenHash } from '../../src/modules/identity/domain/index.js';
+import type { IdentityPublicQueries, IdentityPublicSummary } from '../../src/modules/identity/public/index.js';
 import * as identityPublic from '../../src/modules/identity/public/index.js';
 
 describe('Identity Core Types', () => {
@@ -83,6 +84,10 @@ describe('Identity Core Types', () => {
   });
 
   it('exports only public Identity primitives from the public boundary', () => {
-    expect(Object.keys(identityPublic).sort()).toEqual(['IdentityPublicQuery', 'identityAccountStatusSchema', 'isUserPublicId', 'parseIdentityAccountStatus', 'parseUserPublicId']);
+    expect(Object.keys(identityPublic).sort()).toEqual(['identityAccountStatusSchema', 'isUserPublicId', 'parseIdentityAccountStatus', 'parseUserPublicId']);
+    expectTypeOf<IdentityPublicQueries>().toHaveProperty('getIdentityAccountStatus');
+    expectTypeOf<IdentityPublicQueries>().toHaveProperty('isIdentityActive');
+    expectTypeOf<IdentityPublicQueries>().toHaveProperty('getIdentitySummary');
+    expectTypeOf<IdentityPublicSummary>().toMatchTypeOf<{ userPublicId: unknown; status: unknown }>();
   });
 });

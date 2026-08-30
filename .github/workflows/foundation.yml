@@ -3,7 +3,7 @@ on:
   push:
   pull_request:
 jobs:
-  verify:
+  backend:
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -30,3 +30,44 @@ jobs:
       - run: pnpm --dir apps/backend test:integration
       - run: pnpm --dir database/v2 test
       - run: pnpm --dir database/v2 validate
+  admin:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10.20.0 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm, cache-dependency-path: "**/pnpm-lock.yaml" }
+      - run: pnpm --dir apps/admin install --frozen-lockfile
+      - run: pnpm --dir apps/admin verify
+      - run: pnpm --dir apps/admin exec playwright install --with-deps chromium
+      - run: pnpm --dir apps/admin e2e
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10.20.0 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm, cache-dependency-path: "**/pnpm-lock.yaml" }
+      - run: pnpm --dir docs install --frozen-lockfile
+      - run: pnpm --dir docs docs:build
+  # Mobile regression coverage.
+  #
+  # NOT a formal repository-wide mandatory Gate: Mobile Foundation is currently
+  # IN_PROGRESS (see MOBILE_FOUNDATION_PLAN.md / DEVELOPMENT_PROGRESS.md), so
+  # MOBILE_FOUNDATION_GATE has not been declared PASS. This job keeps independent
+  # verification running (typecheck/lint/test/audit) so regressions surface early,
+  # but it is explicitly non-blocking until Mobile completes its own gate. It must
+  # NOT be interpreted as declaring MOBILE_FOUNDATION_GATE = PASS.
+  mobile:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10.20.0 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm, cache-dependency-path: "**/pnpm-lock.yaml" }
+      - run: pnpm --dir apps/mobile install --frozen-lockfile
+      - run: pnpm --dir apps/mobile verify

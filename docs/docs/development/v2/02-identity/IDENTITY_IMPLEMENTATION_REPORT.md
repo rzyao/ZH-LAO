@@ -107,8 +107,10 @@ Secret Fail-Fast（JWT/OTP 密钥缺失或过短启动拒绝）= PASS
 OTP request/consume/attempt race、Phone/Facebook 注册 race、Bind/Change race、
 Refresh / Logout vs Refresh / LogoutAll vs Refresh、Device Revoke vs Refresh、
 Push token race、Disable vs Refresh、Close vs Login、Outbox duplicate = 全部 PASS（真实 PostgreSQL）
+Account status vs account status（Regression Hotfix 新增 Race A-D）= PASS
 窄毫秒时序断言 = 0（barrier / final-invariant / observable DB state）
 Close vs Login 修复（登录路径 user FOR UPDATE 行锁）保持
+Account status 修复（changeStatus 使用 lockByPublicId 行锁，裁决基于锁后状态）保持
 ```
 
 ## Provider runtime
@@ -154,12 +156,35 @@ identity/public 导出：UserPublicId / IdentityAccountStatus 原语 + IdentityP
 
 ```text
 Typecheck / Lint / Architecture Audit / Build = PASS
-Unit = 32/32；Integration = 84/84
-  HTTP 17 · E2E 13 · Security 11 · Race 15 · Provider(IDN-20) 4 · 既有回归 24
+Unit = 34/34；Integration = 88/88
+  HTTP 17 · E2E 13 · Security 11 · Race 19（15 既有 + 4 Regression Hotfix）· Provider(IDN-20) 4 · 既有回归 24
 Database Validation = PASS（fresh 17 / second 0 / audit / smoke）
 Docs Build = PASS
 Foundation Regression = PASS
 ```
+
+## Identity Regression Hotfix（2026-08-31 Re-Audit）
+
+原 IDN-20 audit 之后，最新全量 GitHub 回归审查发现：`BLOCKER 0 / HIGH 1 / MEDIUM 2 / LOW 2`。执行 Identity Regression Hotfix 并 Re-Audit（详见 [IDENTITY_REGRESSION_HOTFIX_REPORT.md](IDENTITY_REGRESSION_HOTFIX_REPORT.md)）：
+
+```text
+HIGH-01  Account status 并发 stale-read → 修复：新增 UserRepository.lockByPublicId（public_id FOR UPDATE），
+         changeStatus 裁决基于锁后状态；新增 Race A-D；closed terminal 不变量 PASS。
+MEDIUM-01  CI 全仓回归覆盖不完整 → foundation.yml 补齐 backend/admin/docs + mobile(IN_PROGRESS, 非阻塞)。
+MEDIUM-02  Identity public contract construction boundary → 形成 IdentityPublicQueries 接口 + 内部 factory，
+           public barrel 不再暴露 internal 类型；静态 contract-leak 审计。
+LOW-01  Mobile plan/code 状态漂移 → MOBILE_FOUNDATION_PLAN 修正为 IN_PROGRESS。
+LOW-02  Development progress metadata 漂移 → last_updated=2026-08-31 + 更新历史。
+
+Re-Audit 结果：BLOCKER=0、HIGH=0、MEDIUM=0、LOW=0
+Account Status Race = PASS；closed terminal = PASS；Identity Public Contract = PASS
+HTTP Contract = PASS；Security = PASS；Outbox Atomicity = PASS
+Frozen migration changes = 0；fresh 17/0、database audit PASS
+Backend regression = PASS（34 unit + 88 integration）；Admin regression = PASS（57 + smoke 6/6）
+Docs build = PASS；CI configuration = PASS
+```
+
+保持真实历史：原 IDN-20 审计的结论不删除；本节如实记录“后续全量回归发现 HIGH-01 → Regression Hotfix 修复 → Re-Audit”。
 
 ## IDENTITY_DOMAIN = FROZEN
 

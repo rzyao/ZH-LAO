@@ -1,6 +1,6 @@
 # V2 Database Baseline Report
 
-Generated from PostgreSQL catalog at: 2026-08-30T18:15:56.755Z
+Generated from PostgreSQL catalog at: 2026-08-30T19:14:02.552Z
 
 Final status: **PASS**
 
@@ -8,7 +8,7 @@ Final status: **PASS**
 
 | Item | Value |
 | --- | --- |
-| Database | zh_lao_v2_validation_20260830181556_94279bc7 |
+| Database | zh_lao_v2_validation_20260830191401_bd5ded0b |
 | PostgreSQL | 18.6 (Debian 18.6-1.pgdg13+2) |
 | Role | zh_lao |
 | Business schemas | identity, content, learning, social, chat, audio, commerce, rewards, trust, operations, platform |
@@ -24,23 +24,24 @@ Only `pg_trgm` was added by V2. `plpgsql` is built in. The V2 baseline did not i
 
 | Migration | SHA-256 | Applied at |
 | --- | --- | --- |
-| 0000_infrastructure.sql | 5d918e0280348c62b2f9ca1a8a7d57cf15a779f2da40c2f2cb0493ce70099e5a | 2026-08-30T18:15:55.863Z |
-| 0100_identity.sql | 0e6d17346ed339145b4cdc7dc0c6772262685169eca64f1b503ca2bedb183d36 | 2026-08-30T18:15:55.872Z |
-| 0200_operations.sql | c35fa48ff2bf841550cac0927879b999b827c23b84a01ebf9bd55b01986fc632 | 2026-08-30T18:15:55.880Z |
-| 0300_platform.sql | 42df6a8c3a78ab149f57e4bd28e6896aae1590e8349a0a9dc2e54b5fa4791183 | 2026-08-30T18:15:55.889Z |
-| 0400_content.sql | c722654def7a71079d98c355d046d8d6bc3a68f304f3998573d0862540a40986 | 2026-08-30T18:15:55.905Z |
-| 0500_learning.sql | 7f6007c313f684385a5dba4cf9ad134b49293468d7479cc7a415c5bfbabfb06c | 2026-08-30T18:15:55.937Z |
-| 0600_audio.sql | 42ca0d357babb1acf6b4ead5a500b16c096a8b8a1b3861b67e0ee3f4dddbc453 | 2026-08-30T18:15:55.948Z |
-| 0700_social.sql | b5853d01e9fecb129cf0d95f71e36d6d221dbec8a3c50d6ef0a3e8d93120b4a9 | 2026-08-30T18:15:55.966Z |
-| 0800_chat.sql | 32b0ab8f5e4f1c05a229c99fd6063fbfd4947e3f2014578ae6bc0a5cefeb8126 | 2026-08-30T18:15:55.988Z |
-| 0900_commerce.sql | 79c56da178e30e303955fa88837a7c735e707a04578a5cc9c56d9ea8d188282d | 2026-08-30T18:15:55.999Z |
-| 1000_rewards.sql | 86f4dc243a826481a51e37e595d90923d1e570f62923e69e13c6396b78c5a792 | 2026-08-30T18:15:56.071Z |
-| 1100_trust.sql | c08b1476e4ffe1736e135657dff0001ca92c57465e6236fbf645fd1f5c20964a | 2026-08-30T18:15:56.086Z |
-| 1200_asset_infrastructure.sql | e2f0a031d749e1937764ca4b551bbae31a73b1a13f874ce2a1b961bc95b3e585 | 2026-08-30T18:15:56.100Z |
-| 1210_trust_evidence.sql | b69422055ca78c7b44d44825154bdfa0c360da8ced978222d05c7d83ec3c5816 | 2026-08-30T18:15:56.106Z |
-| 1220_identity_auth_runtime.sql | f8de46ddc9f570778fb0e4049cf3a9a6bb32be129a5363a4f1e47026bd31e100 | 2026-08-30T18:15:56.112Z |
-| 1230_system_outbox.sql | e110b36048b6f842833601c86a4ab825ba8a044d0b708b7a3527b9391743cd29 | 2026-08-30T18:15:56.122Z |
-| 1240_content_revision.sql | 89fca2f3e362f8e254167dae4a55edd27d5f320942b63a65c70fbd8f63569cb2 | 2026-08-30T18:15:56.128Z |
+| 0000_infrastructure.sql | 5d918e0280348c62b2f9ca1a8a7d57cf15a779f2da40c2f2cb0493ce70099e5a | 2026-08-30T19:14:01.757Z |
+| 0100_identity.sql | 0e6d17346ed339145b4cdc7dc0c6772262685169eca64f1b503ca2bedb183d36 | 2026-08-30T19:14:01.780Z |
+| 0200_operations.sql | c35fa48ff2bf841550cac0927879b999b827c23b84a01ebf9bd55b01986fc632 | 2026-08-30T19:14:01.795Z |
+| 0300_platform.sql | 42df6a8c3a78ab149f57e4bd28e6896aae1590e8349a0a9dc2e54b5fa4791183 | 2026-08-30T19:14:01.813Z |
+| 0400_content.sql | c722654def7a71079d98c355d046d8d6bc3a68f304f3998573d0862540a40986 | 2026-08-30T19:14:01.835Z |
+| 0500_learning.sql | 7f6007c313f684385a5dba4cf9ad134b49293468d7479cc7a415c5bfbabfb06c | 2026-08-30T19:14:01.920Z |
+| 0600_audio.sql | 42ca0d357babb1acf6b4ead5a500b16c096a8b8a1b3861b67e0ee3f4dddbc453 | 2026-08-30T19:14:01.941Z |
+| 0700_social.sql | b5853d01e9fecb129cf0d95f71e36d6d221dbec8a3c50d6ef0a3e8d93120b4a9 | 2026-08-30T19:14:01.980Z |
+| 0800_chat.sql | 32b0ab8f5e4f1c05a229c99fd6063fbfd4947e3f2014578ae6bc0a5cefeb8126 | 2026-08-30T19:14:02.035Z |
+| 0900_commerce.sql | 79c56da178e30e303955fa88837a7c735e707a04578a5cc9c56d9ea8d188282d | 2026-08-30T19:14:02.056Z |
+| 1000_rewards.sql | 86f4dc243a826481a51e37e595d90923d1e570f62923e69e13c6396b78c5a792 | 2026-08-30T19:14:02.159Z |
+| 1100_trust.sql | c08b1476e4ffe1736e135657dff0001ca92c57465e6236fbf645fd1f5c20964a | 2026-08-30T19:14:02.189Z |
+| 1200_asset_infrastructure.sql | e2f0a031d749e1937764ca4b551bbae31a73b1a13f874ce2a1b961bc95b3e585 | 2026-08-30T19:14:02.211Z |
+| 1210_trust_evidence.sql | b69422055ca78c7b44d44825154bdfa0c360da8ced978222d05c7d83ec3c5816 | 2026-08-30T19:14:02.219Z |
+| 1220_identity_auth_runtime.sql | f8de46ddc9f570778fb0e4049cf3a9a6bb32be129a5363a4f1e47026bd31e100 | 2026-08-30T19:14:02.229Z |
+| 1230_system_outbox.sql | e110b36048b6f842833601c86a4ab825ba8a044d0b708b7a3527b9391743cd29 | 2026-08-30T19:14:02.242Z |
+| 1240_content_revision.sql | 89fca2f3e362f8e254167dae4a55edd27d5f320942b63a65c70fbd8f63569cb2 | 2026-08-30T19:14:02.251Z |
+| 1250_platform_override_indexes.sql | 3cab64c353926d8b5c9ae890d15e04789dcd1739a927812be876488792dc836f | 2026-08-30T19:14:02.260Z |
 
 ## Domain summary
 
@@ -56,7 +57,7 @@ Only `pg_trgm` was added by V2. `plpgsql` is built in. The V2 baseline did not i
 | rewards | 5 | 5 | 5 | 8 | 31 | 32 |
 | trust | 6 | 6 | 7 | 2 | 45 | 28 |
 | operations | 5 | 5 | 4 | 2 | 13 | 12 |
-| platform | 6 | 6 | 3 | 5 | 28 | 13 |
+| platform | 6 | 6 | 3 | 5 | 28 | 17 |
 
 ### Infrastructure inventory
 
@@ -4815,6 +4816,10 @@ Indexes:
 | Name | Unique | Predicate | Definition |
 | --- | --- | --- | --- |
 | feature_flag_overrides_pkey | true | — | CREATE UNIQUE INDEX feature_flag_overrides_pkey ON platform.feature_flag_overrides USING btree (id) |
+| idx_feature_flag_overrides_region_id | false | (region_id IS NOT NULL) | CREATE INDEX idx_feature_flag_overrides_region_id ON platform.feature_flag_overrides USING btree (region_id) WHERE (region_id IS NOT NULL) |
+| uq_feature_flag_overrides_client | true | ((region_id IS NULL) AND (client_platform IS NOT NULL)) | CREATE UNIQUE INDEX uq_feature_flag_overrides_client ON platform.feature_flag_overrides USING btree (feature_flag_id, client_platform) WHERE ((region_id IS NULL) AND (client_platform IS NOT NULL)) |
+| uq_feature_flag_overrides_region | true | ((region_id IS NOT NULL) AND (client_platform IS NULL)) | CREATE UNIQUE INDEX uq_feature_flag_overrides_region ON platform.feature_flag_overrides USING btree (feature_flag_id, region_id) WHERE ((region_id IS NOT NULL) AND (client_platform IS NULL)) |
+| uq_feature_flag_overrides_region_client | true | ((region_id IS NOT NULL) AND (client_platform IS NOT NULL)) | CREATE UNIQUE INDEX uq_feature_flag_overrides_region_client ON platform.feature_flag_overrides USING btree (feature_flag_id, region_id, client_platform) WHERE ((region_id IS NOT NULL) AND (client_platform IS NOT NULL)) |
 
 #### platform.feature_flags
 
