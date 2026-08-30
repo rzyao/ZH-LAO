@@ -41,7 +41,7 @@ last_updated: 2026-08-30
 
 ## 当前行动
 
-Identity Design Gate 已通过，Identity Implementation 已进入 `IN_PROGRESS`。`IDN-01 — Identity Module Skeleton`、`IDN-02 — Core Types` 与 `IDN-03 — Repository Layer` 已完成；`IDN-04` 仍为 `NOT_STARTED`，不得自动开始。
+Identity Design Gate 已通过，Identity Implementation 已进入 `IN_PROGRESS`。`IDN-01` 至 `IDN-08` 已完成；`IDN-09` 仍为 `NOT_STARTED`，不得自动开始。
 
 ## 更新历史
 
@@ -55,3 +55,4 @@ Identity Design Gate 已通过，Identity Implementation 已进入 `IN_PROGRESS`
 | 2026-08-30 | Identity | 完成 IDN-01 Identity Module Skeleton；接入 composition root，新增 public/import boundary 与 route-absence 验证 | `PASS`（IDN-01） | 16 unit + 10 PostgreSQL integration；fresh 17/0 migrations、database audit PASS；Identity business routes/SQL/repositories = 0 |
 | 2026-08-30 | Identity | 完成 IDN-02 Core Types；建立冻结 enum、UUID/BIGINT、E.164、学习方向与 secret/hash 类型边界 | `PASS`（IDN-02） | 22 unit + 10 PostgreSQL integration；fresh 17/0 migrations、database audit PASS；repositories/SQL/routes/services = 0 |
 | 2026-08-30 | Identity | 完成 IDN-03 Repository Layer；7 个契约与 PostgreSQL 实现、事务作用域 factory、row/advisory locking | `PASS`（IDN-03） | 22 unit + 13 PostgreSQL integration；User/Session/OTP concurrency、rollback、executor isolation PASS；migration changes = 0 |
+| 2026-08-30 | Identity | 完成 IDN-04 至 IDN-08：OTP、phone 认证注册与 token 技术服务 | `PASS`（IDN-04~08） | 27 unit + 16 PostgreSQL integration；OTP request/consume concurrency PASS；migration changes = 0 |

@@ -1,0 +1,20 @@
+import { AppError } from '../../../../errors/app-error.js';
+import type { TransactionManager } from '../../../../database/transaction-manager.js';
+import { normalizePhoneNumber, type OtpPurpose, type UserInternalId } from '../../domain/index.js';
+import type { OtpDeliveryProvider, OtpGenerator, OtpHasher } from '../services/index.js';
+import type { IdentityRepositories } from '../ports/index.js';
+
+export type OtpPolicy = Readonly<{ ttlMs: number; maxAttempts: number; resendCooldownMs: number; phoneWindowMs: number; phoneWindowLimit: number; phoneDailyMs: number; phoneDailyLimit: number; ipWindowMs: number; ipLimit: number }>;
+export const defaultOtpPolicy: OtpPolicy = Object.freeze({ ttlMs: 300_000, maxAttempts: 5, resendCooldownMs: 60_000, phoneWindowMs: 1_800_000, phoneWindowLimit: 5, phoneDailyMs: 86_400_000, phoneDailyLimit: 10, ipWindowMs: 1_800_000, ipLimit: 20 });
+class IpWindowLimiter { private readonly requests = new Map<string, number[]>(); check(ip: string, now: number, policy: OtpPolicy) { const floor=now-policy.ipWindowMs; const active=(this.requests.get(ip)??[]).filter(at=>at>floor); if(active.length>=policy.ipLimit) throw new AppError({code:'OTP_RATE_LIMITED',message:'OTP request is temporarily limited',httpStatus:429}); active.push(now); this.requests.set(ip,active); } }
+export type RequestPhoneOtpInput = Readonly<{ phone: unknown; purpose: OtpPurpose; ip: string; authenticatedUserId?: UserInternalId }>;
+export class RequestPhoneOtp {
+  constructor(private readonly transactions: TransactionManager, private readonly repositories: (executor: import('../../../../database/executor.js').DatabaseExecutor) => IdentityRepositories, private readonly generator: OtpGenerator, private readonly hasher: OtpHasher, private readonly delivery: OtpDeliveryProvider, private readonly policy: OtpPolicy = defaultOtpPolicy, private readonly limiter = new IpWindowLimiter(), private readonly now: () => Date = () => new Date()) {}
+  async execute(input: RequestPhoneOtpInput): Promise<{ expiresAt: Date }> {
+    if ((input.purpose === 'bind_phone' || input.purpose === 'change_phone') && input.authenticatedUserId === undefined) throw new AppError({ code: 'INVALID_CREDENTIAL', message: 'Authentication is required', httpStatus: 401 });
+    const phone=normalizePhoneNumber(input.phone); const requestedAt=this.now(); this.limiter.check(input.ip,requestedAt.getTime(),this.policy); const code=this.generator.generate(); const expiresAt=new Date(requestedAt.getTime()+this.policy.ttlMs);
+    const challenge=await this.transactions.run(async executor=>{ const repos=this.repositories(executor); await repos.otpChallenges.acquireRequestAdvisoryLock(phone,input.purpose); const shortCount=await repos.otpChallenges.countRecentRequests(phone,input.purpose,new Date(requestedAt.getTime()-this.policy.phoneWindowMs)); const dailyCount=await repos.otpChallenges.countRecentRequests(phone,input.purpose,new Date(requestedAt.getTime()-this.policy.phoneDailyMs)); const latest=await repos.otpChallenges.lockLatestPending(phone,input.purpose); if(shortCount>=this.policy.phoneWindowLimit||dailyCount>=this.policy.phoneDailyLimit||(latest!==null&&requestedAt.getTime()-latest.createdAt.getTime()<this.policy.resendCooldownMs)) throw new AppError({code:'OTP_RATE_LIMITED',message:'OTP request is temporarily limited',httpStatus:429}); if(latest) await repos.otpChallenges.cancelPending(latest.id); return repos.otpChallenges.create({ userId: input.authenticatedUserId ?? null, phoneNumber:phone,purpose:input.purpose,codeHash:this.hasher.hash({code,phone,purpose:input.purpose}),maxAttempts:this.policy.maxAttempts,expiresAt }); });
+    try { await this.delivery.sendOtp({phone,purpose:input.purpose,code,expiresAt}); } catch { await this.transactions.run(async executor=>{ await this.repositories(executor).otpChallenges.cancelPending(challenge.id); }); throw new AppError({code:'PROVIDER_UNAVAILABLE',message:'OTP delivery is unavailable',httpStatus:503}); }
+    return { expiresAt };
+  }
+}
