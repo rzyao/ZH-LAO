@@ -1,0 +1,37 @@
+import pg from 'pg';
+import pino from 'pino';
+import { afterAll,beforeAll,describe,expect,it } from 'vitest';
+import { asExecutor,createPgPool } from '../../src/database/pool.js';
+import { TransactionManager } from '../../src/database/transaction-manager.js';
+import { buildApp } from '../../src/bootstrap/build-app.js';
+import type { AuthenticationProvider } from '../../src/auth/authentication-provider.js';
+import { createTestDatabase,type TestDatabase } from '../support/test-database.js';
+import { buildOperationsModule } from '../../src/modules/operations/http/composition.js';
+import { buildPlatformModule } from '../../src/modules/platform/http/composition.js';
+import { registerPlatformManagementRoutes } from '../../src/modules/platform/http/management-routes.js';
+import { parseUserPublicId,type IdentityPublicQueries } from '../../src/modules/identity/public/index.js';
+
+const adminUrl=process.env.ADMIN_DATABASE_URL;const integration=adminUrl?describe:describe.skip;
+integration('Operations HTTP and Platform management integration',()=>{
+ let database:TestDatabase;let pool:pg.Pool;const logger=pino({level:'silent'});const active=new Set<string>();
+ const identity:IdentityPublicQueries={async getIdentityAccountStatus(id){return active.has(id)?'active':null;},async isIdentityActive(id){return active.has(id);},async getIdentitySummary(id){return active.has(id)?{userPublicId:parseUserPublicId(id),status:'active'}:null;}};
+ const newSubject=()=>{const id=crypto.randomUUID();active.add(id);return id;};
+ const authentication:AuthenticationProvider={async authenticate(request){const id=request.headers['x-test-subject'];return typeof id==='string'?{subjectId:parseUserPublicId(id)}:null;}};
+ beforeAll(async()=>{database=await createTestDatabase(adminUrl!);pool=createPgPool({url:database.url,poolMin:0,poolMax:6,connectionTimeoutMs:2_000,idleTimeoutMs:2_000},logger);},120_000);
+ afterAll(async()=>{if(pool)await pool.end();if(database)await database.dispose();},30_000);
+ it('enforces authentication, exact RBAC, strict DTO and exposes /me permissions',async()=>{const executor=asExecutor(pool);const operations=buildOperationsModule({executor,transactionManager:new TransactionManager(pool,logger),identity,authentication});const rootSubject=newSubject();const root=await operations.service.bootstrap(rootSubject,'Root');const app=buildApp({logger,database:executor});await operations.registerHttp(app);
+  expect((await app.inject({method:'GET',url:'/api/v1/admin/operations/me'})).statusCode).toBe(401);
+  const me=await app.inject({method:'GET',url:'/api/v1/admin/operations/me',headers:{'x-test-subject':rootSubject}});expect(me.statusCode).toBe(200);expect(me.json().operator.permissions).toHaveLength(26);
+  const weakSubject=newSubject();await operations.service.createOperator({operatorId:root.operator.id,authSubjectId:rootSubject},{authSubjectId:weakSubject,displayName:'No Role'});
+  expect((await app.inject({method:'GET',url:'/api/v1/admin/operations/operators',headers:{'x-test-subject':weakSubject}})).statusCode).toBe(403);
+  const invalid=await app.inject({method:'POST',url:'/api/v1/admin/operations/roles',headers:{'x-test-subject':rootSubject},payload:{code:'strict_role',name:'Strict',unexpected:true}});expect(invalid.statusCode).toBe(400);
+  await app.close();
+ });
+ it('authorizes a real Platform management mutation and records success-only Operations audit',async()=>{const executor=asExecutor(pool);const tx=new TransactionManager(pool,logger);const operations=buildOperationsModule({executor,transactionManager:tx,identity,authentication});const root=(await operations.service.listOperators({page:1,pageSize:10})).items.find(o=>o.displayName==='Root')!;const platform=buildPlatformModule({executor,transactionManager:tx});const app=buildApp({logger,database:executor});await registerPlatformManagementRoutes(app,{executor,authentication,authorizer:operations.service,audit:operations.service,management:platform.managementService!,featureFlags:platform.featureFlagUseCases,runtimeConfigs:platform.runtimeConfigUseCases,appVersions:platform.appVersionUseCases,announcements:platform.announcementUseCases,regions:platform.regionUseCases});
+  const deniedSubject=newSubject();await operations.service.createOperator({operatorId:root.id,authSubjectId:root.authSubjectId},{authSubjectId:deniedSubject,displayName:'Denied'});const denied=await app.inject({method:'POST',url:'/api/v1/admin/platform/feature-flags',headers:{'x-test-subject':deniedSubject},payload:{key:'ops_test_flag',name:'Ops Test Flag'}});expect(denied.statusCode).toBe(403);
+  const deniedAudits=await operations.service.listAudits({actionKey:'platform.feature_flags.write',limit:50});expect(deniedAudits.items).toHaveLength(0);
+  const ok=await app.inject({method:'POST',url:'/api/v1/admin/platform/feature-flags',headers:{'x-test-subject':root.authSubjectId},payload:{key:'ops_test_flag',name:'Ops Test Flag'}});expect(ok.statusCode).toBe(201);
+  const audits=await operations.service.listAudits({actionKey:'platform.feature_flags.write',operatorId:root.id,limit:50});expect(audits.items).toHaveLength(1);expect(audits.items[0]?.details).toMatchObject({key:'ops_test_flag'});expect(audits.items[0]?.requestId).toBeTruthy();
+  await app.close();
+ });
+});
