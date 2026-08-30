@@ -261,8 +261,6 @@ Stage B 的真实 forbidden/401/403 E2E 仍等待 Operations。
 - router Platform landing test
 - Playwright Platform landing smoke
 
-完整 CI 结果以本报告最终 Validation Snapshot 为准。
-
 ## 13. Security / Scope Audit
 
 Stage A 审计结论：
@@ -281,9 +279,26 @@ Runtime Config management 页面只展示 Platform frozen management contract �
 
 ## 14. Validation Snapshot
 
-本分支通过 GitHub Actions 执行 Foundation workflow。首轮 Admin `verify` 暴露 App Version numeric form resolver 类型错误；已修复为 `z.number()` + `valueAsNumber`，没有忽略失败。
+GitHub Actions Foundation workflow 在完整 Stage A code head `c2ad1b5b80c5c2495c33b3c8971d0b84ea69af69` 上完成真实验证：
 
-最终分支 validation 结果在最终 CI 完成后更新。
+```text
+Admin typecheck = PASS
+Admin lint      = PASS (0 errors; existing Fast Refresh warnings remain non-blocking)
+Admin unit      = PASS (16 files / 64 tests)
+Admin build     = PASS (Vite production build)
+Admin Playwright= PASS (7/7)
+Backend verify  = PASS
+Backend build   = PASS
+Backend integration = PASS
+Database test/validate = PASS
+Docs build      = PASS
+```
+
+首轮 Admin `verify` 曾暴露 App Version numeric form resolver 类型错误；已修复为 `z.number()` + React Hook Form `valueAsNumber`，随后完整 Admin CI 通过，没有忽略失败。
+
+同一 Foundation workflow 的 Mobile `verify` 仍失败；该 job 失败在本次 Platform Admin 变更之外，且本 PR 没有修改 `apps/mobile`。因此不把 Mobile 失败伪装成 Platform Admin PASS 证据，也不越界修改 Mobile。
+
+后续仅文档收口提交继续由 Docs build 验证；Stage A code validation 以以上完整 code head 结果为准。
 
 ## 15. Deferred Stage B
 
