@@ -36,7 +36,10 @@ const identityDependencies = createIdentityHttpDependencies({
 });
 await identityModule.registerHttp(app, identityDependencies);
 
-const platformComposition = buildPlatformModule(asExecutor(pool));
+const platformComposition = buildPlatformModule({
+  executor: asExecutor(pool),
+  transactionManager: new TransactionManager(pool, logger),
+});
 await platformModule.registerHttp(app, {
   executor: asExecutor(pool),
   featureFlagUseCases: platformComposition.featureFlagUseCases,

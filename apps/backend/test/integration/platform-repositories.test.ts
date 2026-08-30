@@ -275,6 +275,75 @@ integration('Platform repositories and use cases on real PostgreSQL', () => {
           updatePolicy: 'required',
         }),
       ).rejects.toThrow('no higher active released target exists');
+
+      // Edge test matrix: unknown build vs latest (latest is 20001)
+      // unknown < latest
+      const unknownBelow = await platform.appVersionUseCases.checkAppVersion(executor, {
+        clientPlatform: 'android',
+        currentVersion: '0.9.0',
+        buildNumber: 9000,
+      });
+      expect(unknownBelow).toMatchObject({
+        knownBuild: false,
+        supported: false,
+        updateAvailable: true,
+        updateRequired: true,
+        latestBuildNumber: 20001,
+        reason: 'unknown_build',
+      });
+
+      // unknown = latest build number (unknown build)
+      // Note: 20001 is known as version '2.0.0'. If we request an unknown build number like 20002:
+      // unknown > latest
+      const unknownAbove = await platform.appVersionUseCases.checkAppVersion(executor, {
+        clientPlatform: 'android',
+        currentVersion: '9.9.9',
+        buildNumber: 99999,
+      });
+      expect(unknownAbove).toMatchObject({
+        knownBuild: false,
+        supported: false,
+        updateAvailable: false,
+        updateRequired: true,
+        latestBuildNumber: 20001,
+        reason: 'unknown_build',
+      });
+
+      // Draft build edge matrix: draft < latest, draft = latest, draft > latest
+      // draft < latest
+      const draftBelow = await platform.appVersionUseCases.checkAppVersion(executor, {
+        clientPlatform: 'android',
+        currentVersion: '1.1.0',
+        buildNumber: 11001,
+      });
+      expect(draftBelow).toMatchObject({
+        knownBuild: true,
+        supported: false,
+        updateAvailable: true,
+        updateRequired: true,
+        latestBuildNumber: 20001,
+        reason: 'draft_build',
+      });
+
+      // create draft > latest
+      await platform.appVersionUseCases.createAppVersionDraft(executor, {
+        clientPlatform: 'android',
+        version: '3.0.0',
+        buildNumber: 30001,
+      });
+      const draftAbove = await platform.appVersionUseCases.checkAppVersion(executor, {
+        clientPlatform: 'android',
+        currentVersion: '3.0.0',
+        buildNumber: 30001,
+      });
+      expect(draftAbove).toMatchObject({
+        knownBuild: true,
+        supported: false,
+        updateAvailable: false,
+        updateRequired: true,
+        latestBuildNumber: 20001,
+        reason: 'draft_build',
+      });
     });
   });
 

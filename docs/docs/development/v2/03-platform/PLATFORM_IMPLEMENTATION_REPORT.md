@@ -10,14 +10,16 @@
 
 ## 1. Executive Summary
 
-Platform Domain (Phase 3) implementation is complete, following the frozen design documents (`PLATFORM_IMPLEMENTATION_PLAN.md`, `PLATFORM_USE_CASES.md`, `PLATFORM_CONFIG_CONTRACTS.md`, `PLATFORM_API.md`, and `PLATFORM_DESIGN_AUDIT.md`).
+Platform Domain (Phase 3) implementation and final audit hardening are complete, strictly adhering to the frozen design specifications (`PLATFORM_IMPLEMENTATION_PLAN.md`, `PLATFORM_USE_CASES.md`, `PLATFORM_CONFIG_CONTRACTS.md`, `PLATFORM_API.md`, and `PLATFORM_DESIGN_AUDIT.md`).
 
-Key achievements:
-1. **Physical Contract Correction**: Added forward-only migration `1250_platform_override_indexes.sql` establishing 3 partial UNIQUE indexes and 1 region reverse index without modifying frozen migration `0300_platform.sql`.
-2. **6 Frozen Tables**: Strict adherence to the 6 tables (`platform.feature_flags`, `platform.feature_flag_overrides`, `platform.runtime_configs`, `platform.app_versions`, `platform.announcements`, `platform.regions`). No additional tables created.
-3. **Use Cases**: All 33 required use cases implemented (Runtime and Management).
-4. **Architecture & Boundary**: Modular monolith structure under `apps/backend/src/modules/platform/` with isolated domain, application, infrastructure, http, and public contracts. Zero cross-domain SQL, zero HTTP SQL, zero leaks of internal BIGINTs. Reused Foundation `DatabaseExecutor` and `TransactionManager`.
-5. **No Premature Tech**: No Redis, no Kafka, no Memcached, no premature event outbox.
+Key achievements & audits:
+1. **HIGH-01 Transaction Boundary = FIXED**: `PlatformManagementService` explicitly orchestrates write operations via Foundation's `TransactionManager`, ensuring `FOR UPDATE` row locks and platform advisory locks run within dedicated single-transaction sessions.
+2. **HIGH-02 App Version updateAvailable = FIXED**: Corrected `updateAvailable` computation for unknown and draft builds using strict numeric comparison (`latestActive.buildNumber > buildNumber`).
+3. **MEDIUM-01 Race Test = FIXED**: Rewrote App Version concurrency tests with real `TransactionManager` sessions covering Race A (concurrent policy commands on same build) and Race B (concurrent block vs target modification protecting the higher-active-target invariant).
+4. **MEDIUM-02 Runtime Config Public Typing = FIXED**: Canonical config definitions (`platformDefaultLocaleConfig`, `platformSupportEmailConfig`, `platformMaintenanceNoticeUrlConfig`) are exported from `modules/platform/public/runtime-config-reader.ts` ensuring compile-time type safety with the runtime registry.
+5. **LOW-01 Root Export Boundary = FIXED**: Tightened `modules/platform/index.ts` to export only module bootstrap essentials (`platformModule`), preserving `modules/platform/public` as the sole cross-domain interface.
+6. **Physical Baseline**: Forward migration `1250_platform_override_indexes.sql` establishes 3 partial UNIQUE indexes and 1 region index with 0 changes to `0300_platform.sql`.
+7. **6 Frozen Tables**: Strict adherence to the 6 tables. Zero new tables, zero Redis/Kafka.
 
 ---
 
@@ -44,7 +46,7 @@ Key achievements:
 
 ### 3.2 Runtime Config
 - **Code Registry**: Defined in application layer (`RuntimeConfigRegistry`). Rejects unregistered keys.
-- **Type Safety**: Strictly validates against registered `valueType` and key-specific schemas.
+- **Type Safety**: Canonical definitions exported from `public/` prevent generic tampering. Strictly validates against registered `valueType` and key-specific schemas.
 - **Missing/Retired**: Returns fallback if defined on registry, otherwise throws `RUNTIME_CONFIG_UNAVAILABLE`.
 - **No Secret/Generic Dump**: Server-only by default; no generic public dump endpoint.
 
@@ -70,7 +72,7 @@ Key achievements:
 
 ### 4.1 Public Boundary (`modules/platform/public`)
 - `PlatformFeatureEvaluator`: `evaluateFeature`, `resolveFeatures`.
-- `PlatformRuntimeConfigReader`: `getRuntimeConfig`, `resolveRuntimeConfigs`.
+- `PlatformRuntimeConfigReader`: `getRuntimeConfig`, `resolveRuntimeConfigs` + canonical config definitions.
 - `PlatformRegionReader`: `getRegion`, `listActiveRegions`, `isRegionActive`.
 
 ### 4.2 Runtime HTTP Routes
@@ -88,7 +90,7 @@ All responses use strict Zod schemas and Foundation error envelopes. Zero intern
 
 ### 5.1 Test Results
 - **Unit Tests**: 16 test files, 45 tests passing (domain types, validation, registry, architecture checks, foundation).
-- **Integration Tests**: 17 test files, 100 tests passing on real PostgreSQL (Platform repositories, use cases, HTTP endpoints, race conditions, Identity regression).
+- **Integration Tests**: 17 test files, 101 tests passing on real PostgreSQL (Platform repositories, use cases, HTTP endpoints, race conditions, Identity regression).
 - **Database Baseline Validation**: 18 migrations applied cleanly, second run 0 executed (no-op), smoke tests PASS, zero cross-domain FKs, database audit PASS.
 
 ### 5.2 Findings

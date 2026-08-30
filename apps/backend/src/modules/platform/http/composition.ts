@@ -1,5 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import type { DatabaseExecutor } from '../../../database/executor.js';
+import type { TransactionManager } from '../../../database/transaction-manager.js';
 import {
   PostgresAnnouncementRepository,
   PostgresAppVersionRepository,
@@ -17,11 +18,15 @@ import {
   RuntimeConfigRegistry,
   RuntimeConfigUseCases,
 } from '../application/use-cases/index.js';
-import { PlatformPublicService } from '../application/services/platform-public-service.js';
+import {
+  PlatformManagementService,
+  PlatformPublicService,
+} from '../application/services/index.js';
 import { registerPlatformRuntimeRoutes } from './routes.js';
 
 export type PlatformModule = Readonly<{
   publicService: PlatformPublicService;
+  managementService?: PlatformManagementService | undefined;
   featureFlagUseCases: FeatureFlagUseCases;
   runtimeConfigUseCases: RuntimeConfigUseCases;
   appVersionUseCases: AppVersionUseCases;
@@ -31,7 +36,15 @@ export type PlatformModule = Readonly<{
   registerRoutes: (app: FastifyInstance) => Promise<void>;
 }>;
 
-export function buildPlatformModule(executor: DatabaseExecutor): PlatformModule {
+export type PlatformModuleOptions = Readonly<{
+  executor: DatabaseExecutor;
+  transactionManager?: TransactionManager | undefined;
+}>;
+
+export function buildPlatformModule(optionsOrExecutor: DatabaseExecutor | PlatformModuleOptions): PlatformModule {
+  const executor = 'executor' in optionsOrExecutor ? optionsOrExecutor.executor : optionsOrExecutor;
+  const transactionManager = 'transactionManager' in optionsOrExecutor ? optionsOrExecutor.transactionManager : undefined;
+
   const flagRepo = new PostgresFeatureFlagRepository();
   const overrideRepo = new PostgresFeatureFlagOverrideRepository();
   const configRepo = new PostgresRuntimeConfigRepository();
@@ -54,8 +67,20 @@ export function buildPlatformModule(executor: DatabaseExecutor): PlatformModule 
     regionUseCases,
   );
 
+  const managementService = transactionManager
+    ? new PlatformManagementService(
+        transactionManager,
+        featureFlagUseCases,
+        runtimeConfigUseCases,
+        appVersionUseCases,
+        announcementUseCases,
+        regionUseCases,
+      )
+    : undefined;
+
   return {
     publicService,
+    managementService,
     featureFlagUseCases,
     runtimeConfigUseCases,
     appVersionUseCases,
