@@ -1,7 +1,7 @@
 import pg from 'pg';
 import pino from 'pino';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
-import { createTestDatabase, type TestDatabase } from '../support/test-database.js';
+import { createEmptyTestDatabase, createPartialTestDatabase, createTestDatabase, type TestDatabase } from '../support/test-database.js';
 import { ProbeRepository } from '../support/probe-repository.js';
 import { asExecutor, createPgPool } from '../../src/database/pool.js';
 import { TransactionManager } from '../../src/database/transaction-manager.js';
@@ -12,6 +12,7 @@ import { EventHandlerRegistry } from '../../src/events/handler-registry.js';
 import { OutboxRepository } from '../../src/outbox/outbox-repository.js';
 import { OutboxPublisher } from '../../src/outbox/outbox-publisher.js';
 import { buildApp } from '../../src/bootstrap/build-app.js';
+import { requiredMigrations } from '../../src/database/required-migrations.generated.js';
 
 const adminUrl = process.env.ADMIN_DATABASE_URL;
 const integration = adminUrl ? describe : describe.skip;
@@ -74,5 +75,67 @@ integration('Foundation on a fresh PostgreSQL V2 database', () => {
     expect((await app.inject('/health/ready')).statusCode).toBe(200);
     expect((await pool.query(`SELECT count(*)::int AS count FROM public.v2_schema_migrations`)).rows[0].count).toBe(before);
     await app.close();
+  });
+
+  it('returns 503 for an empty database', async () => {
+    const empty = await createEmptyTestDatabase(adminUrl!, 'empty');
+    const emptyPool = createPgPool({ url: empty.url, poolMin: 0, poolMax: 1, connectionTimeoutMs: 2_000, idleTimeoutMs: 2_000 }, logger);
+    try {
+      const app = buildApp({ logger, database: asExecutor(emptyPool) });
+      expect((await app.inject('/health/ready')).statusCode).toBe(503);
+      await app.close();
+    } finally { await emptyPool.end(); await empty.dispose(); }
+  });
+
+  it('returns 503 when only the migration registry exists', async () => {
+    const registryOnly = await createEmptyTestDatabase(adminUrl!, 'registry');
+    const registryPool = createPgPool({ url: registryOnly.url, poolMin: 0, poolMax: 1, connectionTimeoutMs: 2_000, idleTimeoutMs: 2_000 }, logger);
+    try {
+      await registryPool.query(`CREATE TABLE public.v2_schema_migrations (
+        filename text PRIMARY KEY, sha256 char(64) NOT NULL, applied_at timestamptz NOT NULL DEFAULT now()
+      )`);
+      const app = buildApp({ logger, database: asExecutor(registryPool) });
+      expect((await app.inject('/health/ready')).statusCode).toBe(503);
+      await app.close();
+    } finally { await registryPool.end(); await registryOnly.dispose(); }
+  });
+
+  it('returns 503 for a genuinely partial frozen baseline', async () => {
+    const partial = await createPartialTestDatabase(adminUrl!, 3);
+    const partialPool = createPgPool({ url: partial.url, poolMin: 0, poolMax: 1, connectionTimeoutMs: 2_000, idleTimeoutMs: 2_000 }, logger);
+    try {
+      const count = await partialPool.query<{ count: number }>('SELECT count(*)::int AS count FROM public.v2_schema_migrations');
+      expect(count.rows[0]!.count).toBe(3);
+      const app = buildApp({ logger, database: asExecutor(partialPool) });
+      expect((await app.inject('/health/ready')).statusCode).toBe(503);
+      await app.close();
+    } finally { await partialPool.end(); await partial.dispose(); }
+  });
+
+  it('returns 503 for a missing required migration or checksum mismatch', async () => {
+    const target = requiredMigrations.at(-1)!;
+    const original = await pool.query<{ filename: string; sha256: string; applied_at: Date }>(
+      'DELETE FROM public.v2_schema_migrations WHERE filename=$1 RETURNING filename,sha256,applied_at', [target.filename],
+    );
+    const app = buildApp({ logger, database: asExecutor(pool) });
+    try {
+      expect((await app.inject('/health/ready')).statusCode).toBe(503);
+      await pool.query('INSERT INTO public.v2_schema_migrations(filename,sha256,applied_at) VALUES($1,$2,$3)', [original.rows[0]!.filename, original.rows[0]!.sha256, original.rows[0]!.applied_at]);
+      await pool.query('UPDATE public.v2_schema_migrations SET sha256=$2 WHERE filename=$1', [target.filename, '0'.repeat(64)]);
+      expect((await app.inject('/health/ready')).statusCode).toBe(503);
+    } finally {
+      await pool.query('UPDATE public.v2_schema_migrations SET sha256=$2 WHERE filename=$1', [target.filename, target.sha256]);
+      await app.close();
+    }
+    const restoredApp = buildApp({ logger, database: asExecutor(pool) });
+    expect((await restoredApp.inject('/health/ready')).statusCode).toBe(200);
+    await restoredApp.close();
+  });
+
+  it('returns 503 when PostgreSQL is unavailable', async () => {
+    const unavailable = createPgPool({ url: 'postgresql://invalid:invalid@127.0.0.1:1/invalid', poolMin: 0, poolMax: 1, connectionTimeoutMs: 100, idleTimeoutMs: 100 }, logger);
+    const app = buildApp({ logger, database: asExecutor(unavailable) });
+    try { expect((await app.inject('/health/ready')).statusCode).toBe(503); }
+    finally { await app.close(); await unavailable.end(); }
   });
 });

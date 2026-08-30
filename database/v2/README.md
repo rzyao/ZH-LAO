@@ -49,12 +49,16 @@ DATABASE_URL='postgresql://...' pnpm run validate
 ```
 
 Alternatively, omit `DATABASE_URL` and provide an admin connection. Validation
-then creates and retains a uniquely named `zh_lao_v2_validation_<timestamp>`
-database from `template0`:
+then creates a uniquely named `zh_lao_v2_validation_<timestamp>_<suffix>`
+database from `template0` and drops it in `finally`, including after failures:
 
 ```bash
 ADMIN_DATABASE_URL='postgresql://.../postgres' pnpm run validate
 ```
+
+Set `KEEP_VALIDATION_DATABASE=1` only when a temporary validation database must
+be retained for debugging. A database supplied explicitly through
+`DATABASE_URL` is never deleted by validation.
 
 Real credentials must remain in environment variables and must never be added
 to this directory. `.env.example` contains placeholders only.

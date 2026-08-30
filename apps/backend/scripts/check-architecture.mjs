@@ -29,7 +29,7 @@ for (const file of await walk(root)) {
     if (relative.includes('/http/') && /\.query\s*\(/.test(source)) errors.push(`${relative}: HTTP adapters must not execute SQL`);
   }
   if (!relative.startsWith('modules/') && relative !== 'main.ts' && relative !== 'worker.ts' && /from\s+['"].*modules\//.test(source)) errors.push(`${relative}: shared technical code must not depend on business modules`);
-  if (/database\/v2\/migrations|\bCREATE\s+(?:TABLE|SCHEMA)\b/i.test(source)) errors.push(`${relative}: application source must not manage the frozen schema`);
+  if (relative !== 'database/required-migrations.generated.ts' && /database\/v2\/migrations|\bCREATE\s+(?:TABLE|SCHEMA)\b/i.test(source)) errors.push(`${relative}: application source must not manage the frozen schema`);
 }
 
 if (errors.length) {

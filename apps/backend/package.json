@@ -6,14 +6,16 @@
   "engines": { "node": ">=22" },
   "packageManager": "pnpm@10.20.0",
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
+    "build": "pnpm manifest:check && tsc -p tsconfig.build.json",
     "dev": "tsx --env-file-if-exists=.env watch src/main.ts",
     "start": "node --env-file-if-exists=.env dist/main.js",
     "worker": "node --env-file-if-exists=.env dist/worker.js",
-    "typecheck": "tsc --noEmit",
+    "manifest:generate": "node scripts/generate-migration-manifest.mjs",
+    "manifest:check": "node scripts/generate-migration-manifest.mjs --check",
+    "typecheck": "pnpm manifest:check && tsc --noEmit",
     "lint": "eslint . && node scripts/check-architecture.mjs",
     "test": "vitest run --exclude test/integration/**",
-    "test:integration": "vitest run test/integration --passWithNoTests",
+    "test:integration": "vitest run test/integration",
     "verify": "pnpm typecheck && pnpm lint && pnpm test"
   },
   "dependencies": {

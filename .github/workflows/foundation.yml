@@ -28,4 +28,5 @@ jobs:
       - run: pnpm --dir apps/backend verify
       - run: pnpm --dir apps/backend build
       - run: pnpm --dir apps/backend test:integration
+      - run: pnpm --dir database/v2 test
       - run: pnpm --dir database/v2 validate

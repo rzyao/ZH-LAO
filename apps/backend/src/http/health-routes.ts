@@ -1,15 +1,11 @@
 import type { FastifyInstance } from 'fastify';
 import type { DatabaseExecutor } from '../database/executor.js';
+import { hasCompatibleBaseline } from '../database/migration-compatibility.js';
 
 export type ReadinessState = { isShuttingDown: boolean };
 export async function checkReadiness(executor: DatabaseExecutor, state: ReadinessState): Promise<boolean> {
   if (state.isShuttingDown) return false;
-  const result = await executor.query<{ database_ok: boolean }>(`
-    SELECT (to_regclass('infrastructure.assets') IS NOT NULL
-      AND to_regclass('infrastructure.system_outbox_events') IS NOT NULL
-      AND to_regclass('public.v2_schema_migrations') IS NOT NULL) AS database_ok
-  `);
-  return result.rows[0]?.database_ok === true;
+  return hasCompatibleBaseline(executor);
 }
 
 export function registerHealthRoutes(app: FastifyInstance, executor: DatabaseExecutor, state: ReadinessState): void {

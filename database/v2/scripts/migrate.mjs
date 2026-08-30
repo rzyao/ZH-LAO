@@ -1,11 +1,7 @@
-import { createHash } from 'node:crypto';
-import { readdir, readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
-import path from 'node:path';
 import { requireDatabaseUrl, withClient } from './db.mjs';
+import { loadRequiredMigrations } from './migration-files.mjs';
 
-const here = path.dirname(fileURLToPath(import.meta.url));
-const migrationsDir = path.resolve(here, '..', 'migrations');
 const lockKey = 894_222_002;
 
 export async function migrate(connectionString = requireDatabaseUrl()) {
@@ -20,9 +16,7 @@ export async function migrate(connectionString = requireDatabaseUrl()) {
         )
       `);
 
-      const files = (await readdir(migrationsDir))
-        .filter((name) => /^\d{4}_[a-z0-9_]+\.sql$/.test(name))
-        .sort();
+      const migrations = await loadRequiredMigrations();
       const appliedResult = await client.query(
         'SELECT filename, sha256 FROM public.v2_schema_migrations ORDER BY filename',
       );
@@ -30,9 +24,7 @@ export async function migrate(connectionString = requireDatabaseUrl()) {
       const executed = [];
       const skipped = [];
 
-      for (const filename of files) {
-        const sql = await readFile(path.join(migrationsDir, filename), 'utf8');
-        const sha256 = createHash('sha256').update(sql).digest('hex');
+      for (const { filename, sha256, sql } of migrations) {
         if (applied.has(filename)) {
           if (applied.get(filename) !== sha256) {
             throw new Error(`Applied migration checksum mismatch: ${filename}`);

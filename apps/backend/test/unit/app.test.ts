@@ -5,8 +5,14 @@ import { AppError } from '../../src/errors/app-error.js';
 import { requireAuthentication } from '../../src/auth/auth-hook.js';
 import { newLogicalUuid } from '../../src/ids/uuid.js';
 import type { DatabaseExecutor } from '../../src/database/executor.js';
+import { requiredMigrations } from '../../src/database/required-migrations.generated.js';
 
-const database = { query: async () => ({ rows: [{ database_ok: true }], rowCount: 1, command: 'SELECT', oid: 0, fields: [] }) } as DatabaseExecutor;
+const database = { query: async (text: string) => ({
+  rows: text.includes('to_regclass')
+    ? [{ registry: 'v2_schema_migrations', assets: 'infrastructure.assets', outbox: 'infrastructure.system_outbox_events' }]
+    : requiredMigrations.map(({ filename, sha256 }) => ({ filename, sha256 })),
+  rowCount: 1, command: 'SELECT', oid: 0, fields: []
+}) } as DatabaseExecutor;
 const logger = pino({ level: 'silent' });
 
 describe('Fastify foundation', () => {
