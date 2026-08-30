@@ -1,0 +1,3 @@
+import { describe,expect,it } from 'vitest';
+import { FakeFacebookCredentialVerifier,UnavailableFacebookCredentialVerifier } from '../../src/modules/identity/application/services/index.js';
+describe('FacebookCredentialVerifier',()=>{it('only returns server-mapped subjects',async()=>{const verifier=new FakeFacebookCredentialVerifier(new Map([['opaque','subject-1']]));await expect(verifier.verify('opaque')).resolves.toEqual({providerSubject:'subject-1'});await expect(verifier.verify('subject-1')).rejects.toMatchObject({code:'INVALID_CREDENTIAL'});});it('does not silently use fake in production boundary',async()=>{await expect(new UnavailableFacebookCredentialVerifier().verify('opaque')).rejects.toMatchObject({code:'PROVIDER_UNAVAILABLE'});});});

@@ -4,3 +4,7 @@ export * from './services/index.js';
 export * from './use-cases/request-phone-otp.js';
 export * from './use-cases/authenticate-with-phone-otp.js';
 export * from './use-cases/session-device-lifecycle.js';
+export * from './use-cases/authenticate-with-facebook.js';
+export * from './use-cases/phone-credential-operations.js';
+export * from './use-cases/profile-operations.js';
+export * from './use-cases/identity-state.js';
