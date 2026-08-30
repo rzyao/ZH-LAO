@@ -1,11 +1,12 @@
 ---
 status: frozen
 last_updated: 2026-08-30
+schema: content
 ---
 
 # Knowledge 规格
 
-所有表使用 PostgreSQL BIGINT Identity 或以 `content_id` 为主键；默认删除策略是 `RESTRICT/NO ACTION`。核心知识不物理删除，通过 `contents.status=active/disabled/archived` 下架。
+所有表位于 `content` Schema，使用 PostgreSQL BIGINT Identity 或以 `content_id` 为主键（域内真实 FK）；默认删除策略是 `RESTRICT/NO ACTION`。核心知识不物理删除，通过 `contents.status=active/disabled/archived` 下架。
 
 ## Content Registry
 
@@ -14,13 +15,13 @@ last_updated: 2026-08-30
 | 字段 | 类型/约束 |
 | --- | --- |
 | `id` | `bigint generated always as identity primary key` |
-| `public_id` | `varchar(32) not null unique` |
+| `public_id` | `uuid not null unique`（应用层生成、不可变；跨域 logical ID，D-150） |
 | `language` | `varchar(8) not null check (zh, lo)` |
 | `content_type` | `varchar(32) not null`; 仅 `zh_pinyin/zh_hanzi/zh_word/zh_sentence/lo_letter/lo_syllable/lo_word/lo_sentence` |
 | `status` | `varchar(16) not null default active`; 仅 `active/disabled/archived` |
 | `created_at, updated_at` | `timestamptz not null default now()` |
 
-写入专用知识表时，Learning Service 必须校验 `content_type` 与表一致。
+写入专用知识表时，Content Service 必须校验 `content_type` 与表一致。
 
 ## 中文知识
 
@@ -53,8 +54,8 @@ last_updated: 2026-08-30
 | 表 | 冻结字段与约束 |
 | --- | --- |
 | `meanings` | `id bigint identity PK`、`content_id bigint not null FK → contents`、`language varchar(8) not null check zh/lo`、`word_class varchar(32)`、`definition text not null`、`sense_order smallint not null default 1 check >0`、`status varchar(16) not null default active check active/disabled`、审计时间；UNIQUE `(content_id,language,sense_order)`。 |
-| `translations` | `id bigint identity PK`、`content_id bigint not null FK → contents`、`language varchar(8) not null check zh/lo`、`text text not null`、`is_primary boolean not null default false`、审计时间；partial UNIQUE `(content_id,language) WHERE is_primary`。主要服务 Sentence 与自由文本；Word 优先使用 Meaning/Equivalent。 |
+| `translations` | `id bigint identity PK`、`content_id bigint not null FK → contents`、`language varchar(8) not null check zh/lo`、`text text not null`、`is_primary boolean not null default false`、审计时间；partial UNIQUE `(content_id,language) WHERE is_primary`。主要服务 Sentence 与自由文本；Word 优先使用 Meaning/Equivalent。**canonical 教学翻译**（D-151）：仅存人工确认的正式翻译；用户即时 AI 翻译请求归 `learning.translation_requests`。 |
 | `examples` | `id bigint identity PK`、`content_id bigint not null FK → contents`、`meaning_id bigint FK → meanings`、`sentence_content_id bigint not null FK → contents`、`sort_order smallint not null default 1 check >0`、`created_at timestamptz not null default now()`；UNIQUE `(content_id,sentence_content_id,meaning_id)`。 `meaning_id null` 表示通用例句。 |
-| `pronunciations` | `id bigint identity PK`、`content_id bigint not null FK → contents`、`pronunciation_text varchar(256)`、`pronunciation_key varchar(128)`、`accent varchar(32)`、`source varchar(16) not null check human/tts/system`、`is_primary boolean not null default false`、审计时间。音频不在本表。 |
+| `pronunciations` | `id bigint identity PK`、`content_id bigint not null FK → contents`、`pronunciation_text varchar(256)`、`pronunciation_key varchar(128)`、`accent varchar(32)`、`source varchar(16) not null check human/tts/system`、`is_primary boolean not null default false`、审计时间。**本表只保存发音知识属性，不保存任何音频文件事实。** |
 
-`pronunciation_audios` 的完整规格在 [AI & Media](ai-media.md)。
+> 旧 `pronunciation_audios` / `tts_jobs` 已 `superseded`（D-145）：音频的生产、版本、审核与发布统一归 [Audio Production Domain](../audio/database.md)（Slot → Task → Generation Attempt → Asset Version → Review），Content 只经 `audio_slots.source_domain='content'` 提供内容 logical UUID，并消费最终正式音频（`official_asset_version_id`）。字段级迁移记录见 [Learning 数据库](../learning/database.md)。

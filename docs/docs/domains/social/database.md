@@ -21,7 +21,7 @@ Social Schema 第一阶段冻结为 **19 张表**（原 20 张，`social_reports
 
 - Social 内部继续使用 `BIGINT GENERATED ALWAYS AS IDENTITY` 主键与域内真实 FK；**BIGINT 不允许作为跨域契约暴露**（[D-136](../../governance/design-register.md)，与 [D-097/D-098](../../governance/design-register.md)、ADR-018 一致）。
 - 六个可被 Trust/Chat/Operations 引用的实体拥有稳定 `public_id UUID NOT NULL DEFAULT gen_random_uuid() UNIQUE`：Profile、Profile Photo、Profile Prompt、Match、Post、Post Comment。
-- 跨域字段一律 logical UUID 且**无物理 FK**：`social_profiles.user_id UUID`（Identity）、`social_profile_photos.media_id UUID` 与 `social_post_media.media_id UUID`（Media/Asset）。Chat 引用 Match 只能存 `match_public_id`；Trust 举报 Social 内容用 `subject_domain='social' + subject_type + public_id`。
+- 跨域字段一律 logical UUID 且**无物理 FK**：`social_profiles.user_id UUID`（Identity）、`social_profile_photos.media_id UUID` 与 `social_post_media.media_id UUID`（Media/Asset）。当前 V1 Chat 不引用 Match（Chat 表不保存 `match_id`，聊天权限在发送时由 `canChat()` 读取 Social 事实判断）；未来如果确实形成跨域契约，则只能使用 Match stable logical UUID（`match_public_id`）。Trust 举报 Social 内容用 `subject_domain='social' + subject_type + public_id`。
 
 ## 完整性与服务边界
 

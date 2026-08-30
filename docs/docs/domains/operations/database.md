@@ -20,14 +20,14 @@ operations
 └── operator_audit_logs  （10 字段，append-only，无状态）
 ```
 
-## ID 与跨域引用约定（本会话确认）
+## ID 与跨域引用约定（D-153 全局分区收口修订，frozen）
 
-- **Operator / Role / Audit Log 的 `id` 用 `varchar(20)`**：应用层统一 ID 生成机制产生稳定系统 ID（如 `op_xxx` / `role_xxx` / `log_xxx`），**不重新切成 `bigint identity`**。后台主体属于稳定的“系统主体”，后续其他域保存 `reviewed_by_operator_id` / `created_by_operator_id` 等审计引用时都使用该稳定 ID。
+- **Operator / Role / Audit Log 的 `id` 统一为 `uuid`**（应用层生成、不可变）。Operator 会被 Audio（`assignee_operator_id` / `reviewer_operator_id` / `producer_operator_id` / `created_by_operator_id`）等域引用，其 `id` 即对外稳定 UUID logical/public ID，全系统只有这一套 Operator ID 契约（不再有 `op_xxx` / `sys_xxx` / `varchar(20)` 历史方案）。
 - **域内关系建真实 FK**：`operator_roles` → `operators`/`roles`，`role_permissions` → `roles`，`operator_audit_logs` → `operators`，全部 `ON DELETE RESTRICT`。
 - **跨域只做 logical reference，不建物理 FK**：
-  - `operators.auth_subject_id` → Identity/Auth 域认证主体的稳定逻辑 ID（`sys_xxx`），`UNIQUE`，**无 FK**。
-  - `operator_audit_logs.target_domain + target_type + target_id` → 其他业务域实体的 stable logical ID（polymorphic logical reference），**无 FK**。
-- **明确禁止**：跨域 `REFERENCES identity.*`、根据 `target_domain` 动态验证外域 FK 的 Trigger、把 Operations 变成业务域聚合层。
+  - `operators.auth_subject_id uuid` → Identity/Auth 域认证主体的稳定 UUID logical reference，`UNIQUE`，**无 FK**。
+  - `operator_audit_logs.target_domain + target_type + target_id uuid` → 其他业务域实体的稳定 UUID logical ID（polymorphic logical reference，符合全局跨域多态规范），**无 FK**。
+- **明确禁止**：跨域 `REFERENCES identity.*`、根据 `target_domain` 动态验证外域 FK 的 Trigger、把 Operations 变成业务域聚合层、以及任何 UUID / VARCHAR 两套并存的 operator ID 契约。
 
 ---
 
@@ -43,8 +43,8 @@ operations
 
 | 字段 | 类型 | Null | 默认值 | 说明 |
 | --- | --- | ---: | --- | --- |
-| `id` | `varchar(20)` | NO | — | Operator 稳定 ID（应用层生成） |
-| `auth_subject_id` | `varchar(20)` | NO | — | Identity/Auth 认证主体稳定逻辑引用，`UNIQUE`，无跨域 FK |
+| `id` | `uuid` | NO | — | Operator 稳定 ID（应用层生成、不可变；即跨域引用的 logical/public ID，D-153） |
+| `auth_subject_id` | `uuid` | NO | — | Identity/Auth 认证主体稳定 UUID 逻辑引用，`UNIQUE`，无跨域 FK |
 | `display_name` | `varchar(100)` | NO | — | 后台展示名称（非登录账号，不 UNIQUE） |
 | `status` | `varchar(20)` | NO | `'active'` | `active` / `disabled` |
 | `created_at` | `timestamptz` | NO | `now()` | 创建时间 |
@@ -55,7 +55,6 @@ operations
 - `PK(id)`
 - `UNIQUE(auth_subject_id)`：一个 Auth 主体最多对应一个 Operator（`1 auth subject → 0..1 operator`）。
 - `CHECK`：
-  - `btrim(auth_subject_id) <> ''`
   - `btrim(display_name) <> ''`
   - `status IN ('active','disabled')`
 - **额外 INDEX：0**（Operator 数量极小，PK 与 UNIQUE 自带索引已足够；`status`/`created_at`/`display_name` 不建索引是有意设计）。
@@ -77,8 +76,8 @@ operations
 
 ```sql
 CREATE TABLE operations.operators (
-    id              varchar(20)  NOT NULL,
-    auth_subject_id varchar(20)  NOT NULL,
+    id              uuid         NOT NULL,
+    auth_subject_id uuid         NOT NULL,
     display_name    varchar(100) NOT NULL,
     status          varchar(20)  NOT NULL DEFAULT 'active',
     created_at      timestamptz  NOT NULL DEFAULT now(),
@@ -89,9 +88,6 @@ CREATE TABLE operations.operators (
 
     CONSTRAINT uq_operators_auth_subject_id
         UNIQUE (auth_subject_id),
-
-    CONSTRAINT ck_operators_auth_subject_id_not_blank
-        CHECK (btrim(auth_subject_id) <> ''),
 
     CONSTRAINT ck_operators_display_name_not_blank
         CHECK (btrim(display_name) <> ''),
@@ -128,7 +124,7 @@ CREATE TABLE operations.operators (
 
 | 字段 | 类型 | Null | 默认值 | 说明 |
 | --- | --- | ---: | --- | --- |
-| `id` | `varchar(20)` | NO | — | Role ID |
+| `id` | `uuid` | NO | — | Role ID（应用层生成、不可变；域内被 `operator_roles` / `role_permissions` 引用，不对外跨域暴露） |
 | `code` | `varchar(50)` | NO | — | 稳定机器标识，`UNIQUE`，创建后不可修改 |
 | `name` | `varchar(100)` | NO | — | 后台展示名称（可修改，不 UNIQUE） |
 | `description` | `varchar(500)` | YES | — | 角色说明 |
@@ -164,7 +160,7 @@ CREATE TABLE operations.operators (
 
 ```sql
 CREATE TABLE operations.roles (
-    id          varchar(20)  NOT NULL,
+    id          uuid         NOT NULL,
     code        varchar(50)  NOT NULL,
     name        varchar(100) NOT NULL,
     description varchar(500),
@@ -214,8 +210,8 @@ Operator ↔ Role 的标准多对多关系表。
 
 | 字段 | 类型 | Null | 默认值 |
 | --- | --- | ---: | --- |
-| `operator_id` | `varchar(20)` | NO | — |
-| `role_id` | `varchar(20)` | NO | — |
+| `operator_id` | `uuid` | NO | — |
+| `role_id` | `uuid` | NO | — |
 | `created_at` | `timestamptz` | NO | `now()` |
 
 **不需要单独 `id`**；不建 `status`（授权存在 = 有记录，撤销 = 删除记录，历史进审计）；不建 `assigned_at`（与 `created_at` 重复）；不建 `assigned_by_operator_id`（授权动作应记录在 `operator_audit_logs`）。
@@ -240,8 +236,8 @@ Operator ↔ Role 的标准多对多关系表。
 
 ```sql
 CREATE TABLE operations.operator_roles (
-    operator_id varchar(20) NOT NULL,
-    role_id     varchar(20) NOT NULL,
+    operator_id uuid NOT NULL,
+    role_id     uuid NOT NULL,
     created_at  timestamptz NOT NULL DEFAULT now(),
 
     CONSTRAINT pk_operator_roles
@@ -274,7 +270,7 @@ CREATE INDEX idx_operator_roles_role
 
 | 字段 | 类型 | Null | 默认值 |
 | --- | --- | ---: | --- |
-| `role_id` | `varchar(20)` | NO | — |
+| `role_id` | `uuid` | NO | — |
 | `permission_key` | `varchar(100)` | NO | — |
 | `created_at` | `timestamptz` | NO | `now()` |
 
@@ -318,7 +314,7 @@ Role 撤销一个权限 = `DELETE` 关系记录；重要后台管理操作（`op
 
 ```sql
 CREATE TABLE operations.role_permissions (
-    role_id        varchar(20)  NOT NULL,
+    role_id        uuid         NOT NULL,
     permission_key varchar(100) NOT NULL,
     created_at     timestamptz  NOT NULL DEFAULT now(),
 
@@ -347,12 +343,12 @@ CREATE TABLE operations.role_permissions (
 
 | 字段 | 类型 | Null | 默认值 | 说明 |
 | --- | --- | ---: | --- | --- |
-| `id` | `varchar(20)` | NO | — | Audit Log ID |
-| `operator_id` | `varchar(20)` | NO | — | 操作者（域内 FK） |
+| `id` | `uuid` | NO | — | Audit Log ID（应用层生成、不可变） |
+| `operator_id` | `uuid` | NO | — | 操作者（域内 FK → operators.id） |
 | `action_key` | `varchar(100)` | NO | — | 操作（`<domain>.<resource>.<action>`） |
 | `target_domain` | `varchar(50)` | YES | — | 目标所属 Domain |
 | `target_type` | `varchar(50)` | YES | — | 目标类型 |
-| `target_id` | `varchar(20)` | YES | — | 目标业务实体 stable logical ID |
+| `target_id` | `uuid` | YES | — | 目标业务实体稳定 UUID logical ID（跨域多态引用，D-153） |
 | `request_id` | `varchar(64)` | YES | — | 请求链路 ID（非 UNIQUE，一个请求可产生多个审计动作） |
 | `ip_address` | `inet` | YES | — | 操作者来源 IP（用 PostgreSQL 原生 `inet`，不用 `varchar(45)`） |
 | `details` | `jsonb` | NO | `{}` | 必要的操作上下文快照 |
@@ -364,21 +360,21 @@ CREATE TABLE operations.role_permissions (
 
 ### `target_domain / target_type / target_id`
 
-全部是**弱逻辑引用（polymorphic logical reference）**，指向其他业务域实体的 stable logical ID（`trust/case/xxx`、`commerce/refund/rf_xxx` 等）。**绝不建立跨域 FK，也禁止根据 `target_domain` 设计触发器动态验证外域 FK。**
+全部是**弱逻辑引用（polymorphic logical reference）**，指向其他业务域实体的稳定 UUID logical ID（如 `trust` 域某 case 的 UUID、`commerce` 域某 refund 的 UUID）。**绝不建立跨域 FK，也禁止根据 `target_domain` 设计触发器动态验证外域 FK。**
 
 合法组合只有三种（`target_id` 可以为空，如集合/导出类操作）：
 
 ```text
-NULL            / NULL           / NULL
-commerce        / order          / NULL
-commerce        / refund         / rf_xxx
+NULL     / NULL    / NULL
+commerce / order   / NULL
+commerce / refund  / <refund uuid>
 ```
 
-不允许 `NULL/refund/rf_xxx` 或 `commerce/NULL/rf_xxx`。
+不允许 `NULL/refund/<uuid>` 或 `commerce/NULL/<uuid>`。
 
 ### `details jsonb`
 
-少数明确合理使用 JSONB 的地方（小型上下文快照、无法稳定建模的附属信息，如 `{"role_id": "role_xxx"}`、`{"reason_code": "manual_review"}`）。**禁止放**：password、token、authorization header、完整用户资料/订单/聊天消息、银行卡信息、支付凭据、大对象快照；也不得把已有结构化字段（`targetDomain`/`targetId`/`action`）再复制进去。
+少数明确合理使用 JSONB 的地方（小型上下文快照、无法稳定建模的附属信息，如 `{"role_id": "<role uuid>"}`、`{"reason_code": "manual_review"}`）。**禁止放**：password、token、authorization header、完整用户资料/订单/聊天消息、银行卡信息、支付凭据、大对象快照；也不得把已有结构化字段（`targetDomain`/`targetId`/`action`）再复制进去。
 
 ### 为什么没有 `status / result`
 
@@ -393,7 +389,6 @@ commerce        / refund         / rf_xxx
   - `target_domain` 非空则 `~ '^[a-z][a-z0-9_]*$'`
   - `target_type` 非空则 `~ '^[a-z][a-z0-9_]*$'`
   - `target_reference`：全空 或（domain 非空 AND type 非空）
-  - `target_id` 非空则 `btrim(target_id) <> ''`
   - `request_id` 非空则 `btrim(request_id) <> ''`
   - `jsonb_typeof(details) = 'object'`
 
@@ -421,13 +416,13 @@ commerce        / refund         / rf_xxx
 
 ```sql
 CREATE TABLE operations.operator_audit_logs (
-    id            varchar(20)  NOT NULL,
-    operator_id   varchar(20)  NOT NULL,
+    id            uuid         NOT NULL,
+    operator_id   uuid         NOT NULL,
     action_key    varchar(100) NOT NULL,
 
     target_domain varchar(50),
     target_type   varchar(50),
-    target_id     varchar(20),
+    target_id     uuid,
 
     request_id    varchar(64),
     ip_address    inet,
@@ -466,9 +461,6 @@ CREATE TABLE operations.operator_audit_logs (
                 AND target_type IS NOT NULL
             )
         ),
-
-    CONSTRAINT ck_operator_audit_logs_target_id_not_blank
-        CHECK (target_id IS NULL OR btrim(target_id) <> ''),
 
     CONSTRAINT ck_operator_audit_logs_request_id_not_blank
         CHECK (request_id IS NULL OR btrim(request_id) <> ''),
@@ -510,11 +502,11 @@ CREATE INDEX idx_operator_audit_logs_request_id
 | 单实例单库 + 多 Schema | 使用 `operations` Schema ✅ |
 | 表名复数 snake_case | `operators`/`roles`/`operator_roles`/`role_permissions`/`operator_audit_logs` ✅ |
 | 时间统一 `timestamptz` | 全部 `timestamptz`，默认 `now()` ✅ |
-| 主键类型由各域自行决定 | `varchar(20)` 稳定系统 ID（后台主体属系统主体，不切 `bigint identity`）✅ 自定义 |
-| 跨域 logical reference 不建物理 FK | `auth_subject_id` / `target_*` 均为 logical reference，无跨域 FK ✅ |
+| 主键类型由各域自行决定 | `uuid` 稳定系统 ID（应用层生成；后台主体需被跨域引用，D-153 统一 UUID）✅ 自定义 |
+| 跨域 logical reference 不建物理 FK | `auth_subject_id` / `target_*` 均为 UUID logical reference，无跨域 FK ✅ |
 | 域内真实 FK | 域内 4 处 FK 全部真实 `REFERENCES`，`ON DELETE RESTRICT` ✅ |
 | 状态优先 `varchar + CHECK` | `status`/`action_key`/`permission_key` 均 `varchar + CHECK` ✅ |
 | JSONB 只存真正动态的数据 | `operator_audit_logs.details` 为明确合理例外（必须 object）✅ |
 | 删除策略按业务决定 | operators/roles → disabled；关系表 → 解绑删除；audit → 永久保留 ✅ |
 
-**待主会话裁决**：Operations 的稳定逻辑 ID 为 `varchar(20)`（`op_xxx`/`role_xxx`/`sys_xxx`），而全局「ID 策略」规定跨域 logical ID 统一采用 UUID；该类型差异（及与 `public_id` 前缀方案的联动）由主会话统一裁决，裁决前不影响本域逻辑模型。
+**已裁决（D-153，frozen）**：早期 `varchar(20)` 稳定逻辑 ID 方案（`op_xxx`/`role_xxx`/`sys_xxx`）`superseded`；Operations 全部 ID 与跨域引用统一为 UUID，与全局「跨域 logical ID 统一采用 UUID」的 ID 策略一致，无 VARCHAR / UUID 双契约。

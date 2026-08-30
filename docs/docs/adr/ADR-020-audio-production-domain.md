@@ -19,14 +19,15 @@ Learning 域早期设计（D-028）把发音音频（`learning.pronunciation_aud
 
 ## 决策
 
-1. **Audio Production Domain 独立成域**：第 10 个业务域，Schema `audio`，业务表固定 9 张（slots / tasks / generation_attempts / asset_versions / reviews / task_events / task_batches / task_batch_items / default_presets）。业务 Schema 总数由 9 变为 10（修订 D-005 / D-006 计数）。
+1. **Audio Production Domain 独立成域**：Schema `audio`，业务表固定 9 张（slots / tasks / generation_attempts / asset_versions / reviews / task_events / task_batches / task_batch_items / default_presets）。（历史计数：本 ADR 成立时业务 Schema 由 9 变为 10；[ADR-021](ADR-021-content-and-learning-domain-split.md) 拆分 Content 后，当前最终业务 Schema 总数为 **11**。）
 2. **业务音频需求统一用 Slot 定位**：`source_domain + content_entity_type + content_entity_id + language_code + audio_role` 唯一确定一个逻辑音频槽位；Audio 不理解 Content 内部业务模型。
 3. **正式音频唯一事实源**：`audio_slots.official_asset_version_id` 是某 Slot 当前正式音频的唯一 canonical pointer；Asset Version 不维护 `is_current` / `is_official` / `is_primary` 等重复事实；fresh/stale 判定不清空 pointer。
 4. **Content 与 Audio 职责边界（C 模式，经 [ADR-021](ADR-021-content-and-learning-domain-split.md)/D-148 修订）**：Content 发起需求并拥有 canonical 内容与规范发音（修订自原「Learning 拥有」表述）；Audio 独立完成生产并保存「当时用什么输入生产」的快照（revision + text/pronunciation snapshot + input hash）。
 5. **失败语义二分**：技术失败 = 同 Task 新 Attempt；审核 Reject = 旧 Task 结束 + successor Task（`predecessor_task_id` 链）；Reject 不自动重产；一次生产只产生一个候选；一个 Asset Version 只有一个文件。
 6. **Review 与 Publish 分离**：审核事实 append-only 存 `audio_reviews`；`approved ≠ published`；发布是切换 official pointer 的原子事务。
 7. **TTS 配置归 TTS 服务**：Provider / Model / Voice / Preset 参数及历史由 TTS 服务自维护；Audio 只保存 `tts_preset_key` 使用事实与 `audio_default_presets` 默认映射；TTS 异步执行、生成后自行上传 Cloudflare R2、不留原始文件。
-8. 文件生命周期：曾正式发布的文件永久保留；从未发布且 rejected 的文件经 `pending_delete → deleted / delete_failed` 异步清理，不建独立 cleanup jobs 表。
+8. 文件生命周期（经 D-152 修订）：**物理文件事实（storage_key / mime / size / checksum / codec 及物理删除生命周期）的唯一 canonical owner 是 Media/Asset Infrastructure（D-127）**；`audio_asset_versions` 只保存 `asset_id` logical UUID 与音频业务事实（版本关系、审核、发布、时长/采样率/声道），不自持存储元数据、不建物理删除重试字段。曾正式发布的文件永久保留；从未发布且 rejected 的文件清理由 Asset Infrastructure 依据 Audio 的业务资格（`review_status=rejected` 且从未发布）异步执行，不建独立 cleanup jobs 表。
+9. **Operator 引用统一 UUID（D-153）**：`assignee_operator_id` / `reviewer_operator_id` / `producer_operator_id` / `created_by_operator_id` 等全部与 `operations.operators.id`（UUID）类型一致。
 
 取代关系：Learning 旧 `pronunciation_audios` / `tts_jobs` 表设计（D-028 表级）`superseded`；D-129 中「TTS 路由配置落表归 Learning」的遗留问题由本 ADR 解决（归 TTS 服务 + audio 域默认映射）。
 
@@ -50,13 +51,13 @@ Learning 域早期设计（D-028）把发音音频（`learning.pronunciation_aud
 
 ### 代价与风险
 
-- 业务 Schema 由 9 增至 10，模块化单体的模块边界多一层维护成本。
-- 与 D-127「Media/Asset Infrastructure 为所有 asset_id 权威技术属主」存在边界衔接问题：本域 Asset 自持 `storage_key` / mime / size / checksum 而非统一 `asset_id`。待主会话裁决（designing）。
-- Learning/Content 必建表计数（43，拆分后按职责归属 `content.*`/`learning.*`）需调整并迁移旧表数据；迁移方式待主会话确认（联动 D-145/D-147）。
+- 模块化单体的模块边界多一层维护成本。
+- ~~与 D-127「Media/Asset Infrastructure 为所有 asset_id 权威技术属主」存在边界衔接问题~~ → **已裁决（D-152）**：Asset Version 不再自持 `storage_key` / mime / size / checksum，统一保存 `asset_id` logical UUID。
+- ~~Learning/Content 必建表计数与旧表迁移待确认~~ → **已裁决（D-145/D-150）**：`pronunciation_audios` / `tts_jobs` 不再建表；原 43 张表定稿为 Content 31 + Learning 10。
 - 审核/发布/批处理全部依赖应用层事务保证一致性（数据库不做触发器）。
 
 ## 后续行动
 
-- [ ] 主会话裁决 audio 域 R2 文件事实与 Platform Media/Asset Infrastructure（D-127）的边界归属。
-- [ ] 主会话确认 `learning.pronunciation_audios` / `learning.tts_jobs` 的删除与数据迁移方式，并确认 Learning 必建表计数调整。
-- [ ] Operations logical ID 类型口径（会话称 UUID vs D-107 `varchar(20)`）随既有未决项统一裁决。
+- [x] ~~主会话裁决 audio 域 R2 文件事实与 Platform Media/Asset Infrastructure（D-127）的边界归属~~ → 已由 D-152 裁决：统一 `asset_id`，Asset Infrastructure 为唯一文件事实 owner。
+- [x] ~~主会话确认 `learning.pronunciation_audios` / `learning.tts_jobs` 的删除与数据迁移方式，并确认 Learning 必建表计数调整~~ → 已由 D-145/D-150 裁决。
+- [x] ~~Operations logical ID 类型口径~~ → 已由 D-153 裁决：统一 UUID。

@@ -9,7 +9,7 @@
 - 产品是双边平台：学习负责获客与留存，社交负责关系，商业化主要围绕社交效率和虚拟礼物。
 - 后端采用模块化单体；一个 PostgreSQL 实例、一个主库、十一个业务 Schema（无 community Schema；Platform Infrastructure 含 outbox/asset 不计入业务 Schema）。
 - 一级域（11 个业务域）：Identity、Content、Learning、Social、Chat、Commerce、Rewards、Trust & Safety、Operations、Platform、Audio Production；Community 能力已并入 Social，Notification 不作为独立域（全局最终版 ADR-018；Audio Production 为 D-139 新增、Content 为 D-147 拆分 Learning 所得）。
-- **Content 与 Learning 拆分（「拆分学习域」会话，[ADR-021](docs/adr/ADR-021-content-and-learning-domain-split.md)，D-147~D-149）**：原 Learning 拆为 Content（canonical 教学内容：课程/词汇/句子/标准答案/标准发音要求/Content Revision/发布状态）与 Learning（用户学习状态与事实：进度/掌握/复习/历史）；依赖 `Identity → Learning → Content`（逻辑依赖，非物理 FK）；Learning 只存 `content_id` 等 logical references、不建跨域物理 FK、不得引用 Content 内部 BIGINT PK；被跨域引用的 Content 实体须有稳定 UUID logical/public ID；Audio 契约改为 `Audio Production → Content`（Content 拥有文本/规范发音/Content Revision，D-148）；事件归属与跨域引用按 D-149：内容事件归 Content、学习事件归 Learning，引用教学内容用 Content logical UUID、引用学习事实才用 Learning logical UUID。
+- **Content 与 Learning 拆分（「拆分学习域」会话，[ADR-021](docs/adr/ADR-021-content-and-learning-domain-split.md)，D-147~D-149；逐表归属 D-150、Translation 裁决 D-151）**：原 Learning 拆为 Content（canonical 教学内容：课程/词汇/句子/标准答案/标准发音要求/Content Revision/发布状态/canonical 教学翻译）与 Learning（用户学习状态与事实：进度/掌握/复习/历史/作答记录/用户即时翻译请求）；依赖 `Learning → Identity` 与 `Learning → Content`（Learning depends on Identity and Content；逻辑依赖，非物理 FK）；Learning 只存 `content_id` 等 logical references、不建跨域物理 FK、不得引用 Content 内部 BIGINT PK；被跨域引用的 Content 实体须有稳定 UUID logical/public ID；Audio 契约改为 `Audio Production → Content`（Content 拥有文本/规范发音/Content Revision，D-148）；事件归属与跨域引用按 D-149：内容事件归 Content、学习事件归 Learning，引用教学内容用 Content logical UUID、引用学习事实才用 Learning logical UUID；逐表归属（D-150）：`content.*` 31 张 / `learning.*` 10 张 / `pronunciation_audios`+`tts_jobs` 由 Audio Production 取代。
 - Chat 与社交关系解耦：会话身份由用户对唯一确定，取消关注或重新互关不改变会话。
 - Chat 全域审计最终修正版（D-130~D-134）：`public_id` 定为 UUID（内部 BIGINT `id` 不对外）、跨域引用统一 logical UUID 且无跨域物理 FK、37 条 application-level invariants 定稿。
 - 实时推送不独立成域：Chat 发布领域事件，WebSocket/App Push 由基础设施负责。
@@ -46,17 +46,17 @@
 | 领域 | 业务模型 | 数据库 |
 | --- | --- | --- |
 | Identity | `frozen` | `frozen`：7 张表；部分辅助表字段类型仍按字段级 `designing` 标注 |
-| Content | `frozen`（域边界）/ `designing`（逐表归属） | canonical 教学内容定义类表（Knowledge/Dictionary/Curriculum 定义、Practice 定义、Content Revision 等）由原 Learning 43 张必建表按职责迁入（D-147）；字段规格沿用已冻结的 Learning 分层页；逐表归属清单与跨域 `public_id` 字段级落地 `designing` |
-| Learning | `frozen`（域边界）/ `designing`（逐表归属） | 用户学习状态/行为类表（Progress/Mastery/Review/Activity、作答历史等）保留或迁入（D-147）；字段规格沿用已冻结的 Learning 分层页；逐表归属清单与跨域 logical reference 字段级落地 `designing`；旧音频表 `pronunciation_audios`/`tts_jobs` 迁移与计数调整待主会话确认（D-145） |
+| Content | `frozen` | 31 张表逐表归属已裁决（D-150，`frozen`）：canonical 教学内容定义类表（Knowledge 17 + Curriculum 6 + Dictionary 4 + Practice 4）；canonical 教学翻译归 `content.translations`（D-151）；权威清单见 [Content 数据库](docs/domains/content/database.md) |
+| Learning | `frozen` | 10 张表逐表归属已裁决（D-150，`frozen`）：用户学习状态/行为类表（Progress 6 + Practice 作答 2 + Dictionary 搜索 1 + 用户即时翻译请求 1，D-151）；跨域引用统一 logical UUID；权威清单见 [Learning 数据库](docs/domains/learning/database.md) |
 | Social | `frozen` | 19 张首期表「全域审计修正版定稿」字段级 `frozen`（原 20 张，`social_reports` 已删除、举报事实统一归 `trust.reports`，D-115/D-135~D-138）；跨域契约 compliant：六实体 `public_id UUID`、`user_id`/`media_id` 跨域 logical UUID 零物理 FK（与 ADR-018 一致）；资料关闭后恢复规则 `designing` |
 | Community | `merged` | 已正式并入 Social（全局最终版 ADR-018），不再独立成域；独立社区能力未来再评估 |
 | Chat | `frozen` | 7 张表定稿 `frozen`；「全域审计最终修正版」已落盘（public_id UUID、跨域 logical UUID 无物理 FK、37 条 invariants，D-130~D-134）；剩余物理 DDL（Outbox 物理表、UUID 分配实现）`designing`，用例字段契约 `designing` |
 | Commerce | `frozen`（V1） | 16 张业务表 `frozen`；物理约定（UUID 主键 + 跨域只存 logical UUID 不建物理 FK）符合全局最终版 ADR-018，compliant；会员/Subscription/Entitlement 落表 `deferred` |
 | Rewards | `frozen` | `frozen`：5 张表字段级定稿；审计确认跨域引用统一 `uuid` logical reference、Outbox 统一 `system_outbox_events`（D-096）；Manual Grant、非 Coin 资产延期 |
 | Trust & Safety | `frozen`（治理链路 6 表） | 6 表逻辑模型 `frozen`（全域审计最终确认定稿）；`uuid` 主键 + 跨域只存 logical UUID 不建物理 FK 符合全局最终版 ADR-018，compliant（D-092）；`trust.reports` 为全系统唯一举报事实源、subject 三元组、Operations 逻辑 ID、统一 Outbox（D-113~D-117）；真人认证 Verification 子域 `designing` |
-| Operations | `frozen` | `frozen`：5 张表（operators/roles/operator_roles/role_permissions/operator_audit_logs）字段级定稿；稳定 ID 用 `varchar(20)` 与全局跨域 logical UUID 口径差异待主会话裁决（`designing`）；后台认证机制归 Identity/Auth 未设计 |
+| Operations | `frozen` | `frozen`：5 张表（operators/roles/operator_roles/role_permissions/operator_audit_logs）字段级定稿；全部 ID 统一 UUID（D-153，取代早期 `varchar(20)` 方案，无 VARCHAR/UUID 双契约）；后台认证机制归 Identity/Auth 未设计 |
 | Platform | `frozen` | `frozen`：6 张业务表（feature_flags/feature_flag_overrides/runtime_configs/app_versions/announcements/regions）字段级定稿（全域审计最终修正版，D-118~D-129）；`runtime_configs` 仅 current-state；Media/Asset Infrastructure 与 `system_outbox_events` 物理细节 `designing` |
-| Audio Production | `frozen` | 9 张业务表（slots/tasks/generation_attempts/asset_versions/reviews/task_events/task_batches/task_batch_items/default_presets）字段级 `frozen`（D-139~D-144，ADR-020）；canonical 内容/规范发音归 Content（D-148，`Audio Production → Content`）；与 Media/Asset Infrastructure 边界衔接（D-146）、旧 Learning 音频表迁移与 Content/Learning 计数调整 `designing` |
+| Audio Production | `frozen` | 9 张业务表（slots/tasks/generation_attempts/asset_versions/reviews/task_events/task_batches/task_batch_items/default_presets）字段级 `frozen`（D-139~D-144，ADR-020）；canonical 内容/规范发音归 Content（D-148，`Audio Production → Content`）；`audio_asset_versions` 只存 `asset_id` logical UUID 引用 Media/Asset Infrastructure（物理文件事实唯一 canonical owner，D-152）；operator 引用统一 UUID（D-153） |
 
 ## 状态说明
 

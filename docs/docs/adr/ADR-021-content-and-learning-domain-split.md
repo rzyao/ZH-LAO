@@ -20,12 +20,12 @@
 1. **原 Learning Domain 正式拆分为两个一级域**：
    - **Content Domain** = Canonical Learning Content（用户学什么）：课程体系、单元、Lesson、词汇、句子、教学文本、内容组织关系、内容语言信息、标准答案、标准发音要求、教学内容版本、Content Revision、内容发布状态。判断标准：**即使系统中一个用户都没有，这些数据依然存在**。
    - **Learning Domain** = User Learning State & Facts（用户学得怎么样）：课程/Lesson/Unit 进度、词汇/句子学习状态、完成记录、掌握状态、学习历史、复习状态、学习统计 canonical facts。判断标准：**数据只有在某个用户开始学习之后才产生**。
-2. **依赖方向**：`Identity → Learning → Content`（逻辑箭头，非数据库物理 FK）。Learning 可以保存 `user_id` / `content_id` / `course_id` / `lesson_id` / `unit_id` / `vocabulary_id` / `sentence_id` 等 logical references。
+2. **依赖方向**：`Learning → Identity` 与 `Learning → Content`（即 Learning depends on Identity and Content；逻辑依赖，非数据库物理 FK）。Learning 可以保存 `user_id` / `content_id` / `course_id` / `lesson_id` / `unit_id` / `vocabulary_id` / `sentence_id` 等 logical references。
 3. **跨域规则**：Content 内部实体保留已定稿内部 PK；**被其他域引用的 Content 实体必须具有稳定 UUID logical/public ID**；Learning → Content 不建跨域 physical FK；Learning 不得引用 Content 内部 BIGINT PK；Learning → Identity 不建 physical FK。
 4. **事实严格分离**：不得在 Learning 中复制第二份 canonical 内容（D-099 Canonical Fact 单一归属）。Content Revision 归 Content 管理；Learning 只记录「用户学习时对应的 content revision」用于判断是否需要重学。
 5. **Audio Production 契约同步（D-148）**：文本、正确发音要求、Content Revision 的拥有者由 Learning 修订为 **Content**；依赖 `Audio Production → Content`（取代原 `Audio Production → Learning`）。
 6. **事件归属（D-149）**：内容事件（`content_created/updated/published`、`content_revision_created`、`lesson_published`）归 Content；学习行为事件（`learning_started`、`lesson_completed`、`vocabulary_learned`、`review_completed`、`progress_updated`）归 Learning。
-7. **Schema 拆分**：`content.*` 与 `learning.*`。原 Learning 43 张必建表按职责迁移（定义类 → content、用户状态/行为类 → learning），**不因拆分增加、删除或重新设计已定稿业务表**；逐表归属清单待主会话给出（`designing`）。
+7. **Schema 拆分**：`content.*` 与 `learning.*`。原 Learning 43 张必建表已完成逐表归属裁决（D-150）：**`content.*` 31 张 / `learning.*` 10 张 / `pronunciation_audios` 与 `tts_jobs` 由 Audio Production 取代（D-145）**，权威逐表清单见 [Content 数据库](../domains/content/database.md) 与 [Learning 数据库](../domains/learning/database.md)；**不因拆分增加、删除或重新设计已定稿业务表**。
 8. **覆盖范围**：本裁决正式覆盖此前所有将「教学内容 + 用户学习状态」统称为 Learning Domain 的表述；原已定稿业务模型继续有效；全域其他已定稿 Domain 保持不变。业务 Schema 总数 10 → **11**。
 
 ## 备选方案与取舍
@@ -45,12 +45,12 @@
 
 ### 代价与风险
 
-- 43 张必建表在 `content.*` / `learning.*` 的**逐表归属清单**待主会话给出（当前文档为按职责的建议映射，`designing`）。
-- 跨域 logical reference 字段级落地（被跨域引用的 Content 实体 `public_id` 等）待逐表确认。
-- Learning 旧音频表（`pronunciation_audios` / `tts_jobs`）迁移与计数调整沿用 D-145 未决项。
+- ~~43 张必建表逐表归属清单待主会话给出~~ → **已裁决（D-150）**：`content.*` 31 张 / `learning.*` 10 张 / 2 张由 Audio Production 取代，清单 `frozen`。
+- ~~被跨域引用的 Content 实体 `public_id` 字段级落地待确认~~ → **已裁决（D-150）**：`contents` 等 Content 实体 `public_id` 统一 UUID logical ID，见 [Content 数据库](../domains/content/database.md)。
+- ~~Learning 旧音频表（`pronunciation_audios` / `tts_jobs`）迁移与计数调整沿用 D-145 未决项~~ → **已裁决（D-145/D-150）**：由 Audio Production 域取代（`audio_slots` / `audio_tasks` 等），不再计入 Content / Learning 表数量。
 
 ## 后续行动
 
-- [ ] 主会话给出 43 张表的逐表归属清单（D-147 `designing`）。
-- [ ] 主会话确认被跨域引用的 Content 实体 `public_id` 字段级落地。
-- [ ] Learning 旧音频表删除/迁移与计数调整随 D-145 一并确认。
+- [x] ~~主会话给出 43 张表的逐表归属清单（D-147 `designing`）~~ → 已由 D-150 裁决。
+- [x] ~~主会话确认被跨域引用的 Content 实体 `public_id` 字段级落地~~ → 已由 D-150 裁决（UUID logical ID）。
+- [x] ~~Learning 旧音频表删除/迁移与计数调整随 D-145 一并确认~~ → 已裁决：由 Audio Production 取代。

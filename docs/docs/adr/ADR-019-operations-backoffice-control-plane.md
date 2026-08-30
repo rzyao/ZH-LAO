@@ -21,7 +21,7 @@
 2. **不承接任何业务域状态机**：封禁/举报归 Trust，退款归 Commerce，奖励补发归 Rewards；Operations 只引用他域对象稳定逻辑 ID 做审计描述。
 3. **C 端 User 与后台 Operator 是两个主体**：禁止 `users.is_admin` / `users.role`，运营人员不复制 C 端业务身份。
 4. **不建 `permissions` 表**：权限能力由应用代码 Permission Registry 定义，数据库只配置 `role_permissions`（`<domain>.<resource>.<action>`）；有效权限 = 所有 active Role 权限并集，无角色层级、无 Operator 直接权限、`super_admin` 只是 Role。
-5. **Operator / Role / Audit Log 的 `id` 用 `varchar(20)` 稳定系统 ID**（后台主体属“系统主体”，不切 `bigint identity`）；`operators.auth_subject_id` 与 `operator_audit_logs.target_*` 是跨域 logical reference，**不建跨域物理 FK**；域内 4 处 FK 保留 `ON DELETE RESTRICT`。
+5. **Operator / Role / Audit Log 的 `id` 用 `uuid` 稳定系统 ID**（应用层生成、不可变；经 D-153 全局分区收口修订，取代早期 `varchar(20)` 方案——Operator 会被 Audio 等域引用，必须有稳定 UUID logical/public ID，且全系统不得出现 UUID / VARCHAR 双契约）；`operators.auth_subject_id` 为 Identity 稳定 UUID logical reference（UNIQUE、**不建跨域物理 FK**），`operator_audit_logs.target_id` 为目标域稳定 UUID logical ID（`target_domain + target_type + target_id` 跨域多态引用）；域内 4 处 FK 保留 `ON DELETE RESTRICT`。
 6. **`operator_audit_logs` 永久 append-only**：只 INSERT，不 UPDATE / DELETE；当前由 Application Service + 数据库用户权限控制，不建数据库 Trigger。
 7. **Operations 记录操作轨迹，Trust 保存业务事实**：两者不可互相替代、不复制对方完整业务模型。
 
@@ -48,11 +48,11 @@
 ### 代价与风险
 
 - 后台认证机制（登录、Session、MFA、失败锁定）归 Identity/Auth 域，尚未设计（`designing`）。
-- Operations 稳定逻辑 ID 为 `varchar(20)`（`op_xxx` / `role_xxx` / `sys_xxx`），与全局「跨域 logical UUID」在类型口径上存在差异，待主会话统一裁决（与 `public_id` 前缀方案联动）。
+- ~~Operations 稳定逻辑 ID 为 `varchar(20)` 与全局「跨域 logical UUID」存在类型差异，待主会话统一裁决~~ → **已裁决（D-153）**：全部统一为 UUID，早期方案 `superseded`。
 - 工作队列、内容/用户运营、数据看板等后台能力 V1 明确不建；未来确有需求需重新评估归属（Operations 或 Platform）。
 
 ## 后续行动
 
 - [ ] Identity/Auth 域设计后台认证（auth subject、登录、Session、MFA），作为 `operators.auth_subject_id` 的落点。
-- [ ] 主会话裁决 Operations `varchar(20)` 稳定逻辑 ID 与全局「跨域 logical UUID」的口径统一。
+- [x] ~~主会话裁决 Operations 稳定逻辑 ID 与全局「跨域 logical UUID」的口径统一~~ → 已由 D-153 裁决：统一 UUID。
 - [ ] 未来确有后台工作队列 / 看板需求时，评估扩展 Operations 或归属 Platform。

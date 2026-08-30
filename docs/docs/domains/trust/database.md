@@ -228,7 +228,7 @@ CREATE TABLE trust.moderation_evidence (
     source_type   varchar(24) NOT NULL,       -- 证据从哪来
 
     content_text text,
-    storage_key  varchar(512),                -- Trust 自行控制的存储键，不依赖业务域 URL
+    storage_key  varchar(512),                -- Trust 自行控制的存储键，不依赖业务域 URL（遗留边界：早于 D-127/D-152 Asset 收口，是否迁移为 Media/Asset `asset_id` logical UUID 待裁决，见未决事项）
 
     reference_domain varchar(32),             -- 被引用对象所属域（三元组）
     reference_type   varchar(32),

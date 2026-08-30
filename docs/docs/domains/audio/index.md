@@ -9,11 +9,11 @@ source_share_url: https://chatgpt.com/share/6a93716e-8a28-83ea-abbd-355679b38fe2
 
 # Audio Production 域（音频生产域）
 
-Audio Production Domain 统一负责**业务音频的生产、生产版本、审核、发布、正式版本指针、失败重试、批量生产以及生产审计**。它不是「通用媒体文件域」，也不是 Media Center；媒体文件的通用技术归属见 Platform Infrastructure（边界衔接待裁决项见文末）。
+Audio Production Domain 统一负责**业务音频的生产、生产版本、审核、发布、正式版本指针、失败重试、批量生产以及生产审计**。它不是「通用媒体文件域」，也不是 Media Center；**物理文件事实的唯一 canonical owner 是 Media/Asset Infrastructure（D-127/D-152）**，Audio 只保存 `asset_id` logical UUID 引用。
 
-**一句话定义（会话最终收口）：**
+**一句话定义（会话最终收口 + D-152 边界裁决）：**
 
-> Content 提供需要发音的业务对象及规范生产输入，Audio 为其建立稳定 Slot；通过 TTS 或人工录音创建一次生产 Task，TTS 技术重试通过 Attempt 保留历史，每个 Task 最终只形成一个不可变 Asset Version；资产经过独立 Review 后才能 Publish，Slot 的 `official_asset_version_id` 是全系统当前正式音频的唯一事实源；历史正式版本永久保存，Rejected 未发布文件异步清理；TTS 的 Provider/Model/Voice/Preset 配置归 TTS 服务维护，Audio 只保存实际使用的 Preset Key 与必要生产快照。
+> Content 提供需要发音的业务对象及规范生产输入，Audio 为其建立稳定 Slot；通过 TTS 或人工录音创建一次生产 Task，TTS 技术重试通过 Attempt 保留历史，每个 Task 最终只形成一个不可变 Asset Version；资产经过独立 Review 后才能 Publish，Slot 的 `official_asset_version_id` 是全系统当前正式音频的唯一事实源；历史正式版本永久保存，Rejected 未发布文件异步清理（物理清理由 Asset Infrastructure 执行）；生产文件统一登记为 Asset Infrastructure 资产，Audio 只保存 `asset_id` 与音频业务事实；TTS 的 Provider/Model/Voice/Preset 配置归 TTS 服务维护，Audio 只保存实际使用的 Preset Key 与必要生产快照。
 
 ## 定位与职责
 
@@ -101,8 +101,8 @@ V1 两种生产方式：`tts`（主）与 `human_recording`（兜底）。产物
 - Audio 只认识 **Preset Key**（如 `zh_word_normal`、`zh_sentence_slow`、`lo_word_normal`），Task 上保存 `tts_preset_key` 使用事实；Asset 不重复保存 preset 配置。
 - Preset 可直接修改、无需参数版本历史；生产人员选 Preset 而非底层模型。
 - `audio_default_presets` 只是 Audio 后台的「某类内容默认选哪个 Preset」映射（current configuration，可 UPDATE/DELETE），不是 TTS 配置表。
-- TTS **异步执行**：Task → Generation Attempt → TTS submit → external job → TTS 处理 → **TTS 自己上传 Cloudflare R2** → 返回 object metadata → Audio 形成 Asset Version。不经「TTS → Audio API → Audio 再上传」的回传路径。
-- TTS 成功上传 R2 后**不长期保留**自己的「原始生成文件」；R2 对象即生产文件。
+- TTS **异步执行**：Task → Generation Attempt → TTS submit → external job → TTS 处理 → **TTS 自己上传 Cloudflare R2** → 经 Media/Asset Infrastructure 登记为资产（获得 `asset_id`）→ Audio 形成 Asset Version（只保存 `asset_id` 引用与音频技术属性）。不经「TTS → Audio API → Audio 再上传」的回传路径。
+- TTS 成功上传 R2 后**不长期保留**自己的「原始生成文件」；R2 对象即生产文件，其存储元数据（object key / mime / size / checksum / codec）由 Asset Infrastructure 维护，Audio 不复制。
 
 ## 人工录音
 
@@ -122,8 +122,8 @@ V1 两种生产方式：`tts`（主）与 `human_recording`（兜底）。产物
 
 - 当前正式音频的唯一事实源：`audio_slots.official_asset_version_id`。不再维护 `is_current` / `is_official` / `is_primary` / `current_version` 等重复事实。
 - 旧正式版本被替代后：行与文件保留，`first_published_at` 证明其曾正式发布；历史完整可审计。
-- **曾经正式发布的文件永久保留**；**从未发布且审核拒绝**的文件可删：`present → pending_delete → deleted`（失败 `delete_failed` 重试），异步执行、不在审核 API 内同步删 R2；V1 **不建独立 cleanup jobs 表**（重试状态存 Asset Version 自身字段）。
-- 存储统一 **Cloudflare R2**，TTS 与人工录音共用；`storage_key` 全表 UNIQUE。
+- **曾经正式发布的文件永久保留**；**从未发布且审核拒绝**的文件可删：清理由 **Asset Infrastructure 异步执行**（含重试状态，D-152），Audio 只表达业务资格（`review_status=rejected` 且 `first_published_at IS NULL`），不在审核 API 内同步删 R2；V1 **不建独立 cleanup jobs 表**。
+- 存储统一 **Cloudflare R2**，TTS 与人工录音共用；物理文件事实（含 object key）由 Asset Infrastructure 维护，Audio 侧 `asset_id` 全表 UNIQUE、两个 Asset Version 不得指向同一文件资产。
 
 ## 状态机
 
@@ -133,7 +133,6 @@ V1 两种生产方式：`tts`（主）与 `human_recording`（兜底）。产物
 | `audio_tasks` | `status` | `pending_assignment` / `assigned` / `producing` / `pending_review` / `production_failed` / `approved` / `rejected` / `published` / `canceled`（无 `needs_regeneration` 主状态，用 rejected + successor Task 表达） |
 | `audio_generation_attempts` | `status` | `queued` / `submitting` / `processing` / `retry_wait` / `succeeded` / `failed` / `dead_letter` / `canceled` |
 | `audio_asset_versions` | `review_status` | `pending_review` / `approved` / `rejected` |
-| `audio_asset_versions` | `file_status` | `present` / `pending_delete` / `delete_failed` / `deleted` |
 | `audio_reviews` | `decision` | `approved` / `rejected` / `approval_revoked` |
 | `audio_task_batches` | `status` | `creating` / `completed` / `failed` / `canceled` |
 | `audio_task_batch_items` | `result_status` | `created` / `skipped` / `failed` |
@@ -198,7 +197,7 @@ Batch 只负责**批量创建 Audio Tasks**，不是长期跟踪子任务进度�
 
 | 层 | 机制 | 目标 |
 | --- | --- | --- |
-| 业务唯一性 | UNIQUE / partial UNIQUE | 防重复 Slot、重复活动 Task、重复版本、重复 storage_key |
+| 业务唯一性 | UNIQUE / partial UNIQUE | 防重复 Slot、重复活动 Task、重复版本、同一 `asset_id` 被多个版本引用（D-152：文件事实在 Asset Infrastructure，Audio 不自持 storage_key） |
 | 请求幂等 | `client_idempotency_key` / `request_id` | 客户端/worker/TTS callback 重试不制造重复业务事实 |
 | 乐观并发 | `audio_tasks.lock_version` | 后台多操作同时修改 Task 防覆盖 |
 
@@ -211,9 +210,9 @@ Attempt 层另有 `transport_retry_count` / `next_retry_at` / `lease_until` / `e
 | `content_entity_id` / `content_entity_type` / `source_domain` | Content 或其他业务域 | 稳定 UUID logical reference，不建跨域物理 FK |
 | `content_revision_id` | Content | 稳定 UUID logical reference；Task / Asset 保存生产时快照 |
 | 规范发音 / 当前文本 | Content | canonical owner 在 Content；Audio 仅保存快照 |
-| operator IDs（assignee/created_by/reviewer/producer/created_by(batch)） | Operations | 稳定 logical ID（会话表述为 Operations logical UUID），不建跨域 FK；类型口径与 D-107 联动 |
+| operator IDs（assignee/created_by/reviewer/producer/created_by(batch)） | Operations | 稳定 **UUID logical ID**（D-153 统一为 UUID，无 VARCHAR 套契约），不建跨域 FK |
 | TTS preset / model / voice | TTS 服务 | Audio 只保存 preset key；具体定义由 TTS 自维护 |
-| R2 object | Cloudflare R2 | Audio 保存 `storage_key` 与文件 metadata |
+| 物理文件（R2 object 及其 storage/mime/size/checksum/codec、物理生命周期） | Media/Asset Infrastructure | Audio 只保存 `asset_id` logical UUID（D-127/D-152），不复制任何文件事实 |
 
 - Domain 内（9 张表之间）建立真实 physical FK。
 - 跨 Domain 一律 stable logical UUID reference，不建立 physical FK。
@@ -251,6 +250,7 @@ Attempt 层另有 `transport_retry_count` / `next_retry_at` / `lease_until` / `e
 | 独立 regeneration 表 | Reject 后通过 predecessor/successor Task 链表达 |
 | 独立 human recording attempt 表 | 人工录音直接形成 Asset Version，不伪造 TTS Attempt |
 | 多格式 variant 表 | 每个 Asset Version 只有一个实际文件 |
+| 自持文件存储元数据（storage_key / mime / size / checksum / codec） | 物理文件事实唯一 canonical owner 为 Asset Infrastructure（D-127/D-152），Audio 只保存 `asset_id` |
 | `is_current` / `is_primary` / `is_official` 字段 | 会与 Slot official pointer 形成重复事实源 |
 | `needs_regeneration` Task 主状态 | 用 rejected + successor Task 表达 |
 
@@ -259,14 +259,11 @@ Attempt 层另有 `transport_retry_count` / `next_retry_at` / `lease_until` / `e
 ## 与既有定稿的关系
 
 - **Content/Learning 拆分契约（「拆分学习域」会话，D-147/D-148）**：canonical 内容、规范发音、Content Revision 的拥有者由 Learning 改为 **Content**；依赖 `Audio Production → Content`（而非 → Learning）；Content 提供 `content_entity_id` / `content_revision_id` 稳定 logical UUID，Audio 使用 logical reference 不建跨域 FK；Audio 仍只负责生产、不成为教学内容 canonical source。
-- 取代 Learning 域旧 `learning.pronunciation_audios` 与 `learning.tts_jobs` 表设计（D-028 表级设计 `superseded`，见 [Learning AI & Media](../learning/ai-media.md) 与台账 D-145）：业务音频生产/版本/发布事实统一归本域。
+- 取代 Learning 域旧 `pronunciation_audios` 与 `tts_jobs` 表设计（D-028 表级设计 `superseded`，迁移记录见 [Learning 数据库](../learning/database.md) 与台账 D-145）：业务音频生产/版本/发布事实统一归本域。
 - 解决 [D-129](../../governance/design-register.md) 中「TTS 路由配置落表」遗留：TTS Provider/Model/Voice/Preset 归 TTS 服务维护，Audio 侧仅存 `audio_default_presets` 默认映射，Learning/Content 不再落 TTS 路由表。
-- 与 D-127（Platform Media/Asset Infrastructure 为所有 `asset_id` 权威技术属主）的边界衔接：本域 `audio_asset_versions` 自持 `storage_key`/mime/size/checksum 等文件事实，未引用统一 asset_id。该跨会话边界关系**待主会话裁决**（见[未决事项](../../governance/open-questions.md)）。
+- **与 D-127（Platform Media/Asset Infrastructure 为所有 `asset_id` 权威技术属主）的边界已裁决（D-152，frozen）**：`audio_asset_versions` 不再自持 `storage_key` / mime / size / checksum / codec 等文件事实，统一保存 `asset_id` logical UUID；物理文件生命周期（含删除重试）由 Asset Infrastructure 维护。Audio 只保留音频业务事实（版本关系、审核、发布、时长/采样率/声道等音频技术属性）。
 
 ## 数据库状态
 
 - **9 张表字段级定稿 `frozen`**：字段、约束、索引见[数据库总览](database.md)。
-- **`designing` / 待主会话裁决**：
-  - 与 D-127 Media/Asset Infrastructure 的边界（audio 自持 storage_key vs 统一 asset_id）。
-  - Learning 旧表（`pronunciation_audios` / `tts_jobs`）的迁移/删除落地方式与 Content/Learning 必建表计数调整的确认（联动 D-147 逐表归属清单）。
-  - Operations logical ID 类型口径（会话称 UUID，与 D-107 `varchar(20)` 差异，沿用既有未决项）。
+- Media/Asset 边界（D-152）与 Operations operator 引用类型（D-153，统一 UUID）均已收口，无遗留未决项。

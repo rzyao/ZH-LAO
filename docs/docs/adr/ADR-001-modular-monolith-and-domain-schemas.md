@@ -9,7 +9,7 @@ date: 2026-08-30
 
 ## 决策
 
-采用一个模块化后端、一个 PostgreSQL 实例、一个主数据库和十个业务 Schema。当前不按领域拆微服务或独立数据库，允许跨 Schema Foreign Key。
+采用一个模块化后端、一个 PostgreSQL 实例、一个主数据库和十一个业务 Schema（`identity` / `content` / `learning` / `social` / `chat` / `audio` / `commerce` / `rewards` / `trust` / `operations` / `platform`）。当前不按领域拆微服务或独立数据库；同一 Domain（同一 Schema）内建立真实 FK，**禁止跨 Domain / 跨 Schema 物理 Foreign Key**（跨域只保存对方 logical UUID，见 ADR-018）。
 
 ## 原因与后果
 

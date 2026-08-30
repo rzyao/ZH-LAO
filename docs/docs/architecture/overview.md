@@ -11,10 +11,10 @@ ZH-LAO 采用模块化单体：一个后端、一个 PostgreSQL 主数据库、�
 Android Client
       ↓
 Modular Backend / API
-      ├─ Identity / Learning / Audio / Social / Chat
-      └─ Commerce / Rewards / Trust / Operations / Platform
+      ├─ Identity / Content / Learning / Social / Chat
+      └─ Audio / Commerce / Rewards / Trust / Operations / Platform
       ↓
-PostgreSQL：一个实例、一个主库、十个 Schema
+PostgreSQL：一个实例、一个主库、十一个 Schema
 ```
 
 该方案面向单人开发、未来多人运营和约 10,000 注册用户的首期规模，优先降低部署、监控和分布式一致性成本。只有在出现真实负载与组织需求时，才评估拆分 Chat、Media 等高负载能力。

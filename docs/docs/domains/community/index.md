@@ -3,9 +3,11 @@ status: deferred
 last_updated: 2026-08-30
 ---
 
-# Community 域
+# Community 域（历史归档）
 
-Community 保留为未来独立社区能力。最新 Social 设计已将首期公开动态、点赞、评论和举报入口冻结为 `social_*` 表，因此 Community 当前不重复拥有这些事实。
+> **归档说明**：Community 已正式并入 Social Domain（全局最终版 [ADR-018](../../adr/ADR-018-global-database-design-principles-final.md)），**不再是独立 Domain、不再拥有独立 PostgreSQL Schema**。动态、点赞、评论、Feed 等社区能力归 Social。本页仅作为迁移记录/历史文档保留，不得与 11 个正式业务 Domain 并列使用。
+
+Community 保留为未来独立社区能力的评估入口。最新 Social 设计已将首期公开动态、点赞、评论和举报入口冻结为 `social_*` 表，因此 Community 当前不重复拥有这些事实。
 
 ## 子域与实体
 

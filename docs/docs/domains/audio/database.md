@@ -38,7 +38,7 @@ slot → task → generation_attempt（仅 TTS）→ asset_version → review �
 | 字段 | 类型 | 约束 | 说明 |
 | --- | --- | --- | --- |
 | `id` | UUID | PK | Slot 稳定 ID |
-| `source_domain` | varchar | NOT NULL | 来源 Domain，如 `learning` |
+| `source_domain` | varchar | NOT NULL | 来源 Domain，如 `content`（词汇/句子/课程等 canonical 教学内容一律指向 `content`，不得再写历史的 `learning`） |
 | `content_entity_type` | varchar | NOT NULL | 来源业务实体类型 |
 | `content_entity_id` | UUID | NOT NULL；跨域 logical ref | 来源业务实体稳定 UUID |
 | `language_code` | varchar | NOT NULL | 语言代码 |
@@ -146,6 +146,8 @@ Attempt status：`queued` / `submitting` / `processing` / `retry_wait` / `succee
 
 定位：不可变的实际音频产物事实表；**一个版本只有一个文件**；`version` 按 Slot 独立递增。
 
+**Media/Asset 边界（D-152，frozen）**：物理文件事实（storage provider / bucket / object key / mime / size / checksum / codec）的唯一 canonical owner 是 **Media/Asset Infrastructure**（D-127）。Audio 只保存对最终文件的 **`asset_id` logical UUID 引用**与音频业务事实（审核 / 发布 / 版本关系 / 音频技术属性）；**不保存 `storage_key`、`mime_type`、`size_bytes`、`checksum_sha256`、`codec` 等存储元数据，也不维护物理文件删除重试状态**（物理文件生命周期由 Asset Infrastructure 依据 Audio 的业务裁决执行）。
+
 | 字段 | 类型 | 约束 | 说明 |
 | --- | --- | --- | --- |
 | `id` | UUID | PK | Asset Version 稳定 ID |
@@ -156,32 +158,23 @@ Attempt status：`queued` / `submitting` / `processing` / `retry_wait` / `succee
 | `producer_operator_id` | UUID | NULL；跨域 logical ref（Operations） | 人工录音生产人 |
 | `content_revision_id` | UUID | NOT NULL；跨域 logical ref | 实际生产使用的 Revision |
 | `audio_input_hash` | varchar | NOT NULL | 实际生产输入哈希 |
-| `storage_key` | varchar | UNIQUE | Cloudflare R2 对象 key |
-| `file_format` | varchar | NOT NULL | 如 mp3 / wav；不同 Asset 可不同 |
-| `mime_type` | varchar | NOT NULL | MIME 类型 |
-| `codec` | varchar | NULL | 编码格式 |
-| `size_bytes` | bigint | NOT NULL | 文件大小 |
-| `checksum_sha256` | varchar | NOT NULL | SHA-256 校验值 |
-| `duration_ms` | integer / bigint | NOT NULL | 时长毫秒 |
+| `asset_id` | UUID | NOT NULL；UNIQUE；跨域 logical ref（Asset Infrastructure） | 生产文件的 Media/Asset logical UUID；两个 Asset Version 不得指向同一文件资产 |
+| `duration_ms` | integer / bigint | NOT NULL | 时长毫秒（音频技术属性，归 Audio） |
 | `sample_rate_hz` | integer | NULL | 采样率 |
 | `channels` | smallint | NULL | 声道数 |
 | `review_status` | varchar(32)+CHECK | `pending_review` / `approved` / `rejected` | 当前审核状态 projection |
-| `file_status` | varchar(32)+CHECK | `present` / `pending_delete` / `delete_failed` / `deleted` | 实际文件生命周期状态 |
 | `first_published_at` | timestamptz | NULL | 首次正式发布时间 |
-| `delete_attempt_count` | integer | NOT NULL | 清理重试次数 |
-| `next_delete_retry_at` | timestamptz | NULL | 下一次清理重试时间 |
-| `last_delete_error` | text | NULL | 最近清理失败详情 |
 | `created_at` | timestamptz | NOT NULL | 创建时间 |
 | `updated_at` | timestamptz | NOT NULL | 更新时间 |
 
-唯一约束：`UNIQUE(slot_id, version)`、`UNIQUE(task_id)`、`generation_attempt_id` 非空时 UNIQUE、`UNIQUE(storage_key)`（两个资产行不得指向同一 R2 对象）。
+唯一约束：`UNIQUE(slot_id, version)`、`UNIQUE(task_id)`、`generation_attempt_id` 非空时 UNIQUE、`UNIQUE(asset_id)`。
 
 生产来源 CHECK（production source 约束）：
 
 - TTS Asset：`generation_attempt_id IS NOT NULL`。
 - Human Recording Asset：`generation_attempt_id IS NULL AND producer_operator_id IS NOT NULL`。
 
-Asset 上明确不保存：`validity`、`source_type`、preset configuration（来源从 Task / Attempt 关系推导；Preset 使用事实在 `audio_tasks.tts_preset_key`）。
+Asset 上明确不保存：`validity`、`source_type`、preset configuration、**以及任何物理存储元数据（storage_key / mime / size / checksum / codec）与物理删除重试状态**（来源从 Task / Attempt 关系推导；Preset 使用事实在 `audio_tasks.tts_preset_key`；文件事实在 Asset Infrastructure）。
 
 ## audio.audio_reviews
 
@@ -289,7 +282,7 @@ event_type 最终枚举（12 种）：`task_created` / `assigned` / `production_
 | `updated_at` | timestamptz | NOT NULL | 更新时间 |
 
 - `UNIQUE(source_domain, content_entity_type, language_code, audio_role)`——`source_domain` 必须进唯一键，防未来两 Domain 使用相同 `content_entity_type` 冲突。
-- 概念示例（`illustrative`）：`learning / word / zh-CN / pronunciation → zh_word_normal`；管理员创建任务时可改选其他 Preset。
+- 概念示例（`illustrative`）：`content / word / zh-CN / pronunciation → zh_word_normal`；管理员创建任务时可改选其他 Preset。
 - 允许 UPDATE / DELETE（current configuration）；历史 Task 已保存 `tts_preset_key`，不受默认配置变化影响。
 
 ## 删除策略汇总
@@ -299,7 +292,7 @@ event_type 最终枚举（12 种）：`task_created` / `assigned` / `production_
 | `audio_slots` | 停用用 `status = offline`，不物理删除 |
 | `audio_tasks` | 生产业务事实，保留 |
 | `audio_generation_attempts` | 技术执行历史，保留 |
-| `audio_asset_versions` | 记录永久保留；rejected 未发布的**文件**可异步删除，行仍用于审计 |
+| `audio_asset_versions` | 记录永久保留；rejected 未发布资产的**文件**清理由 Asset Infrastructure 执行（业务资格由 Audio 依据 review_status + first_published_at 判定，D-152），行仍用于审计 |
 | `audio_reviews` | append-only，不删除 |
 | `audio_task_events` | append-only，不删除 |
 | `audio_task_batches` / `audio_task_batch_items` | 批处理记录，保留 |
@@ -313,7 +306,8 @@ event_type 最终枚举（12 种）：`task_created` / `assigned` / `production_
 | 当前音频需求 revision/hash | `audio_slots` |
 | 一次生产意图 | `audio_tasks` |
 | TTS 技术执行 | `audio_generation_attempts` |
-| 音频版本 | `audio_asset_versions` |
+| 音频版本（业务关系、审核/发布生命周期、音频技术属性） | `audio_asset_versions` |
+| **物理文件事实（storage/mime/size/checksum/codec 及文件物理生命周期）** | **Media/Asset Infrastructure（D-127/D-152；Audio 只保存 `asset_id` 引用）** |
 | 审核事实 | `audio_reviews` |
 | 当前审核状态 | `audio_asset_versions.review_status` |
 | 当前正式音频 | `audio_slots.official_asset_version_id` |
@@ -343,8 +337,8 @@ event_type 最终枚举（12 种）：`task_created` / `assigned` / `production_
 10. Reject 原因 CHECK 与 `approval_revoked` remark CHECK 生效。
 11. Publish 前必须 approved；Publish 后 Slot pointer、Task status、Event 原子一致。
 12. stale 不清空 official pointer，但业务层能禁止继续使用 stale 音频。
-13. Rejected 未发布文件经 `pending_delete → deleted / delete_failed` 异步清理。
-14. 曾经发布的文件不会被 Reject 清理逻辑删除。
+13. Rejected 未发布资产的文件清理由 Asset Infrastructure 异步执行；Audio 不保存物理删除重试状态（D-152）。
+14. 曾经发布的文件不会被清理逻辑删除。
 15. TTS Provider / Model / Voice 配置没有复制进 Audio 数据库。
 16. Batch completed 后，不因子 Task 后续状态变化而变化。
 17. Default Preset 允许当前配置更新，同时历史 Task 的 preset key 保持不变。

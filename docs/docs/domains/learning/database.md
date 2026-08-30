@@ -6,41 +6,81 @@ schema: learning
 
 # Learning 数据库总览
 
-> **「拆分学习域」会话裁决（D-147）**：原 Learning 域拆分为 Content + Learning 两域，本页 43 张必建表按职责归属 `content.*` / `learning.*` 两个 Schema（定义类 → content、用户状态/行为类 → learning），**不重新设计已定稿表**。下表新增「建议 Schema 归属」列（`designing`，逐表归属清单待主会话确认；建议映射汇总见 [Content 数据库](../content/database.md)）。
+> **「拆分学习域」会话裁决（[ADR-021](../../adr/ADR-021-content-and-learning-domain-split.md)，D-147）+ 全局分区收口修订（D-150/D-151）**：原 Learning 域 43 张必建表已逐表定稿归属——31 张定义类表迁入 `content.*`（唯一权威清单见 [Content 数据库](../content/database.md)），**10 张用户学习事实表保留 / 迁入 `learning.*`**，2 张旧音频表（`pronunciation_audios` / `tts_jobs`）由 Audio Production Domain 取代、不再建表（D-145）。字段契约沿用已冻结规格，仅按最终 ID/FK 规范修正跨域引用类型（跨域一律 logical UUID、无物理 FK）。
 
-第一版共 **43 张必建表**，另有 1 张可选 `question_reviews`。会话曾称 44 张，但最终列出的表名去重后为 43 张；本页按明确实体清单计数。各表字段和约束只在下列分层规格页完整定义。
+## Learning 最终表清单（10 张，frozen）
 
-> **取代说明（2026-08-30）**：`pronunciation_audios` 与 `tts_jobs` 两表的表级设计已被 Audio Production Domain（`audio` Schema 9 张表）取代，`superseded`（D-145）；本页计数暂维持 43 张不变，删除/迁移方式与计数调整待主会话确认（见 [未决事项](../../governance/open-questions.md)）。
+| # | 表 | 来源分层 | 说明 |
+| ---: | --- | --- | --- |
+| 1 | `learning_activities` | Progress | 用户学习行为历史（canonical facts） |
+| 2 | `course_progress` | Progress | 用户 × 课程进度 |
+| 3 | `lesson_progress` | Progress | 用户 × Lesson 进度 |
+| 4 | `content_mastery` | Progress | 用户 × Content 掌握状态 |
+| 5 | `content_reviews` | Progress | 用户复习调度状态 |
+| 6 | `content_bookmarks` | Progress | 用户内容收藏 |
+| 7 | `exercise_attempts` | Practice 作答 | 用户练习作答历史 |
+| 8 | `question_attempts` | Practice 作答 | 用户逐题作答记录 |
+| 9 | `dictionary_search_history` | Dictionary | 用户词典搜索行为事实 |
+| 10 | `translation_requests` | AI & Translation | 用户即时翻译请求与执行结果（D-151） |
 
-| 分层 | 表数 | 表 | 建议 Schema 归属 |
-| --- | ---: | --- | --- |
-| Knowledge | 18 | `contents`、中文/老挝语知识表、`meanings`、`translations`、`examples`、`pronunciations` | `content` |
-| Dictionary | 5 | `content_equivalents`、`content_relations`、`tags`、`content_tags`、`dictionary_search_history` | 前 4 张 `content`；`dictionary_search_history` `learning` |
-| Curriculum | 5 | `courses`、`units`、`lessons`、`lesson_sections`、`lesson_items` | `content` |
-| Practice | 7 | `exercises`、`questions`、`question_contents`、`question_options`、`answer_rules`、`exercise_attempts`、`question_attempts` | 前 5 张 `content`（定义）；后 2 张 `learning`（作答历史） |
-| Progress | 6 | `learning_activities`、`course_progress`、`lesson_progress`、`content_mastery`、`content_reviews`、`content_bookmarks` | `learning` |
-| Audio & AI | 3 | ~~`pronunciation_audios`~~、~~`tts_jobs`~~（均已被 Audio Production Domain 取代，D-145）、`translation_requests` | `pronunciation_audios`/`tts_jobs` `superseded`（归 Audio 域）；`translation_requests` `designing`（倾向 `learning`） |
+**已由其他 Domain 取代 / 迁出的旧表**：
+
+| 旧表 | 处置 |
+| --- | --- |
+| `pronunciation_audios` | `superseded`（D-145）：业务音频生产/版本/发布统一归 Audio Production Domain（`audio` Schema 9 张表），不在 Content/Learning 建表 |
+| `tts_jobs` | `superseded`（D-145）：TTS 技术执行归 `audio.audio_generation_attempts`，TTS 配置归 TTS 服务自维护 |
+| 其余 31 张定义类表 | 迁入 `content.*`，见 [Content 数据库](../content/database.md) |
+
+> 历史计数说明：原 Learning「43 张必建表」= 31（content）+ 10（learning）+ 2（superseded）；最终两 Schema 合计 **41 张**（Content 31 + Learning 10）。
+
+## 用户事实表规格（自 Dictionary / Practice / AI & Media 分层页迁入）
+
+### `dictionary_search_history`
+
+| 字段 | 冻结字段与约束（最终口径） |
+| --- | --- |
+| 全部字段 | `id bigint identity PK`、`user_id uuid not null`（Identity logical UUID，无跨域 FK）、`query_text varchar(256) not null`、可空 `selected_content_id uuid`（Content logical UUID，无跨域 FK）、`searched_at timestamptz not null default now()`。 |
+
+搜索历史不混入 `learning_activities`；收藏复用 `content_bookmarks`。
+
+### `exercise_attempts`
+
+| 字段 | 冻结字段与约束（最终口径） |
+| --- | --- |
+| 全部字段 | `id bigint identity PK`、`user_id uuid not null`（Identity logical UUID，无跨域 FK）、`exercise_id uuid not null`（Content logical UUID，无跨域 FK）、`status varchar(16) not null default in_progress check in_progress/completed/abandoned`、`total_score numeric(10,2)`、`earned_score numeric(10,2)`、`score_percent numeric(5,2) check null or 0..100`、`started_at timestamptz not null default now()`、`completed_at timestamptz`、`created_at timestamptz not null default now()`。同一用户可多次尝试，禁止 UNIQUE `(user_id,exercise_id)`。 |
+
+### `question_attempts`
+
+| 字段 | 冻结字段与约束（最终口径） |
+| --- | --- |
+| 全部字段 | `id bigint identity PK`、`exercise_attempt_id bigint not null FK → exercise_attempts`（域内 FK）、`question_id uuid not null`（Content logical UUID，无跨域 FK）、`answer_data jsonb not null`、`is_correct boolean`、`earned_score numeric(10,2)`、`answered_at timestamptz not null default now()`；UNIQUE `(exercise_attempt_id,question_id)`。 |
+
+`answer_data` 是允许的 JSONB：可分别表达单选、多选、填空、排序和配对答案；题目定义本身（Content 侧）不使用万能 JSONB。可选表 `question_reviews` 仅在高频错题本产品需求出现时建立，第一阶段不纳入。
+
+### `translation_requests`（Translation ownership 裁决，D-151）
+
+| 字段 | 冻结字段与约束（最终口径） |
+| --- | --- |
+| 全部字段 | `id bigint identity PK`、可空 `user_id uuid`（Identity logical UUID，无跨域 FK）、`source_language varchar(8) not null`、`target_language varchar(8) not null`、`source_text text not null`、`translated_text text`、`provider varchar(64)`、`model varchar(128)`、`status varchar(16) not null default pending check pending/processing/succeeded/failed`、`error_code varchar(64)`、`created_at timestamptz not null default now()`、`completed_at timestamptz`；CHECK 仅允许 zh→lo 或 lo→zh。 |
+
+裁决依据：用户发起一次翻译请求并产生执行结果是**用户行为/运行事实**（没有具体用户就没有意义），归 Learning；系统预先存在、人工确认的 canonical 教学翻译是内容定义，归 `content.translations`。即时 AI 结果只保留在 `learning.translation_requests`，不得自动污染知识库；未来若审核入库，使用 Request → Review → Promote → `content.translations` 流程，第一阶段不实现。
 
 ## 规格页
 
-- [Knowledge](knowledge.md)：18 张知识表与非物理删除策略。
-- [Curriculum](curriculum.md)：课程编排和发布状态。
-- [Practice](practice.md)：题目定义、答案规则和作答历史。
-- [Progress](progress.md)：学习活动、当前进度、掌握度和复习。
-- [Dictionary](dictionary.md)：词典语义、搜索和用户搜索历史。
-- [AI & Media](ai-media.md)：发音、音频、TTS、翻译与 MediaAsset 引用。
+- [业务模型与边界](model.md)
+- [表总览与跨层关系](database.md)（本页）
+- [Progress、Mastery 与 Review 规格](progress.md)（6 张用户状态表）
 
 ## 跨层完整性
 
-- 所有可教学知识通过 `contents.id` 获得统一身份；专用表以 `content_id` 为 PK/FK。
-- Registry 类型匹配由 Learning Service 校验，避免为此引入复杂跨表约束。
-- Learning 指向 `platform.media_assets` 的 `media_id`、`cover_media_id`、`result_media_id` 将在 Platform Media 规格冻结后补齐跨 Schema FK。
-- 课程、题目、活动和用户状态都可以引用 Identity User、Learning Content 与其他 Learning 实体；跨层行为由 Application Service 在事务中协调。
-- 核心 Knowledge Content 不物理删除；下架使用 `contents.status`。关系表和运营草稿可按各自编辑策略处理。
+- 历史行为（`learning_activities`）与当前状态（Progress/Mastery/Review 表）分开；当前状态不通过扫描 Activity 计算。
+- 所有跨域引用（`user_id` → Identity、`content_id` / `course_id` / `lesson_id` / `exercise_id` / `question_id` → Content）一律保存对方 **logical UUID**，不建跨域物理 FK、不引用 Content 内部 BIGINT PK（D-097/D-098/D-147）。
+- 课程发布校验、练习评分、进度更新和复习调度由 Application Service 在事务中完成，不使用 Trigger。
+- 核心 Knowledge Content 不物理删除；下架使用 `contents.status`（归 Content 域）。
 
 ## 已取代的早期方案
 
-- `pronunciations.audio_media_id` 与 `voice` 已由 `pronunciation_audios` 取代。
-- `meanings.meaning` 已改为 `definition`；Meaning 增加状态。
-- 旧 Examples 仅绑定 Content；当前支持可选 `meaning_id`。
-- Unit、LessonSection、LessonItem 不再拥有独立发布状态；仅 Course 与 Lesson 管理发布生命周期。
+- `pronunciation_audios`（`id bigint PK`、`pronunciation_id FK`、`media_id`、`audio_source human/tts`、`voice_code/provider/model`、`quality_score`、`is_primary`、`status`）与 `tts_jobs`（`content_id/pronunciation_id`、`input_text/language/provider/model/voice_code`、`status pending/processing/succeeded/failed/cancelled`、`result_media_id/error_*`、时间戳）：表级设计 `superseded`（D-145），被 Audio Production Domain 的 Slot/Task/Attempt/Asset Version/Review 模型取代（[ADR-020](../../adr/ADR-020-audio-production-domain.md)、[Audio 数据库](../audio/database.md)）。此处仅存字段概要作迁移记录。
+- `pronunciations.audio_media_id` 与 `voice` 早期方案已由 Audio Production Domain 取代（发音知识属性归 `content.pronunciations`，音频生产归 Audio）。
+- 旧 Examples 仅绑定 Content；当前支持可选 `meaning_id`（归 Content 规格）。
+- Unit、LessonSection、LessonItem 不拥有独立发布状态；仅 Course 与 Lesson 管理发布生命周期（归 Content 规格）。

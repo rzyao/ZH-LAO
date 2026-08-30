@@ -17,9 +17,9 @@ commerce  rewards  trust     operations platform
 ```
 
 - `community` Schema 已取消：动态、点赞、评论、Feed 等社区/动态能力正式归入 `social` Schema，不再保留独立 Community Schema。
-- `content` Schema 承载 Content 业务域（第 11 个业务 Schema，D-147/[ADR-021](../adr/ADR-021-content-and-learning-domain-split.md)）：中文/老挝语 canonical 教学内容定义（课程/单元/Lesson/词汇/句子/教学文本/标准答案/标准发音要求/内容版本与 Content Revision/发布状态）。
-- `learning` Schema 收窄为用户学习状态与学习事实（进度/完成/掌握/复习/学习历史/学习统计）；原 Learning 的 43 张必建表按职责归属 `content.*` 与 `learning.*` 两个 Schema（定义类 → content、用户状态/行为类 → learning），**逐表归属清单待主会话给出（D-147 `designing`，文档建议映射见 [Content 数据库](../domains/content/database.md)）**；不因拆分重新设计已定稿表。
-- `audio` Schema 承载 Audio Production 业务域（第 10 个业务 Schema，D-139/[ADR-020](../adr/ADR-020-audio-production-domain.md)），固定 9 张业务表：`audio_slots` / `audio_tasks` / `audio_generation_attempts` / `audio_asset_versions` / `audio_reviews` / `audio_task_events` / `audio_task_batches` / `audio_task_batch_items` / `audio_default_presets`。
+- `content` Schema 承载 Content 业务域（D-147/[ADR-021](../adr/ADR-021-content-and-learning-domain-split.md)，31 张表 D-150）：中文/老挝语 canonical 教学内容定义（课程/单元/Lesson/词汇/句子/教学文本/标准答案/标准发音要求/内容版本与 Content Revision/发布状态/canonical 教学翻译）。
+- `learning` Schema 收窄为用户学习状态与学习事实（进度/完成/掌握/复习/学习历史/学习统计）；原 Learning 的 43 张必建表已完成逐表归属裁决（D-150）：**`content.*` 31 张 / `learning.*` 10 张 / 2 张由 Audio Production 取代废弃**，权威逐表清单见 [Content 数据库](../domains/content/database.md) 与 [Learning 数据库](../domains/learning/database.md)；不因拆分重新设计已定稿表。
+- `audio` Schema 承载 Audio Production 业务域（D-139/[ADR-020](../adr/ADR-020-audio-production-domain.md)），固定 9 张业务表：`audio_slots` / `audio_tasks` / `audio_generation_attempts` / `audio_asset_versions` / `audio_reviews` / `audio_task_events` / `audio_task_batches` / `audio_task_batch_items` / `audio_default_presets`。`audio_slots.source_domain` 指向 `content`（不是历史的 `learning`）；物理文件事实的唯一 canonical owner 是 Media/Asset Infrastructure，`audio_asset_versions` 只保存 `asset_id` logical UUID 引用（D-152）。
 - `platform` 承载 Platform 业务域能力，固定为 6 张业务表：`feature_flags` / `feature_flag_overrides` / `runtime_configs` / `app_versions` / `announcements` / `regions`（Product Runtime Control Plane）。`system_outbox_events`（全系统唯一一套）与统一 Asset/Media 基础设施属于 **Platform Infrastructure**，不计入业务 Schema，也不计入任何业务 Domain 的业务表数量。其他业务 Domain 不建立指向 `platform.*` 的跨域 FK（Region 语义跨域用 `region_code` 等逻辑标识）。
 - 不采用一个 Domain 一个数据库。
 
@@ -44,7 +44,7 @@ commerce  rewards  trust     operations platform
 - **Logical ID**：服务于跨 Domain 引用、API、Event、Outbox、客户端标识、跨系统长期追踪；统一采用 **UUID**。
 - 任何满足以下任一条件的聚合根或业务实体，**必须具有稳定 UUID logical/public ID**：可能被其他 Domain 引用；会出现在跨域事件中；会暴露给客户端/API；生命周期需跨系统长期追踪；可能被运营/审计/安全识别；未来存在跨服务拆分可能。
 - **跨 Domain 永远不得引用另一个 Domain 的内部 BIGINT PK**；跨域只能通过 logical UUID 协作（Domain Service / API + Domain Event / Outbox）。
-- `public_id` 用于向客户端公开且不应暴露连续内部 ID 的主要实体（User、Post、Conversation、Message、Order 等）；生成算法与各实体前缀为 `designing`。
+- `public_id` 用于向客户端公开且不应暴露连续内部 ID 的主要实体（User、Post、Conversation、Message、Order 等），统一为 UUID（应用层生成、不可变）；具体生成实现为 `designing`。
 - Rewards 的跨域稳定 ID 是 `grant_no uuid`（名为 `grant_no` 而非 `public_id`，见 [Rewards 数据库](../domains/rewards/database.md)）。
 
 ## 数据库与应用职责
@@ -53,23 +53,23 @@ commerce  rewards  trust     operations platform
 | --- | --- |
 | PK、FK、UNIQUE、CHECK、NOT NULL、事务完整性 | Follow 后检查 Mutual Follow、创建 Match、发放权益、撤销会话、发布 Domain Event |
 
-不要使用“万能 JSONB 表”或无法建立真实 FK 的 `content_type + content_id` 代替结构化关系。
+不要使用“万能 JSONB 表”，也不要在 **Domain 内普通关系**中用 `type + id` 代替明确关系与真实 FK。**跨 Domain 多态业务对象**（业务天然允许引用不同 Domain / entity type）允许使用 `subject_domain + subject_type + subject_id` 或 `source_domain + source_type + source_id` 形式的多态 logical reference，其中 `subject_id` / `source_id` 必须为稳定 UUID logical ID（典型合法案例：`trust.reports` 的 subject 三元组、`audio_slots` 的 `source_domain + content_entity_type + content_entity_id`、`operations.operator_audit_logs` 的 `target_domain + target_type + target_id`）。
 
 ## Schema 成熟度
 
 | Schema | 模型 | 字段设计 |
 | --- | --- | --- |
 | `identity` | `frozen` | 核心四表 SQL 级 `frozen`；OTP/Session/Device 已确认字段，未确认类型逐字段 `designing` |
-| `content` | `frozen`（域边界）/ `designing`（逐表归属） | 教学内容定义类表（Knowledge/Dictionary/Curriculum 定义、Practice 定义、Content Revision 等）由原 Learning 43 张必建表按职责迁入；字段规格沿用已冻结的 Learning 分层页；逐表归属清单与跨域 `public_id` 字段级落地待主会话确认（D-147） |
-| `learning` | `frozen`（域边界）/ `designing`（逐表归属） | 用户学习状态/行为类表（Progress/Mastery/Review/Activity、作答历史等）保留或迁入；字段规格沿用已冻结的 Learning 分层页；逐表归属清单与跨域 logical reference 字段级落地待主会话确认（D-147） |
-| `social` | `frozen` | 20 张首期表已冻结；公开内容字段局部 `designing`。 |
+| `content` | `frozen` | 31 张表逐表归属已裁决（D-150，`frozen`）：教学内容定义类表（Knowledge/Dictionary/Curriculum 定义、Practice 定义、Content Revision、canonical 教学翻译 D-151）；字段规格沿用已冻结的原 Learning 分层页；权威清单见 [Content 数据库](../domains/content/database.md) |
+| `learning` | `frozen` | 10 张表逐表归属已裁决（D-150，`frozen`）：用户学习状态/行为类表（Progress/Mastery/Review/Activity、作答历史、用户即时翻译请求 D-151）；跨域引用统一 logical UUID；权威清单见 [Learning 数据库](../domains/learning/database.md) |
+| `social` | `frozen` | 19 张表已冻结（`social_reports` 已删除，举报事实唯一归 `trust.reports`）；公开内容字段局部 `designing`。 |
 | `chat` | `frozen` | Chat 第一阶段 7 张表定稿；「全域审计后的最终修正版」已把跨域用户 / Media 引用统一为 logical UUID（无跨域物理 FK）、`public_id` 定为 UUID；剩余物理 DDL（Outbox 物理表、UUID 分配实现）为 `designing`；逻辑模型与跨域契约均符合全局最终版（`bigint identity` 内部 PK + `public_id uuid` logical ID） |
 | `commerce` | `frozen`（V1） | 16 张业务表 `frozen`；物理约定（`uuid` 主键 + 跨域只存 logical UUID 不建物理 FK）**符合全局最终版（ADR-018），compliant**；会员/Subscription/Entitlement 落表 `deferred` |
 | `trust` | `frozen`（治理链路 6 表） | 6 表逻辑模型 `frozen`；`uuid` 主键 + 跨域只存 logical UUID 不建物理 FK **符合全局最终版（ADR-018），compliant**；真人认证 Verification `designing` |
 | `rewards` | `frozen` | 5 张表（programs/rules/events/grants/deliveries）字段级 `frozen`；审计确认跨域引用统一 `uuid` logical reference、不建独立 outbox（统一 `system_outbox_events`），符合全局最终版（ADR-018）；权益型奖励/Manual Grant/非 Coin 资产延后 |
-| `operations` | `frozen` | 5 张表（operators/roles/operator_roles/role_permissions/operator_audit_logs）字段级 `frozen`；稳定逻辑 ID 用 `varchar(20)`（非 UUID）与全局「跨域 logical UUID」的类型差异待主会话裁决；后台认证机制归 Identity/Auth 未设计 |
-| `platform` | `frozen` | 6 张业务表（`feature_flags`/`feature_flag_overrides`/`runtime_configs`/`app_versions`/`announcements`/`regions`）字段级 `frozen`（全域审计最终修正版）；`runtime_configs` 仅 current-state（无版本/回滚）；Media/Asset Infrastructure 与 `system_outbox_events` 物理细节 `designing` |
-| `audio` | `frozen` | 9 张业务表字段级 `frozen`（D-139~D-144）；`uuid` 主键 + 跨域只存 logical UUID（`content_entity_id`/operator 等）不建跨域物理 FK，符合全局最终版（ADR-018）；`audio_asset_versions` 自持文件事实与 Media/Asset Infrastructure 的边界衔接待主会话裁决（D-146，`designing`） |
+| `operations` | `frozen` | 5 张表（operators/roles/operator_roles/role_permissions/operator_audit_logs）字段级 `frozen`；全部 ID 统一 UUID（D-153，取代早期 `varchar(20)` 方案）：`operators.auth_subject_id` 为 Identity 稳定 UUID logical reference（UNIQUE、无跨域 FK），`operator_audit_logs.target_id` 为目标域稳定 UUID logical ID；后台认证机制归 Identity/Auth 未设计 |
+| `platform` | `frozen` | 6 张业务表（`feature_flags`/`feature_flag_overrides`/`runtime_configs`/`app_versions`/`announcements`/`regions`）字段级 `frozen`（全域审计最终修正版）；`runtime_configs` 仅 current-state（无版本/回滚）；Media/Asset Infrastructure（物理文件事实唯一 canonical owner，D-152/D-127）与 `system_outbox_events` 物理细节 `designing` |
+| `audio` | `frozen` | 9 张业务表字段级 `frozen`（D-139~D-144）；`uuid` 主键 + 跨域只存 logical UUID（`content_entity_id`/operator 等）不建跨域物理 FK，符合全局最终版（ADR-018）；`audio_asset_versions` 只保存 `asset_id` logical UUID 引用 Media/Asset Infrastructure（物理文件事实唯一 canonical owner），不自持存储元数据（D-152 已裁决，取代 D-146 待裁决状态） |
 
 详见 [Identity 数据库](../domains/identity/database.md)、[Content 数据库](../domains/content/database.md)、[Learning 数据库](../domains/learning/database.md)、[Social 数据库](../domains/social/database.md)、[Chat 数据库](../domains/chat/database.md)、[Commerce 数据库](../domains/commerce/database.md)、[Trust 数据库](../domains/trust/database.md)、[Rewards 数据库](../domains/rewards/database.md)、[Operations 数据库](../domains/operations/database.md)、[Platform 数据库](../domains/platform/database.md) 与 [Audio 数据库](../domains/audio/database.md)。
 

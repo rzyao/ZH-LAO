@@ -132,7 +132,7 @@ Operator 处理 Trust Case 时：**Operations 记录操作轨迹**（`trust.case
 ## 数据库状态
 
 - **5 张表字段级定稿 `frozen`**：字段、可空性、默认值、FK/UNIQUE/CHECK/INDEX、状态枚举、删除策略见[数据库总览](database.md)。
-- **`designing` / 待主会话裁决**：
+- **ID 口径已收口（D-153，frozen）**：Operator / Role / Audit Log 的 `id` 与全部跨域引用（`auth_subject_id`、audit `target_id`）统一为 UUID；早期 `varchar(20)`（`op_xxx` / `role_xxx` / `sys_xxx`）方案 `superseded`，全系统只有一套 Operator UUID 契约（Audio 等域的 `assignee_operator_id` 等与之类型一致）。
+- **`designing`**：
   - 后台认证机制（登录、Session、MFA、失败锁定）归 Identity/Auth 域，本会话未设计（Operations 不存认证数据）。
-  - Operations 使用应用层生成的稳定逻辑 ID（`varchar(20)`，如 `op_xxx` / `role_xxx` / `sys_xxx`），跨域引用（`auth_subject_id`、audit `target_id`）同为稳定逻辑 ID 而非全局规范中的 UUID；该类型差异待主会话统一裁决（与 `public_id` 前缀方案联动）。
   - 工作队列、内容/用户运营、数据看板等后台能力 V1 明确不建，未来确有需求再评估是否扩展 Operations 或归属 Platform。

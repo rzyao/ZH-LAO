@@ -16,19 +16,19 @@ last_updated: 2026-08-30
 | 产品战略问答 | 用户目标、规模、平台、市场、指标、运营约束 | [产品定位](../product/product-overview.md) |
 | 产品支柱收敛 | 学习范围、双边价值、商业模式、社交资格、聊天范围 | [产品定位](../product/product-overview.md)、[业务模型](../product/business-model.md) |
 | 社交与运营规则 | Follow/Match、Feed、礼物、奖励、推荐、功能开放 | [业务模型](../product/business-model.md)、[功能开放](../product/feature-rollout.md) |
-| 一级 Domain Map | 十个域、职责、非职责和依赖 | [Domain Map](../architecture/domain-map.md) |
+| 一级 Domain Map | 十个域、职责、非职责和依赖（历史快照；现行口径为 11 个业务 Domain，见 [Domain Map](../architecture/domain-map.md)） | [Domain Map](../architecture/domain-map.md) |
 | 三层实体地图 | Domain、Subdomain、Core Entity | [Domain Map](../architecture/domain-map.md)、[领域入口](../domains/index.md) |
-| PostgreSQL 总规范 | 十个 Schema、十二项规则、ID/Public ID（后经全局修订为 9 业务 Schema + Final 十二项，见 [ADR-018](../adr/ADR-018-global-database-design-principles-final.md)） | [数据库规范](../architecture/database.md) |
+| PostgreSQL 总规范 | 十个 Schema、十二项规则、ID/Public ID（后经全局修订为 9 业务 Schema + Final 十二项，见 [ADR-018](../adr/ADR-018-global-database-design-principles-final.md)；现行口径为 **11 个业务 Schema**，经 D-139 新增 `audio`、D-147 新增 `content`） | [数据库规范](../architecture/database.md) |
 | Identity 核心 SQL | users、auth_identities、basic_profiles、learning_profiles | [Identity 数据库](../domains/identity/database.md) |
 | Identity 补全 | OTP、Session、状态、Device、游客转正式用户 | [Identity 模型](../domains/identity/model.md)、[流程](../domains/identity/flows.md) |
 | Learning 骨架 | Knowledge/Curriculum/Practice/Progress/Dictionary/Pronunciation | [Learning 模型](../domains/learning/model.md) |
-| Learning Knowledge DDL | Registry、中文/老挝语知识、Meaning/Translation/Example/Pronunciation 的字段、约束、索引、删除策略 | [Knowledge](../domains/learning/knowledge.md) |
-| Learning Curriculum DDL | Course → Unit → Lesson → Section → LessonItem、发布与版本原则 | [Curriculum](../domains/learning/curriculum.md) |
-| Learning Practice DDL | 七张练习表、题型、JSONB 答案、评分和历史不可破坏性 | [Practice](../domains/learning/practice.md) |
+| Learning Knowledge DDL | Registry、中文/老挝语知识、Meaning/Translation/Example/Pronunciation 的字段、约束、索引、删除策略 | [Knowledge](../domains/content/knowledge.md)（D-147 拆分后归 Content） |
+| Learning Curriculum DDL | Course → Unit → Lesson → Section → LessonItem、发布与版本原则 | [Curriculum](../domains/content/curriculum.md)（D-147 拆分后归 Content） |
+| Learning Practice DDL | 七张练习表、题型、JSONB 答案、评分和历史不可破坏性 | [Practice](../domains/content/practice.md)（定义类表归 Content、用户作答归 Learning） |
 | Learning Progress DDL | Activity、Progress、Mastery、Review、Bookmark，以及不建的状态表 | [Progress](../domains/learning/progress.md) |
-| Learning Dictionary DDL | Meaning/Example 升级、Equivalent、Relation、Tag、Search History 与 pg_trgm | [Dictionary](../domains/learning/dictionary.md) |
-| Learning AI/Media DDL | PronunciationAudio、TTS Job、Translation Request、MediaAsset 与 Entitlement 边界 | [AI & Media](../domains/learning/ai-media.md) |
-| Learning 第一版表清单 | 43 张必建表、1 张 optional question_reviews、替代关系；会话口述 44 的算术差异已记录 | [Learning 数据库](../domains/learning/database.md) |
+| Learning Dictionary DDL | Meaning/Example 升级、Equivalent、Relation、Tag、Search History 与 pg_trgm | [Dictionary](../domains/content/dictionary.md)（词典内容归 Content、搜索历史归 Learning） |
+| Learning AI/Media DDL | PronunciationAudio、TTS Job、Translation Request、MediaAsset 与 Entitlement 边界（原 `ai-media.md` 页面已分流：知识属性 → Content、音频生产 → Audio Production、用户翻译请求 → Learning，见 D-145/D-150/D-151） | [Content 数据库](../domains/content/database.md)、[Audio 数据库](../domains/audio/database.md)、[Learning 数据库](../domains/learning/database.md) |
+| Learning 第一版表清单 | 43 张必建表、1 张 optional question_reviews、替代关系；会话口述 44 的算术差异已记录（归属已由 D-150 裁决：`content.*` 31 / `learning.*` 10 / 2 张由 Audio 取代） | [Learning 数据库](../domains/learning/database.md)、[Content 数据库](../domains/content/database.md) |
 | Social Profile | 唯一公开资料、照片、兴趣、语言、Prompt、审核可见性、软删除和 partial unique index | [Social 资料](../domains/social/profile.md) |
 | Social Preferences / Discovery | 多选偏好、零记录不限、双向硬兼容、实时候选、Exposure | [Social 发现](../domains/social/discovery-and-relationships.md) |
 | Social Relationships | 直接 Follow、互关 Match、取消关注结束历史、Block 与免费聊天边界 | [Social 关系](../domains/social/discovery-and-relationships.md) |
@@ -111,7 +111,7 @@ last_updated: 2026-08-30
 | Commerce 合同 | `creditAsset` 参数与返回 `target_reference_id`、Port/Adapter、禁止 SQL JOIN 跨域 | [Rewards 应用服务与事件](../domains/rewards/application-and-events.md) |
 | Admin/API/Service | 后台 API、Domain/Application Service、Policy、错误码、后台权限、日志/指标、C 端 `GET /api/me/rewards` | [Rewards 应用服务与事件](../domains/rewards/application-and-events.md) |
 | 明确不建 / 延期 | 13 类表不建、无 claim、Manual Grant 不做、权益型奖励与新资产延后（Outbox 统一方式已由审计确认） | [Rewards](../domains/rewards/index.md)、[未决事项](open-questions.md) |
-| 与全局 SQL 规范 | `bigint identity` 主键与全局规范一致；**审计后跨域引用统一 `uuid` logical reference 且不建跨域 FK**，全局政策仍待裁决（D-077/D-078） | [Rewards 数据库](../domains/rewards/database.md)「与全局 SQL 规范的关系」 |
+| 与全局 SQL 规范 | `bigint identity` 主键与全局规范一致；审计后跨域引用统一 `uuid` logical reference 且不建跨域 FK（~~全局政策仍待裁决 D-077/D-078~~ **已由 ADR-018 裁决为全局标准，compliant**） | [Rewards 数据库](../domains/rewards/database.md)「与全局 SQL 规范的关系」 |
 | 全域审计确认修订（[33]-[39]） | 跨域 5 字段改 `uuid`（source_event_id/subject_user_id/source_reference_id/user_id/target_reference_id）；Rewards 不建独立 outbox 表（统一 `system_outbox_events`）；Grant=奖励权益事实非到账事实；Program 不新增 INACTIVE；确认 7 条幂等规则与删除策略 | [Rewards 数据库](../domains/rewards/database.md)「跨 Domain Logical Reference」、[设计台账](design-register.md) D-096 |
 | 与旧模型关系 | 早期 Contribution/Scoring（ScoreRecord 计分）模型被 5 表模型取代 | [设计台账](design-register.md) D-017 `superseded` |
 
@@ -143,7 +143,7 @@ last_updated: 2026-08-30
 | --- | --- | --- |
 | 域边界与定位 | Operations = 后台运营主体 + RBAC + 操作审计（Backoffice Control Plane）；不承接业务域状态机；C 端 User ≠ Operator；不建 16 类后台表 | [Operations 域](../domains/operations/index.md)、[设计台账](design-register.md) D-105 |
 | 权限模型 | 不建 `permissions` 表；代码 Permission Registry 定义能力；key 格式 `<domain>.<resource>.<action>`；有效权限 = active Role 权限并集；无层级/无 deny/`super_admin` 只是 Role | [Operations 数据库](../domains/operations/database.md)、[设计台账](design-register.md) D-106 |
-| `operations.operators` | 6 字段定稿：`id varchar(20)` 稳定系统 ID、`auth_subject_id` UNIQUE 跨域逻辑引用无 FK、status active/disabled、不软删不硬删只 disabled | [Operations 数据库](../domains/operations/database.md)、[设计台账](design-register.md) D-107 |
+| `operations.operators` | 6 字段定稿：`id varchar(20)` 稳定系统 ID（~~该 ID 类型方案已由 D-153 修订为 `uuid`~~）、`auth_subject_id` UNIQUE 跨域逻辑引用无 FK、status active/disabled、不软删不硬删只 disabled | [Operations 数据库](../domains/operations/database.md)、[设计台账](design-register.md) D-107/D-153 |
 | `operations.roles` | 7 字段定稿：`code` UNIQUE + lower_snake_case 不可改、status active/disabled、无 is_system/无角色层级 | [Operations 数据库](../domains/operations/database.md)、[设计台账](design-register.md) D-108 |
 | `operations.operator_roles` | PK(operator_id,role_id) + 反向索引 + 域内 FK RESTRICT；无 status；解绑即删关系、历史进审计；active 校验由应用服务强制 | [Operations 数据库](../domains/operations/database.md)、[设计台账](design-register.md) D-109 |
 | `operations.role_permissions` | PK(role_id,permission_key)；仅 role FK；CHECK 三段 key；应用层校验 Registry | [Operations 数据库](../domains/operations/database.md)、[设计台账](design-register.md) D-110 |
@@ -179,8 +179,8 @@ last_updated: 2026-08-30
 | TTS 契约 | Provider/Model/Voice/Preset 归 TTS 服务自维护；只存 `tts_preset_key` 使用事实与 `audio_default_presets` 默认映射；TTS 异步执行、自行上传 Cloudflare R2、不留原始生成文件 | [Audio 域](../domains/audio/index.md)、[设计台账](design-register.md) D-142（解决 D-129 TTS 路由遗留） |
 | 审核与发布 | `audio_reviews` append-only（decision/reject_reason CHECK）；approved ≠ published；发布原子事务；曾发布文件永久保留；未发布 rejected 文件异步清理（不建 cleanup jobs 表） | [Audio 数据库](../domains/audio/database.md)、[设计台账](design-register.md) D-143 |
 | 幂等/并发/批处理 | 三层并发（业务唯一约束 + Idempotency Key/request_id + `lock_version`）；同 Slot 至多一个 active Task（partial UNIQUE 六状态）；Attempt 唯一约束与 worker/callback 并发控制；Batch 只批量创建 Task（key+`request_hash` 幂等） | [Audio 数据库](../domains/audio/database.md)、[设计台账](design-register.md) D-144 |
-| 取代 Learning 旧音频表 | 旧 `pronunciation_audios`/`tts_jobs`（D-028 表级）`superseded`；Learning 必建表计数（43）相应调整；明确不建清单（TTS 参数历史表、cleanup jobs 表、Publish History/current-official/regeneration/human recording attempt/多格式 variant 表、`is_current` 类字段） | [设计台账](design-register.md) D-145、[Learning AI & Media](../domains/learning/ai-media.md) |
-| 边界衔接遗留 | `audio_asset_versions` 自持文件事实（R2 直连、`storage_key` 全表 UNIQUE）与 D-127「Media/Asset Infrastructure 为 asset_id 权威技术属主」的边界冲突待主会话裁决；Audio operator 字段引用 Operations logical ID 的类型口径沿用 D-107 未决项 | [未决事项](open-questions.md)、[设计台账](design-register.md) D-146 |
+| 取代 Learning 旧音频表 | 旧 `pronunciation_audios`/`tts_jobs`（D-028 表级）`superseded`；Learning 必建表计数（43）相应调整（**已由 D-150 落地：content 31 / learning 10 / 2 张废弃**）；明确不建清单（TTS 参数历史表、cleanup jobs 表、Publish History/current-official/regeneration/human recording attempt/多格式 variant 表、`is_current` 类字段） | [设计台账](design-register.md) D-145/D-150、[Content 数据库](../domains/content/database.md)、[Learning 数据库](../domains/learning/database.md) |
+| 边界衔接遗留 | ~~`audio_asset_versions` 自持文件事实与 Media/Asset Infrastructure 边界冲突待主会话裁决；operator 字段类型口径沿用 D-107 未决项~~ → **均已裁决**：文件事实边界由 D-152 收口（只存 `asset_id` logical UUID）；operator ID 类型由 D-153 收口（统一 UUID） | [Audio 数据库](../domains/audio/database.md)、[设计台账](design-register.md) D-152/D-153 |
 
 ## "拆分学习域"会话
 
@@ -188,7 +188,19 @@ last_updated: 2026-08-30
 
 | 会话阶段 | 已覆盖内容 | 文档 |
 | --- | --- | --- |
-| 拆分裁决 | Learning 正式拆为 **Content Domain**（Canonical Learning Content：课程/单元/Lesson/词汇/句子/教学文本/内容组织/语言信息/标准答案/标准发音要求/内容版本/Content Revision/发布状态，「零用户时依然存在」）与 **Learning Domain**（User Learning State & Facts：课程/Lesson/Unit 进度、词汇/句子学习状态、完成记录、掌握状态、学习历史、复习状态、学习统计 facts，「用户开始学习后才产生」）；依赖 `Identity → Learning → Content`（逻辑箭头）；Learning 可存 `content_id/course_id/lesson_id/unit_id/vocabulary_id/sentence_id` logical references；被跨域引用的 Content 实体须有稳定 UUID logical/public ID；Learning→Content、Learning→Identity 不建物理 FK；事实严格分离（Learning 不复制第二份 canonical 内容）；Content Revision 归 Content、Learning 只记录学习时对应的 revision；Schema 拆 `content.*`/`learning.*`；不因拆分重新设计已定稿表 | [Domain Map](../architecture/domain-map.md)、[Content 域](../domains/content/index.md)、[Content 数据库](../domains/content/database.md)、[Learning 数据库](../domains/learning/database.md)、[设计台账](design-register.md) D-147、[ADR-021](../adr/ADR-021-content-and-learning-domain-split.md) |
+| 拆分裁决 | Learning 正式拆为 **Content Domain**（Canonical Learning Content：课程/单元/Lesson/词汇/句子/教学文本/内容组织/语言信息/标准答案/标准发音要求/内容版本/Content Revision/发布状态，「零用户时依然存在」）与 **Learning Domain**（User Learning State & Facts：课程/Lesson/Unit 进度、词汇/句子学习状态、完成记录、掌握状态、学习历史、复习状态、学习统计 facts，「用户开始学习后才产生」）；依赖 `Learning → Identity` 与 `Learning → Content`（Learning depends on Identity and Content；逻辑依赖）；Learning 可存 `content_id/course_id/lesson_id/unit_id/vocabulary_id/sentence_id` logical references；被跨域引用的 Content 实体须有稳定 UUID logical/public ID；Learning→Content、Learning→Identity 不建物理 FK；事实严格分离（Learning 不复制第二份 canonical 内容）；Content Revision 归 Content、Learning 只记录学习时对应的 revision；Schema 拆 `content.*`/`learning.*`；不因拆分重新设计已定稿表 | [Domain Map](../architecture/domain-map.md)、[Content 域](../domains/content/index.md)、[Content 数据库](../domains/content/database.md)、[Learning 数据库](../domains/learning/database.md)、[设计台账](design-register.md) D-147、[ADR-021](../adr/ADR-021-content-and-learning-domain-split.md) |
 | Audio Production 契约同步 | 文本/正确发音要求/Content Revision 由 Content 拥有；依赖 `Audio Production → Content`（而非 → Learning）；Content 提供 `content_entity_id/content_revision_id` 稳定 logical UUID；Audio 仍只负责生产 | [Audio 域](../domains/audio/index.md)、[设计台账](design-register.md) D-148、[ADR-020](../adr/ADR-020-audio-production-domain.md) |
 | 事件归属与跨域引用 | 内容事件归 Content（content_created/updated/published/revision_created、lesson_published）；学习行为事件归 Learning（learning_started/lesson_completed/vocabulary_learned/review_completed/progress_updated）；他域引用教学内容 → Content logical UUID、引用学习事实 → Learning logical UUID；`content_id` 与 `learning_record_id/progress_id` 不得混用 | [Content 域](../domains/content/index.md)、[Domain Map](../architecture/domain-map.md)、[设计台账](design-register.md) D-149 |
 | 显式保留 | 原有已定稿业务模型继续有效；除 Domain ownership / Schema 名 / 跨域 logical reference 调整外，不增加、删除或重新设计业务表；全域其他已定稿 Domain 保持不变 | [设计台账](design-register.md) D-147、[未决事项](open-questions.md) |
+
+## "全局分区最终收口修订"文档维护会话
+
+来源：本会话（2026-08-30）。以各 Domain 最终定稿、全域数据库最终审计结果与最新全局数据库规范为权威来源，对整个文档站做统一收口修订；不重新设计任何已定稿 Domain。
+
+| 修订项 | 已覆盖内容 | 文档 |
+| --- | --- | --- |
+| Content/Learning 逐表归属（D-150） | 原 Learning 43 张必建表逐表裁决：`content.*` 31 张 / `learning.*` 10 张 / `pronunciation_audios`+`tts_jobs` 由 Audio Production 取代；两份权威清单冻结 | [Content 数据库](../domains/content/database.md)、[Learning 数据库](../domains/learning/database.md) |
+| Translation ownership（D-151） | canonical 教学翻译 → `content.translations`；用户即时翻译请求 → `learning.translation_requests` | [Content 数据库](../domains/content/database.md)、[Learning 数据库](../domains/learning/database.md)、[Domain Map](../architecture/domain-map.md) |
+| Audio Asset 边界（D-152） | 物理文件事实唯一 canonical owner 为 Media/Asset Infrastructure；`audio_asset_versions` 只存 `asset_id` logical UUID，不自持存储元数据（取代 D-146 待裁决状态） | [Audio 数据库](../domains/audio/database.md)、[ADR-020](../adr/ADR-020-audio-production-domain.md) |
+| Operations ID 统一（D-153） | Operator/Role/AuditLog `id` 统一 `uuid`；`auth_subject_id` 为 Identity UUID logical reference（UNIQUE、无跨域 FK）；Audio 等域 operator 引用类型一致；无 VARCHAR/UUID 双契约 | [Operations 数据库](../domains/operations/database.md)、[ADR-019](../adr/ADR-019-operations-backoffice-control-plane.md) |
+| 全站口径统一 | 11 个业务 Domain / 11 个 Schema；Community 并入 Social；Social 19 表；Chat 7 表；Platform 6 表；多态 logical reference 规范（域内禁滥用 `type+id`、跨域多态允许三元组且 ID 为 UUID）；依赖表达 `Learning → Identity`、`Learning → Content`；架构层/ADR/首页/导航/治理文档同步修订 | [Domain Map](../architecture/domain-map.md)、[数据库规范](../architecture/database.md)、[总体架构](../architecture/overview.md)、[ADR-001](../adr/ADR-001-modular-monolith-and-domain-schemas.md)、[ADR-021](../adr/ADR-021-content-and-learning-domain-split.md) |

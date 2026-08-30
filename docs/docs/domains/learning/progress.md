@@ -1,20 +1,21 @@
 ---
 status: frozen
 last_updated: 2026-08-30
+schema: learning
 ---
 
 # Progress、Mastery 与 Review 规格
 
-历史 Activity 不替代当前状态；首页和课程页不能扫描 Activity 计算进度。
+> 所有表位于 `learning` Schema。跨域引用统一为 **logical UUID、无物理 FK**：`user_id` → Identity（用户 auth subject UUID），`course_id` / `lesson_id` / `content_id` / `exercise_id` / `last_section_id` → Content 的稳定 `public_id` UUID（D-147/D-150）。历史 Activity 不替代当前状态；首页和课程页不能扫描 Activity 计算进度。
 
-| 表 | 冻结字段与约束 |
+| 表 | 冻结字段与约束（最终口径） |
 | --- | --- |
-| `learning_activities` | `id bigint identity PK`、`user_id bigint not null FK → identity.users`、`activity_type varchar(32) not null check course_started/lesson_started/lesson_completed/content_viewed/content_practiced/exercise_started/exercise_completed/review_completed`、可空 `course_id/lesson_id/content_id/exercise_id`、`occurred_at timestamptz not null default now()`、`metadata jsonb not null default '{}'::jsonb`。记录历史、分析和状态重算。 |
-| `course_progress` | `user_id bigint not null FK → users`、`course_id bigint not null FK → courses`、`status varchar(16) not null default not_started check not_started/in_progress/completed`、`started_at`、`completed_at`、`last_lesson_id bigint FK → lessons`、`progress_percent numeric(5,2) not null default 0 check 0..100`、`updated_at timestamptz not null default now()`；PK `(user_id,course_id)`。 |
-| `lesson_progress` | `user_id bigint not null FK → users`、`lesson_id bigint not null FK → lessons`、`status varchar(16) not null default not_started check not_started/in_progress/completed`、`started_at`、`completed_at`、`last_section_id bigint FK → lesson_sections`、`progress_percent numeric(5,2) not null default 0 check 0..100`、`updated_at timestamptz not null default now()`；PK `(user_id,lesson_id)`。 |
-| `content_mastery` | `user_id bigint not null FK → users`、`content_id bigint not null FK → contents`、`mastery_status varchar(16) not null default new check new/learning/familiar/mastered`、`mastery_score numeric(5,2) check null or 0..100`、`correct_count integer not null default 0`、`incorrect_count integer not null default 0`、`first_learned_at`、`last_practiced_at`、`mastered_at`、`updated_at timestamptz not null default now()`；PK `(user_id,content_id)`；计数 CHECK 非负。 |
-| `content_reviews` | `user_id bigint not null FK → users`、`content_id bigint not null FK → contents`、`next_review_at timestamptz not null`、`priority smallint not null default 0`、`review_count integer not null default 0 check >=0`、`last_reviewed_at timestamptz`、`updated_at timestamptz not null default now()`；PK `(user_id,content_id)`。 |
-| `content_bookmarks` | `user_id bigint not null FK → users`、`content_id bigint not null FK → contents`、`created_at timestamptz not null default now()`；PK `(user_id,content_id)`。 |
+| `learning_activities` | `id bigint identity PK`、`user_id uuid not null`（Identity logical UUID，无跨域 FK）、`activity_type varchar(32) not null check course_started/lesson_started/lesson_completed/content_viewed/content_practiced/exercise_started/exercise_completed/review_completed`、可空 `course_id/lesson_id/content_id/exercise_id uuid`（Content logical UUID，无跨域 FK）、`occurred_at timestamptz not null default now()`、`metadata jsonb not null default '{}'::jsonb`。记录历史、分析和状态重算。 |
+| `course_progress` | `user_id uuid not null`（Identity logical UUID）、`course_id uuid not null`（Content logical UUID）、`status varchar(16) not null default not_started check not_started/in_progress/completed`、`started_at`、`completed_at`、`last_lesson_id uuid`（Content logical UUID）、`progress_percent numeric(5,2) not null default 0 check 0..100`、`updated_at timestamptz not null default now()`；PK `(user_id,course_id)`。 |
+| `lesson_progress` | `user_id uuid not null`（Identity logical UUID）、`lesson_id uuid not null`（Content logical UUID）、`status varchar(16) not null default not_started check not_started/in_progress/completed`、`started_at`、`completed_at`、`last_section_id uuid`（Content `lesson_sections` logical UUID）、`progress_percent numeric(5,2) not null default 0 check 0..100`、`updated_at timestamptz not null default now()`；PK `(user_id,lesson_id)`。 |
+| `content_mastery` | `user_id uuid not null`（Identity logical UUID）、`content_id uuid not null`（Content logical UUID）、`mastery_status varchar(16) not null default new check new/learning/familiar/mastered`、`mastery_score numeric(5,2) check null or 0..100`、`correct_count integer not null default 0`、`incorrect_count integer not null default 0`、`first_learned_at`、`last_practiced_at`、`mastered_at`、`updated_at timestamptz not null default now()`；PK `(user_id,content_id)`；计数 CHECK 非负。 |
+| `content_reviews` | `user_id uuid not null`（Identity logical UUID）、`content_id uuid not null`（Content logical UUID）、`next_review_at timestamptz not null`、`priority smallint not null default 0`、`review_count integer not null default 0 check >=0`、`last_reviewed_at timestamptz`、`updated_at timestamptz not null default now()`；PK `(user_id,content_id)`。 |
+| `content_bookmarks` | `user_id uuid not null`（Identity logical UUID）、`content_id uuid not null`（Content logical UUID）、`created_at timestamptz not null default now()`；PK `(user_id,content_id)`。 |
 
 ## 规则
 
