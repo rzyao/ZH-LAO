@@ -1,0 +1,105 @@
+{
+  "postgresMajor": 18,
+  "extensions": ["pg_trgm"],
+  "schemas": {
+    "identity": ["auth_identities", "basic_profiles", "learning_profiles", "users"],
+    "content": [
+      "answer_rules", "content_equivalents", "content_relations", "content_tags", "contents",
+      "courses", "examples", "exercises", "lesson_items", "lesson_sections", "lessons",
+      "lo_letters", "lo_sentences", "lo_syllable_letters", "lo_syllables", "lo_word_syllables",
+      "lo_words", "meanings", "pronunciations", "question_contents", "question_options", "questions",
+      "tags", "translations", "units", "zh_hanzi", "zh_hanzi_pinyin", "zh_pinyin",
+      "zh_sentences", "zh_word_hanzi", "zh_words"
+    ],
+    "learning": [
+      "content_bookmarks", "content_mastery", "content_reviews", "course_progress",
+      "dictionary_search_history", "exercise_attempts", "learning_activities", "lesson_progress",
+      "question_attempts", "translation_requests"
+    ],
+    "social": [
+      "social_blocks", "social_discovery_exposures", "social_follows", "social_interests",
+      "social_matches", "social_post_comments", "social_post_likes", "social_post_media", "social_posts",
+      "social_preference_countries", "social_preference_genders", "social_preference_goals",
+      "social_preferences", "social_profile_interests", "social_profile_languages",
+      "social_profile_photos", "social_profile_prompts", "social_profiles", "social_prompt_templates"
+    ],
+    "chat": [
+      "chat_conversation", "chat_conversation_member", "chat_conversation_user_state",
+      "chat_direct_conversation", "chat_message", "chat_message_image", "chat_message_text"
+    ],
+    "audio": [
+      "audio_asset_versions", "audio_default_presets", "audio_generation_attempts", "audio_reviews",
+      "audio_slots", "audio_task_batch_items", "audio_task_batches", "audio_task_events", "audio_tasks"
+    ],
+    "commerce": [
+      "commerce_coin_packs", "commerce_gift_sends", "commerce_gifts", "commerce_order_fulfillments",
+      "commerce_order_items", "commerce_orders", "commerce_payment_events", "commerce_payments",
+      "commerce_product_prices", "commerce_products", "commerce_refund_recoveries", "commerce_refunds",
+      "commerce_wallet_adjustments", "commerce_wallet_ledger", "commerce_wallet_reversals", "commerce_wallets"
+    ],
+    "rewards": ["reward_deliveries", "reward_events", "reward_grants", "reward_programs", "reward_rules"],
+    "trust": ["appeals", "enforcement_actions", "moderation_cases", "moderation_decisions", "reports"],
+    "operations": ["operator_audit_logs", "operator_roles", "operators", "role_permissions", "roles"],
+    "platform": ["announcements", "app_versions", "feature_flag_overrides", "feature_flags", "regions", "runtime_configs"]
+  },
+  "logicalUuidColumns": [
+    "identity.users.public_id", "identity.basic_profiles.avatar_media_id",
+    "content.contents.public_id", "content.courses.public_id", "content.lessons.public_id",
+    "content.lesson_sections.public_id", "content.exercises.public_id", "content.questions.public_id",
+    "learning.learning_activities.user_id", "learning.learning_activities.course_id",
+    "learning.learning_activities.lesson_id", "learning.learning_activities.content_id",
+    "learning.learning_activities.exercise_id", "learning.course_progress.user_id",
+    "learning.course_progress.course_id", "learning.lesson_progress.user_id",
+    "learning.lesson_progress.lesson_id", "learning.content_mastery.user_id",
+    "learning.content_mastery.content_id", "learning.content_reviews.user_id",
+    "learning.content_reviews.content_id", "learning.content_bookmarks.user_id",
+    "learning.content_bookmarks.content_id", "learning.exercise_attempts.user_id",
+    "learning.exercise_attempts.exercise_id", "learning.question_attempts.question_id",
+    "social.social_profiles.public_id", "social.social_profiles.user_id",
+    "social.social_profile_photos.public_id", "social.social_profile_photos.media_id",
+    "social.social_profile_prompts.public_id", "social.social_matches.public_id",
+    "social.social_posts.public_id", "social.social_post_media.media_id",
+    "social.social_post_comments.public_id", "chat.chat_conversation.public_id",
+    "chat.chat_message.public_id", "chat.chat_message_image.asset_id",
+    "audio.audio_slots.content_entity_id", "audio.audio_slots.required_content_revision_id",
+    "audio.audio_tasks.content_revision_id", "audio.audio_tasks.assignee_operator_id",
+    "audio.audio_tasks.created_by_operator_id", "audio.audio_asset_versions.content_revision_id",
+    "audio.audio_asset_versions.asset_id", "audio.audio_asset_versions.producer_operator_id",
+    "audio.audio_reviews.reviewer_operator_id", "operations.operators.id",
+    "operations.operators.auth_subject_id", "operations.operator_audit_logs.target_id",
+    "rewards.reward_events.source_event_id", "rewards.reward_events.subject_user_id",
+    "rewards.reward_events.source_reference_id", "rewards.reward_grants.grant_no",
+    "rewards.reward_grants.user_id", "rewards.reward_deliveries.target_reference_id",
+    "trust.reports.reporter_user_id", "trust.reports.subject_id"
+  ],
+  "blockedTables": [
+    "identity.otp_challenges", "identity.sessions", "identity.devices", "trust.moderation_evidence"
+  ],
+  "blockers": [
+    {
+      "code": "BLOCKED_BY_SPEC_CONFLICT",
+      "subject": "identity auxiliary authentication tables",
+      "detail": "otp_challenges, sessions, and devices have frozen responsibilities but unresolved types, nullability, status values, defaults, and uniqueness scope."
+    },
+    {
+      "code": "BLOCKED_BY_SPEC_CONFLICT",
+      "subject": "trust.moderation_evidence storage ownership",
+      "detail": "storage_key conflicts with D-152 Asset canonical ownership; the replacement asset_id contract and payload CHECK are not frozen."
+    },
+    {
+      "code": "BLOCKED_BY_SPEC_CONFLICT",
+      "subject": "Media/Asset Infrastructure",
+      "detail": "Canonical ownership is frozen, but the physical table, lifecycle states, fields, indexes, and retention are designing."
+    },
+    {
+      "code": "BLOCKED_BY_SPEC_CONFLICT",
+      "subject": "system_outbox_events",
+      "detail": "The single global outbox responsibility is frozen, but its physical columns, indexes, retry metadata, and retention are designing."
+    },
+    {
+      "code": "BLOCKED_BY_SPEC_CONFLICT",
+      "subject": "Content Revision physical model",
+      "detail": "Content owns revisions, but the physical version/revision tables and publishing contract remain designing."
+    }
+  ]
+}
