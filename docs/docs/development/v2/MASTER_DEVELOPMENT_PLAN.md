@@ -225,6 +225,8 @@ Domain Phase 还必须包含：
 <DOMAIN>_API.md
 ```
 
+并且必须按“19A. Admin 与 Mobile 客户端开发策略”说明该 Domain 的 Admin 新写范围、Mobile `REUSE` / `REFACTOR` / `REWRITE` 决策，以及 Domain E2E 客户端验收范围。
+
 需要复杂状态机的 Domain：
 
 额外产生：
@@ -459,6 +461,125 @@ API Integration Test
 ↓
 Client Implementation
 ```
+
+---
+
+# 19A. Admin 与 Mobile 客户端开发策略
+
+**状态：FROZEN / 全局规则**
+
+本章节属于 ZH-LAO V2 的全局客户端规则。后续任何 Phase、Domain Implementation Plan、Admin Implementation Plan、Mobile Integration Plan 均不得擅自改变本章节确定的客户端策略、技术栈或 UI 基线。
+
+## 19A.1 总体策略
+
+```text
+Backend        → V2 全新实现
+Database       → PostgreSQL V2 全新实现
+Admin          → Greenfield Rewrite / 全新重写
+Mobile         → UI/UX 优先复用；V2 数据与业务接入层重建
+```
+
+不得因为 Backend 和 Database 全新设计而机械地重写已经可复用的 Mobile UI/UX；也不得因为 Mobile 页面可以复用而继续沿用旧的数据、认证或业务接入架构。
+
+## 19A.2 Admin 最终策略与技术栈
+
+Admin 必须围绕 V2 Domain 架构、Operations / RBAC、Content、Audio Production、Trust & Safety、Commerce、Rewards 与 Platform 能力全新实现。旧 Admin 的信息架构不得反向约束 V2。
+
+Admin 是内部桌面优先 SPA，默认架构为：
+
+```text
+Admin Browser SPA
+        ↓
+V2 HTTP / Realtime API
+        ↓
+Application Service
+        ↓
+Domain
+        ↓
+PostgreSQL V2
+```
+
+当前不采用 Next.js 作为 Admin 主框架；不得为 Admin 当前不需要的 SSR / SEO 能力增加额外复杂度。
+
+Admin 技术栈固定为：
+
+```text
+React 19 + TypeScript
+Vite 8
+TanStack Router
+TanStack Query
+TanStack Table
+shadcn/ui + Base UI + Tailwind CSS v4
+React Hook Form + Zod
+Lucide
+Vitest + Testing Library + Playwright
+```
+
+TanStack Router 统一承担 Route、Path Params、Search Params、筛选、分页与 Tab URL State。重要列表状态必须可通过 URL 恢复、分享与浏览器前进/后退；例如：
+
+```text
+/content/words?status=published&page=2
+/audio/tasks?status=pending&producer=<id>
+/trust/cases?priority=high
+/commerce/orders?status=paid
+```
+
+TanStack Query 统一承担服务端 Query、Mutation、Cache、Retry 与 Invalidation。不得用临时本地状态替代可缓存的服务端状态；仅短暂、纯 UI 的交互状态保留在 React local state，确有跨页面需求时才引入专门的 local UI state store。
+
+## 19A.3 Mobile 复用与 V2 重建边界
+
+Mobile 按页面和功能逐项标注并执行 `REUSE`、`REFACTOR` 或 `REWRITE`：
+
+- `REUSE`：保留视觉 UI/UX 与无 V2 耦合的展示组件；
+- `REFACTOR`：保留页面结构或交互，替换 V2 数据接入与业务编排；
+- `REWRITE`：旧设计无法满足 V2 Use Case、权限、状态或体验要求时重写。
+
+无论上述分类如何，以下能力必须按 V2 重建，不得直接沿用旧实现：
+
+```text
+API Client
+DTO / Types
+Auth / Session
+Domain Hooks
+Server State / Cache
+Error Handling
+Pagination
+Asset / Upload
+Realtime Chat
+Feature Flags
+```
+
+Mobile 对 V2 的 API、错误格式、UUID、日期时间、分页、认证、权限与 Feature Flag 解释必须与 Admin 一致。
+
+## 19A.4 Admin UI 风格与信息架构
+
+UI 风格固定为 **Rhea-inspired Compact Admin**：简洁、现代、专业、高信息密度、弱装饰、强层级、桌面优先、工作流优先。
+
+具体规则：
+
+- Sidebar 必须按 Domain 分组，使用 V2 Domain 名称和职责组织导航；不得按旧 Admin 页面历史或零散功能堆叠。
+- 页面模式统一为 `List`、`Detail`、`Edit`、`Workbench`。普通资源使用 List / Detail / Edit；审核、生产、处理队列等复杂流程使用 Workbench。
+- 列表页使用 TanStack Table 的统一 DataTable 基线：稳定列定义、服务端分页/排序/筛选、URL 同步、列可见性与 loading / empty / error 状态一致；不得每个 Domain 自行实现不兼容的列表范式。
+- 颜色以中性基础色与有限语义色为主。颜色仅表达层级、操作重点与业务状态；不得以大面积渐变、装饰色或卡片堆叠替代信息层级。所有状态颜色必须同时有文本或图标标签，不得只依赖颜色。
+- Dark Mode 必须从 Foundation 起由 Tailwind CSS v4 token / CSS variables 支持；同一语义 token 在 Light/Dark 模式下保持一致含义，组件不得硬编码破坏主题的颜色。
+- 表单统一采用 React Hook Form + Zod；读写权限、禁用原因、验证错误、提交中与服务端错误必须在统一交互模型中呈现。
+- Admin 和 Mobile 均以 V2 统一的错误模型、权限模型、资产模型、分页模型、实时事件模型及 Feature Flag 为唯一来源；禁止各 Domain 在客户端自行解释 contract。
+
+## 19A.5 Domain Phase 客户端完成定义
+
+每个 Domain Phase 的客户端工作不得延后至最后统一补做。对应 Backend contract 冻结、Backend Functional 与 API Integration Test 通过后，必须在该 Domain Phase 内同步完成：
+
+```text
+Backend
+↓
+Admin（新写）
+↓
+Mobile（REUSE / REFACTOR / REWRITE）
+↓
+Domain E2E
+```
+
+Domain Exit Gate 的客户端部分必须验证该 Domain 的授权、错误、分页、资产/上传、实时能力与 Feature Flag（适用时），并通过相应的 Admin、Mobile 与跨端 Domain E2E。PHASE 14 仅负责跨 Domain 客户端一致性、遗留集成与完整收口，不得成为推迟单个 Domain 客户端交付的理由。
 
 ---
 
@@ -1477,7 +1598,7 @@ Unknown Integration Contract = 0
 
 # 64. PHASE 14 — Complete Client Integration
 
-虽然每个 Domain 可以在自身 Phase 做对应 UI，但此 Phase 做完整客户端收口。
+每个 Domain 的 Admin 与 Mobile 客户端交付及 Domain E2E 必须已经在各自 Domain Phase 内完成。本 Phase 只做跨 Domain 客户端一致性、遗留集成与完整收口，不得替代任何 Domain Phase 的客户端交付。
 
 覆盖：
 
@@ -1825,21 +1946,24 @@ STEP 15
 11. API Contract
 12. C-side Requirements
 13. B-side Requirements
-14. Cross-Domain Dependencies
-15. Events
-16. Transaction Boundaries
-17. UUID Contracts
-18. Asset Usage
-19. Error Model
-20. Permission Model
-21. Logging
-22. Test Plan
-23. File Change Scope
-24. Implementation Tasks
-25. Risks
-26. Rollback / Revert Strategy
-27. Exit Gate
-28. Forbidden Changes
+14. Admin 新写范围与页面模式
+15. Mobile REUSE / REFACTOR / REWRITE 决策
+16. Domain E2E（Admin / Mobile / 跨端）
+17. Cross-Domain Dependencies
+18. Events
+19. Transaction Boundaries
+20. UUID Contracts
+21. Asset Usage
+22. Error Model
+23. Permission Model
+24. Logging
+25. Test Plan
+26. File Change Scope
+27. Implementation Tasks
+28. Risks
+29. Rollback / Revert Strategy
+30. Exit Gate
+31. Forbidden Changes
 ```
 
 ---
@@ -2204,6 +2328,7 @@ Tables used
 Cross-domain contracts
 Events
 Client work
+Admin / Mobile client strategy and Domain E2E result
 Changed files
 Tests
 Database audit
