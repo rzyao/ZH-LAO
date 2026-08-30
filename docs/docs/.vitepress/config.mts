@@ -11,6 +11,7 @@ export default defineConfig({
       { text: '首页', link: '/' },
       { text: '产品', link: '/product/product-overview' },
       { text: '架构', link: '/architecture/overview' },
+      { text: '开发计划', link: '/development/v2/' },
       { text: '领域设计', link: '/domains/' },
       { text: '设计治理', link: '/governance/design-register' },
       { text: 'ADR', link: '/adr/' }
@@ -39,6 +40,14 @@ export default defineConfig({
           { text: 'PostgreSQL 总规范', link: '/architecture/database' },
           { text: '后端架构', link: '/architecture/backend' },
           { text: '前端架构', link: '/architecture/frontend' }
+        ]
+      },
+      {
+        text: 'V2 开发计划',
+        items: [
+          { text: '开发计划入口', link: '/development/v2/' },
+          { text: '全量开发总计划', link: '/development/v2/MASTER_DEVELOPMENT_PLAN' },
+          { text: '开发进度记录表', link: '/development/v2/DEVELOPMENT_PROGRESS' }
         ]
       },
       {

@@ -204,3 +204,12 @@ last_updated: 2026-08-30
 | Audio Asset 边界（D-152） | 物理文件事实唯一 canonical owner 为 Media/Asset Infrastructure；`audio_asset_versions` 只存 `asset_id` logical UUID，不自持存储元数据（取代 D-146 待裁决状态） | [Audio 数据库](../domains/audio/database.md)、[ADR-020](../adr/ADR-020-audio-production-domain.md) |
 | Operations ID 统一（D-153） | Operator/Role/AuditLog `id` 统一 `uuid`；`auth_subject_id` 为 Identity UUID logical reference（UNIQUE、无跨域 FK）；Audio 等域 operator 引用类型一致；无 VARCHAR/UUID 双契约 | [Operations 数据库](../domains/operations/database.md)、[ADR-019](../adr/ADR-019-operations-backoffice-control-plane.md) |
 | 全站口径统一 | 11 个业务 Domain / 11 个 Schema；Community 并入 Social；Social 19 表；Chat 7 表；Platform 6 表；多态 logical reference 规范（域内禁滥用 `type+id`、跨域多态允许三元组且 ID 为 UUID）；依赖表达 `Learning → Identity`、`Learning → Content`；架构层/ADR/首页/导航/治理文档同步修订 | [Domain Map](../architecture/domain-map.md)、[数据库规范](../architecture/database.md)、[总体架构](../architecture/overview.md)、[ADR-001](../adr/ADR-001-modular-monolith-and-domain-schemas.md)、[ADR-021](../adr/ADR-021-content-and-learning-domain-split.md) |
+
+## “审核分区问题”会话（V2 全量开发总计划）
+
+来源：ChatGPT 内部会话 ID `6a93e766-3cf0-83ea-95c0-5e5db14592ad`。会话尾部在确认本项目是新项目开发、不是旧系统迁移后，产出《ZH-LAO V2 全量开发总计划》，明确替代旧的迁移总计划并冻结为开发执行最高级规范。
+
+| 会话结论 | 状态 | 唯一事实源 |
+| --- | --- | --- |
+| Phase 0–17 的开发顺序、Application Foundation 为唯一下一阶段、逐 Phase 的计划/审核/实施/测试/报告/Gate 流程、Domain 与跨域规则、API-from-Use-Case 原则、测试与上线标准 | `frozen` | [V2 全量开发总计划](../development/v2/MASTER_DEVELOPMENT_PLAN.md) |
+| 当前执行状态与 Gate 证据记录 | `baseline` | [V2 开发进度记录表](../development/v2/DEVELOPMENT_PROGRESS.md) |
