@@ -1,7 +1,7 @@
 ---
 status: frozen
-last_updated: 2026-08-30
-revision: "2026-08-30 设计运营域会话定稿：5 表最终确认版（后台主体 + RBAC + 不可变操作审计）"
+last_updated: 2026-08-31
+revision: "Operations V1 application/RBAC/audit/API design gate PASS; 5-table database contract unchanged"
 schema: operations
 source_conversation_id: 6a9351a6-17b8-83ea-b172-5f58121a431f
 source_share_url: https://chatgpt.com/share/6a9351a6-17b8-83ea-b172-5f58121a431f
@@ -9,34 +9,53 @@ source_share_url: https://chatgpt.com/share/6a9351a6-17b8-83ea-b172-5f58121a431f
 
 # Operations 域
 
-Operations Domain = **内部运营后台的身份、授权与操作追踪域**（Backoffice Control Plane）。
+Operations Domain = **内部运营后台的身份映射、RBAC 授权控制面与 Operator 操作审计域**。
 
-它只解决三个问题：
+它回答三个问题：
 
-1. **谁可以进入运营后台**（后台运营主体）
-2. **这个后台人员可以做什么**（RBAC 后台授权）
-3. **这个后台人员实际做过什么**（后台操作审计）
+1. 谁是后台 Operator；
+2. 当前 Operator 可以做什么；
+3. 哪个 Operator 成功执行过什么管理动作。
 
-Operations **不是“所有后台功能的大杂烩”**，也不是业务域的状态机聚合层。真正的数据仍然分别写入各自属主域（`trust.*` 举报/处罚、`commerce.*` 订单/退款、`rewards.*` 奖励发放等）；Operations 只负责操作者与权限，并留下操作审计记录。
+Operations 不是业务状态聚合层。Platform / Content / Trust / Commerce / Rewards 等 canonical state 始终由各自 Domain 保存。
+
+## Canonical Application Design
+
+PHASE 4 application design 已于 2026-08-31 完成并通过：
+
+```text
+OPERATIONS_DESIGN_GATE = PASS
+OPERATIONS_IMPLEMENTATION_STARTED = NO
+```
+
+权威设计文档：
+
+- [Operations Implementation Plan](../../development/v2/04-operations/OPERATIONS_IMPLEMENTATION_PLAN.md)
+- [Operations Use Cases](../../development/v2/04-operations/OPERATIONS_USE_CASES.md)
+- [Operations RBAC Contracts](../../development/v2/04-operations/OPERATIONS_RBAC_CONTRACTS.md)
+- [Operations API / Public Contract](../../development/v2/04-operations/OPERATIONS_API.md)
+- [Operations Design Audit](../../development/v2/04-operations/OPERATIONS_DESIGN_AUDIT.md)
+
+数据库字段、FK、CHECK、INDEX 与删除策略仍以 [Operations 数据库总览](database.md) 与 `database/v2/migrations/0200_operations.sql` 为 frozen authority；本次 Design Gate 没有修改 migration。
 
 ## 一句话边界
 
 ```text
-Operations = 后台身份 + RBAC + 操作审计
-不接管：业务审核/处罚/退款/奖励/聊天/社交/学习等任何业务域状态机
+Operations = Operator mapping + RBAC + Admin authorization + Operator audit
+Identity   = authentication / account / token / session canonical owner
+Platform   = platform runtime state canonical owner
+Owner Domain = its own business state canonical owner
 ```
 
-## 子域与实体（本会话定稿）
+## 最终 5 张表
 
-| 子域 | 核心实体 | 表 | 职责 |
+| 子域 | 实体 | 表 | 职责 |
 | --- | --- | --- | --- |
-| 运营主体 | Operator | `operations.operators` | 后台运营主体的身份档案（非认证账户） |
-| RBAC | Role | `operations.roles` | 后台角色，一组权限的稳定集合 |
-| RBAC | OperatorRole | `operations.operator_roles` | 运营人员 ↔ 角色（多对多） |
-| RBAC | RolePermission | `operations.role_permissions` | 角色 ↔ 权限 key（`permission_key`，无 permissions 表） |
-| 操作审计 | OperatorAuditLog | `operations.operator_audit_logs` | 后台管理动作的永久、不可变、append-only 事实 |
-
-第一阶段共 **5 张表**，由[数据库总览](database.md)维护 DDL。
+| Operator | Operator | `operations.operators` | Identity stable UUID ↔ 后台 Operator 映射与 active/disabled 状态 |
+| RBAC | Role | `operations.roles` | 平面 Role |
+| RBAC | OperatorRole | `operations.operator_roles` | Operator ↔ Role assignment |
+| RBAC | RolePermission | `operations.role_permissions` | Role ↔ exact permission key |
+| Audit | OperatorAuditLog | `operations.operator_audit_logs` | 成功、已接受的 Operator 管理动作 append-only 事实 |
 
 ```text
 operations
@@ -47,92 +66,355 @@ operations
 └── operator_audit_logs
 ```
 
-## 明确不能放进 Operations 的东西
+禁止增加 Permission dictionary table 或第 6 张 Operations 核心业务表。
 
-- **举报、审核、处罚** → `trust`（即使人工审核在“运营后台”完成，仍是 Trust 数据；Operations 只记录 `operator X 执行了 trust.reports.resolve`）。
-- **退款、补单、支付调整** → `commerce`（不建 `admin_refunds` / `manual_orders` / `payment_adjustments`）。
-- **奖励补发** → `rewards`。
-- **聊天管理** → `chat`（`messaging.*` 仅指 Chat 域数据的 Schema 引用，Chat 为唯一正式命名，见 [ADR-015](../../adr/ADR-015-chat-naming-and-sql-adjudication.md)）。
-- **内容本身**（课程、词汇、文章、Banner 业务内容、动态、礼物、商品）→ 由拥有这些对象的业务域负责。
-- **Feature Flag / 系统参数** → `platform`。Operations 描述“谁在操作系统”，Platform 描述“系统如何运行”，两者不混。
-- **认证机制**：登录 Session、密码、MFA、失败锁定 → 认证类属 Identity/Auth 域，不能因为后台用户位于 Operations 就把认证系统塞进来。
+## Identity Boundary
 
-## C 端用户与后台 Operator 必须分开
+`operators.auth_subject_id`：
 
 ```text
-App User ≠ Operator
+UUID
+UNIQUE
+Identity stable logical/public subject reference
+NO cross-domain FK
 ```
 
-禁止 `users.is_admin = true`、禁止 `users.role = 'ADMIN'`。C 端身份与后台运营身份生命周期完全不同：普通用户、老师、VIP、社交用户都不意味着后台管理员；运营人员也没必要拥有 C 端社交资料、会员、钱包、奖励等业务身份。`operations.operators` 是独立的后台主体。
+正式请求链路：
 
-## 权限模型：代码定义能力，数据库配置规则
+```text
+Foundation / Identity Authentication
+→ AuthContext(subjectId)
+→ Operations resolve Operator by auth_subject_id
+→ RBAC authorization
+```
 
-- **不建 `permissions` 表**。权限能力由应用代码中的 **Application Permission Registry** 定义（`trust.reports.read`、`commerce.refunds.create`、`rewards.grants.create`、`social.profiles.moderate` 等），数据库只负责“哪个 Role 拥有哪些权限 key”（`role_permissions`）。
-- 权限 key 格式统一为 **`<domain>.<resource>.<action>`**，全部 `lower_snake_case`；不使用 `TRUST_REPORT_READ`、`trust:reports:read`、`Trust.Report.Read`。
-- 写入 `role_permissions` 时应用层必须校验 `permission_key ∈ Application Permission Registry`；数据库 CHECK 只验证格式，不验证权限是否真实存在。
-- **有效权限 = 所有 active Role 的 Permission 并集**。无 deny permission、无权限/角色优先级、无角色层级（role hierarchy）、无用户直接权限（禁止 `operator_permissions` 或 `operators.permissions jsonb`）。
-- `super_admin` 只是一个 Role（`roles.code = 'super_admin'`），不是数据库中的特殊身份，也不建 `operators.is_super_admin`。
+Operations 只能依赖 `apps/backend/src/modules/identity/public/`，禁止直接依赖 Identity repositories、application/infrastructure 或 SQL tables。
 
-## Operations 与 Trust 的边界（不可互相替代）
+Operations 不实现：password、OTP、JWT issuing、session、独立管理员用户名密码。
 
-| Domain | 记录什么 | 回答什么 |
-| --- | --- | --- |
-| Trust | 业务审核、判断与处罚事实：Case / Decision / Enforcement（成立与否、理由、起止、状态、申诉） | Trust 业务上发生了什么 |
-| Operations | 哪个后台 Operator 在什么时间执行了什么后台管理动作（`operator_id + action_key + target_*`） | 谁动了系统 |
+## Operator Lifecycle
 
-Operator 处理 Trust Case 时：**Operations 记录操作轨迹**（`trust.cases.resolve` / `trust.enforcements.create` → `operator_audit_logs`），**Trust 仍然保存业务事实本身**（case / decision / enforcement）。两者不能互相替代，也不复制对方完整业务模型。
+V1 已冻结：
 
-## 状态汇总
+```text
+self registration = NO
+create operator   = authorized Operator management action
+first operator    = one-time controlled CLI bootstrap
+status            = active | disabled
+physical delete   = NO
+soft delete       = NO
+auth_subject_id   = immutable after create
+```
 
-整个 Operations Domain **只有两个实体存在状态机**：
+Create / Enable 必须通过 `identity/public` 确认 Identity subject 当前存在且 active。
 
-| 表 | 字段 | 值 |
-| --- | --- | --- |
-| `operators` | `status` | `active` / `disabled` |
-| `roles` | `status` | `active` / `disabled` |
+Operator disabled 后所有新的 authorization decision 立即 deny；角色关系和历史审计保留。重新 enable 后，已有 active Role assignment 重新参与权限计算。
 
-`operator_roles` / `role_permissions` / `operator_audit_logs` 三张表全部**不需要 status**。
+Identity account inactive/closed 时，现有 Identity AuthenticationProvider 不产生可用 AuthContext，因此 Admin authorization 无法进入 Operations。
 
-- `active`：可参与权限计算 / 承担运营职责（同时还需 Auth 可认证）。
-- `disabled`：整个 Operator / Role 立即不再产生有效权限，但历史关系与审计保留。
+## Role Model
 
-## 删除策略矩阵
+Role 是 exact permissions 的平面集合：
 
-| 表 | 物理删除 | Soft delete | 正确策略 |
-| --- | ---: | ---: | --- |
-| `operators` | ❌ | ❌ | `status = disabled`（审计主体永久保留） |
-| `roles` | ❌ | ❌ | `status = disabled` |
-| `operator_roles` | ✅ | 不需要 | 解绑即删除关系，历史进审计 |
-| `role_permissions` | ✅ | 不需要 | 撤销权限即删除关系，历史进审计 |
-| `operator_audit_logs` | ❌ | ❌ | 永久 append-only（不可 UPDATE / DELETE） |
+```text
+Operator
+→ zero or more Roles
+→ exact Permission union
+```
 
-“可删除”只表示当前授权关系可以消失，不抹掉历史；历史永远通过 `operator_audit_logs` 保留。
+Role：
 
-## 18 条不可违反规则
+```text
+code        UNIQUE + lower_snake_case + immutable
+name        mutable
+description mutable
+status      active | disabled
+physical delete = NO
+```
 
-1. **Operations 最终保持 5 张表，不增加 Permission dictionary table。**
-2. `operators.auth_subject_id` 是 Identity/Auth stable logical ID，并保持 `UNIQUE`。
-3. `auth_subject_id` 不建立跨 Domain physical FK。
-4. Operators / Roles 都不物理删除，以 `disabled` 结束当前有效生命周期。
-5. Role `code` 必须 `UNIQUE + lower_snake_case`。
-6. `operator_roles` 使用 `PK(operator_id, role_id)`。
-7. `operator_roles` 保留反向索引 `(role_id, operator_id)`。
-8. Permission key 固定为 `<domain>.<resource>.<action>`。
-9. Permission 定义权属于代码 Registry，不属于数据库。
-10. Operator 只能通过 Role 获取 Permission（单一授权路径）。
-11. Audit Log 是永久、不可修改、不可删除的 append-only 事实。
-12. Audit target 使用 `target_domain + target_type + target_id`。
-13. `target_id` 是目标业务实体 stable logical ID。
-14. Audit target 对所有其他 Domain 均不建立 physical FK。
-15. **Trust Decision / Enforcement 是业务事实。**
-16. **Operations Audit 是后台操作轨迹。**
-17. Operator 操作 Trust 时，Operations 记录“谁做了什么”；Trust 继续保存 case / decision / enforcement 本身。
-18. 两个 Domain 不允许互相替代，也不复制对方完整业务模型。
+Disabled Role 的 assignment/permissions 保留，但 authorization 完全忽略该 Role。
 
-## 数据库状态
+V1 允许自定义 Role。
 
-- **5 张表字段级定稿 `frozen`**：字段、可空性、默认值、FK/UNIQUE/CHECK/INDEX、状态枚举、删除策略见[数据库总览](database.md)。
-- **ID 口径已收口（D-153，frozen）**：Operator / Role / Audit Log 的 `id` 与全部跨域引用（`auth_subject_id`、audit `target_id`）统一为 UUID；早期 `varchar(20)`（`op_xxx` / `role_xxx` / `sys_xxx`）方案 `superseded`，全系统只有一套 Operator UUID 契约（Audio 等域的 `assignee_operator_id` 等与之类型一致）。
-- **`designing`**：
-  - 后台认证机制（登录、Session、MFA、失败锁定）归 Identity/Auth 域，本会话未设计（Operations 不存认证数据）。
-  - 工作队列、内容/用户运营、数据看板等后台能力 V1 明确不建，未来确有需求再评估是否扩展 Operations 或归属 Platform。
+## `super_admin`
+
+`super_admin` 是唯一冻结的 code-level reserved Role。
+
+它不是 bypass：
+
+```text
+NO is_super_admin field
+NO wildcard
+NO role-code allow-all branch
+```
+
+它仍通过 `role_permissions` 显式拥有 canonical Permission Catalog 中的全部当前 keys。
+
+保护规则：
+
+- 不允许 disable；
+- 不允许 permission set 少于完整 catalog；
+- 可以分配给多个 Operator；
+- DisableOperator / revoke super_admin assignment 不得导致 active super-admin Operator 数量变成 0。
+
+Last-admin race 通过对 `super_admin` Role row 的共享 `SELECT ... FOR UPDATE` serialization point + transaction re-count 解决，不新增数据库字段。
+
+## Permission Model
+
+Canonical grammar：
+
+```text
+<domain>.<resource>.<action>
+```
+
+Application contract 严格三段；全部 lower_snake_case。
+
+Domain token：
+
+```text
+identity
+platform
+operations
+content
+learning
+audio
+social
+chat
+commerce
+rewards
+trust
+```
+
+Resource 统一使用 plural lower_snake_case capability family。
+
+V1 authorization 只支持 **exact permission key**：
+
+```text
+wildcard            = NO
+deny permission     = NO
+role hierarchy      = NO
+role priority       = NO
+direct user permission = NO
+ABAC                = NO
+resource ACL        = NO
+```
+
+## Permission Catalog Authority
+
+不建 `operations.permissions` 表。
+
+Permission 的权威来自 Operations code-level static catalog，未来目标 public path：
+
+```text
+apps/backend/src/modules/operations/public/permissions.ts
+```
+
+数据库只存 Role 当前拥有的 exact key；写入前应用层必须验证 key 属于 catalog。
+
+当前设计冻结：
+
+```text
+Operations exact keys = 16
+Platform exact keys   = 10 (from frozen Platform Design)
+Current catalog total = 26
+```
+
+后续 Content/Learning/Audio/Social/Chat/Commerce/Rewards/Trust 的 exact keys 只有在各自 Admin capability/API 冻结后才加入，不提前发明。
+
+Role permission mutation V1 只保留：
+
+```text
+SetRolePermissions(role_id, complete_permission_set)
+```
+
+不同时提供 grant/remove/replace 三套等价 API。
+
+## Authorization Semantics
+
+```text
+Identity authenticated
+→ Operator exists
+→ Operator active
+→ active assigned Roles
+→ union exact role_permissions
+→ required exact key exists
+```
+
+- multiple roles = permission union；
+- disabled Role = ignored；
+- disabled Operator = deny all；
+- no Role = empty permission set；
+- super_admin = explicit rows only；
+- Redis/in-process permission cache = NO in V1。
+
+## Audit Semantics
+
+Operations Audit 是：
+
+```text
+who             -> operator_id
+did what        -> action_key
+to what         -> target_domain/target_type/target_id
+when            -> created_at
+request context -> request_id/ip_address/details
+```
+
+Frozen DB 没有 `result` 字段，且数据库文档已冻结“只记录已接受并成功执行的 Operator action”。因此：
+
+```text
+persisted operator_audit_logs row => implicit result = success
+```
+
+认证失败、权限拒绝、validation/business failure、pre-commit exception 进入 security/application/observability logs，不伪造 failed Audit row，也不把 `result` 偷塞进 `details`。
+
+Audit 不替代业务事实：
+
+```text
+Trust decision/enforcement -> Trust
+Commerce refund            -> Commerce
+Platform feature/config    -> Platform
+Operator action trail      -> Operations
+```
+
+### Audit Transaction Boundary
+
+Operations 自己的 mutation：
+
+```text
+state mutation + audit INSERT = same Operations transaction
+```
+
+跨 Domain management mutation：
+
+```text
+Operations authorize
+→ Owner Domain commits canonical state
+→ Operations synchronously records success Audit
+```
+
+不允许 Operations transaction 包住另一个 Domain write，不允许 Operations direct SQL 外域表。
+
+当前 Platform Design 已冻结 `Platform Outbox events = NONE REQUIRED IN V1`，所以本次 Operations Design 不反向引入 Platform audit outbox。Owner commit 后 Audit persistence 失败的 durability gap 已在 Design Audit 记录为 V1 MEDIUM TECH_DEBT，未来要改为 outbox 必须单独做跨域 contract revision。
+
+## Bootstrap
+
+系统第一个 Operator 通过 one-time controlled CLI 初始化：
+
+```text
+active Identity subject
++ empty operations.operators
+→ reserved super_admin
+→ full explicit permission catalog rows
+→ first Operator
+→ super_admin assignment
+→ bootstrap audit
+```
+
+全部 Operations state 在一个本域 transaction 完成。
+
+禁止：
+
+```text
+admin/admin
+public bootstrap HTTP
+long-lived bootstrap secret
+```
+
+一旦存在任何 Operator，bootstrap 必须拒绝再次执行。
+
+## Admin Foundation Contract
+
+Admin Foundation 已提供 Auth/Permission skeleton。
+
+Operations 完成后真实绑定：
+
+```text
+Identity access token
+→ GET /api/v1/admin/operations/me
+→ current Operator + exact effective permissions
+→ Admin PermissionGuard/can() (UI only)
+→ backend OperationsAuthorizer (real enforcement)
+```
+
+Operations HTTP base：
+
+```text
+/api/v1/admin/operations
+```
+
+Backend public boundary未来固定在：
+
+```text
+apps/backend/src/modules/operations/public/
+```
+
+概念 exports：
+
+```text
+OperationsAuthorizer
+OperationsOperatorResolver
+OperationsAuditRecorder
+AuthorizedOperatorContext
+OperatorPermissionKey / static catalog
+```
+
+禁止 public export repositories / DB executor / transaction manager / SQL / DB rows。
+
+## Platform Boundary
+
+截至 Operations Repository Audit 的基线 commit：
+
+```text
+PLATFORM_DESIGN_GATE = PASS
+PLATFORM_IMPLEMENTATION_STARTED = NO
+PLATFORM_FINAL_GATE = NOT_RUN
+```
+
+Operations 原样接纳 Platform 已冻结的 10 个 RBAC keys，但 Platform management route 实际接入属于 `IMPLEMENTATION_DEPENDENCY`。
+
+Operations 不写 `platform.*`，不复制 Feature Flag / Runtime Config / App Version / Announcement / Region state。
+
+## Delete Strategy
+
+| 表 | 物理删除 | 正确策略 |
+| --- | ---: | --- |
+| `operators` | NO | `status=disabled` |
+| `roles` | NO | `status=disabled` |
+| `operator_roles` | YES | revoke relation；历史进 Audit |
+| `role_permissions` | YES | complete-set reconciliation；历史进 Audit |
+| `operator_audit_logs` | NO | append-only |
+
+## V1 Explicit Non-Goals
+
+```text
+Permission dictionary table
+Operator physical deletion
+Role physical deletion
+Custom permission creation
+Wildcard permissions
+Per-user direct permissions
+Temporary roles
+Role hierarchy
+Permission deny rules
+ABAC
+Resource-level ACL
+Approval workflow
+Independent admin authentication system
+Redis/Kafka/microservice
+```
+
+## Current Domain Status
+
+```text
+Operations frozen database tables = 5
+Operator Lifecycle                = FROZEN
+RBAC Model                        = FROZEN
+Permission Grammar                = FROZEN
+Authorization Algorithm           = FROZEN
+Audit Contract                    = FROZEN
+Bootstrap Strategy                = FROZEN
+Public Contract                   = FROZEN
+HTTP/API Contract                 = FROZEN
+OPERATIONS_DESIGN_GATE            = PASS
+OPERATIONS_IMPLEMENTATION_STARTED = NO
+```
