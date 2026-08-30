@@ -45,6 +45,13 @@ describe('Router', () => {
     expect(await screen.findByText('Content — Coming Soon')).toBeInTheDocument()
   })
 
+  it('renders the real Platform Admin landing route', async () => {
+    renderAt('/platform')
+    expect(await screen.findByRole('heading', { name: 'Platform' })).toBeInTheDocument()
+    expect(screen.getByText('Platform Admin Stage A')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /Feature Flags/ })).toBeInTheDocument()
+  })
+
   it('renders the 404 page for unknown routes', async () => {
     renderAt('/definitely-missing')
     expect(await screen.findByText('页面不存在')).toBeInTheDocument()

@@ -12,17 +12,8 @@ test.describe('Admin Foundation smoke', () => {
   test('all 11 domain entries are present in the sidebar', async ({ page }) => {
     await page.goto('/')
     const labels = [
-      'Content',
-      'Learning',
-      'Audio Production',
-      'Identity',
-      'Social',
-      'Chat',
-      'Commerce',
-      'Rewards',
-      'Trust & Safety',
-      'Operations',
-      'Platform',
+      'Content', 'Learning', 'Audio Production', 'Identity', 'Social', 'Chat',
+      'Commerce', 'Rewards', 'Trust & Safety', 'Operations', 'Platform',
     ]
     for (const label of labels) {
       await expect(page.getByRole('link', { name: label })).toBeVisible()
@@ -34,6 +25,17 @@ test.describe('Admin Foundation smoke', () => {
     await page.getByRole('link', { name: 'Content' }).click()
     await expect(page.getByText('Content — Coming Soon')).toBeVisible()
     await expect(page).toHaveURL(/\/content$/)
+  })
+
+  test('Platform entry opens the real Stage A management landing', async ({ page }) => {
+    await page.goto('/platform')
+    await expect(page.getByRole('heading', { name: 'Platform' })).toBeVisible()
+    await expect(page.getByText('Platform Admin Stage A')).toBeVisible()
+    await expect(page.getByRole('link', { name: /Feature Flags/ })).toBeVisible()
+    await expect(page.getByRole('link', { name: /Runtime Configs/ })).toBeVisible()
+    await expect(page.getByRole('link', { name: /App Versions/ })).toBeVisible()
+    await expect(page.getByRole('link', { name: /Announcements/ })).toBeVisible()
+    await expect(page.getByRole('link', { name: /Regions/ })).toBeVisible()
   })
 
   test('navigation works for the design-system page', async ({ page }) => {
@@ -51,11 +53,9 @@ test.describe('Admin Foundation smoke', () => {
     await page.goto('/')
     const html = page.locator('html')
     await expect(html).not.toHaveClass(/dark/)
-
     await page.getByTestId('theme-switch').click()
     await page.getByRole('menuitem', { name: '深色' }).click()
     await expect(html).toHaveClass(/dark/)
-
     await page.getByTestId('theme-switch').click()
     await page.getByRole('menuitem', { name: '浅色' }).click()
     await expect(html).not.toHaveClass(/dark/)
