@@ -4,8 +4,10 @@ import {
   createInMemoryPreferencesStorage,
 } from '../src/storage/preferencesStorage';
 import { createMemoryStorage } from '../src/storage/memoryStorage';
+import { createInMemorySecureStorage } from '../src/storage/secureStorage';
 import { createTokenStore } from '../src/auth/storage/tokenStore';
-import { createMemorySecureStorage } from './helpers/secureStorageStub';
+
+const createMemorySecureStorage = createInMemorySecureStorage;
 
 describe('Storage layering', () => {
   it('memory storage keeps values in process only', () => {
@@ -40,7 +42,7 @@ describe('Storage layering', () => {
     for (const forbidden of FORBIDDEN_ASYNC_STORAGE_KEYS) {
       await expect(
         prefs.setString(forbidden as never, 'secret'),
-      ).rejects.toThrow(/SecureStore/);
+      ).rejects.toThrow(/secureStorage/);
     }
   });
 
@@ -54,7 +56,7 @@ describe('Storage layering', () => {
     await store.setRefreshToken('refresh-1');
     expect(await store.getRefreshToken()).toBe('refresh-1');
     // The refresh token physically lives in secure storage, not memory.
-    expect(secure.getItem('zhlao.auth.refresh_token')).toBe('refresh-1');
+    expect(await secure.getItem('zhlao.auth.refresh_token')).toBe('refresh-1');
 
     await store.writeSessionMetadata({ subjectId: 'sub-1', updatedAt: '2026-08-31T00:00:00.000Z' });
     expect(await store.readSessionMetadata()).toEqual({

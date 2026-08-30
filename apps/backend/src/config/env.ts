@@ -7,7 +7,7 @@ export type AppConfig = Readonly<{
   database: Readonly<{ url: string; poolMin: number; poolMax: number; connectionTimeoutMs: number; idleTimeoutMs: number }>;
   logLevel: Environment['LOG_LEVEL'];
   outbox: Readonly<{ pollIntervalMs: number; batchSize: number; leaseMs: number }>;
-  identity: Readonly<{ otpHmacSecret: string | undefined; jwtHmacSecret: string | undefined; jwtIssuer: string; jwtAudience: string }>;
+  identity: Readonly<{ otpHmacSecret: string | undefined; jwtHmacSecret: string | undefined; jwtIssuer: string; jwtAudience: string; otpProvider: 'console' | 'unavailable' }>;
   shutdownTimeoutMs: number;
 }>;
 
@@ -26,7 +26,7 @@ export function loadConfig(source: NodeJS.ProcessEnv = process.env): AppConfig {
     }),
     logLevel: env.LOG_LEVEL,
     outbox: Object.freeze({ pollIntervalMs: env.OUTBOX_POLL_INTERVAL_MS, batchSize: env.OUTBOX_BATCH_SIZE, leaseMs: env.OUTBOX_LEASE_MS }),
-    identity: Object.freeze({ otpHmacSecret: env.OTP_HMAC_SECRET, jwtHmacSecret: env.JWT_HMAC_SECRET, jwtIssuer: env.JWT_ISSUER, jwtAudience: env.JWT_AUDIENCE }),
+    identity: Object.freeze({ otpHmacSecret: env.OTP_HMAC_SECRET, jwtHmacSecret: env.JWT_HMAC_SECRET, jwtIssuer: env.JWT_ISSUER, jwtAudience: env.JWT_AUDIENCE, otpProvider: env.IDENTITY_OTP_PROVIDER }),
     shutdownTimeoutMs: env.SHUTDOWN_TIMEOUT_MS
   });
 }

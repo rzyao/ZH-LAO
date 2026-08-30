@@ -83,6 +83,6 @@ describe('Identity Core Types', () => {
   });
 
   it('exports only public Identity primitives from the public boundary', () => {
-    expect(Object.keys(identityPublic).sort()).toEqual(['identityAccountStatusSchema', 'isUserPublicId', 'parseIdentityAccountStatus', 'parseUserPublicId']);
+    expect(Object.keys(identityPublic).sort()).toEqual(['IdentityPublicQuery', 'identityAccountStatusSchema', 'isUserPublicId', 'parseIdentityAccountStatus', 'parseUserPublicId']);
   });
 });

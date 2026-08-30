@@ -19,6 +19,9 @@ export const environmentSchema = z.object({
   JWT_HMAC_SECRET: z.string().min(32).optional(),
   JWT_ISSUER: z.string().min(1).default('zh-lao'),
   JWT_AUDIENCE: z.string().min(1).default('zh-lao-client'),
+  // 显式 OTP 投递 provider 裁决：默认 unavailable（未接真实 SMS 时失败安全 503）；
+  // console 仅允许 development 显式启用，绝不静默 fake-success。
+  IDENTITY_OTP_PROVIDER: z.enum(['console', 'unavailable']).default('unavailable'),
   SHUTDOWN_TIMEOUT_MS: int(100).default(10_000)
 }).superRefine((value, context) => {
   if (value.DATABASE_POOL_MIN > value.DATABASE_POOL_MAX) {
@@ -26,6 +29,7 @@ export const environmentSchema = z.object({
   }
   if (value.APP_ENV === 'production' && !value.OTP_HMAC_SECRET) context.addIssue({ code: 'custom', path: ['OTP_HMAC_SECRET'], message: 'is required in production' });
   if (value.APP_ENV === 'production' && !value.JWT_HMAC_SECRET) context.addIssue({ code: 'custom', path: ['JWT_HMAC_SECRET'], message: 'is required in production' });
+  if (value.APP_ENV === 'production' && value.IDENTITY_OTP_PROVIDER === 'console') context.addIssue({ code: 'custom', path: ['IDENTITY_OTP_PROVIDER'], message: 'console OTP provider is development-only' });
 });
 
 export type Environment = z.infer<typeof environmentSchema>;
