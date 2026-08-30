@@ -23,7 +23,7 @@ last_updated: 2026-08-30
 | PostgreSQL Baseline | `COMPLETE` | — | `PASS` | — | — | 2026-08-30 | 冻结基线见 `database/v2/` | `database/v2/reports/V2_DATABASE_BASELINE_REPORT.md` | Fresh DB、migration 幂等及数据库审计通过 | 无 | 2026-08-30 |
 | Application Foundation | `COMPLETE` | DB Baseline `PASS` | `PASS` | — | 2026-08-30 | 2026-08-30 | [计划](01-foundation/APPLICATION_FOUNDATION_PLAN.md) | [报告](01-foundation/APPLICATION_FOUNDATION_REPORT.md) | typecheck/lint/build；14 unit + 10 PostgreSQL integration + 3 validation lifecycle；complete/partial/empty/unavailable readiness；fresh 17 migrations；DB audit PASS；临时库残留 0 | 无 | 2026-08-30 |
 | Admin Foundation | `COMPLETE` | Application Foundation `PASS` | `PASS` | — | 2026-08-31 | 2026-08-31 | [计划](ADMIN_FOUNDATION_PLAN.md) | [报告](ADMIN_FOUNDATION_REPORT.md) | typecheck/lint PASS；57 unit/component PASS；build PASS；Playwright smoke 6/6 PASS；架构/范围/依赖/安全审计 PASS；Business API/页面/Fake CRUD = 0 | 无 | 2026-08-31 |
-| Identity | `IN_PROGRESS` | Foundation `PASS` | `PASS`（Design Audit） | — | 2026-08-30 | — | [实施计划](02-identity/IDENTITY_IMPLEMENTATION_PLAN.md)、[Use Cases](02-identity/IDENTITY_USE_CASES.md)、[API](02-identity/IDENTITY_API.md) | [设计审计](02-identity/IDENTITY_DESIGN_AUDIT.md)、[IDN-01 报告](02-identity/IDN_01_REPORT.md)、[IDN-02 报告](02-identity/IDN_02_REPORT.md)、[IDN-03 报告](02-identity/IDN_03_REPORT.md) | IDN-03 repository layer；22 unit + 13 PostgreSQL integration；User/Session/OTP 并发锁、rollback 与 executor isolation PASS；migration changes = 0 | 无 | 2026-08-30 |
+| Identity | `IN_PROGRESS` | Foundation `PASS` | `PASS`（Design Audit） | — | 2026-08-30 | — | [实施计划](02-identity/IDENTITY_IMPLEMENTATION_PLAN.md)、[Use Cases](02-identity/IDENTITY_USE_CASES.md)、[API](02-identity/IDENTITY_API.md) | [设计审计](02-identity/IDENTITY_DESIGN_AUDIT.md)、[IDN-01 报告](02-identity/IDN_01_REPORT.md)、[IDN-02 报告](02-identity/IDN_02_REPORT.md)、[IDN-03 报告](02-identity/IDN_03_REPORT.md)、[IDN-04~08 报告](02-identity/IDN_04_08_REPORT.md)、[IDN-09~10 报告](02-identity/IDN_09_10_REPORT.md)、[IDN-17~19 批次报告](02-identity/IDN_17_19_REPORT.md) | IDN-01~19 COMPLETE；31 unit + 80 PostgreSQL integration（HTTP 17 / E2E 13 / Security 11 / Race 15）；16 路由全绿；Close-vs-Login 与锁时序 flaky 已修复；fresh 17/0 migrations、database audit PASS、migration changes = 0 | 无 | 2026-08-31 |
 | Platform | `NOT_STARTED` | Foundation `PASS` | — | — | — | — | 待创建 | 待创建 | — | 无 | 2026-08-30 |
 | Operations | `NOT_STARTED` | Identity + Platform 基础能力可用 | — | — | — | — | 待创建 | 待创建 | — | 无 | 2026-08-30 |
 | Content | `NOT_STARTED` | Operations `PASS` | — | — | — | — | 待创建 | 待创建 | — | 无 | 2026-08-30 |
@@ -42,9 +42,7 @@ last_updated: 2026-08-30
 
 ## 当前行动
 
-Admin Foundation 已完整执行并通过 `ADMIN_FOUNDATION_GATE = PASS`（ADM-F01 → ADM-F18 全部完成；typecheck / lint / 57 unit+component / build / Playwright smoke 6/6 全绿；架构与范围审计通过，Business API / 业务页面 / Fake CRUD = 0）。
-
-Identity Implementation 仍为 `IN_PROGRESS`：`IDN-01` 至 `IDN-10` 已完成；`IDN-11` 仍为 `NOT_STARTED`，不得自动开始。Admin 下一阶段（Identity Admin 等）同样等待新的明确任务与对应 Contract 冻结。
+Identity Implementation 仍为 `IN_PROGRESS`：`IDN-01` 至 `IDN-19` 均为 `COMPLETE`；`IDN-20`（Domain Final Gate / 收口）仍为 `NOT_STARTED`，不得自动开始。Admin / Mobile 后续阶段同样等待新的明确任务与对应 Contract 冻结。
 
 ## 更新历史
 
@@ -61,3 +59,7 @@ Identity Implementation 仍为 `IN_PROGRESS`：`IDN-01` 至 `IDN-10` 已完成�
 | 2026-08-30 | Identity | 完成 IDN-04 至 IDN-08：OTP、phone 认证注册与 token 技术服务 | `PASS`（IDN-04~08） | 27 unit + 16 PostgreSQL integration；OTP request/consume concurrency PASS；migration changes = 0 |
 | 2026-08-31 | Identity | 完成 IDN-09 至 IDN-10：Session refresh/logout 与 Device lifecycle | `PASS`（IDN-09~10） | 27 unit + 17 PostgreSQL integration；refresh rotation 与 device-session 联动 PASS；migration changes = 0 |
 | 2026-08-31 | Admin Foundation | 执行 ADM-F01 → ADM-F18 全量任务并通过 `ADMIN_FOUNDATION_GATE` | `PASS` | 57 unit/component + build + Playwright smoke 6/6；架构/范围/依赖/安全/可访问性审计 PASS；Business API / 业务页面 / Fake CRUD = 0 |
+| 2026-08-31 | Identity | 完成 IDN-11 至 IDN-16：Facebook 认证、phone 凭据操作、Profile、Learning、Account State 与事件（Use Case 层 Repository/集成覆盖） | `PASS`（IDN-11~16） | 31 unit + 复用 integration 全绿；migration changes = 0 |
+| 2026-08-31 | Identity | 完成 IDN-17 HTTP/API：16 个冻结路由、组合根与运行装配 | `PASS`（IDN-17） | HTTP SQL=0、Repository access=0、unknown field/mass assignment 拒绝、AuthenticationProvider 复用、token no-store headers；HTTP integration 17/17；migration changes = 0 |
+| 2026-08-31 | Identity | 完成 IDN-18 Domain E2E：真实 PostgreSQL 全链路 | `PASS`（IDN-18） | 真实 PostgreSQL 18.6、fresh DB、core mock=0；phone/fb 注册登录、refresh、logout、device、profile、learning、bind/change、account state、outbox 原子性 13/13 |
+| 2026-08-31 | Identity | 完成 IDN-19 Security/Race：安全加固、并发竞态与 flaky 稳定化 | `PASS`（IDN-19） | Security 11/11 + Race 15/15；修复 Close-vs-Login（登录路径 user 行锁）与两处时序 flaky；JWT/OTP/refresh/secret/日志脱敏/IDOR/mass assignment 全 PASS；race 多轮重跑无间歇失败；migration changes = 0 |

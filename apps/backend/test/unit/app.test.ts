@@ -7,6 +7,24 @@ import { newLogicalUuid } from '../../src/ids/uuid.js';
 import type { DatabaseExecutor } from '../../src/database/executor.js';
 import { requiredMigrations } from '../../src/database/required-migrations.generated.js';
 import { identityModule } from '../../src/modules/identity/index.js';
+import type { IdentityHttpDependencies } from '../../src/modules/identity/http/routes.js';
+import type { AuthenticationProvider } from '../../src/auth/authentication-provider.js';
+
+function stubIdentityDependencies(authenticated: boolean): IdentityHttpDependencies {
+  const authentication: AuthenticationProvider = { authenticate: async () => authenticated ? { subjectId: newLogicalUuid() } : null };
+  const execution = async () => { throw new AppError({ code: 'INTERNAL_ERROR', message: 'stub', httpStatus: 500, expose: false }); };
+  return {
+    authentication,
+    requestOtp: { execute: execution } as never,
+    phoneAuth: { execute: execution } as never,
+    facebookAuth: { execute: execution } as never,
+    sessions: { refreshSession: execution, logoutCurrent: execution, logoutAll: execution, listMySessions: execution } as never,
+    devices: { listMyDevices: execution, revokeDevice: execution } as never,
+    profile: { getOwnBasicProfile: execution, updateOwnBasicProfile: execution, readLearningProfile: execution } as never,
+    state: { getIdentitySummary: execution, getCurrentIdentity: execution } as never,
+    phones: { bindPhone: execution, changePhone: execution } as never
+  };
+}
 
 const database = { query: async (text: string) => ({
   rows: text.includes('to_regclass')
@@ -17,10 +35,15 @@ const database = { query: async (text: string) => ({
 const logger = pino({ level: 'silent' });
 
 describe('Fastify foundation', () => {
-  it('loads the Identity module without business routes', async () => {
+  it('registers the Identity HTTP contract with fail-closed protected routes', async () => {
     const app = buildApp({ logger, database });
-    await identityModule.registerHttp(app);
-    expect((await app.inject('/api/v1/identity/phone-otp')).statusCode).toBe(404);
+    await identityModule.registerHttp(app, stubIdentityDependencies(false));
+    const publicRoute = await app.inject({ method: 'POST', url: '/api/v1/identity/phone-otp', payload: {} });
+    expect(publicRoute.statusCode).toBe(400);
+    expect(publicRoute.json().error.code).toBe('VALIDATION_ERROR');
+    const protectedRoute = await app.inject('/api/v1/identity/me');
+    expect(protectedRoute.statusCode).toBe(401);
+    expect(protectedRoute.json().error.code).toBe('UNAUTHENTICATED');
     await app.close();
   });
   it('serves liveness and readiness with request IDs', async () => {

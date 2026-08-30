@@ -19,7 +19,7 @@ export interface UserRepository {
   lockByInternalId(id: UserInternalId): Promise<UserRecord | null>; updateLastActiveAt(id: UserInternalId, at: Date): Promise<UserRecord | null>; updateStatus(id: UserInternalId, status: IdentityAccountStatus): Promise<UserRecord | null>;
 }
 export interface AuthIdentityRepository {
-  findByProviderAndSubject(provider: IdentityAuthProvider, subject: string): Promise<AuthIdentityRecord | null>; findPhoneByUserId(userId: UserInternalId): Promise<AuthIdentityRecord | null>;
+  findByProviderAndSubject(provider: IdentityAuthProvider, subject: string): Promise<AuthIdentityRecord | null>; findPhoneByUserId(userId: UserInternalId): Promise<AuthIdentityRecord | null>; listByUserId(userId: UserInternalId): Promise<AuthIdentityRecord[]>;
   create(input: { userId: UserInternalId; provider: IdentityAuthProvider; providerSubject: string; verifiedAt?: Date | null }): Promise<AuthIdentityRecord>;
   updateProviderSubject(id: AuthIdentityInternalId, subject: string): Promise<AuthIdentityRecord | null>; touchLastLogin(id: AuthIdentityInternalId, at: Date): Promise<AuthIdentityRecord | null>;
 }

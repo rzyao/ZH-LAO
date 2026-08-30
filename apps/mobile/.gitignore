@@ -1,0 +1,12 @@
+node_modules/
+.expo/
+dist/
+dist-web/
+dist-android/
+web-build/
+android/
+ios/
+*.log
+.env
+.env.local
+coverage/

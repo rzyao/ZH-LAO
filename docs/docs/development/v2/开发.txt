@@ -1,0 +1,2876 @@
+你现在要继续开发 ZH-LAO V2 项目。
+
+仓库：
+
+https://github.com/rzyao/ZH-LAO
+
+请先完整审查当前仓库、现有代码、开发文档和测试，再执行任务。
+
+后续所有分析、开发说明、审计结果和最终汇报都使用中文。
+
+---
+
+# 一、项目当前权威状态
+
+这是一个正在重写中的 V2 项目。
+
+当前总体状态：
+
+```text
+PostgreSQL V2 Baseline = COMPLETE / PASS
+Application Foundation = COMPLETE / PASS
+
+IDENTITY_DESIGN_GATE = PASS
+IDENTITY_IMPLEMENTATION = IN_PROGRESS
+```
+
+Identity 已完成：
+
+```text
+IDN-01 = COMPLETE
+IDN-02 = COMPLETE
+IDN-03 = COMPLETE
+IDN-04 = COMPLETE
+IDN-05 = COMPLETE
+IDN-06 = COMPLETE
+IDN-07 = COMPLETE
+IDN-08 = COMPLETE
+IDN-09 = COMPLETE
+IDN-10 = COMPLETE
+IDN-11 = COMPLETE
+IDN-12 = COMPLETE
+IDN-13 = COMPLETE
+IDN-14 = COMPLETE
+IDN-15 = COMPLETE
+IDN-16 = COMPLETE
+
+IDN-17 = NOT_STARTED
+```
+
+你现在只执行：
+
+```text
+IDN-17 — HTTP/API
+IDN-18 — Domain E2E Integration
+IDN-19 — Security/Race Tests
+```
+
+如果三项全部完成：
+
+```text
+IDN-17 = COMPLETE
+IDN-18 = COMPLETE
+IDN-19 = COMPLETE
+IDN-20 = NOT_STARTED
+```
+
+完成后必须停止。
+
+**禁止进入 IDN-20。**
+
+---
+
+# 二、开始前必须读取
+
+先读取并理解：
+
+```text
+docs/docs/development/v2/MASTER_DEVELOPMENT_PLAN.md
+
+docs/docs/development/v2/02-identity/IDENTITY_IMPLEMENTATION_PLAN.md
+docs/docs/development/v2/02-identity/IDENTITY_USE_CASES.md
+docs/docs/development/v2/02-identity/IDENTITY_API.md
+docs/docs/development/v2/02-identity/IDENTITY_DESIGN_AUDIT.md
+
+docs/docs/development/v2/02-identity/IDN_01_REPORT.md
+docs/docs/development/v2/02-identity/IDN_02_REPORT.md
+docs/docs/development/v2/02-identity/IDN_03_REPORT.md
+docs/docs/development/v2/02-identity/IDN_04_08_REPORT.md
+docs/docs/development/v2/02-identity/IDN_09_10_REPORT.md
+docs/docs/development/v2/02-identity/IDN_11_16_REPORT.md
+
+docs/docs/development/v2/DEVELOPMENT_PROGRESS.md
+```
+
+数据库权威事实：
+
+```text
+database/v2/migrations/0100_identity.sql
+database/v2/migrations/1220_identity_auth_runtime.sql
+database/v2/reports/V2_DATABASE_BASELINE_REPORT.md
+```
+
+同时审查当前代码：
+
+```text
+apps/backend/src/modules/identity/**
+apps/backend/src/http/**
+apps/backend/src/auth/**
+apps/backend/src/main.ts
+apps/backend/test/**
+```
+
+如果实际目录略有不同，以仓库现状为准。
+
+不要假设以前会话里的代码结构一定准确。
+
+---
+
+# 三、最高级全局数据库规则
+
+数据库已经冻结。
+
+必须遵守：
+
+```text
+database/v2/migrations/* = NO CHANGE
+```
+
+不得修改历史 migration。
+
+不得为当前任务新增：
+
+```text
+session public UUID
+device public UUID
+token family
+refresh history
+access blacklist
+phone history
+account closure table
+identity event table
+新的 Identity 核心表
+```
+
+Identity 内部 PK 可以继续 BIGINT。
+
+但是：
+
+```text
+所有跨 Domain / API public identity
+必须使用 stable UUID logical/public ID
+```
+
+绝不能向 API 或其他 Domain 暴露内部 BIGINT。
+
+跨 Domain：
+
+```text
+physical FK = 0
+```
+
+Identity Repository 不得直接访问其他业务 Domain 表。
+
+---
+
+# 四、Identity 冻结核心模型
+
+Identity 主要表：
+
+```text
+identity.users
+identity.auth_identities
+identity.basic_profiles
+identity.learning_profiles
+
+identity.otp_challenges
+identity.devices
+identity.sessions
+```
+
+User 状态只有：
+
+```text
+active
+disabled
+closed
+```
+
+Session 状态只有：
+
+```text
+active
+revoked
+expired
+```
+
+OTP 状态只有：
+
+```text
+pending
+verified
+expired
+cancelled
+locked
+```
+
+OTP purpose：
+
+```text
+login
+bind_phone
+change_phone
+```
+
+不得重新增加其他状态。
+
+---
+
+# 五、已经完成的能力
+
+IDN-01 ~ IDN-16 已经实现并通过此前 Gate。
+
+你必须复用，而不是重新设计。
+
+现有能力应该已经包括：
+
+```text
+RequestPhoneOtp
+AuthenticateWithPhoneOtp
+AuthenticateWithFacebook
+
+RefreshSession
+LogoutCurrentSession
+LogoutAllSessions
+
+GetCurrentIdentity
+GetCurrentAccountStatus
+
+GetOwnBasicProfile
+UpdateOwnBasicProfile
+ReadLearningProfile
+
+RegisterOrUpdateDevice
+ListMyDevices
+RevokeDevice
+ListMySessions
+
+BindPhone
+ChangePhone
+
+Account Status Transition
+
+AuthenticationProvider
+
+Identity Outbox
+```
+
+Technical services 应已包含：
+
+```text
+OTP generator
+OTP HMAC validation
+OTP delivery boundary
+
+Facebook credential verifier boundary
+
+JWT Access Token
+opaque Refresh Token
+Refresh token hashing
+
+Foundation TransactionManager integration
+Identity repositories
+Foundation Outbox integration
+```
+
+不要复制第二套实现。
+
+如果实际代码与文档不完全一致：
+
+先审查差异。
+
+只有真正阻塞当前任务时才修改既有实现。
+
+---
+
+# 六、已经冻结的安全规则
+
+## OTP
+
+```text
+OTP length = 6 digits
+TTL = 5 minutes
+Max attempts = 5
+Cooldown = 60 seconds
+
+Phone/purpose:
+5 requests / 30 minutes
+10 requests / 24 hours
+
+IP:
+20 requests / 30 minutes
+```
+
+OTP：
+
+```text
+raw OTP never persisted
+raw OTP never logged
+```
+
+低熵 OTP 必须使用 keyed HMAC / MAC 类安全校验。
+
+不得改成普通 SHA256 直接 hash。
+
+OTP 成功消费不是 reusable verification ticket。
+
+必须与实际业务操作原子绑定。
+
+---
+
+# 七、Session / Token 冻结规则
+
+```text
+Access Token = JWT
+Access TTL = 15 minutes
+
+Refresh Token = opaque cryptographically random
+Refresh Rotation = ALWAYS
+
+Session TTL = 30-day sliding
+Raw Refresh Token persisted = NEVER
+```
+
+数据库只能保存 refresh hash。
+
+成功 refresh：
+
+```text
+old refresh token immediately invalid
+new refresh token generated
+session expires_at = now + 30 days
+```
+
+并发使用同一个旧 refresh：
+
+```text
+success count <= 1
+```
+
+当前 V1 没有：
+
+```text
+Access Token blacklist
+Refresh token family
+Replay history
+```
+
+不要新增。
+
+Session / Device revoke：
+
+立即阻止 refresh。
+
+已签发 Access JWT 最多还可能存活约 15 分钟。
+
+---
+
+# 八、Device 冻结规则
+
+客户端公开标识：
+
+```text
+installation_id UUID
+```
+
+不是 Device BIGINT。
+
+平台：
+
+```text
+android
+ios
+```
+
+同 installation：
+
+```text
+same user → update
+different user → DEVICE_OWNERSHIP_CONFLICT
+```
+
+普通 device update：
+
+```text
+cannot restore revoked device
+```
+
+fresh primary authentication：
+
+```text
+may restore same-user revoked device
+```
+
+Device revoke 必须与：
+
+```text
+all sessions bound to device revoke
+```
+
+同事务。
+
+Push token：
+
+```text
+same user migration = allowed
+cross-user stealing = forbidden
+```
+
+完整 push token 不得向客户端返回。
+
+---
+
+# 九、Facebook 冻结规则
+
+客户端 credential 是：
+
+```text
+untrusted opaque credential
+```
+
+服务器验证后才能获得可信：
+
+```text
+provider_subject
+```
+
+禁止客户端直接传可信：
+
+```text
+facebook user id
+provider_subject
+```
+
+当前 V1：
+
+```text
+Facebook login/register = supported
+
+BindFacebookToExistingUser = DEFERRED
+UnlinkFacebook = DEFERRED
+Automatic Account Merge = NOT_SUPPORTED
+```
+
+不要提前实现。
+
+---
+
+# 十、Phone Credential 冻结规则
+
+支持：
+
+```text
+BindPhone
+ChangePhone
+```
+
+Bind：
+
+```text
+purpose = bind_phone
+```
+
+Change：
+
+```text
+purpose = change_phone
+```
+
+必须保证：
+
+```text
+one phone AuthIdentity per user
+```
+
+ChangePhone：
+
+更新现有 phone AuthIdentity。
+
+不要保留旧号码再创建第二条。
+
+ChangePhone：
+
+```text
+does NOT force logout-all
+```
+
+---
+
+# 十一、Profile 冻结规则
+
+BasicProfile 可修改字段只允许：
+
+```text
+display_name
+gender
+birth_date
+country_code
+region_code
+avatar_media_id
+```
+
+gender：
+
+```text
+male
+female
+other
+unspecified
+```
+
+Learning direction：
+
+```text
+lo -> zh
+zh -> lo
+```
+
+注册后 immutable。
+
+禁止：
+
+```text
+ChangeLearningDirection
+```
+
+`avatar_media_id`：
+
+```text
+UUID logical asset reference
+```
+
+不建立跨 Domain FK。
+
+不要直接 SQL 查询 infrastructure.assets 来验证。
+
+---
+
+# 十二、Identity 状态规则
+
+合法状态转换：
+
+```text
+active -> disabled
+disabled -> active
+
+active -> closed
+disabled -> closed
+```
+
+禁止：
+
+```text
+closed -> active
+closed -> disabled
+```
+
+closed 是 V1 terminal。
+
+进入：
+
+```text
+disabled
+closed
+```
+
+必须与：
+
+```text
+revoke all active sessions
+```
+
+同事务。
+
+Re-enable：
+
+不能恢复旧 Session。
+
+Identity status 不得增加：
+
+```text
+banned
+suspended
+muted
+chat_restricted
+dating_restricted
+```
+
+这些属于其他 Domain。
+
+---
+
+# 十三、Outbox 已完成规则
+
+使用唯一 shared infrastructure：
+
+```text
+infrastructure.system_outbox_events
+```
+
+必须复用 Foundation Outbox。
+
+Identity 目前需要：
+
+```text
+identity.user_registered.v1
+identity.account_status_changed.v1
+```
+
+Phone / Facebook 新注册：
+
+```text
+business transaction
++
+UserRegistered outbox
+```
+
+同事务。
+
+Account status：
+
+```text
+status change
++
+session revocation
++
+AccountStatusChanged outbox
+```
+
+同事务。
+
+禁止创建第二套 Outbox。
+
+事件 payload 不得出现：
+
+```text
+phone
+OTP
+access token
+refresh token
+hash
+Facebook credential
+push token
+internal BIGINT
+```
+
+---
+
+# 十四、当前批次执行顺序
+
+严格：
+
+```text
+IDN-17
+→ Gate PASS
+
+IDN-18
+→ Gate PASS
+
+IDN-19
+→ Gate PASS
+
+全量回归
+→ 批次报告
+→ STOP
+```
+
+如果 IDN-17 BLOCKED：
+
+```text
+IDN-18 = NOT_STARTED
+IDN-19 = NOT_STARTED
+```
+
+如果 IDN-18 BLOCKED：
+
+```text
+IDN-19 = NOT_STARTED
+```
+
+不得跳过 Gate。
+
+---
+
+# 十五、IDN-17 — HTTP/API
+
+现在正式把已完成 Use Cases 暴露为 HTTP API。
+
+Base：
+
+```text
+/api/v1/identity
+```
+
+JSON：
+
+```text
+snake_case
+```
+
+错误：
+
+复用 Foundation：
+
+```text
+AppError
+统一 error envelope
+```
+
+不要创建第二套 HTTP 错误系统。
+
+---
+
+# 十六、Public Routes
+
+实现：
+
+```text
+POST /api/v1/identity/phone-otp
+
+POST /api/v1/identity/auth/phone
+POST /api/v1/identity/auth/facebook
+
+POST /api/v1/identity/sessions/refresh
+POST /api/v1/identity/sessions/logout
+```
+
+---
+
+# 十七、Protected Routes
+
+实现：
+
+```text
+POST /api/v1/identity/sessions/logout-all
+
+GET /api/v1/identity/me
+GET /api/v1/identity/me/status
+
+GET /api/v1/identity/me/profile
+PATCH /api/v1/identity/me/profile
+
+GET /api/v1/identity/me/learning-profile
+
+GET /api/v1/identity/me/devices
+DELETE /api/v1/identity/me/devices/{installation_id}
+
+GET /api/v1/identity/me/sessions
+
+POST /api/v1/identity/me/phone/bind
+POST /api/v1/identity/me/phone/change
+```
+
+Protected：
+
+```text
+Bearer Access Token
+→ AuthenticationProvider
+→ AuthContext
+→ Use Case
+```
+
+JWT 解析和用户状态检查不能复制进每个 handler。
+
+---
+
+# 十八、HTTP Handler 边界
+
+Handler 只负责：
+
+```text
+输入解析
+schema validation
+AuthContext
+调用 use case
+输出 DTO
+error mapping
+```
+
+Handler 禁止：
+
+```text
+SQL
+Repository
+TransactionManager orchestration
+JWT crypto
+OTP logic
+Facebook verification
+Outbox insert
+Device ownership rules
+Session rotation rules
+```
+
+要求：
+
+```text
+HTTP SQL = 0
+HTTP Repository access = 0
+```
+
+---
+
+# 十九、HTTP Schema
+
+必须严格拒绝：
+
+```text
+unknown body fields
+```
+
+尤其防止 mass assignment。
+
+不得接受客户端注入：
+
+```text
+user_id
+status
+provider_subject
+internal session id
+internal device id
+refresh_token_hash
+code_hash
+created_at
+updated_at
+```
+
+---
+
+# 二十、POST /phone-otp
+
+输入：
+
+```json
+{
+  "phone": "...",
+  "purpose": "login | bind_phone | change_phone"
+}
+```
+
+`login`：
+
+匿名允许。
+
+`bind_phone` / `change_phone`：
+
+必须要求当前 authenticated user。
+
+不得让匿名用户发起 authenticated credential operation。
+
+HTTP response：
+
+绝不返回：
+
+```text
+OTP
+OTP hash
+internal challenge ID
+```
+
+匿名 login OTP request 要保持 anti-enumeration。
+
+不能通过响应告诉用户：
+
+```text
+phone registered
+phone not registered
+```
+
+---
+
+# 二十一、POST /auth/phone
+
+输入：
+
+```text
+phone
+otp_code
+learning_direction
+optional device
+```
+
+新用户：
+
+```text
+learning_direction required
+```
+
+现有用户：
+
+如果提供冲突方向：
+
+```text
+LEARNING_DIRECTION_IMMUTABLE
+```
+
+成功响应：
+
+```text
+user_id
+status
+is_new_user
+access_token
+token_type
+expires_in
+refresh_token
+session_expires_at
+```
+
+这里：
+
+```text
+user_id = users.public_id UUID
+```
+
+绝不能是 BIGINT。
+
+---
+
+# 二十二、POST /auth/facebook
+
+输入：
+
+```text
+credential
+learning_direction
+optional device
+```
+
+禁止客户端提供可信：
+
+```text
+provider_subject
+facebook_user_id
+```
+
+成功 response 风格与 phone auth 一致。
+
+---
+
+# 二十三、Token Response 安全 Header
+
+以下至少：
+
+```text
+/auth/phone
+/auth/facebook
+/sessions/refresh
+```
+
+响应必须有：
+
+```text
+Cache-Control: no-store
+Pragma: no-cache
+```
+
+---
+
+# 二十四、Refresh API
+
+```text
+POST /sessions/refresh
+```
+
+Body：
+
+```json
+{
+  "refresh_token": "..."
+}
+```
+
+禁止放：
+
+```text
+URL
+query string
+```
+
+成功：
+
+```text
+rotate refresh ALWAYS
+```
+
+返回新的：
+
+```text
+access token
+refresh token
+```
+
+---
+
+# 二十五、Logout API
+
+```text
+POST /sessions/logout
+```
+
+Body：
+
+```json
+{
+  "refresh_token": "..."
+}
+```
+
+幂等。
+
+invalid / unknown / already revoked / expired：
+
+不能泄漏 Session existence。
+
+成功：
+
+```text
+204
+```
+
+---
+
+# 二十六、Logout All API
+
+```text
+POST /sessions/logout-all
+```
+
+Protected。
+
+身份唯一来源：
+
+```text
+AuthContext.user_public_id
+```
+
+成功：
+
+```text
+204
+```
+
+---
+
+# 二十七、GET /me
+
+只返回安全 Identity 摘要。
+
+禁止：
+
+```text
+internal BIGINT
+full phone
+token/hash
+OTP fields
+internal session/device/auth IDs
+```
+
+如果返回 auth provider：
+
+只返回：
+
+```text
+phone
+facebook
+```
+
+---
+
+# 二十八、GET /me/status
+
+只返回冻结最小结果，例如：
+
+```text
+user_id
+status
+```
+
+其中 user_id 是 public UUID。
+
+---
+
+# 二十九、Profile Routes
+
+```text
+GET /me/profile
+PATCH /me/profile
+```
+
+PATCH whitelist：
+
+```text
+display_name
+gender
+birth_date
+country_code
+region_code
+avatar_media_id
+```
+
+其他字段：
+
+```text
+reject
+```
+
+必须保持：
+
+```text
+absent field != null field
+```
+
+若 nullable：
+
+```text
+null = clear
+```
+
+absent：
+
+```text
+keep existing
+```
+
+---
+
+# 三十、Learning Profile
+
+只实现：
+
+```text
+GET /me/learning-profile
+```
+
+不得实现更新接口。
+
+---
+
+# 三十一、Devices
+
+```text
+GET /me/devices
+DELETE /me/devices/{installation_id}
+```
+
+`installation_id`：
+
+UUID。
+
+不得暴露 internal Device BIGINT。
+
+List：
+
+不能返回 full push token。
+
+DELETE foreign/nonexistent：
+
+安全 404。
+
+不能泄漏 ownership。
+
+---
+
+# 三十二、Sessions
+
+```text
+GET /me/sessions
+```
+
+只返回安全 metadata。
+
+由于 frozen schema 没有 Session public UUID：
+
+禁止实现：
+
+```text
+DELETE /me/sessions/{id}
+```
+
+禁止暴露 BIGINT session id。
+
+---
+
+# 三十三、Phone Bind / Change
+
+```text
+POST /me/phone/bind
+```
+
+内部固定：
+
+```text
+purpose = bind_phone
+```
+
+```text
+POST /me/phone/change
+```
+
+内部固定：
+
+```text
+purpose = change_phone
+```
+
+不要让客户端传 purpose 来改变业务行为。
+
+---
+
+# 三十四、HTTP Errors
+
+至少正确处理：
+
+```text
+VALIDATION_ERROR
+UNAUTHENTICATED
+FORBIDDEN
+
+INVALID_PHONE
+INVALID_LEARNING_DIRECTION
+LEARNING_DIRECTION_IMMUTABLE
+
+INVALID_CREDENTIAL
+TOKEN_EXPIRED
+
+ACCOUNT_DISABLED
+ACCOUNT_CLOSED
+
+OTP_INVALID
+OTP_EXPIRED
+OTP_LOCKED
+OTP_ALREADY_USED
+OTP_RATE_LIMITED
+
+IDENTITY_CONFLICT
+PHONE_ALREADY_BOUND
+PHONE_NOT_BOUND
+
+DEVICE_REVOKED
+DEVICE_OWNERSHIP_CONFLICT
+
+PROVIDER_UNAVAILABLE
+```
+
+不得把底层：
+
+```text
+PostgreSQL errors
+constraint names
+JWT raw library error
+Facebook upstream raw error
+stack trace
+```
+
+暴露给 HTTP client。
+
+---
+
+# 三十五、IDN-17 Tests
+
+必须有 HTTP-level integration。
+
+使用项目实际 Fastify app/injection。
+
+至少测试全部 routes。
+
+Auth：
+
+```text
+missing bearer
+malformed bearer
+expired JWT
+invalid JWT
+disabled user
+closed user
+active user
+```
+
+Security：
+
+```text
+unknown field rejection
+status injection
+internal ID injection
+provider_subject injection
+```
+
+Token endpoints：
+
+```text
+Cache-Control = no-store
+Pragma = no-cache
+```
+
+---
+
+# 三十六、IDN-17 Gate
+
+必须全部满足：
+
+```text
+All frozen routes implemented
+
+HTTP SQL = 0
+HTTP Repository access = 0
+
+Unknown fields rejected
+Mass assignment blocked
+
+AuthenticationProvider reused = YES
+
+Public UUID only
+Internal BIGINT HTTP exposure = 0
+
+Token no-store headers = PASS
+
+HTTP integration tests = PASS
+
+Frozen migration changes = 0
+```
+
+然后：
+
+```text
+IDN-17 = COMPLETE
+```
+
+才进入 IDN-18。
+
+---
+
+# 三十七、IDN-18 — Domain E2E Integration
+
+目标：
+
+验证真实完整链路：
+
+```text
+HTTP
+→ Authentication
+→ Use Case
+→ Transaction
+→ Repository
+→ PostgreSQL
+→ Outbox
+```
+
+不新增产品功能。
+
+---
+
+# 三十八、E2E 测试环境
+
+必须使用：
+
+```text
+real PostgreSQL
+fresh database
+real 17 migrations
+actual application composition root
+```
+
+外部依赖允许：
+
+```text
+FakeOtpDeliveryProvider
+FakeFacebookCredentialVerifier
+```
+
+但核心 DB 禁止：
+
+```text
+SQLite
+mock Repository
+fake in-memory database
+```
+
+---
+
+# 三十九、Phone New User E2E
+
+验证：
+
+```text
+POST phone-otp
+↓
+Fake OTP provider receives OTP
+↓
+POST auth/phone
+↓
+User
+AuthIdentity(phone)
+BasicProfile
+LearningProfile
+Device optional
+Session
+Refresh hash
+UserRegistered Outbox
+↓
+HTTP token response
+```
+
+数据库最终：
+
+```text
+User = 1
+Phone AuthIdentity = 1
+BasicProfile = 1
+LearningProfile = 1
+Session = 1
+UserRegistered = 1
+```
+
+并确认：
+
+```text
+raw OTP persisted = 0
+raw Refresh persisted = 0
+```
+
+---
+
+# 四十、Existing Phone Login E2E
+
+再次 OTP + 登录：
+
+```text
+same canonical User
+new Session allowed
+duplicate UserRegistered = 0
+```
+
+---
+
+# 四十一、Facebook E2E
+
+新 Facebook credential：
+
+```text
+User
+AuthIdentity(facebook)
+BasicProfile
+LearningProfile
+Session
+UserRegistered Outbox
+```
+
+Existing Facebook login：
+
+```text
+same User
+no duplicate registration event
+```
+
+---
+
+# 四十二、Refresh E2E
+
+```text
+login
+→ refresh A
+→ refresh(A)
+→ refresh B
+→ refresh(A) rejected
+→ refresh(B) succeeds
+```
+
+验证：
+
+```text
+Rotation ALWAYS
+Sliding TTL
+DB only latest hash
+```
+
+---
+
+# 四十三、Logout E2E
+
+Current：
+
+```text
+login
+→ logout(refresh)
+→ refresh rejected
+```
+
+All：
+
+```text
+login A
+login B
+→ logout-all
+→ both refresh rejected
+```
+
+---
+
+# 四十四、Device E2E
+
+```text
+login with device
+→ GET devices
+→ DELETE device
+→ Device revoked
+→ bound Sessions revoked
+→ Refresh rejected
+```
+
+ordinary update：
+
+```text
+cannot restore
+```
+
+fresh Phone OTP login：
+
+```text
+same-user revoked device restore allowed
+new Session created
+```
+
+---
+
+# 四十五、Profile E2E
+
+```text
+register
+→ GET profile
+→ PATCH
+→ GET
+```
+
+验证：
+
+```text
+absent fields preserved
+nullable clear works
+birth_date no timezone drift
+avatar UUID preserved
+```
+
+---
+
+# 四十六、Learning E2E
+
+注册：
+
+```text
+lo -> zh
+```
+
+GET learning profile：
+
+正确。
+
+尝试任何 profile payload 修改：
+
+```text
+learning direction
+```
+
+必须拒绝。
+
+---
+
+# 四十七、Bind Phone E2E
+
+Facebook-first User：
+
+```text
+Facebook register
+→ bind_phone OTP
+→ POST bind
+→ phone AuthIdentity added
+→ same User
+```
+
+不能新建 User。
+
+---
+
+# 四十八、Change Phone E2E
+
+```text
+existing phone user
+→ request change_phone OTP new phone
+→ POST change
+→ same AuthIdentity updated
+→ old phone no longer resolves
+→ new phone resolves same User
+```
+
+Session：
+
+```text
+not forcibly revoked
+```
+
+---
+
+# 四十九、Account State E2E
+
+没有 public mutation endpoint。
+
+可通过 Application service/test harness：
+
+```text
+active -> disabled
+```
+
+验证：
+
+```text
+sessions revoked
+AccountStatusChanged event exists
+new login denied
+refresh denied
+protected auth denied
+```
+
+然后：
+
+```text
+disabled -> active
+```
+
+确认旧 Session：
+
+```text
+remain revoked
+```
+
+再验证 closed terminal。
+
+---
+
+# 五十、Outbox E2E
+
+通过 failure injection 测：
+
+Phone registration：
+
+```text
+outbox write failure
+→ all registration writes rollback
+```
+
+Facebook registration：
+
+同样。
+
+Account status：
+
+```text
+status/session/outbox all atomic
+```
+
+---
+
+# 五十一、IDN-18 Gate
+
+全部：
+
+```text
+Phone Registration E2E = PASS
+Existing Phone Login E2E = PASS
+Facebook E2E = PASS
+
+Refresh E2E = PASS
+Logout E2E = PASS
+Device E2E = PASS
+
+Profile E2E = PASS
+Learning Profile E2E = PASS
+BindPhone E2E = PASS
+ChangePhone E2E = PASS
+
+Account State E2E = PASS
+Outbox Atomicity = PASS
+
+Real PostgreSQL = YES
+Fresh DB = YES
+Mock DB for core = 0
+
+Cross-domain SQL = 0
+Frozen migration changes = 0
+```
+
+然后：
+
+```text
+IDN-18 = COMPLETE
+```
+
+才进入 IDN-19。
+
+---
+
+# 五十二、IDN-19 — Security / Race Tests
+
+这一阶段：
+
+```text
+不新增产品功能
+```
+
+只做：
+
+```text
+Security Hardening
+Race Hardening
+Abuse Resistance
+Transaction Integrity
+Credential Safety
+Flaky Test Stabilization
+```
+
+---
+
+# 五十三、OTP Security
+
+验证：
+
+```text
+6-digit OTP
+leading-zero supported
+Math.random = 0
+
+keyed HMAC validation
+plain SHA-only OTP hash = 0
+
+raw OTP DB = 0
+raw OTP logs = 0
+OTP hash HTTP = 0
+```
+
+---
+
+# 五十四、OTP Rate Limits
+
+验证：
+
+```text
+60s cooldown
+5 / 30 min phone+purpose
+10 / 24h phone+purpose
+20 / 30 min IP
+```
+
+测试：
+
+```text
+threshold
+threshold + 1
+window expiration
+purpose isolation
+phone isolation
+```
+
+---
+
+# 五十五、OTP Enumeration
+
+匿名 login OTP：
+
+```text
+existing phone
+new phone
+```
+
+不能通过：
+
+```text
+HTTP status
+response body
+special error code
+```
+
+明显枚举账户。
+
+---
+
+# 五十六、OTP Races
+
+真实 PostgreSQL：
+
+```text
+same phone + purpose parallel request
+→ at most one valid pending challenge
+```
+
+```text
+same OTP parallel consume
+→ max one success
+```
+
+```text
+parallel wrong OTP
+→ attempt_count no lost updates
+→ max attempts locks challenge
+```
+
+不要依赖脆弱毫秒阈值。
+
+---
+
+# 五十七、Phone Registration Race
+
+同一新手机号并发认证：
+
+最终：
+
+```text
+User = 1
+Phone AuthIdentity = 1
+BasicProfile = 1
+LearningProfile = 1
+UserRegistered = 1
+Orphan User = 0
+```
+
+---
+
+# 五十八、Facebook Registration Race
+
+同一 provider_subject 并发：
+
+最终同样：
+
+```text
+canonical User = 1
+AuthIdentity = 1
+Profile rows = 1
+UserRegistered = 1
+```
+
+---
+
+# 五十九、BindPhone Race
+
+同 User 并发 bind：
+
+最终：
+
+```text
+phone AuthIdentity count <= 1
+```
+
+不能绕过 one-phone invariant。
+
+---
+
+# 六十、ChangePhone Race
+
+并发 change：
+
+最终：
+
+```text
+exactly one phone AuthIdentity
+```
+
+不能产生两个 phone identity。
+
+---
+
+# 六十一、Refresh Race
+
+同一旧 refresh：
+
+并行：
+
+```text
+success = exactly 1
+```
+
+不能生成两个有效 descendant refresh。
+
+---
+
+# 六十二、Logout vs Refresh
+
+真实 PostgreSQL race。
+
+要求最终具备清晰串行语义。
+
+不能出现：
+
+```text
+logout committed
+but same session later remains indefinitely active due stale refresh
+```
+
+---
+
+# 六十三、LogoutAll vs Refresh
+
+同 User：
+
+```text
+LogoutAllSessions
+vs
+RefreshSession
+```
+
+最终不能留下违反 logout-all 语义的 active session。
+
+需要审查 lock ordering。
+
+---
+
+# 六十四、Device Revoke vs Refresh
+
+如果 refresh 先：
+
+```text
+Device revoke afterward must revoke bound session
+```
+
+如果 revoke 先：
+
+```text
+Refresh fails
+```
+
+最终：
+
+```text
+revoked device cannot retain indefinitely usable refresh session
+```
+
+---
+
+# 六十五、Device Restore Race
+
+```text
+fresh-auth restore
+vs
+device revoke
+```
+
+必须得到可解释一致结果。
+
+不能 stale write 静默重新激活已经 revoke 的 device。
+
+---
+
+# 六十六、Push Token Race
+
+同 User 多 Device claim 相同 token：
+
+最终数据库 partial unique invariant 保持。
+
+不同 User：
+
+```text
+no stealing
+```
+
+---
+
+# 六十七、Disable vs Refresh
+
+```text
+account disable
+vs
+refresh
+```
+
+最终如果 disable 成功：
+
+```text
+all sessions revoked
+user disabled
+refresh unusable
+```
+
+---
+
+# 六十八、Close vs Login
+
+```text
+close
+vs
+phone auth / Facebook auth
+```
+
+closed terminal 必须保持。
+
+不能在 closure 最终成功后留下新 active session。
+
+---
+
+# 六十九、Outbox Duplicate Race
+
+并发首次注册：
+
+最终：
+
+```text
+UserRegistered canonical business event = 1
+```
+
+---
+
+# 七十、JWT Security
+
+测试：
+
+```text
+alg=none rejected
+unexpected algorithm rejected
+wrong signature
+wrong issuer
+wrong audience
+expired
+tampered payload
+invalid UUID sub
+```
+
+JWT payload 禁止：
+
+```text
+internal BIGINT
+phone
+OTP
+refresh token
+profile data
+```
+
+---
+
+# 七十一、Refresh Security
+
+确认 refresh token：
+
+```text
+cryptographically random
+opaque
+high entropy
+not JWT
+not UUID-only
+not timestamp-derived
+```
+
+并确认：
+
+```text
+raw != stored hash
+```
+
+---
+
+# 七十二、Secret Fail-Fast
+
+production-like configuration 缺：
+
+```text
+JWT signing secret/key
+OTP HMAC secret
+```
+
+必须：
+
+```text
+fail fast
+```
+
+禁止 production fallback：
+
+```text
+changeme
+default-secret
+development-secret
+```
+
+测试环境可显式传 test secret。
+
+---
+
+# 七十三、Logging Redaction
+
+捕获日志验证不存在：
+
+```text
+OTP
+OTP hash
+Authorization
+Access Token
+Refresh Token
+Refresh Hash
+Facebook credential
+full phone
+full push token
+JWT secret
+OTP HMAC secret
+```
+
+可以有 masked phone。
+
+---
+
+# 七十四、HTTP Sensitive Data Scan
+
+所有 Identity endpoint response：
+
+禁止：
+
+```text
+internal bigint IDs
+refresh_token_hash
+code_hash
+provider credential
+full push token
+```
+
+---
+
+# 七十五、Mass Assignment
+
+测试例如：
+
+```json
+{
+  "status": "active",
+  "user_id": "...",
+  "learning_language": "...",
+  "created_at": "..."
+}
+```
+
+对 Profile PATCH：
+
+必须拒绝。
+
+---
+
+# 七十六、AuthContext Ownership
+
+身份来源只有：
+
+```text
+AuthContext.user_public_id
+```
+
+不能通过：
+
+```text
+body user_id
+query user_id
+custom user_id header
+```
+
+切换当前用户。
+
+---
+
+# 七十七、IDOR
+
+至少：
+
+```text
+User A revoke User B device
+User A read/update User B profile
+User A manipulate User B session
+```
+
+全部：
+
+```text
+denied / safe not found
+```
+
+不泄漏存在性。
+
+---
+
+# 七十八、Facebook Security
+
+验证：
+
+```text
+client provider_subject not trusted
+invalid credential rejected
+provider unavailable safe error
+credential DB = 0
+credential logs = 0
+```
+
+---
+
+# 七十九、Credential Security
+
+Bind/Change：
+
+```text
+purpose mismatch rejected
+phone mismatch rejected
+foreign-owned phone rejected
+```
+
+禁止：
+
+```text
+cross-purpose OTP reuse
+phone stealing
+```
+
+---
+
+# 八十、Rollback Hardening
+
+至少覆盖：
+
+```text
+registration mid-failure
+session creation failure
+outbox failure
+device revoke failure
+account status transition failure
+phone bind failure
+phone change failure
+```
+
+确认：
+
+```text
+partial canonical facts = 0
+consumed OTP without successful business operation = 0
+orphan User = 0
+lost refresh credential = 0
+```
+
+---
+
+# 八十一、Lock Ordering / Deadlocks
+
+重点审计：
+
+```text
+Phone authentication
+Facebook authentication
+BindPhone
+ChangePhone
+RefreshSession
+LogoutCurrentSession
+LogoutAllSessions
+RevokeDevice
+Fresh-auth Device Restore
+Disable/Close account
+```
+
+报告实际锁顺序。
+
+不要机械套一个虚构顺序。
+
+检查是否存在：
+
+```text
+lock order inversion
+deadlock risk
+stale write
+```
+
+必要时修正并增加 race test。
+
+---
+
+# 八十二、Flaky Test 稳定性
+
+此前曾出现过：
+
+```text
+Foundation empty database test transient timeout
+advisory-lock timing assertion transient timeout
+```
+
+复跑均通过，尚未发现稳定回归。
+
+IDN-19 需要审查。
+
+不要用：
+
+```text
+必须 50ms 内
+必须阻塞超过 100ms
+```
+
+这类机器性能相关断言。
+
+优先使用：
+
+```text
+barrier
+latch
+promise coordination
+transaction coordination
+final DB invariant
+success count
+observable state
+```
+
+不要只是把 timeout 无限制调大。
+
+关键 race tests 可重复执行：
+
+```text
+10~20 iterations
+```
+
+按实际运行成本合理选择。
+
+---
+
+# 八十三、资源清理
+
+完整 suite 后确认：
+
+```text
+temporary databases cleaned
+DB connections closed
+Fastify app closed
+timers cleaned
+open handles = 0
+```
+
+避免测试 suite hang。
+
+---
+
+# 八十四、IDN-19 Gate
+
+全部：
+
+```text
+OTP abuse = PASS
+OTP enumeration = PASS
+OTP request race = PASS
+OTP consume race = PASS
+OTP attempt race = PASS
+
+Phone registration race = PASS
+Facebook registration race = PASS
+BindPhone race = PASS
+ChangePhone race = PASS
+
+Refresh race = PASS
+Logout vs Refresh race = PASS
+LogoutAll vs Refresh race = PASS
+Device Revoke vs Refresh race = PASS
+Push token race = PASS
+Disable vs Refresh race = PASS
+Close vs Login race = PASS
+
+JWT security = PASS
+Refresh security = PASS
+Secret fail-fast = PASS
+Logging redaction = PASS
+
+IDOR = PASS
+Mass assignment = PASS
+Cross-purpose OTP protection = PASS
+
+Rollback tests = PASS
+Outbox duplicate protection = PASS
+
+Flaky timing assertions stabilized = PASS
+
+Frozen migration changes = 0
+```
+
+然后：
+
+```text
+IDN-19 = COMPLETE
+```
+
+---
+
+# 八十五、全局禁止事项
+
+本批次绝对禁止：
+
+```text
+修改 frozen migrations
+
+Redis
+Kafka
+RabbitMQ
+ORM
+
+Access Token blacklist
+Refresh Token family table
+Session public UUID
+Device public UUID
+
+Password login
+Email login
+Google login
+Apple login
+MFA
+Passkey
+
+Account Merge
+Multiple phone identities
+
+Trust enforcement
+Operations RBAC
+
+进入 IDN-20
+```
+
+---
+
+# 八十六、Public Contract
+
+继续保证：
+
+```text
+other domains
+→ modules/identity/public
+```
+
+其他 Domain 不得 import：
+
+```text
+identity/application
+identity/infrastructure
+identity internal domain types
+repositories
+internal IDs
+```
+
+HTTP DTO 不是跨-domain contract。
+
+---
+
+# 八十七、数据库最终检查
+
+必须确认：
+
+```text
+Frozen migration changes = 0
+Frozen migration diff = 0
+
+Fresh migrations = 17
+Second migration run = 0
+Database audit = PASS
+
+Cross-domain SQL = 0
+```
+
+刷新 database baseline report 可以。
+
+但是：
+
+```text
+baseline definition / migration content
+```
+
+不能改变。
+
+---
+
+# 八十八、REQUIRED Use Cases 覆盖检查
+
+最终逐项确认全部已经：
+
+```text
+implemented + tested
+```
+
+包括：
+
+```text
+RequestPhoneOtp
+
+AuthenticateWithPhoneOtp
+AuthenticateWithFacebook
+
+RefreshSession
+LogoutCurrentSession
+LogoutAllSessions
+
+GetCurrentIdentity
+GetCurrentAccountStatus
+
+GetOwnBasicProfile
+UpdateOwnBasicProfile
+
+RegisterOrUpdateDevice
+ListMyDevices
+RevokeDevice
+
+ListMySessions
+
+BindPhone
+ChangePhone
+
+ReadLearningProfile
+
+RevokeCurrentSession
+RevokeSessionsByDevice
+```
+
+---
+
+# 八十九、确认未提前实现
+
+必须检查并明确：
+
+```text
+ChangeLearningDirection = NOT_SUPPORTED
+RestoreClosedAccount = NOT_SUPPORTED
+Password Login = NOT_SUPPORTED
+Multiple active phone identities = NOT_SUPPORTED
+Automatic Account Merge = NOT_SUPPORTED
+
+RevokeArbitrarySessionByPublicSessionId = DEFERRED
+BindFacebookToExistingUser = DEFERRED
+UnlinkFacebook = DEFERRED
+GuestDataMigration = DEFERRED
+AccessTokenBlacklist = DEFERRED
+RefreshTokenFamilyReplayDetection = DEFERRED
+MFA = DEFERRED
+Passkey = DEFERRED
+Google Auth = DEFERRED
+Apple Auth = DEFERRED
+```
+
+---
+
+# 九十、最终全量验证
+
+完成 IDN-19 后运行当前仓库实际存在的：
+
+```text
+typecheck
+lint
+architecture audit
+build
+
+unit tests
+integration tests
+HTTP tests
+E2E tests
+security tests
+race tests
+rollback tests
+
+database tests
+fresh database validation
+
+docs build
+```
+
+同时确认：
+
+```text
+Foundation Regression = PASS
+IDN-01 ~ IDN-16 Regression = PASS
+```
+
+不要因为测试数量增加就跳过旧回归。
+
+---
+
+# 九十一、生成报告
+
+创建：
+
+```text
+docs/docs/development/v2/02-identity/IDN_17_19_REPORT.md
+```
+
+如果现有文档规范要求，也可以另外创建：
+
+```text
+IDN_17_REPORT.md
+IDN_18_REPORT.md
+IDN_19_REPORT.md
+```
+
+但必须有 `IDN_17_19_REPORT.md` 批次总报告。
+
+---
+
+# 九十二、更新开发进度
+
+全部通过后更新：
+
+```text
+docs/docs/development/v2/DEVELOPMENT_PROGRESS.md
+```
+
+状态：
+
+```text
+IDENTITY_DESIGN_GATE = PASS
+IDENTITY_IMPLEMENTATION = IN_PROGRESS
+
+IDN-01 = COMPLETE
+IDN-02 = COMPLETE
+IDN-03 = COMPLETE
+IDN-04 = COMPLETE
+IDN-05 = COMPLETE
+IDN-06 = COMPLETE
+IDN-07 = COMPLETE
+IDN-08 = COMPLETE
+IDN-09 = COMPLETE
+IDN-10 = COMPLETE
+IDN-11 = COMPLETE
+IDN-12 = COMPLETE
+IDN-13 = COMPLETE
+IDN-14 = COMPLETE
+IDN-15 = COMPLETE
+IDN-16 = COMPLETE
+IDN-17 = COMPLETE
+IDN-18 = COMPLETE
+IDN-19 = COMPLETE
+
+IDN-20 = NOT_STARTED
+```
+
+Identity 仍然不能标记：
+
+```text
+COMPLETE
+```
+
+最终完成与 Gate 属于 IDN-20 / IDN-21。
+
+---
+
+# 九十三、最终汇报格式
+
+最后只向我汇报一次。
+
+全部使用中文。
+
+## IDN-17 ~ IDN-19 结果
+
+```text
+IDN-17 = COMPLETE / BLOCKED / NOT_STARTED
+IDN-18 = COMPLETE / BLOCKED / NOT_STARTED
+IDN-19 = COMPLETE / BLOCKED / NOT_STARTED
+
+IDN-20 = NOT_STARTED
+```
+
+## IDN-17 — HTTP/API
+
+列出实际实现全部端点。
+
+明确：
+
+```text
+HTTP SQL = 0
+HTTP Repository access = 0
+Unknown field rejection = PASS
+Mass assignment protection = PASS
+Internal BIGINT HTTP exposure = 0
+Token no-store headers = PASS
+AuthenticationProvider reused = YES
+```
+
+## IDN-18 — E2E
+
+报告：
+
+```text
+Phone New Registration
+Existing Phone Login
+Facebook Registration/Login
+
+Refresh Rotation
+Logout Current / All
+Device Lifecycle
+
+Profile
+Learning Profile
+BindPhone
+ChangePhone
+
+Account State
+Outbox Atomicity
+```
+
+明确：
+
+```text
+Real PostgreSQL = YES
+Fresh Database = YES
+Mock DB for core E2E = 0
+```
+
+## IDN-19 — Security / Race
+
+报告：
+
+```text
+OTP request race
+OTP consume race
+OTP attempt race
+
+Phone registration race
+Facebook registration race
+BindPhone race
+ChangePhone race
+
+Refresh race
+Logout vs Refresh
+LogoutAll vs Refresh
+
+Device Revoke vs Refresh
+Device Restore race
+Push Token race
+
+Disable vs Refresh
+Close vs Login
+
+Outbox duplicate race
+```
+
+## Security
+
+明确：
+
+```text
+Raw OTP persisted = 0
+Raw Refresh Token persisted = 0
+Facebook credential persisted = 0
+
+OTP logged = 0
+Access Token logged = 0
+Refresh Token logged = 0
+Refresh Hash logged = 0
+Facebook credential logged = 0
+Full Push Token logged = 0
+
+Internal BIGINT HTTP exposure = 0
+
+Account Enumeration = mitigated
+IDOR = PASS
+Mass Assignment = PASS
+JWT Security = PASS
+Secret Fail-Fast = PASS
+```
+
+## Flaky / Race Stability
+
+说明：
+
+```text
+是否仍有 narrow timing assertions
+是否使用 barrier/final invariant
+race tests 重复轮数
+是否出现 intermittent failure
+```
+
+## Locks / Transactions
+
+报告实际 lock ordering。
+
+明确：
+
+```text
+Foundation TransactionManager reused = YES
+Repository-owned transactions = 0
+Identity-owned DB Pool = 0
+Rollback consistency = PASS
+```
+
+## Database
+
+明确：
+
+```text
+Frozen migration changes = 0
+Frozen migration diff = 0
+Cross-domain SQL = 0
+
+Fresh migrations = 17
+Second migration run = 0
+Database audit = PASS
+```
+
+## REQUIRED Use Cases
+
+逐项确认：
+
+```text
+全部 REQUIRED = IMPLEMENTED + TESTED
+```
+
+## NOT_SUPPORTED / DEFERRED
+
+明确：
+
+```text
+没有提前实现
+```
+
+## Validation
+
+报告实际数量：
+
+```text
+Typecheck
+Lint
+Architecture Audit
+Build
+
+Unit Tests
+Integration Tests
+HTTP Tests
+E2E Tests
+Security Tests
+Race Tests
+Rollback Tests
+
+Database Validation
+Docs Build
+Foundation Regression
+```
+
+## Blockers
+
+```text
+Blockers = N
+```
+
+## 最终状态
+
+如果全部通过：
+
+```text
+IDENTITY_DESIGN_GATE = PASS
+IDENTITY_IMPLEMENTATION = IN_PROGRESS
+
+IDN-01 = COMPLETE
+IDN-02 = COMPLETE
+IDN-03 = COMPLETE
+IDN-04 = COMPLETE
+IDN-05 = COMPLETE
+IDN-06 = COMPLETE
+IDN-07 = COMPLETE
+IDN-08 = COMPLETE
+IDN-09 = COMPLETE
+IDN-10 = COMPLETE
+IDN-11 = COMPLETE
+IDN-12 = COMPLETE
+IDN-13 = COMPLETE
+IDN-14 = COMPLETE
+IDN-15 = COMPLETE
+IDN-16 = COMPLETE
+IDN-17 = COMPLETE
+IDN-18 = COMPLETE
+IDN-19 = COMPLETE
+
+IDN-20 = NOT_STARTED
+```
+
+完成后立即停止。
+
+**绝对不要开始 IDN-20。**

@@ -14,3 +14,12 @@ export type OtpDelivery = Readonly<{ phone: E164PhoneNumber; purpose: OtpPurpose
 export interface OtpDeliveryProvider { sendOtp(delivery: OtpDelivery): Promise<void> }
 export class FakeOtpDeliveryProvider implements OtpDeliveryProvider { readonly deliveries: OtpDelivery[] = []; async sendOtp(delivery: OtpDelivery): Promise<void> { this.deliveries.push(delivery); } }
 export class UnavailableOtpDeliveryProvider implements OtpDeliveryProvider { async sendOtp(): Promise<void> { throw new AppError({ code: 'PROVIDER_UNAVAILABLE', message: 'OTP delivery is unavailable', httpStatus: 503 }); } }
+// TECH_DEBT: temporary developer facade until a production SMS/OTP delivery adapter exists
+// in the delivery boundary. It never logs the raw OTP; it only echoes a masked envelope.
+export class ConsoleOtpDeliveryProvider implements OtpDeliveryProvider {
+  constructor(private readonly logger: { info(message: string, fields: Record<string, unknown>): void }) {}
+  async sendOtp(delivery: OtpDelivery): Promise<void> {
+    const masked = delivery.phone.length > 9 ? `${delivery.phone.slice(0, 5)}****${delivery.phone.slice(-4)}` : '****';
+    this.logger.info('OTP delivery placeholder', { phone: masked, purpose: delivery.purpose, expires_at: delivery.expiresAt.toISOString() });
+  }
+}

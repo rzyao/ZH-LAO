@@ -1,0 +1,55 @@
+{
+  "expo": {
+    "name": "ZH-LAO",
+    "slug": "zh-lao-mobile",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "scheme": "zhlao",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "backgroundColor": "#0F6FFF",
+      "resizeMode": "contain"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.zhlao.app",
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "ZH-LAO 需要麦克风权限以支持口语练习与跟读功能。",
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "package": "com.zhlao.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#0F6FFF",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "permissions": [
+        "android.permission.INTERNET",
+        "android.permission.ACCESS_NETWORK_STATE",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS"
+      ],
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-font",
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "ZH-LAO 需要麦克风权限以支持口语练习与跟读功能。"
+        }
+      ]
+    ]
+  }
+}
