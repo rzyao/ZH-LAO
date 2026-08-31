@@ -19,7 +19,7 @@ Feature Page 是端到端交付事实源，用于描述：
 - 生命周期状态；
 - 责任边界；
 - Contract 边界；
-- 交付 Lane；
+- Dependency 关系；
 - Gate 与 Evidence。
 
 Feature Page 不复制：
@@ -69,6 +69,16 @@ contracts:
     - session
   consumes:
     - otp-provider
+  forbidden:
+    - profile-mutation
+
+dependencies:
+  upstream:
+    - otp-provider
+  downstream:
+    - user-profile
+  external:
+    - facebook-provider
 ```
 
 ---
@@ -143,27 +153,45 @@ Profile 管理 Session
 
 ---
 
-## 5. Lane 规范
+## 5. Dependency 规范
 
-固定 Lane：
+每个 Feature 必须声明依赖关系。
 
-```text
-设计
-Backend
-Admin
-Mobile
-集成
-验收
+格式：
+
+```yaml
+dependencies:
+  upstream:
+    - required-feature
+
+  downstream:
+    - dependent-feature
+
+  external:
+    - external-service
 ```
 
-每个 Lane 必须包含：
+必须明确：
+
+- 当前 Feature 依赖哪些前置能力；
+- 哪些 Feature 依赖当前 Feature；
+- 哪些外部系统影响当前 Feature。
+
+Dependency 不等于 Contract：
 
 ```text
-状态
-范围
-Stage / 工件
-Gate / Evidence
-下一步
+Contract
+= 能力交互规则
+
+Dependency
+= 生命周期与交付依赖关系
+```
+
+禁止：
+
+```text
+Feature blocked
+但是没有说明依赖对象
 ```
 
 ---
@@ -223,7 +251,7 @@ Gate 必须说明：
 Evidence
 ```
 
-不同 Lane 使用对应 Gate，不允许使用 Domain Gate 替代 Feature Gate。
+不同交付阶段使用对应 Gate，不允许使用 Domain Gate 替代 Feature Gate。
 
 ---
 
@@ -269,13 +297,10 @@ Evidence
 |-|-|
 |Capability|核心能力|
 |Lifecycle|生命周期|
-|Actor|参与角色|
-|Scope Boundary|责任边界|
-|Architecture|架构关系|
 |Evidence|证据|
 |Gate|阶段门禁|
-|Next Action|下一步|
 |Contract|契约|
+|Dependency|依赖|
 
 ---
 
@@ -291,4 +316,4 @@ Feature Page 必须回答：
 6. 为什么当前状态成立？
 7. 如何验证完成？
 8. 与哪些 Contract 有关系？
-
+9. 与哪些 Feature 或外部系统存在 Dependency？
