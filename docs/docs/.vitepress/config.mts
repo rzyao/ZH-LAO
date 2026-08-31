@@ -47,6 +47,7 @@ export default defineConfig({
         items: [
           { text: '开发计划入口', link: '/development/' },
           { text: 'Executable Spec System', link: '/development/SPEC_SYSTEM' },
+          { text: 'Implementation Blueprint 模板', link: '/development/IMPLEMENTATION_BLUEPRINT_TEMPLATE' },
           { text: '开发流程控制中心', link: '/development/DEVELOPMENT_CONTROL_CENTER' },
           { text: 'AI 多会话工作流', link: '/development/workflow/' },
           { text: '当前下一动作', link: '/development/workflow/NEXT_ACTIONS' },
