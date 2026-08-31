@@ -239,6 +239,15 @@ const domainsSidebar = [
     collapsed: true,
     items: [
       { text: '领域概览', link: '/domains/operations/' },
+      {
+        text: '业务设计',
+        collapsed: true,
+        items: [
+          { text: 'RBAC 与授权', link: '/domains/operations/rbac' },
+          { text: '操作审计与 Bootstrap', link: '/domains/operations/audit' }
+        ]
+      },
+      { text: '公共契约与集成', link: '/domains/operations/contracts' },
       { text: '数据设计', link: '/domains/operations/database' }
     ]
   },
