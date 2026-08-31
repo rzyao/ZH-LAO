@@ -47,7 +47,6 @@ jobs:
               path = Path('docs/docs/features') / feature_id / 'index.md'
               text = path.read_text(encoding='utf-8')
               end = text.find('\n---', 4)
-              fm = text[4:end]
               text = text[:end] + '\n' + block.rstrip() + text[end:]
               path.write_text(text, encoding='utf-8')
 
@@ -77,6 +76,39 @@ jobs:
           git add docs/docs/features
           if ! git diff --cached --quiet; then
             git commit -m "docs(f21): sync integrated Feature metadata requirements"
+            git push origin HEAD:docs/f21-feature-docs-integration
+          fi
+      - name: Normalize obvious dead evidence links
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          prefix = 'file:///c:/project/ZH-LAO/'
+          github = 'https://github.com/rzyao/ZH-LAO/blob/main/'
+          identity_dir = Path('docs/docs/development/02-identity')
+          changed = 0
+          for path in identity_dir.glob('*.md'):
+              text = path.read_text(encoding='utf-8')
+              updated = text.replace(prefix, github)
+              if updated != text:
+                  path.write_text(updated, encoding='utf-8')
+                  changed += 1
+
+          stale = '[Feature Page Index](../../development/workflow/FEATURE_PAGE_INDEX.json)'
+          for feature_id in ('creator-earnings','promotions-coupons','social-membership-entitlements'):
+              path = Path('docs/docs/features') / feature_id / 'index.md'
+              text = path.read_text(encoding='utf-8')
+              updated = text.replace(stale, '`FEATURE_PAGE_INDEX.json`')
+              if updated != text:
+                  path.write_text(updated, encoding='utf-8')
+                  changed += 1
+          print(f'normalized_link_files={changed}')
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/docs/development/02-identity docs/docs/features/creator-earnings docs/docs/features/promotions-coupons docs/docs/features/social-membership-entitlements
+          if ! git diff --cached --quiet; then
+            git commit -m "docs(f21): normalize dead evidence links"
             git push origin HEAD:docs/f21-feature-docs-integration
           fi
       - name: Diagnose Feature frontmatter requirements
