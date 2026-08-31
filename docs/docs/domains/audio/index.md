@@ -25,6 +25,46 @@ schema: audio
 | 批量创建生产任务 | 长期批处理工作流跟踪 |
 | 生产生命周期审计 | — |
 
+## 领域能力地图
+
+Audio Production 当前提供的稳定业务能力包括：
+
+```text
+生产需求承接
+├─ 建立 / 识别 Slot
+├─ 创建 Task
+└─ 保存生产输入快照
+
+生产
+├─ TTS Generation Attempt
+├─ 人工录音
+└─ Asset Version 形成
+
+治理
+├─ Review
+├─ 技术失败重试
+├─ 质量失败 successor Task
+└─ 生产事件审计
+
+发布
+├─ Publish
+├─ official_asset_version_id
+└─ Fresh / Stale 判定
+
+批量
+└─ Task Batch / Batch Item
+```
+
+这些是 Audio Domain Capability；Admin 音频工作台是这些能力的消费者体验，不是领域模型本身。
+
+## 参与的产品功能
+
+| 产品功能 | 关系 | Audio 职责 |
+| --- | --- | --- |
+| [音频生产](/features/audio-production/) | 主要领域 | Slot、Task、Attempt、Asset Version、Review、Publish 与生产生命周期 |
+
+该 Feature 同时依赖 Content、Operations 与 Asset Infrastructure，但这些边界不会并入 Audio。
+
 ## 核心模型
 
 ```text
@@ -100,3 +140,5 @@ Slot.official_asset_version_id 成为当前正式音频唯一事实源
 - [工作流与状态机](lifecycle.md)：Task/Attempt/Review/Batch 状态、主流程、发布事务、并发与幂等。
 - [契约与边界](contracts.md)：Content、Operations、TTS、Asset Infrastructure 的跨域契约和明确不建立的概念。
 - [数据设计](database.md)：9 张表的字段、约束、索引和物理关系。
+- [音频生产 Feature](/features/audio-production/)
+- [领域能力与产品功能关系模型](/domains/FEATURE_RELATIONSHIP_MODEL)
