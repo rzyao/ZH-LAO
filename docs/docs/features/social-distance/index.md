@@ -28,100 +28,139 @@ blocks:
 
 Portfolio Status：`pending_decision`。
 
-`social-distance` 是当前正式 Feature 清单中的功能。其领域事实以 social、identity 文档为准。
+本 Feature 保留当前正式清单中的“距离筛选与模糊距离展示”需求，但不代表该能力已获准进入实现。现有 Social canonical location 只有 `country_code / region / city` 粗粒度位置，并明确首期不引入经纬度 / PostGIS；因此仓库当前没有足以支撑真实距离计算或模糊距离展示的 canonical 数据契约。
+
+NEEDS_DECISION：`SOCIAL_LOCATION_SCOPE_DECISION`。本文档只记录这一阻塞，不裁决是否上线、不发明坐标来源、精度、隐私规则或距离算法。
 
 ## 设计
 
 状态：blocked
 
-范围：围绕“距离筛选与模糊距离展示”确认用户/运营目标、范围边界、流程与跨域归属；权威事实来自 [social](/domains/social/)、[identity](/domains/identity/)。
+### 范围
 
-执行阶段与产物：[social](/domains/social/)、[identity](/domains/identity/)。
+需要先裁决“距离筛选与模糊距离展示”是否进入当前产品组合，以及进入后应由哪套 location contract 支撑。当前 frozen Social Profile 只能表达国家/地区/城市，不能把这些字段伪装成精确距离事实。
 
-Gate / 完成证据：阻塞证据：[未决与延期事项](/governance/open-questions.md)记录了该范围决策缺口；未伪造 Gate PASS。
+### Stage / 工件 / Gate
 
-NEEDS_DECISION：`SOCIAL_LOCATION_SCOPE_DECISION`。仓库事实显示该能力仍受范围/设计裁决影响，不能自行补造实现边界。
+已完成的相关资产：
 
-阻塞对象：SOCIAL_LOCATION_SCOPE_DECISION；已完成内容：尚无该 Lane 的可确认完成产物。
+- [Social 资料与展示内容](/domains/social/profile)：冻结 `country_code / region / city` 为首期粗粒度位置，并明确“不引入经纬度/PostGIS”。
+- [Social 偏好、发现与关系](/domains/social/discovery-and-relationships)：V1 硬筛选仅包含性别、年龄、国家、目标；普通 Discovery 的实时候选语义已冻结。
+- [ADR-010](/adr/ADR-010-social-profile-discovery-and-relationships)：冻结当前 Profile / Preference / Discovery 基线。
+- `database/v2/migrations/0700_social.sql` 只落粗粒度 Profile location，没有 latitude / longitude / geography 字段。
 
-等待条件：完成该裁决并把结论写入 canonical 设计文档。
+Gate / 阻塞证据：本 Feature 当前 frontmatter 的 Portfolio 为 `pending_decision`，五个执行 Lane 均被 `SOCIAL_LOCATION_SCOPE_DECISION` 阻塞；当前 `main` 没有完成该裁决的 canonical 产物，也没有 Distance Design Gate PASS。
 
-下一步：解除阻塞后，从该 Lane 的设计/执行准备阶段重新核对范围并继续。
+### 已完成 / 当前阻塞
+
+已完成：普通 Discovery 和粗粒度 location 的现行边界清楚，且不存在“已实现精确距离”的误导性数据模型。
+
+阻塞对象：`SOCIAL_LOCATION_SCOPE_DECISION`。
+
+等待条件：裁决该 Feature 是否进入当前范围；如进入，必须先把真实 location ownership、可用数据、公开粒度与计算 Contract 写回 canonical 设计并形成可审计 Gate。
+
+### 下一步
+
+仅在 `SOCIAL_LOCATION_SCOPE_DECISION` 被正式解决后重新评估 Design Lane；未裁决前不扩 Social canonical schema。
 
 ## Backend
 
 状态：blocked
 
-范围：覆盖“距离筛选与模糊距离展示”在所属 Domain 的 API、Service、Repository、数据交互与错误处理；权威边界来自 [social](/domains/social/)、[identity](/domains/identity/)。
+### 范围
 
-执行阶段与产物：[social](/domains/social/)、[identity](/domains/identity/)。
+Backend 目前不能实现真实距离筛选/模糊距离，因为没有已裁决 location / distance Contract。不得使用 `country_code / region / city` 推导伪精确距离，也不得在 Feature 文档中预设坐标字段或地理数据库方案。
 
-Gate / 完成证据：阻塞证据：[未决与延期事项](/governance/open-questions.md)记录了该范围决策缺口；未伪造 Gate PASS。
+### Stage / 工件 / Gate
 
-NEEDS_DECISION：`SOCIAL_LOCATION_SCOPE_DECISION`。仓库事实显示该能力仍受范围/设计裁决影响，不能自行补造实现边界。
+`apps/backend/src` 当前没有 Social module；更关键的是 `SOCIAL_LOCATION_SCOPE_DECISION` 尚未解决，所以不存在可执行的 Distance Backend Stage / Contract / Gate。
 
-阻塞对象：SOCIAL_LOCATION_SCOPE_DECISION；已完成内容：尚无该 Lane 的可确认完成产物。
+Gate / 阻塞证据：`SOCIAL_LOCATION_SCOPE_DECISION`；无 Backend PASS 证据。
 
-等待条件：完成该裁决并把结论写入 canonical 设计文档。
+### 已完成 / 当前阻塞
 
-下一步：解除阻塞后，从该 Lane 的设计/执行准备阶段重新核对范围并继续。
+已完成：确认现有 `0700_social.sql` 不含真实距离所需的坐标事实。
+
+等待条件：Design decision + canonical location/distance Contract。
+
+### 下一步
+
+裁决通过且 Design Gate 完成后，再创建 Backend Stage；若裁决不进入当前产品组合，则按正式 Portfolio 决策调整，而不是本页自行改状态。
 
 ## Admin
 
 状态：na
 
-不适用：当前功能不需要该交付端。
+### 原因
+
+当前待裁决能力是用户侧距离筛选/展示，不存在需要由本 Feature 交付的 Admin 页面。若未来出现位置策略运营配置，需由对应 Platform/Admin Feature 单独证明。
 
 ## Mobile
 
 状态：blocked
 
-范围：覆盖“距离筛选与模糊距离展示”在 Mobile 端的页面、导航、用户状态与真实接口接入；页面边界来自 [social](/domains/social/)、[identity](/domains/identity/)。
+### 范围
 
-执行阶段与产物：[social](/domains/social/)、[identity](/domains/identity/)。
+Mobile 不能在产品范围和 distance Contract 未定时提前设计距离筛选控件、距离文案或位置权限流程。
 
-Gate / 完成证据：阻塞证据：[未决与延期事项](/governance/open-questions.md)记录了该范围决策缺口；未伪造 Gate PASS。
+### Stage / 工件 / Gate
 
-NEEDS_DECISION：`SOCIAL_LOCATION_SCOPE_DECISION`。仓库事实显示该能力仍受范围/设计裁决影响，不能自行补造实现边界。
+`mobile_pages` 为空，没有 Distance Mobile Stage / Artifact / Gate；`SOCIAL_LOCATION_SCOPE_DECISION` 是当前阻塞对象。
 
-阻塞对象：SOCIAL_LOCATION_SCOPE_DECISION；已完成内容：尚无该 Lane 的可确认完成产物。
+### 已完成 / 当前阻塞
 
-等待条件：完成该裁决并把结论写入 canonical 设计文档。
+已完成：普通 Discovery 的非距离基线可独立推进。
 
-下一步：解除阻塞后，从该 Lane 的设计/执行准备阶段重新核对范围并继续。
+等待条件：明确该能力是否进入产品组合，以及可供 Mobile 消费的正式距离/模糊展示 Contract。
+
+### 下一步
+
+裁决后再创建真实 Mobile Stage；未裁决前不补造页面或权限事实。
 
 ## 集成
 
 状态：blocked
 
-范围：覆盖“距离筛选与模糊距离展示”的跨端/跨域契约、依赖顺序、错误传播与发布前联调；依赖事实来自 [social](/domains/social/)、[identity](/domains/identity/)。
+### 范围
 
-执行阶段与产物：[social](/domains/social/)、[identity](/domains/identity/)。
+真实集成至少需要可运行的 location source、Social distance Contract、Backend 与 Mobile；这些前置尚未被 canonical 裁决。
 
-Gate / 完成证据：阻塞证据：[未决与延期事项](/governance/open-questions.md)记录了该范围决策缺口；未伪造 Gate PASS。
+### Stage / 工件 / Gate
 
-NEEDS_DECISION：`SOCIAL_LOCATION_SCOPE_DECISION`。仓库事实显示该能力仍受范围/设计裁决影响，不能自行补造实现边界。
+当前只有普通 Discovery / Profile 的 frozen design，没有 Distance Integration Artifact / Gate。
 
-阻塞对象：SOCIAL_LOCATION_SCOPE_DECISION；已完成内容：尚无该 Lane 的可确认完成产物。
+Gate / 阻塞证据：`SOCIAL_LOCATION_SCOPE_DECISION`。
 
-等待条件：完成该裁决并把结论写入 canonical 设计文档。
+### 已完成 / 当前阻塞
 
-下一步：解除阻塞后，从该 Lane 的设计/执行准备阶段重新核对范围并继续。
+已完成：明确现有粗粒度 location 不构成距离集成事实。
+
+等待条件：设计裁决及 Backend/Mobile 实现完成。
+
+### 下一步
+
+裁决并实现后再启动跨端/跨域联调。
 
 ## 验收
 
 状态：blocked
 
-范围：覆盖“距离筛选与模糊距离展示”已定义范围的 E2E 场景、回归检查与最终交付判定；验收对象来自 [social](/domains/social/)、[identity](/domains/identity/)。
+### 范围
 
-执行阶段与产物：[social](/domains/social/)、[identity](/domains/identity/)。
+在产品语义、数据来源和模糊展示 Contract 未定前，无法定义可信的距离 E2E 验收标准；本页不自行发明阈值或精度。
 
-Gate / 完成证据：阻塞证据：[未决与延期事项](/governance/open-questions.md)记录了该范围决策缺口；未伪造 Gate PASS。
+### Stage / 工件 / Gate
 
-NEEDS_DECISION：`SOCIAL_LOCATION_SCOPE_DECISION`。仓库事实显示该能力仍受范围/设计裁决影响，不能自行补造实现边界。
+当前无 Distance Acceptance Scenario / Report / Gate。
 
-阻塞对象：SOCIAL_LOCATION_SCOPE_DECISION；已完成内容：尚无该 Lane 的可确认完成产物。
+Gate / 阻塞证据：`SOCIAL_LOCATION_SCOPE_DECISION`。
 
-等待条件：完成该裁决并把结论写入 canonical 设计文档。
+### 已完成 / 当前阻塞
 
-下一步：解除阻塞后，从该 Lane 的设计/执行准备阶段重新核对范围并继续。
+已完成：识别出现行 canonical 数据能力与 Feature 名称之间的决策缺口。
+
+等待条件：正式范围裁决、可运行实现和集成结果。
+
+### 下一步
+
+仅在前置条件满足后建立验收矩阵并由真实 Gate 判定结果。
