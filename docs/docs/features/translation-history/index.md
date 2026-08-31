@@ -23,13 +23,15 @@ admin_pages: []
 
 Portfolio Status：`active`。
 
-`translation-history` 是当前正式 Feature 清单中的功能。其领域事实以 learning、content、identity 文档为准。
+该 Feature 当前仍在正式 Portfolio 中，但远程最新 Learning frozen V1 **没有冻结用户可浏览的翻译历史能力**。`translation_requests` 的持久化、处理状态与 retention 是即时翻译执行事实，不等于已经存在“翻译历史”产品契约。
 
 ## 设计
 
 状态：todo
 
-在此维护该 Lane 的范围、当前 Stage、相关工件、Gate 与下一步。
+当前事实：[Learning Use Cases](/development/06-learning/LEARNING_USE_CASES.md) 只把 `LRN-R24 RequestTranslation` 与 `LRN-R25 GetTranslationRequest` 列为 REQUIRED；[Learning HTTP/API Contract](/development/06-learning/LEARNING_API.md) 明确写明 `No V1 list/history endpoint`。因此本任务不从 `translation_requests` 表、30 天 retention 或单次 translation token 推导历史列表、分页、删除、同步等未冻结语义。
+
+下一步：如该 Portfolio Feature 要进入实现，需由独立 Learning canonical design 任务先确定历史可见范围、分页 / retention UX、隐私与删除语义，并形成对应 Stage / Gate。完成该设计前，本页 Design、Backend、Mobile、Integration 与 Acceptance 均保持 todo。
 
 ## Backend
 
@@ -41,7 +43,7 @@ Portfolio Status：`active`。
 
 状态：na
 
-不适用：当前功能不需要该交付端。
+不适用：当前 Feature 面向 learner，且 frozen Learning Admin support 默认排除 translation plaintext。
 
 ## Mobile
 

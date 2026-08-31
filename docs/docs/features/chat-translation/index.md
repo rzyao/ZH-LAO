@@ -30,100 +30,74 @@ blocks:
 
 Portfolio Status：`pending_decision`。
 
-`chat-translation` 是当前正式 Feature 清单中的功能。其领域事实以 chat、identity、social、learning 文档为准。
+当前 Chat canonical 明确规定聊天原文是不可变事实，Chat 不拥有翻译结果或语言知识事实，并明确不包含消息翻译；[消息模型](/domains/chat/message.md)禁止在 `chat_message_text` 中增加 `translated_text`、`language` 等派生字段。[未决与延期事项](/governance/open-questions.md)又记录产品定位中存在聊天翻译能力，因此当前真实状态是范围/归属待裁决，而不是等待补一个 translation model。
+
+当前禁止创建 `chat_message_translation`、给 `chat_message_text` 追加翻译字段，或把 Learning 的翻译事实复制进 Chat。任何未来方案都必须先解决 `CHAT_SCOPE_DECISION` 并更新 canonical 设计。
+
+NEEDS_DECISION：`CHAT_SCOPE_DECISION`——确认聊天翻译是否进入当前产品组合，以及它与 Chat 原文事实、Learning 翻译能力之间的正式职责边界；本文档不裁决持久化模型或 API 形态。
 
 ## 设计
 
 状态：blocked
 
-范围：围绕“聊天翻译”确认用户/运营目标、范围边界、流程与跨域归属；权威事实来自 [chat](/domains/chat/)、[identity](/domains/identity/)、[social](/domains/social/)、[learning](/domains/learning/)。
+Scope：确认聊天翻译是否属于当前范围及其跨域职责边界；不在本 Lane 自行设计 translation table、字段、缓存或接口。
 
-执行阶段与产物：[chat](/domains/chat/)、[identity](/domains/identity/)、[social](/domains/social/)、[learning](/domains/learning/)。
+Stage / Artifact：当前有效工件是 [Chat 域](/domains/chat/)、[消息模型](/domains/chat/message.md) 与 [未决与延期事项](/governance/open-questions.md)。Chat frozen canonical 只保存用户原文，并把翻译结果排除在 Chat 事实之外。
 
-Gate / 完成证据：阻塞证据：[未决与延期事项](/governance/open-questions.md)记录了该范围决策缺口；未伪造 Gate PASS。
+Gate / Evidence：D-056 仍要求主会话确认语音/翻译/语音转文字的首期范围；同时 canonical 明确禁止把翻译结果混入 `chat_message_text`。因此 `CHAT_SCOPE_DECISION` 未完成，Design Gate 不可判 PASS。
 
-NEEDS_DECISION：`CHAT_SCOPE_DECISION`。仓库事实显示该能力仍受范围/设计裁决影响，不能自行补造实现边界。
-
-阻塞对象：CHAT_SCOPE_DECISION；已完成内容：尚无该 Lane 的可确认完成产物。
-
-等待条件：完成该裁决并把结论写入 canonical 设计文档。
-
-下一步：解除阻塞后，从该 Lane 的设计/执行准备阶段重新核对范围并继续。
+Next Action：由主架构/产品完成范围与 ownership 裁决并更新 canonical；随后再重评本 Lane。
 
 ## Backend
 
 状态：blocked
 
-范围：覆盖“聊天翻译”在所属 Domain 的 API、Service、Repository、数据交互与错误处理；权威边界来自 [chat](/domains/chat/)、[identity](/domains/identity/)、[social](/domains/social/)、[learning](/domains/learning/)。
+Scope：只记录 Backend 缺少正式翻译契约的事实，不定义未来翻译请求、存储、缓存或第三方服务接入。
 
-执行阶段与产物：[chat](/domains/chat/)、[identity](/domains/identity/)、[social](/domains/social/)、[learning](/domains/learning/)。
+Stage / Artifact：现有 Chat Backend canonical 的文本事实只有原文；没有获准的聊天翻译数据模型或 public contract。
 
-Gate / 完成证据：阻塞证据：[未决与延期事项](/governance/open-questions.md)记录了该范围决策缺口；未伪造 Gate PASS。
+Gate / Evidence：[消息模型](/domains/chat/message.md)明确 `chat_message_text.text = immutable original content`，且禁止 `translated_text` / `language` 等字段；直接创建 `chat_message_translation` 也会越过当前 Chat final design。阻塞对象为 `CHAT_SCOPE_DECISION`。
 
-NEEDS_DECISION：`CHAT_SCOPE_DECISION`。仓库事实显示该能力仍受范围/设计裁决影响，不能自行补造实现边界。
-
-阻塞对象：CHAT_SCOPE_DECISION；已完成内容：尚无该 Lane 的可确认完成产物。
-
-等待条件：完成该裁决并把结论写入 canonical 设计文档。
-
-下一步：解除阻塞后，从该 Lane 的设计/执行准备阶段重新核对范围并继续。
+Next Action：待 Design Lane 的 canonical ownership 与 contract 落盘后，再启动 Backend；不得以实现倒逼 canonical。
 
 ## Admin
 
 状态：na
 
-不适用：当前功能不需要该交付端。
+不适用：当前 Feature 没有已定义的 Admin 交付面；未来如正式设计需要运营能力，再由 canonical 设计新增对应范围。
 
 ## Mobile
 
 状态：blocked
 
-范围：覆盖“聊天翻译”在 Mobile 端的页面、导航、用户状态与真实接口接入；页面边界来自 [chat](/domains/chat/)、[identity](/domains/identity/)、[social](/domains/social/)、[learning](/domains/learning/)。
+Scope：仅记录聊天界面对翻译能力的依赖，不提前定义翻译按钮、自动翻译、语言选择或结果展示规则。
 
-执行阶段与产物：[chat](/domains/chat/)、[identity](/domains/identity/)、[social](/domains/social/)、[learning](/domains/learning/)。
+Stage / Artifact：当前没有获准的聊天翻译 public contract，也没有本 Feature 的 canonical Mobile 页面/状态工件。
 
-Gate / 完成证据：阻塞证据：[未决与延期事项](/governance/open-questions.md)记录了该范围决策缺口；未伪造 Gate PASS。
+Gate / Evidence：翻译范围和 ownership 尚未裁决，Mobile 无稳定后端语义可接入；阻塞对象为 `CHAT_SCOPE_DECISION`。
 
-NEEDS_DECISION：`CHAT_SCOPE_DECISION`。仓库事实显示该能力仍受范围/设计裁决影响，不能自行补造实现边界。
-
-阻塞对象：CHAT_SCOPE_DECISION；已完成内容：尚无该 Lane 的可确认完成产物。
-
-等待条件：完成该裁决并把结论写入 canonical 设计文档。
-
-下一步：解除阻塞后，从该 Lane 的设计/执行准备阶段重新核对范围并继续。
+Next Action：待 canonical 与 Backend contract 确认后，再建立 Mobile Stage 和真实页面证据。
 
 ## 集成
 
 状态：blocked
 
-范围：覆盖“聊天翻译”的跨端/跨域契约、依赖顺序、错误传播与发布前联调；依赖事实来自 [chat](/domains/chat/)、[identity](/domains/identity/)、[social](/domains/social/)、[learning](/domains/learning/)。
+Scope：未来若进入范围，需要基于正式 ownership 处理 Chat 与 Learning 等能力的调用边界；本页不预设同步/异步、存储或缓存方式。
 
-执行阶段与产物：[chat](/domains/chat/)、[identity](/domains/identity/)、[social](/domains/social/)、[learning](/domains/learning/)。
+Stage / Artifact：当前只有 Chat 原文 canonical 与 Learning 用户即时翻译事实的既有边界，没有聊天翻译 integration contract。
 
-Gate / 完成证据：阻塞证据：[未决与延期事项](/governance/open-questions.md)记录了该范围决策缺口；未伪造 Gate PASS。
+Gate / Evidence：跨域 ownership 尚未裁决，无法形成有效集成 Gate；阻塞对象为 `CHAT_SCOPE_DECISION`。
 
-NEEDS_DECISION：`CHAT_SCOPE_DECISION`。仓库事实显示该能力仍受范围/设计裁决影响，不能自行补造实现边界。
-
-阻塞对象：CHAT_SCOPE_DECISION；已完成内容：尚无该 Lane 的可确认完成产物。
-
-等待条件：完成该裁决并把结论写入 canonical 设计文档。
-
-下一步：解除阻塞后，从该 Lane 的设计/执行准备阶段重新核对范围并继续。
+Next Action：Design / Backend 形成正式跨域契约后再进入联调。
 
 ## 验收
 
 状态：blocked
 
-范围：覆盖“聊天翻译”已定义范围的 E2E 场景、回归检查与最终交付判定；验收对象来自 [chat](/domains/chat/)、[identity](/domains/identity/)、[social](/domains/social/)、[learning](/domains/learning/)。
+Scope：只验收经正式裁决后的聊天翻译能力；当前不虚构语言覆盖、准确率、缓存或 E2E 标准。
 
-执行阶段与产物：[chat](/domains/chat/)、[identity](/domains/identity/)、[social](/domains/social/)、[learning](/domains/learning/)。
+Stage / Artifact：尚无获准范围、实现产物或验收 Gate。
 
-Gate / 完成证据：阻塞证据：[未决与延期事项](/governance/open-questions.md)记录了该范围决策缺口；未伪造 Gate PASS。
+Gate / Evidence：`CHAT_SCOPE_DECISION` 未完成，且当前 Chat canonical 明确不包含消息翻译，因此不存在可判定完成的验收对象。
 
-NEEDS_DECISION：`CHAT_SCOPE_DECISION`。仓库事实显示该能力仍受范围/设计裁决影响，不能自行补造实现边界。
-
-阻塞对象：CHAT_SCOPE_DECISION；已完成内容：尚无该 Lane 的可确认完成产物。
-
-等待条件：完成该裁决并把结论写入 canonical 设计文档。
-
-下一步：解除阻塞后，从该 Lane 的设计/执行准备阶段重新核对范围并继续。
+Next Action：裁决完成并有真实实现/集成证据后，再定义验收 Gate。

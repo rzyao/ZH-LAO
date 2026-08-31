@@ -39,11 +39,11 @@ LOW-02     Development progress metadata drift
 
 ### HIGH-01 — Account status concurrent stale-read（FIXED）
 
-**根因**：[identity-state.ts](file:///c:/project/ZH-LAO/apps/backend/src/modules/identity/application/use-cases/identity-state.ts) 的 `changeStatus()` 先用 `findByPublicId`（普通 SELECT，无锁）读取 `current`，再 `lockByInternalId`，随后仍使用锁前的 `current.status` 做状态机裁决。并发 `active->closed` 与 `active->disabled` 时，后获得锁的事务可能基于 stale `active` 执行 `closed->disabled`，破坏 `closed = terminal`。
+**根因**：[identity-state.ts](https://github.com/rzyao/ZH-LAO/blob/main/apps/backend/src/modules/identity/application/use-cases/identity-state.ts) 的 `changeStatus()` 先用 `findByPublicId`（普通 SELECT，无锁）读取 `current`，再 `lockByInternalId`，随后仍使用锁前的 `current.status` 做状态机裁决。并发 `active->closed` 与 `active->disabled` 时，后获得锁的事务可能基于 stale `active` 执行 `closed->disabled`，破坏 `closed = terminal`。
 
 **修复**：
-- [identity-repositories.ts](file:///c:/project/ZH-LAO/apps/backend/src/modules/identity/application/ports/identity-repositories.ts) 新增 `UserRepository.lockByPublicId(id)`。
-- [repositories.ts](file:///c:/project/ZH-LAO/apps/backend/src/modules/identity/infrastructure/repositories.ts) 实现：
+- [identity-repositories.ts](https://github.com/rzyao/ZH-LAO/blob/main/apps/backend/src/modules/identity/application/ports/identity-repositories.ts) 新增 `UserRepository.lockByPublicId(id)`。
+- [repositories.ts](https://github.com/rzyao/ZH-LAO/blob/main/apps/backend/src/modules/identity/infrastructure/repositories.ts) 实现：
 
 ```sql
 SELECT ... FROM identity.users WHERE public_id = $1 FOR UPDATE
@@ -53,7 +53,7 @@ SELECT ... FROM identity.users WHERE public_id = $1 FOR UPDATE
 
 ### MEDIUM-01 — CI 全仓回归覆盖不完整（FIXED）
 
-**根因**：[foundation.yml](file:///c:/project/ZH-LAO/.github/workflows/foundation.yml) 仅覆盖 Backend + PostgreSQL，未覆盖 Admin / Docs / Mobile。
+**根因**：[foundation.yml](https://github.com/rzyao/ZH-LAO/blob/main/.github/workflows/foundation.yml) 仅覆盖 Backend + PostgreSQL，未覆盖 Admin / Docs / Mobile。
 
 **修复**：CI 重构为 4 个 job：
 - `backend`（mandatory）：install → `verify`（typecheck/lint/architecture/unit）→ `build` → `test:integration`（真实 PostgreSQL）→ `database/v2 test`（validation lifecycle）→ `database/v2 validate`（fresh migration / second no-op / audit / smoke）。
@@ -68,26 +68,26 @@ SELECT ... FROM identity.users WHERE public_id = $1 FOR UPDATE
 **根因**：原 `IdentityPublicQuery` 类的构造签名直接依赖 `IdentityRepositories` / `DatabaseExecutor`，即 public 类的 construction contract 知道 Identity internal infrastructure/application 类型；下游 Domain 若 `new IdentityPublicQuery(createIdentityRepositories, executor)` 会耦合内部实现。
 
 **修复**：
-- [public/query.ts](file:///c:/project/ZH-LAO/apps/backend/src/modules/identity/public/query.ts) 只保留纯净契约：`IdentityPublicQueries` 接口（`getIdentityAccountStatus` / `isIdentityActive` / `getIdentitySummary`）+ `IdentityPublicSummary` 类型，不再引用任何内部类型。
-- [identity-public-query.ts](file:///c:/project/ZH-LAO/apps/backend/src/modules/identity/application/services/identity-public-query.ts)（application 内部）承载 `IdentityPublicQueryImpl` 与 `createIdentityPublicQuery` factory，composition 在 Identity 内部完成。
-- [public/index.ts](file:///c:/project/ZH-LAO/apps/backend/src/modules/identity/public/index.ts) 只导出原语 + `IdentityPublicQueries` + `IdentityPublicSummary`，不导出 impl / repository / executor。
+- [public/query.ts](https://github.com/rzyao/ZH-LAO/blob/main/apps/backend/src/modules/identity/public/query.ts) 只保留纯净契约：`IdentityPublicQueries` 接口（`getIdentityAccountStatus` / `isIdentityActive` / `getIdentitySummary`）+ `IdentityPublicSummary` 类型，不再引用任何内部类型。
+- [identity-public-query.ts](https://github.com/rzyao/ZH-LAO/blob/main/apps/backend/src/modules/identity/application/services/identity-public-query.ts)（application 内部）承载 `IdentityPublicQueryImpl` 与 `createIdentityPublicQuery` factory，composition 在 Identity 内部完成。
+- [public/index.ts](https://github.com/rzyao/ZH-LAO/blob/main/apps/backend/src/modules/identity/public/index.ts) 只导出原语 + `IdentityPublicQueries` + `IdentityPublicSummary`，不导出 impl / repository / executor。
 - 新增静态 contract-leak 审计测试 + 更新既有 public export 断言。
 
 ### LOW-01 — Mobile plan/code status drift（FIXED）
 
-**根因**：[MOBILE_FOUNDATION_PLAN.md](file:///c:/project/ZH-LAO/docs/docs/development/MOBILE_FOUNDATION_PLAN.md) 仍标记 `PLANNING`，但 `apps/mobile` 已存在大量 Foundation 实现代码。
+**根因**：[MOBILE_FOUNDATION_PLAN.md](https://github.com/rzyao/ZH-LAO/blob/main/docs/docs/development/MOBILE_FOUNDATION_PLAN.md) 仍标记 `PLANNING`，但 `apps/mobile` 已存在大量 Foundation 实现代码。
 
 **修复**：按实际开发状态改为 `IN_PROGRESS`，并附修正说明（无 `MOBILE_FOUNDATION_REPORT.md`、无 Gate 证据，禁止标 `COMPLETE / PASS`）。本轮**不是** Mobile Foundation Final Audit。
 
 ### LOW-02 — Development progress metadata drift（FIXED）
 
-**根因**：[DEVELOPMENT_PROGRESS.md](file:///c:/project/ZH-LAO/docs/docs/development/DEVELOPMENT_PROGRESS.md) frontmatter `last_updated: 2026-08-30`，正文已含 2026-08-31 内容。
+**根因**：[DEVELOPMENT_PROGRESS.md](https://github.com/rzyao/ZH-LAO/blob/main/docs/docs/development/DEVELOPMENT_PROGRESS.md) frontmatter `last_updated: 2026-08-30`，正文已含 2026-08-31 内容。
 
 **修复**：`last_updated` → `2026-08-31`；Identity 行更新为本轮 hotfix 后的证据（34 unit + 88 integration / Race 19 / Regression Hotfix 报告链接）；更新历史追加本轮记录。
 
 ## 4. Account State Concurrency Proof
 
-新增 4 个 Race 测试（[identity-race.test.ts](file:///c:/project/ZH-LAO/apps/backend/test/integration/identity-race.test.ts)），全部基于真实 PostgreSQL、无窄毫秒时序断言，验证数据库最终状态 / 事务顺序 / 事件数量 / 事件 previous_status：
+新增 4 个 Race 测试（[identity-race.test.ts](https://github.com/rzyao/ZH-LAO/blob/main/apps/backend/test/integration/identity-race.test.ts)），全部基于真实 PostgreSQL、无窄毫秒时序断言，验证数据库最终状态 / 事务顺序 / 事件数量 / 事件 previous_status：
 
 ```text
 Race A  active -> closed  VS  active -> disabled

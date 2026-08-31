@@ -30,100 +30,74 @@ blocks:
 
 Portfolio Status：`pending_decision`。
 
-`chat-voice-message` 是当前正式 Feature 清单中的功能。其领域事实以 chat、identity、social、learning 文档为准。
+当前 Chat canonical 只定义 `text` / `image` 两种 MessageType、7 张业务表，并明确把 Voice Message 排除在当前模型之外；[未决与延期事项](/governance/open-questions.md)同时记录产品定位中存在语音能力、但 Chat 首期数据库只到 TEXT / IMAGE 的范围冲突。因此该 Feature 不是“缺一张表”的实现任务，而是 `CHAT_SCOPE_DECISION` 尚未完成。
+
+当前禁止通过补 `voice` MessageType、语音 subtype 表或临时 API 来绕过裁决。若未来进入正式范围，必须先更新 canonical Chat design，再进入各执行 Lane。
+
+NEEDS_DECISION：`CHAT_SCOPE_DECISION`——确认语音消息是否进入当前产品组合；若进入，再由 canonical 设计明确 Chat 与 Media / Asset、Learning 的职责边界，本文档不代替该裁决。
 
 ## 设计
 
 状态：blocked
 
-范围：围绕“语音消息”确认用户/运营目标、范围边界、流程与跨域归属；权威事实来自 [chat](/domains/chat/)、[identity](/domains/identity/)、[social](/domains/social/)、[learning](/domains/learning/)。
+Scope：只确认“语音消息是否进入当前 Chat 范围”以及进入后需要由 canonical 设计解决的领域边界；本 Lane 不自行设计语音表、字段、消息类型或 API。
 
-执行阶段与产物：[chat](/domains/chat/)、[identity](/domains/identity/)、[social](/domains/social/)、[learning](/domains/learning/)。
+Stage / Artifact：当前有效工件是 [Chat 域](/domains/chat/) 与 [消息模型](/domains/chat/message.md) 的 frozen canonical，以及 [未决与延期事项](/governance/open-questions.md) 中的 D-056 范围缺口；尚无获准的 Voice Message canonical extension。
 
-Gate / 完成证据：阻塞证据：[未决与延期事项](/governance/open-questions.md)记录了该范围决策缺口；未伪造 Gate PASS。
+Gate / Evidence：Chat canonical 明确当前只有 TEXT / IMAGE，并将 Voice Message 列为“当前明确不包含”；D-056 要求主会话确认收缩产品范围还是延后数据库建模。因此 `CHAT_SCOPE_DECISION` 未完成，Design Gate 不可判 PASS。
 
-NEEDS_DECISION：`CHAT_SCOPE_DECISION`。仓库事实显示该能力仍受范围/设计裁决影响，不能自行补造实现边界。
-
-阻塞对象：CHAT_SCOPE_DECISION；已完成内容：尚无该 Lane 的可确认完成产物。
-
-等待条件：完成该裁决并把结论写入 canonical 设计文档。
-
-下一步：解除阻塞后，从该 Lane 的设计/执行准备阶段重新核对范围并继续。
+Next Action：由主架构/产品裁决 `CHAT_SCOPE_DECISION`；只有 canonical 结论落盘后，才能重评本 Lane 状态并建立后续执行工件。
 
 ## Backend
 
 状态：blocked
 
-范围：覆盖“语音消息”在所属 Domain 的 API、Service、Repository、数据交互与错误处理；权威边界来自 [chat](/domains/chat/)、[identity](/domains/identity/)、[social](/domains/social/)、[learning](/domains/learning/)。
+Scope：仅记录 Backend 当前无法开始的原因，不定义未来语音消息 API、Repository、存储或传输实现。
 
-执行阶段与产物：[chat](/domains/chat/)、[identity](/domains/identity/)、[social](/domains/social/)、[learning](/domains/learning/)。
+Stage / Artifact：[消息模型](/domains/chat/message.md)当前 `MessageType = text | image`，不存在 `voice` subtype 的有效 canonical contract；没有可供 Backend 实现的获准语音消息契约。
 
-Gate / 完成证据：阻塞证据：[未决与延期事项](/governance/open-questions.md)记录了该范围决策缺口；未伪造 Gate PASS。
+Gate / Evidence：Backend 若直接增加 `voice` 类型或语音 subtype，会与 frozen Chat canonical 冲突；阻塞对象为 `CHAT_SCOPE_DECISION`。
 
-NEEDS_DECISION：`CHAT_SCOPE_DECISION`。仓库事实显示该能力仍受范围/设计裁决影响，不能自行补造实现边界。
-
-阻塞对象：CHAT_SCOPE_DECISION；已完成内容：尚无该 Lane 的可确认完成产物。
-
-等待条件：完成该裁决并把结论写入 canonical 设计文档。
-
-下一步：解除阻塞后，从该 Lane 的设计/执行准备阶段重新核对范围并继续。
+Next Action：等待 Design Lane 通过正式裁决产出 canonical extension，再依据该工件启动 Backend；不得先实现后补设计。
 
 ## Admin
 
 状态：na
 
-不适用：当前功能不需要该交付端。
+不适用：当前 Feature 没有已定义的 Admin 交付面；未来若产品裁决改变范围，再由正式设计决定是否需要 Admin 能力。
 
 ## Mobile
 
 状态：blocked
 
-范围：覆盖“语音消息”在 Mobile 端的页面、导航、用户状态与真实接口接入；页面边界来自 [chat](/domains/chat/)、[identity](/domains/identity/)、[social](/domains/social/)、[learning](/domains/learning/)。
+Scope：仅记录 Mobile 对“语音消息”能力的依赖，不提前定义录制、上传、播放、权限或交互契约。
 
-执行阶段与产物：[chat](/domains/chat/)、[identity](/domains/identity/)、[social](/domains/social/)、[learning](/domains/learning/)。
+Stage / Artifact：当前没有获准的语音消息 Backend / public contract，也没有本 Feature 的 canonical Mobile 页面或导航工件。
 
-Gate / 完成证据：阻塞证据：[未决与延期事项](/governance/open-questions.md)记录了该范围决策缺口；未伪造 Gate PASS。
+Gate / Evidence：产品范围与 Chat canonical 尚未统一，Mobile 无稳定契约可接入；阻塞对象为 `CHAT_SCOPE_DECISION`。
 
-NEEDS_DECISION：`CHAT_SCOPE_DECISION`。仓库事实显示该能力仍受范围/设计裁决影响，不能自行补造实现边界。
-
-阻塞对象：CHAT_SCOPE_DECISION；已完成内容：尚无该 Lane 的可确认完成产物。
-
-等待条件：完成该裁决并把结论写入 canonical 设计文档。
-
-下一步：解除阻塞后，从该 Lane 的设计/执行准备阶段重新核对范围并继续。
+Next Action：待 canonical 设计与 Backend contract 明确后，再建立 Mobile Stage；不得以客户端临时能力反向固化领域契约。
 
 ## 集成
 
 状态：blocked
 
-范围：覆盖“语音消息”的跨端/跨域契约、依赖顺序、错误传播与发布前联调；依赖事实来自 [chat](/domains/chat/)、[identity](/domains/identity/)、[social](/domains/social/)、[learning](/domains/learning/)。
+Scope：仅记录未来可能涉及 Chat、Media / Asset、Identity、Social、Learning 的边界需要正式契约后才能联调，不在本页定义这些契约。
 
-执行阶段与产物：[chat](/domains/chat/)、[identity](/domains/identity/)、[social](/domains/social/)、[learning](/domains/learning/)。
+Stage / Artifact：当前只有既有 Chat TEXT / IMAGE 与跨域 logical UUID 规则，没有 Voice Message integration artifact。
 
-Gate / 完成证据：阻塞证据：[未决与延期事项](/governance/open-questions.md)记录了该范围决策缺口；未伪造 Gate PASS。
+Gate / Evidence：缺少经裁决的语音消息领域归属与 public contract，无法形成有效集成 Gate；阻塞对象为 `CHAT_SCOPE_DECISION`。
 
-NEEDS_DECISION：`CHAT_SCOPE_DECISION`。仓库事实显示该能力仍受范围/设计裁决影响，不能自行补造实现边界。
-
-阻塞对象：CHAT_SCOPE_DECISION；已完成内容：尚无该 Lane 的可确认完成产物。
-
-等待条件：完成该裁决并把结论写入 canonical 设计文档。
-
-下一步：解除阻塞后，从该 Lane 的设计/执行准备阶段重新核对范围并继续。
+Next Action：Design / Backend 获得正式 canonical 工件后，再确认实际参与域与集成顺序。
 
 ## 验收
 
 状态：blocked
 
-范围：覆盖“语音消息”已定义范围的 E2E 场景、回归检查与最终交付判定；验收对象来自 [chat](/domains/chat/)、[identity](/domains/identity/)、[social](/domains/social/)、[learning](/domains/learning/)。
+Scope：验收对象只能是经 canonical 设计确认并完成实现的语音消息能力；当前不虚构 E2E 场景或通过标准。
 
-执行阶段与产物：[chat](/domains/chat/)、[identity](/domains/identity/)、[social](/domains/social/)、[learning](/domains/learning/)。
+Stage / Artifact：尚无获准范围、实现产物或验收 Gate。
 
-Gate / 完成证据：阻塞证据：[未决与延期事项](/governance/open-questions.md)记录了该范围决策缺口；未伪造 Gate PASS。
+Gate / Evidence：上游 `CHAT_SCOPE_DECISION` 未完成，且当前 frozen Chat canonical 明确不包含 Voice Message，因此不存在可验收交付物。
 
-NEEDS_DECISION：`CHAT_SCOPE_DECISION`。仓库事实显示该能力仍受范围/设计裁决影响，不能自行补造实现边界。
-
-阻塞对象：CHAT_SCOPE_DECISION；已完成内容：尚无该 Lane 的可确认完成产物。
-
-等待条件：完成该裁决并把结论写入 canonical 设计文档。
-
-下一步：解除阻塞后，从该 Lane 的设计/执行准备阶段重新核对范围并继续。
+Next Action：裁决并完成后续实现与集成后，再建立验收证据与最终 Gate。

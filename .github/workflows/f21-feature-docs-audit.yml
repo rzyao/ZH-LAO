@@ -1,0 +1,214 @@
+name: F21 Feature Docs Audit
+
+on:
+  push:
+    branches:
+      - docs/f21-feature-docs-integration
+
+permissions:
+  contents: write
+
+jobs:
+  feature-docs-audit:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: docs/f21-feature-docs-integration
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.20.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: "**/pnpm-lock.yaml"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install pyyaml
+      - name: Sync integrated Feature metadata requirements
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          f06 = [
+              'course-catalog','guest-learning-browse','knowledge-learning',
+              'learning-progress','lesson-learning','practice-exercises'
+          ]
+          f10 = [
+              'social-discovery','social-discovery-preferences','social-profile',
+              'social-profile-media','social-profile-view'
+          ]
+
+          def append_frontmatter(feature_id, block):
+              path = Path('docs/docs/features') / feature_id / 'index.md'
+              text = path.read_text(encoding='utf-8')
+              end = text.find('\n---', 4)
+              text = text[:end] + '\n' + block.rstrip() + text[end:]
+              path.write_text(text, encoding='utf-8')
+
+          for feature_id in f06:
+              path = Path('docs/docs/features') / feature_id / 'index.md'
+              text = path.read_text(encoding='utf-8')
+              end = text.find('\n---', 4)
+              fm = text[4:end]
+              additions=[]
+              if '\nblocks:' not in fm:
+                  additions.append('blocks:\n  backend: "Content runtime read implementation and formal Content Backend Gate are not yet complete; Learning Backend execution remains blocked."')
+              if '\nevidence:' not in fm:
+                  additions.append('evidence:\n  design:\n    - /development/05-content/CONTENT_DESIGN_AUDIT\n    - /development/06-learning/LEARNING_DESIGN_AUDIT')
+              if additions:
+                  append_frontmatter(feature_id, '\n'.join(additions))
+
+          for feature_id in f10:
+              path = Path('docs/docs/features') / feature_id / 'index.md'
+              text = path.read_text(encoding='utf-8')
+              end = text.find('\n---', 4)
+              fm = text[4:end]
+              if '\nactive_notes:' not in fm:
+                  append_frontmatter(feature_id, 'active_notes:\n  design: "已冻结的数据模型与业务边界见本页设计 Lane；公共应用 Contract 与正式 Social Design Gate 仍在收口。"')
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/docs/features
+          if ! git diff --cached --quiet; then
+            git commit -m "docs(f21): sync integrated Feature metadata requirements"
+            git push origin HEAD:docs/f21-feature-docs-integration
+          fi
+      - name: Normalize obvious dead links
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          changed = 0
+
+          prefix = 'file:///c:/project/ZH-LAO/'
+          github = 'https://github.com/rzyao/ZH-LAO/blob/main/'
+          for path in Path('docs/docs/development/02-identity').glob('*.md'):
+              text = path.read_text(encoding='utf-8')
+              updated = text.replace(prefix, github)
+              if updated != text:
+                  path.write_text(updated, encoding='utf-8')
+                  changed += 1
+
+          stale = '[Feature Page Index](../../development/workflow/FEATURE_PAGE_INDEX.json)'
+          for feature_id in ('creator-earnings','promotions-coupons','social-membership-entitlements'):
+              path = Path('docs/docs/features') / feature_id / 'index.md'
+              text = path.read_text(encoding='utf-8')
+              updated = text.replace(stale, '`FEATURE_PAGE_INDEX.json`')
+              if updated != text:
+                  path.write_text(updated, encoding='utf-8')
+                  changed += 1
+
+          old_social = '/domains/social/discovery-and-relationships/index'
+          new_social = '/domains/social/discovery-and-relationships'
+          for feature_id in ('social-block','social-follow','social-lifecycle','social-match','social-relationships'):
+              path = Path('docs/docs/features') / feature_id / 'index.md'
+              text = path.read_text(encoding='utf-8')
+              updated = text.replace(old_social, new_social)
+              if updated != text:
+                  path.write_text(updated, encoding='utf-8')
+                  changed += 1
+
+          print(f'normalized_link_files={changed}')
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/docs/development/02-identity docs/docs/features
+          if ! git diff --cached --quiet; then
+            git commit -m "docs(f21): normalize dead links"
+            git push origin HEAD:docs/f21-feature-docs-integration
+          fi
+      - name: Diagnose Feature frontmatter requirements
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import yaml
+          missing=[]
+          for path in sorted(Path('docs/docs/features').glob('*/index.md')):
+              text=path.read_text(encoding='utf-8')
+              end=text.find('\n---',4)
+              data=yaml.safe_load(text[4:end])
+              fid=data.get('feature_id', path.parent.name)
+              for lane,status in (data.get('status') or {}).items():
+                  if status=='done' and not (data.get('evidence') or {}).get(lane):
+                      missing.append(f'{fid}.{lane}: done missing evidence.{lane}')
+                  if status=='active' and not (data.get('active_notes') or {}).get(lane):
+                      missing.append(f'{fid}.{lane}: active missing active_notes.{lane}')
+                  if status=='blocked' and not (data.get('blocks') or {}).get(lane):
+                      missing.append(f'{fid}.{lane}: blocked missing blocks.{lane}')
+          print(f'FRONTMATTER_REQUIREMENT_GAPS={len(missing)}')
+          for item in missing:
+              print('  '+item)
+          if missing:
+              raise SystemExit(1)
+          PY
+      - name: Generate canonical Feature index
+        run: python scripts/validate_feature_pages.py --write
+      - name: Verify generator idempotency
+        run: |
+          cp docs/docs/development/workflow/FEATURE_PAGE_INDEX.json /tmp/FEATURE_PAGE_INDEX.json
+          python scripts/validate_feature_pages.py --write
+          cmp /tmp/FEATURE_PAGE_INDEX.json docs/docs/development/workflow/FEATURE_PAGE_INDEX.json
+      - name: Validate Matrix source contract
+        run: python scripts/generate_ai_stage_matrix.py --check
+      - name: Feature lifecycle audit
+        run: python scripts/audit_feature_lifecycle.py
+      - name: Markdown link and anchor audit
+        run: python scripts/check_md_links.py
+      - name: Sidebar navigation audit
+        run: python scripts/check_sidebar_links.py
+      - name: Build docs
+        run: |
+          pnpm --dir docs install --frozen-lockfile
+          pnpm --dir docs docs:build
+      - name: Built Matrix navigation audit
+        run: python scripts/check_feature_navigation.py
+      - name: Final integration diagnostics
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import json, re, subprocess, yaml
+          base='3ddab9c4d610559abedd6a234752b7abc18d4681'
+          dirty_titles=0
+          changed_titles=0
+          cleaned_markers=0
+          marker=re.compile(r'(延期|待裁决|待设计)')
+          for path in sorted(Path('docs/docs/features').glob('*/index.md')):
+              text=path.read_text(encoding='utf-8')
+              end=text.find('\n---',4)
+              current=yaml.safe_load(text[4:end])
+              if marker.search(current['title']):
+                  dirty_titles += 1
+              rel=str(path).replace('\\','/')
+              try:
+                  old_text=subprocess.check_output(['git','show',f'{base}:{rel}'], text=True)
+              except subprocess.CalledProcessError:
+                  continue
+              old_end=old_text.find('\n---',4)
+              old=yaml.safe_load(old_text[4:old_end])
+              if old.get('title') != current.get('title'):
+                  changed_titles += 1
+              if marker.search(old.get('title','')) and not marker.search(current.get('title','')):
+                  cleaned_markers += 1
+          index=json.loads(Path('docs/docs/development/workflow/FEATURE_PAGE_INDEX.json').read_text(encoding='utf-8'))
+          print(f'TITLE_CHANGED_FROM_BASELINE={changed_titles}')
+          print(f'TITLE_MARKERS_CLEANED_FROM_BASELINE={cleaned_markers}')
+          print(f'TITLE_POLLUTION_FINAL={dirty_titles}')
+          print(f'INDEX_FEATURES={len(index.get("features", []))}')
+          print(f'INDEX_DOMAINS={len(index.get("domains", [])) if isinstance(index.get("domains"), list) else len(index.get("domains", {}))}')
+          PY
+      - name: Commit refreshed derived index
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/docs/development/workflow/FEATURE_PAGE_INDEX.json
+          if git diff --cached --quiet; then
+            echo "Derived Feature index already current"
+          else
+            git commit -m "docs(f21): refresh derived feature index"
+            git push origin HEAD:docs/f21-feature-docs-integration
+          fi
