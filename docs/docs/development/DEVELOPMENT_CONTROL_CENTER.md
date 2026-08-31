@@ -11,8 +11,9 @@ last_updated: 2026-08-31
 
 | 问题 | 查看 |
 | --- | --- |
-| 现在最应该启动什么 | [当前下一动作](workflow/NEXT_ACTIONS.md) |
-| 某个 Domain 处于哪一步 | [领域生命周期矩阵](DOMAIN_LIFECYCLE_MATRIX.md) |
+| Domain / Feature 哪些 AI Stage 已完成、下一段 Prompt 是什么 | [AI 开发阶段矩阵](DOMAIN_LIFECYCLE_MATRIX.md) |
+| 现在真正允许启动什么 | [当前下一动作](workflow/NEXT_ACTIONS.md) |
+| 一段 Prompt 为什么算一个 Stage | [AI 开发阶段模型](workflow/AI_STAGE_MODEL.md) |
 | 用户/运营功能是否真正交付 | [功能交付](/features/) |
 | Backend 任务如何组织 | [后端开发](backend/) |
 | Admin 页面如何组织 | [后台开发](admin/) |
@@ -21,7 +22,7 @@ last_updated: 2026-08-31
 | 新会话如何恢复角色、Task、Claim | [Workflow Control Plane](workflow/) |
 | Spec / Blueprint 规则 | [Executable Spec System](SPEC_SYSTEM.md) |
 
-动态调度只在 `workflow/NEXT_ACTIONS.md` 维护，避免多份全局页面互相漂移。
+动态调度只在 `workflow/NEXT_ACTIONS.md` 维护。AI Stage Matrix 是派生可视化，不成为第二份调度事实源。
 
 ## 二、Source of Truth
 
@@ -45,9 +46,10 @@ Feature 是 derived delivery view，不插入上述 authority 链。
 Final Gate / Final Audit
 → Implementation Report
 → Current Code + Tests / CI Evidence
-→ Task Manifest / Task Events
+→ Task Manifest / Task Events / Claim
 → DEVELOPMENT_PROGRESS
-→ NEXT_ACTIONS / Matrix / Control Center summary
+→ AI_STAGE_REGISTRY
+→ Matrix / NEXT_ACTIONS / Control Center summary
 ```
 
 ## 三、开发轴
@@ -59,29 +61,51 @@ Mobile Track  = Screen / User Flow / Journey driven
 Feature       = cross-track delivery / E2E view
 ```
 
-Backend、Admin、Mobile 的文档不得继续混在同一个数字 Phase 目录。
-
-## 四、标准 Domain → Delivery 流程
+真正交给 AI 执行时，以上工作再拆成 Stage：
 
 ```text
-产品定义
-→ 业务设计 / 状态机
-→ 领域模型与数据设计
-→ API / Public / Cross-domain / Event Contract
-→ 安全 / 权限 / 事务 / 并发 / 幂等
-→ DESIGN_GATE
-→ Spec（采用时）
-→ Execution Brief
-→ Implementation Blueprint
-→ Backend Implementation
-→ BACKEND_GATE
-        ↓
-Admin / Mobile / Integration（按 Feature 需要并行）
-        ↓
-对应 Track Gate
-        ↓
-Feature E2E / Domain Acceptance
+一段完整 Prompt
+→ 一个 Task Manifest + Stage ID
+→ 明确输入/输出
+→ Push
+→ STOP
 ```
+
+需要两次独立会话的工作必须显示为两个 Stage。
+
+## 四、典型 Domain Stage 链
+
+```text
+<DOMAIN>-DESIGN
+→ DESIGN_GATE
+→ <DOMAIN>-BACKEND-PREP
+→ IMPLEMENTATION_READY
+→ <DOMAIN>-BACKEND
+→ <DOMAIN>-BACKEND-AUDIT
+→ BACKEND_GATE
+```
+
+历史任务遵守非追溯原则，不补造过去不存在的 Prep / Blueprint / Audit Stage。
+
+## 五、典型 Feature Stage 链
+
+Feature 在 AI Matrix 中显示在 `primary_domain` 下方：
+
+```text
+<FEATURE>-FEATURE-DESIGN
+      ↓
+Backend dependency
+      ↓
+Admin Design / Admin Implementation
+和/或
+Mobile Design / Mobile Implementation
+      ↓
+<FEATURE>-INTEGRATION
+      ↓
+<FEATURE>-ACCEPTANCE
+```
+
+Admin 和 Mobile 可以在依赖与路径安全时并行。
 
 不能混用：
 
@@ -93,21 +117,24 @@ ADMIN_GATE PASS    ≠ Mobile Complete
 FEATURE_GATE PASS  ≠ Production Ready
 ```
 
-## 五、Task 准入
+## 六、Task 准入
 
 Implementation Worker 开始代码修改前至少确认：
 
 1. Task Manifest 存在；
-2. Role / track 匹配；
-3. Entry Gate 满足；
-4. required sources 可读取；
-5. dependency snapshot 有效；
-6. Claim 不冲突；
-7. Blueprint required 时 base/spec/authority snapshot 可验证；
-8. 没有 material repository drift；
-9. 输出文档路径符合 `backend | admin | mobile` track 规则。
+2. `matrix.stage_id` 与当前 Prompt 一致；
+3. Role / track / Matrix Lane 匹配；
+4. Entry Gate 满足；
+5. required sources 可读取；
+6. dependency snapshot 有效；
+7. Claim 不冲突；
+8. Blueprint required 时 base/spec/authority snapshot 可验证；
+9. 没有 material repository drift；
+10. 输出文档路径符合 `backend | admin | mobile` track 规则。
 
-## 六、并行规则
+只有满足全部 READY 条件的 Stage 才能在 Matrix 显示 `▶`。
+
+## 七、并行规则
 
 严格的是依赖链 Gate 顺序，不是整个项目一次只能做一个 Phase。
 
@@ -121,44 +148,48 @@ Backend Worker
 
 只有依赖、路径、contract snapshot 与 Claim 都兼容时才允许并行。
 
-## 七、Gate FAIL / Recovery / Drift
+## 八、Gate FAIL / Recovery / Drift
 
 ```text
-ANY STATE
+ANY STAGE
 → GATE_FAIL / SPEC_CONFLICT / IMPLEMENTATION_BLOCKER / REPOSITORY_DRIFT
 → RECOVERY_REQUIRED
-→ Recovery / Design Fix / Revalidation
+→ Recovery / Design Fix / Revalidation Stage
 → 重新运行原 Gate
 ```
 
-当前 Gate `!= PASS` 时：
+Recovery 显示在原来的 Lane，不创建永久 Recovery 列。
 
-```text
-dependent downstream = BLOCKED
-shortest legal Recovery = PRIMARY
-independent parallel-safe Task = 可继续
-```
-
-## 八、Grounding Gate
+## 九、Grounding Gate
 
 严重 finding 必须重新 grounding 到当前 `main`，给出 source path、exact heading/symbol/field、current commit、authority 交叉验证和可复现 evidence。
 
 聊天上下文不是 authority。
 
-## 九、全局视图维护
+## 十、全局视图维护
 
 Worker 主要写自己的 Task 事实：Manifest、Event、Brief/Blueprint、Report、Gate、Claim release。
 
-以下为派生视图，由 Dispatcher / Reconciliation 汇总：
+Dispatcher / Reconciliation 负责：
+
+```text
+Task / Gate / Claim / Feature metadata
+→ workflow/AI_STAGE_REGISTRY.json
+→ scripts/generate_ai_stage_matrix.py
+→ DOMAIN_LIFECYCLE_MATRIX.md
+```
+
+Matrix 不允许手工维护状态；CI 使用 `generate_ai_stage_matrix.py --check` 防止漂移。
+
+其它派生视图：
 
 ```text
 workflow/NEXT_ACTIONS.md
-DOMAIN_LIFECYCLE_MATRIX.md
 DEVELOPMENT_PROGRESS.md
 DEVELOPMENT_CONTROL_CENTER.md
 features/* delivery status
 ```
 
-## 十、Production Readiness
+## 十一、Production Readiness
 
 Production Readiness 是系统级生命周期。只有 release-required Domain、Backend、Admin、Mobile、Feature/Integration 全部满足后，才进入全系统 E2E、性能、安全、可观测性、部署、备份恢复和正式发布门禁。
