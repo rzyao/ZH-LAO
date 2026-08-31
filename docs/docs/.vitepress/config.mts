@@ -47,6 +47,7 @@ export default defineConfig({
         items: [
           { text: '开发计划入口', link: '/development/v2/' },
           { text: '开发流程控制中心', link: '/development/v2/DEVELOPMENT_CONTROL_CENTER' },
+          { text: 'Domain 全生命周期矩阵', link: '/development/v2/DOMAIN_LIFECYCLE_MATRIX' },
           { text: '全量开发总计划', link: '/development/v2/MASTER_DEVELOPMENT_PLAN' },
           { text: '开发进度记录表', link: '/development/v2/DEVELOPMENT_PROGRESS' }
         ]
