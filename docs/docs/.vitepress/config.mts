@@ -1,5 +1,247 @@
 import { defineConfig } from 'vitepress'
 
+const guideSidebar = [
+  {
+    text: '使用指南',
+    items: [
+      { text: '阅读与维护文档', link: '/guide/getting-started' },
+      { text: '常见问题', link: '/guide/faq' }
+    ]
+  }
+]
+
+const productSidebar = [
+  {
+    text: '产品',
+    items: [
+      { text: '产品定位与范围', link: '/product/product-overview' },
+      { text: '业务与商业模型', link: '/product/business-model' },
+      { text: '功能开放与规则', link: '/product/feature-rollout' }
+    ]
+  }
+]
+
+const architectureSidebar = [
+  {
+    text: '架构设计',
+    items: [
+      { text: '总体架构', link: '/architecture/overview' },
+      { text: '领域关系图', link: '/architecture/domain-map' },
+      { text: 'PostgreSQL 总规范', link: '/architecture/database' },
+      { text: '后端架构', link: '/architecture/backend' },
+      { text: '前端架构', link: '/architecture/frontend' }
+    ]
+  }
+]
+
+const developmentSidebar = [
+  {
+    text: '开发总览',
+    items: [
+      { text: '开发入口', link: '/development/' },
+      { text: '开发流程控制中心', link: '/development/DEVELOPMENT_CONTROL_CENTER' },
+      { text: '领域生命周期矩阵', link: '/development/DOMAIN_LIFECYCLE_MATRIX' },
+      { text: '当前下一动作', link: '/development/workflow/NEXT_ACTIONS' },
+      { text: '开发进度', link: '/development/DEVELOPMENT_PROGRESS' },
+      { text: '全量开发总计划', link: '/development/MASTER_DEVELOPMENT_PLAN' }
+    ]
+  },
+  {
+    text: '开发规范',
+    items: [
+      { text: '可执行规格系统', link: '/development/SPEC_SYSTEM' },
+      { text: '实现蓝图模板', link: '/development/IMPLEMENTATION_BLUEPRINT_TEMPLATE' },
+      { text: 'AI 多会话工作流', link: '/development/workflow/' },
+      { text: '工作流启动简报', link: '/development/workflow/WORKFLOW_BOOTSTRAP_BRIEF' }
+    ]
+  },
+  {
+    text: '客户端基础',
+    collapsed: true,
+    items: [
+      { text: '后台基础计划', link: '/development/ADMIN_FOUNDATION_PLAN' },
+      { text: '移动端基础计划', link: '/development/MOBILE_FOUNDATION_PLAN' }
+    ]
+  },
+  {
+    text: '领域开发',
+    collapsed: true,
+    items: [
+      { text: '身份', link: '/development/02-identity/IDENTITY_IMPLEMENTATION_PLAN' },
+      { text: '平台', link: '/development/03-platform/PLATFORM_IMPLEMENTATION_PLAN' },
+      { text: '运营', link: '/development/04-operations/OPERATIONS_IMPLEMENTATION_PLAN' },
+      { text: '内容', link: '/development/05-content/CONTENT_DESIGN_BRIEF' },
+      { text: '学习', link: '/development/06-learning/LEARNING_DESIGN_BRIEF' },
+      { text: '音频生产', link: '/development/07-audio/AUDIO_DESIGN_BRIEF' }
+    ]
+  }
+]
+
+const domainsSidebar = [
+  {
+    text: '领域设计',
+    items: [
+      { text: '领域总览', link: '/domains/' },
+      { text: '领域文档规范', link: '/governance/DOMAIN_DOCUMENT_STANDARD' }
+    ]
+  },
+  {
+    text: '身份（Identity）',
+    collapsed: true,
+    items: [
+      { text: '领域概览', link: '/domains/identity/' },
+      {
+        text: '业务设计',
+        collapsed: true,
+        items: [
+          { text: '业务流程', link: '/domains/identity/flows' }
+        ]
+      },
+      { text: '领域模型', link: '/domains/identity/model' },
+      { text: '数据设计', link: '/domains/identity/database' }
+    ]
+  },
+  {
+    text: '内容（Content）',
+    collapsed: true,
+    items: [
+      { text: '领域概览', link: '/domains/content/' },
+      {
+        text: '业务设计',
+        collapsed: true,
+        items: [
+          { text: '知识内容', link: '/domains/content/knowledge' },
+          { text: '课程体系', link: '/domains/content/curriculum' },
+          { text: '词典', link: '/domains/content/dictionary' },
+          { text: '练习', link: '/domains/content/practice' }
+        ]
+      },
+      { text: '数据设计', link: '/domains/content/database' }
+    ]
+  },
+  {
+    text: '学习（Learning）',
+    collapsed: true,
+    items: [
+      { text: '领域概览', link: '/domains/learning/' },
+      {
+        text: '业务设计',
+        collapsed: true,
+        items: [
+          { text: '学习进度', link: '/domains/learning/progress' }
+        ]
+      },
+      { text: '领域模型', link: '/domains/learning/model' },
+      { text: '数据设计', link: '/domains/learning/database' }
+    ]
+  },
+  {
+    text: '音频生产（Audio Production）',
+    collapsed: true,
+    items: [
+      { text: '领域概览', link: '/domains/audio/' },
+      { text: '数据设计', link: '/domains/audio/database' }
+    ]
+  },
+  {
+    text: '社交（Social）',
+    collapsed: true,
+    items: [
+      { text: '领域概览', link: '/domains/social/' },
+      {
+        text: '业务设计',
+        collapsed: true,
+        items: [
+          { text: '社交资料', link: '/domains/social/profile' },
+          { text: '发现与关系', link: '/domains/social/discovery-and-relationships' },
+          { text: '动态与举报入口', link: '/domains/social/community-content' }
+        ]
+      },
+      { text: '数据设计', link: '/domains/social/database' }
+    ]
+  },
+  {
+    text: '聊天（Chat）',
+    collapsed: true,
+    items: [
+      { text: '领域概览', link: '/domains/chat/' },
+      {
+        text: '业务设计',
+        collapsed: true,
+        items: [
+          { text: '会话', link: '/domains/chat/conversation' },
+          { text: '消息', link: '/domains/chat/message' }
+        ]
+      },
+      { text: '契约与事件', link: '/domains/chat/application-and-events' },
+      { text: '数据设计', link: '/domains/chat/database' }
+    ]
+  },
+  {
+    text: '商业（Commerce）',
+    collapsed: true,
+    items: [
+      { text: '领域概览', link: '/domains/commerce/' },
+      { text: '数据设计', link: '/domains/commerce/database' }
+    ]
+  },
+  {
+    text: '奖励（Rewards）',
+    collapsed: true,
+    items: [
+      { text: '领域概览', link: '/domains/rewards/' },
+      { text: '契约与事件', link: '/domains/rewards/application-and-events' },
+      { text: '数据设计', link: '/domains/rewards/database' }
+    ]
+  },
+  {
+    text: '信任与安全（Trust & Safety）',
+    collapsed: true,
+    items: [
+      { text: '领域概览', link: '/domains/trust/' },
+      { text: '数据设计', link: '/domains/trust/database' }
+    ]
+  },
+  {
+    text: '运营（Operations）',
+    collapsed: true,
+    items: [
+      { text: '领域概览', link: '/domains/operations/' },
+      { text: '数据设计', link: '/domains/operations/database' }
+    ]
+  },
+  {
+    text: '平台（Platform）',
+    collapsed: true,
+    items: [
+      { text: '领域概览', link: '/domains/platform/' },
+      { text: '数据设计', link: '/domains/platform/database' }
+    ]
+  }
+]
+
+const governanceSidebar = [
+  {
+    text: '设计治理',
+    items: [
+      { text: '领域文档规范', link: '/governance/DOMAIN_DOCUMENT_STANDARD' },
+      { text: '设计决策台账', link: '/governance/design-register' },
+      { text: '未决事项', link: '/governance/open-questions' },
+      { text: '来源覆盖清单', link: '/governance/source-coverage' }
+    ]
+  }
+]
+
+const adrSidebar = [
+  {
+    text: '架构决策记录',
+    items: [
+      { text: 'ADR 索引', link: '/adr/' },
+      { text: '设计决策台账', link: '/governance/design-register' }
+    ]
+  }
+]
+
 export default defineConfig({
   title: 'ZH-LAO 设计文档',
   description: '中老双语学习与跨语言社交应用设计文档系统',
@@ -11,138 +253,20 @@ export default defineConfig({
       { text: '首页', link: '/' },
       { text: '产品', link: '/product/product-overview' },
       { text: '架构', link: '/architecture/overview' },
-      { text: '开发计划', link: '/development/' },
-      { text: '领域设计', link: '/domains/' },
-      { text: '设计治理', link: '/governance/design-register' },
+      { text: '开发', link: '/development/' },
+      { text: '领域', link: '/domains/' },
+      { text: '治理', link: '/governance/design-register' },
       { text: 'ADR', link: '/adr/' }
     ],
-    sidebar: [
-      {
-        text: '使用指南',
-        items: [
-          { text: '阅读与维护文档', link: '/guide/getting-started' },
-          { text: '常见问题', link: '/guide/faq' }
-        ]
-      },
-      {
-        text: '产品',
-        items: [
-          { text: '产品定位与范围', link: '/product/product-overview' },
-          { text: '业务与商业模型', link: '/product/business-model' },
-          { text: '功能开放与规则', link: '/product/feature-rollout' }
-        ]
-      },
-      {
-        text: '架构设计',
-        items: [
-          { text: '总体架构', link: '/architecture/overview' },
-          { text: 'Domain Map', link: '/architecture/domain-map' },
-          { text: 'PostgreSQL 总规范', link: '/architecture/database' },
-          { text: '后端架构', link: '/architecture/backend' },
-          { text: '前端架构', link: '/architecture/frontend' }
-        ]
-      },
-      {
-        text: 'V2 开发计划',
-        items: [
-          { text: '开发计划入口', link: '/development/' },
-          { text: 'Executable Spec System', link: '/development/SPEC_SYSTEM' },
-          { text: 'Implementation Blueprint 模板', link: '/development/IMPLEMENTATION_BLUEPRINT_TEMPLATE' },
-          { text: '开发流程控制中心', link: '/development/DEVELOPMENT_CONTROL_CENTER' },
-          { text: 'AI 多会话工作流', link: '/development/workflow/' },
-          { text: '当前下一动作', link: '/development/workflow/NEXT_ACTIONS' },
-          { text: 'Workflow Bootstrap', link: '/development/workflow/WORKFLOW_BOOTSTRAP_BRIEF' },
-          { text: 'Domain 全生命周期矩阵', link: '/development/DOMAIN_LIFECYCLE_MATRIX' },
-          { text: '全量开发总计划', link: '/development/MASTER_DEVELOPMENT_PLAN' },
-          { text: '开发进度记录表', link: '/development/DEVELOPMENT_PROGRESS' }
-        ]
-      },
-      {
-        text: '领域设计',
-        items: [
-          { text: '领域成熟度', link: '/domains/' },
-          { text: 'Identity', link: '/domains/identity/' },
-          { text: 'Identity 流程', link: '/domains/identity/flows' },
-          { text: 'Identity 数据库', link: '/domains/identity/database' },
-          { text: 'Identity 业务模型', link: '/domains/identity/model' },
-          { text: 'Content', link: '/domains/content/' },
-          { text: 'Content · 数据库总览', link: '/domains/content/database' },
-          { text: 'Content · Knowledge', link: '/domains/content/knowledge' },
-          { text: 'Content · Curriculum', link: '/domains/content/curriculum' },
-          { text: 'Content · Dictionary', link: '/domains/content/dictionary' },
-          { text: 'Content · Practice', link: '/domains/content/practice' },
-          { text: 'Learning', link: '/domains/learning/' },
-          { text: 'Learning · 数据库总览', link: '/domains/learning/database' },
-          { text: 'Learning 业务模型', link: '/domains/learning/model' },
-          { text: 'Learning · Progress', link: '/domains/learning/progress' },
-          { text: 'Social', link: '/domains/social/' },
-          { text: 'Social · 资料', link: '/domains/social/profile' },
-          { text: 'Social · 发现与关系', link: '/domains/social/discovery-and-relationships' },
-          { text: 'Social · 动态与举报入口', link: '/domains/social/community-content' },
-          { text: 'Social · 数据库总览', link: '/domains/social/database' },
-          { text: 'Chat', link: '/domains/chat/' },
-          { text: 'Chat · 会话模型', link: '/domains/chat/conversation' },
-          { text: 'Chat · 消息模型', link: '/domains/chat/message' },
-          { text: 'Chat · 应用服务与事件', link: '/domains/chat/application-and-events' },
-          { text: 'Chat · 数据库总览', link: '/domains/chat/database' },
-          { text: 'Audio Production', link: '/domains/audio/' },
-          { text: 'Audio · 数据库总览', link: '/domains/audio/database' },
-          { text: 'Commerce', link: '/domains/commerce/' },
-          { text: 'Commerce · 数据库总览', link: '/domains/commerce/database' },
-          { text: 'Rewards', link: '/domains/rewards/' },
-          { text: 'Rewards · 应用服务与事件', link: '/domains/rewards/application-and-events' },
-          { text: 'Rewards · 数据库总览', link: '/domains/rewards/database' },
-          { text: 'Trust & Safety', link: '/domains/trust/' },
-          { text: 'Trust & Safety · 数据库总览', link: '/domains/trust/database' },
-          { text: 'Operations', link: '/domains/operations/' },
-          { text: 'Operations · 数据库总览', link: '/domains/operations/database' },
-          { text: 'Platform', link: '/domains/platform/' },
-          { text: 'Platform · 数据库总览', link: '/domains/platform/database' }
-        ]
-      },
-      {
-        text: '历史归档',
-        items: [
-          { text: 'Community（已并入 Social）', link: '/domains/community/' },
-          { text: 'Community · 数据库（历史）', link: '/domains/community/database' }
-        ]
-      },
-      {
-        text: '设计治理',
-        items: [
-          { text: '设计决策台账', link: '/governance/design-register' },
-          { text: '未决事项', link: '/governance/open-questions' },
-          { text: '会话覆盖清单', link: '/governance/source-coverage' }
-        ]
-      },
-      {
-        text: 'ADR',
-        items: [
-          { text: 'ADR 索引', link: '/adr/' },
-          { text: 'ADR-001 模块化单体', link: '/adr/ADR-001-modular-monolith-and-domain-schemas' },
-          { text: 'ADR-002 Identity 拆分', link: '/adr/ADR-002-separate-user-identities-and-profiles' },
-          { text: 'ADR-003 Follow 与 Match', link: '/adr/ADR-003-follow-mutual-follow-match' },
-          { text: 'ADR-004 Content Registry', link: '/adr/ADR-004-learning-content-registry' },
-          { text: 'ADR-005 Entitlement', link: '/adr/ADR-005-entitlement-centered-authorization' },
-          { text: 'ADR-006 Learning Content 生命周期', link: '/adr/ADR-006-learning-content-lifecycle' },
-          { text: 'ADR-007 统一课程分层', link: '/adr/ADR-007-unified-curriculum-hierarchy' },
-          { text: 'ADR-008 Practice 答案数据', link: '/adr/ADR-008-practice-definition-and-answer-data' },
-          { text: 'ADR-009 Learning 状态模型', link: '/adr/ADR-009-learning-history-and-current-state' },
-          { text: 'ADR-010 Social 资料与发现模型', link: '/adr/ADR-010-social-profile-discovery-and-relationships' },
-          { text: 'ADR-011 Chat 会话身份与 Direct 唯一', link: '/adr/ADR-011-chat-conversation-identity-and-direct-uniqueness' },
-          { text: 'ADR-012 消息 seq 与发送幂等', link: '/adr/ADR-012-message-seq-ordering-and-idempotency' },
-          { text: 'ADR-013 已读游标而非 Receipt 表', link: '/adr/ADR-013-read-state-as-cursor-not-receipt-table' },
-          { text: 'ADR-014 不新增 Notification 域', link: '/adr/ADR-014-no-notification-domain-events-outbox-infra' },
-          { text: 'ADR-015 Chat 命名与 SQL 规范裁决', link: '/adr/ADR-015-chat-naming-and-sql-adjudication' },
-          { text: 'ADR-016 Commerce 资金与只追加账本', link: '/adr/ADR-016-commerce-money-and-append-only-ledger' },
-          { text: 'ADR-017 Rewards 边界与事件驱动发放', link: '/adr/ADR-017-rewards-boundary-and-event-driven-grant' },
-          { text: 'ADR-018 全局数据库设计原则最终版', link: '/adr/ADR-018-global-database-design-principles-final' },
-          { text: 'ADR-019 Operations 后台控制平面', link: '/adr/ADR-019-operations-backoffice-control-plane' },
-          { text: 'ADR-020 Audio Production 域', link: '/adr/ADR-020-audio-production-domain' },
-          { text: 'ADR-021 Content/Learning 拆分', link: '/adr/ADR-021-content-and-learning-domain-split' }
-        ]
-      }
-    ],
+    sidebar: {
+      '/guide/': guideSidebar,
+      '/product/': productSidebar,
+      '/architecture/': architectureSidebar,
+      '/development/': developmentSidebar,
+      '/domains/': domainsSidebar,
+      '/governance/': governanceSidebar,
+      '/adr/': adrSidebar
+    },
     outline: { level: [2, 3], label: '页面导航' },
     docFooter: { prev: '上一篇', next: '下一篇' },
     search: { provider: 'local' }
