@@ -4,7 +4,7 @@ last_updated: 2026-08-31
 schema: content
 ---
 
-# Content 域
+# 内容（Content）
 
 Content Domain 负责**用户要学什么**，是所有与具体用户无关、可被多个用户共同消费的教学内容的 canonical source of truth。
 
@@ -29,6 +29,31 @@ Content 不负责：
 - 用户作答历史、搜索历史、即时翻译请求；
 - 音频生产、版本、审核和发布；
 - 具体媒体文件的物理存储事实。
+
+## 领域能力地图
+
+Content 当前提供的稳定能力包括：
+
+```text
+知识内容
+课程体系
+词典语义
+练习与标准答案
+发音知识属性
+内容发布
+Content Revision
+跨域可引用的稳定内容标识
+```
+
+这些能力可以被多个 Feature 消费，但 Content 不负责消费者页面或端到端交付流程。
+
+## 参与的产品功能
+
+| 产品功能 | 关系 | Content 职责 |
+| --- | --- | --- |
+| [音频生产](/features/audio-production/) | 参与领域 | 提供 canonical 教学内容、发音要求、Content Revision 与规范生产输入 |
+
+音频生产 Feature 不改变 Content 对教学内容的 canonical ownership。
 
 ## 与 Learning 的边界
 
@@ -105,4 +130,5 @@ Content V1 固定 **31 张业务表**。完整表清单、字段、约束、索�
 - [词典](dictionary.md)：词典语义、Equivalent、Relation 与 Tag。
 - [练习](practice.md)：练习与题目定义、标准答案与规则。
 - [数据设计](database.md)：31 张表与数据库契约。
+- [音频生产 Feature](/features/audio-production/)
 - [ADR-021](../../adr/ADR-021-content-and-learning-domain-split.md)：Content / Learning 边界形成的架构决策历史。
