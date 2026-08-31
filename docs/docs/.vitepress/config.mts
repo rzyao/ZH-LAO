@@ -1,10 +1,7 @@
 import { defineConfig } from 'vitepress'
-import featureInventory from '../development/workflow/FEATURE_INVENTORY.json'
+import featurePageIndex from '../development/workflow/FEATURE_PAGE_INDEX.json'
 
-const inventoryColumns = featureInventory.columns
-const inventoryFeatures = featureInventory.features.map((row) =>
-  Object.fromEntries(inventoryColumns.map((name, index) => [name, row[index]]))
-)
+const featureGroups = [...new Set(featurePageIndex.features.map((feature) => feature.domain[0] ?? 'product'))]
 
 const guideSidebar = [
   {
@@ -71,12 +68,12 @@ const featuresSidebar = [
   {
     text: '功能目录',
     collapsed: true,
-    items: [...new Set(inventoryFeatures.map((feature) => feature.parent))].map((parent) => ({
-      text: parent,
+    items: featureGroups.map((domain) => ({
+      text: domain,
       collapsed: true,
-      items: inventoryFeatures
-        .filter((feature) => feature.parent === parent)
-        .map((feature) => ({ text: feature.label, link: `/features/${feature.id}/` }))
+      items: featurePageIndex.features
+        .filter((feature) => (feature.domain[0] ?? 'product') === domain)
+        .map((feature) => ({ text: feature.title, link: `/features/${feature.id}/` }))
     }))
   }
 ]
@@ -365,9 +362,11 @@ export default defineConfig({
     nav: [
       { text: '首页', link: '/' },
       { text: '产品', link: '/product/product-overview' },
-      { text: '架构', link: '/architecture/' },
-      { text: '领域', link: '/domains/' },
       { text: '功能', link: '/features/' },
+      { text: 'Mobile', link: '/mobile/' },
+      { text: 'Admin', link: '/admin/' },
+      { text: '领域', link: '/domains/' },
+      { text: '架构', link: '/architecture/' },
       { text: '开发', link: '/development/' },
       { text: '治理', link: '/governance/design-register' },
       { text: 'ADR', link: '/adr/' }
@@ -378,6 +377,15 @@ export default defineConfig({
       '/architecture/': architectureSidebar,
       '/domains/': domainsSidebar,
       '/features/': featuresSidebar,
+      '/mobile/': [
+        { text: 'Mobile', items: [{ text: '概览', link: '/mobile/' }, { text: '导航结构', link: '/mobile/navigation' }, { text: '页面清单', link: '/mobile/pages' }] },
+        { text: '认证', items: [{ text: '登录页', link: '/mobile/login' }, { text: 'OTP 验证页', link: '/mobile/otp' }] }
+      ],
+      '/admin/': [
+        { text: 'Admin', items: [{ text: '概览', link: '/admin/' }, { text: '导航结构', link: '/admin/navigation' }, { text: '页面清单', link: '/admin/pages' }] },
+        { text: '账号权限', items: [{ text: '操作员管理', link: '/admin/operators' }] },
+        { text: '音频', items: [{ text: '音频生产工作台', link: '/admin/audio-production' }] }
+      ],
       '/development/': developmentSidebar,
       '/governance/': governanceSidebar,
       '/adr/': adrSidebar

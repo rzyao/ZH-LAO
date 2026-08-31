@@ -1,23 +1,58 @@
 ---
-status: deferred
 feature_id: promotions-coupons
-generated_from_feature_inventory: true
+title: 促销与优惠券（延期）
+domain:
+  - commerce
+  - platform
+status:
+  design: todo
+  backend: todo
+  admin: na
+  mobile: todo
+  integration: todo
+  acceptance: todo
+mobile_pages: []
+admin_pages: []
 ---
 
 # 促销与优惠券（延期）
 
-这是 `promotions-coupons` 的功能设计入口。领域规则、数据模型与跨领域边界仍以关联 Domain 文档为准。
+## 功能概览
 
-## 功能范围
+`promotions-coupons` 是当前正式 Feature 清单中的功能。其领域事实以 commerce、platform 文档为准。
 
-| 项目 | 内容 |
-| --- | --- |
-| 主要领域 | [commerce](/domains/commerce/) |
-| 参与领域 | platform |
-| 涉及端 | mobile, integration, acceptance |
-| 当前状态 | deferred |
-| 设计交付 | 待设计 |
+## 设计
 
-## 设计入口
+状态：todo
 
-从主要领域开始确认业务边界、生命周期与契约；需要跨领域协作时，再补充本功能的端到端交付设计。
+在此维护该 Lane 的范围、当前 Stage、相关工件、Gate 与下一步。
+
+## Backend
+
+状态：todo
+
+在此维护该 Lane 的范围、当前 Stage、相关工件、Gate 与下一步。
+
+## Admin
+
+状态：na
+
+不适用：当前功能不需要该交付端。
+
+## Mobile
+
+状态：todo
+
+在此维护该 Lane 的范围、当前 Stage、相关工件、Gate 与下一步。
+
+## 集成
+
+状态：todo
+
+在此维护该 Lane 的范围、当前 Stage、相关工件、Gate 与下一步。
+
+## 验收
+
+状态：todo
+
+在此维护该 Lane 的范围、当前 Stage、相关工件、Gate 与下一步。

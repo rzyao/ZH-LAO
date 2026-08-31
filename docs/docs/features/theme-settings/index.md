@@ -1,23 +1,56 @@
 ---
-status: active
 feature_id: theme-settings
-generated_from_feature_inventory: true
+title: 主题设置
+domain: []
+status:
+  design: done
+  backend: todo
+  admin: na
+  mobile: done
+  integration: na
+  acceptance: done
+mobile_pages: []
+admin_pages: []
 ---
 
 # 主题设置
 
-这是 `theme-settings` 的功能设计入口。领域规则、数据模型与跨领域边界仍以关联 Domain 文档为准。
+## 功能概览
 
-## 功能范围
+`theme-settings` 是当前正式 Feature 清单中的功能。其领域事实以 产品级设计 文档为准。
 
-| 项目 | 内容 |
-| --- | --- |
-| 主要领域 | 未指定 |
-| 参与领域 | 无 |
-| 涉及端 | mobile, acceptance |
-| 当前状态 | active |
-| 设计交付 | 已交付 |
+## 设计
 
-## 设计入口
+状态：done
 
-从主要领域开始确认业务边界、生命周期与契约；需要跨领域协作时，再补充本功能的端到端交付设计。
+在此维护该 Lane 的范围、当前 Stage、相关工件、Gate 与下一步。
+
+## Backend
+
+状态：todo
+
+在此维护该 Lane 的范围、当前 Stage、相关工件、Gate 与下一步。
+
+## Admin
+
+状态：na
+
+不适用：当前功能不需要该交付端。
+
+## Mobile
+
+状态：done
+
+在此维护该 Lane 的范围、当前 Stage、相关工件、Gate 与下一步。
+
+## 集成
+
+状态：na
+
+不适用：当前功能不需要该交付端。
+
+## 验收
+
+状态：done
+
+在此维护该 Lane 的范围、当前 Stage、相关工件、Gate 与下一步。

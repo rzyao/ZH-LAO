@@ -1,27 +1,65 @@
 ---
-status: unresolved
 feature_id: verification-review
-generated_from_feature_inventory: true
+title: 真人认证审核（待设计）
+domain:
+  - trust
+  - operations
+  - social
+status:
+  design: blocked
+  backend: blocked
+  admin: blocked
+  mobile: na
+  integration: blocked
+  acceptance: blocked
+mobile_pages: []
+admin_pages: []
+blocks:
+  design: TRUST_VERIFICATION_DESIGN
+  backend: TRUST_VERIFICATION_DESIGN
+  admin: TRUST_VERIFICATION_DESIGN
+  integration: TRUST_VERIFICATION_DESIGN
+  acceptance: TRUST_VERIFICATION_DESIGN
 ---
 
 # 真人认证审核（待设计）
 
-这是 `verification-review` 的功能设计入口。领域规则、数据模型与跨领域边界仍以关联 Domain 文档为准。
+## 功能概览
 
-## 功能范围
+`verification-review` 是当前正式 Feature 清单中的功能。其领域事实以 trust、operations、social 文档为准。
 
-| 项目 | 内容 |
-| --- | --- |
-| 主要领域 | [trust](/domains/trust/) |
-| 参与领域 | operations, social |
-| 涉及端 | admin, integration, acceptance |
-| 当前状态 | unresolved |
-| 设计交付 | 待设计 |
+## 设计
 
-## 待决事项
+状态：blocked
 
-`TRUST_VERIFICATION_DESIGN`
+阻塞原因：TRUST_VERIFICATION_DESIGN
 
-## 设计入口
+## Backend
 
-从主要领域开始确认业务边界、生命周期与契约；需要跨领域协作时，再补充本功能的端到端交付设计。
+状态：blocked
+
+阻塞原因：TRUST_VERIFICATION_DESIGN
+
+## Admin
+
+状态：blocked
+
+阻塞原因：TRUST_VERIFICATION_DESIGN
+
+## Mobile
+
+状态：na
+
+不适用：当前功能不需要该交付端。
+
+## 集成
+
+状态：blocked
+
+阻塞原因：TRUST_VERIFICATION_DESIGN
+
+## 验收
+
+状态：blocked
+
+阻塞原因：TRUST_VERIFICATION_DESIGN

@@ -1,27 +1,64 @@
 ---
-status: unresolved
 feature_id: social-distance
-generated_from_feature_inventory: true
+title: 距离筛选与模糊距离展示（待裁决）
+domain:
+  - social
+  - identity
+status:
+  design: blocked
+  backend: blocked
+  admin: na
+  mobile: blocked
+  integration: blocked
+  acceptance: blocked
+mobile_pages: []
+admin_pages: []
+blocks:
+  design: SOCIAL_LOCATION_SCOPE_DECISION
+  backend: SOCIAL_LOCATION_SCOPE_DECISION
+  mobile: SOCIAL_LOCATION_SCOPE_DECISION
+  integration: SOCIAL_LOCATION_SCOPE_DECISION
+  acceptance: SOCIAL_LOCATION_SCOPE_DECISION
 ---
 
 # 距离筛选与模糊距离展示（待裁决）
 
-这是 `social-distance` 的功能设计入口。领域规则、数据模型与跨领域边界仍以关联 Domain 文档为准。
+## 功能概览
 
-## 功能范围
+`social-distance` 是当前正式 Feature 清单中的功能。其领域事实以 social、identity 文档为准。
 
-| 项目 | 内容 |
-| --- | --- |
-| 主要领域 | [social](/domains/social/) |
-| 参与领域 | identity |
-| 涉及端 | mobile, integration, acceptance |
-| 当前状态 | unresolved |
-| 设计交付 | 待设计 |
+## 设计
 
-## 待决事项
+状态：blocked
 
-`SOCIAL_LOCATION_SCOPE_DECISION`
+阻塞原因：SOCIAL_LOCATION_SCOPE_DECISION
 
-## 设计入口
+## Backend
 
-从主要领域开始确认业务边界、生命周期与契约；需要跨领域协作时，再补充本功能的端到端交付设计。
+状态：blocked
+
+阻塞原因：SOCIAL_LOCATION_SCOPE_DECISION
+
+## Admin
+
+状态：na
+
+不适用：当前功能不需要该交付端。
+
+## Mobile
+
+状态：blocked
+
+阻塞原因：SOCIAL_LOCATION_SCOPE_DECISION
+
+## 集成
+
+状态：blocked
+
+阻塞原因：SOCIAL_LOCATION_SCOPE_DECISION
+
+## 验收
+
+状态：blocked
+
+阻塞原因：SOCIAL_LOCATION_SCOPE_DECISION
