@@ -15,6 +15,12 @@ status:
   acceptance: todo
 mobile_pages: []
 admin_pages: []
+blocks:
+  backend: "Content runtime read implementation and formal Content Backend Gate are not yet complete; Learning Backend execution remains blocked."
+evidence:
+  design:
+    - /development/05-content/CONTENT_DESIGN_AUDIT
+    - /development/06-learning/LEARNING_DESIGN_AUDIT
 ---
 
 # Lesson 学习流程

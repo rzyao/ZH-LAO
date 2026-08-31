@@ -15,6 +15,8 @@ status:
   acceptance: todo
 mobile_pages: []
 admin_pages: []
+active_notes:
+  design: "已冻结的数据模型与业务边界见本页设计 Lane；公共应用 Contract 与正式 Social Design Gate 仍在收口。"
 ---
 
 # 社交资料创建与编辑
