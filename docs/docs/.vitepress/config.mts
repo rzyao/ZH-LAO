@@ -58,7 +58,8 @@ const featuresSidebar = [
     text: '功能交付',
     items: [
       { text: '功能总览', link: '/features/' },
-      { text: '功能文档规范', link: '/features/FEATURE_DOCUMENT_STANDARD' }
+      { text: '功能文档规范', link: '/features/FEATURE_DOCUMENT_STANDARD' },
+      { text: '领域与功能关系', link: '/domains/FEATURE_RELATIONSHIP_MODEL' }
     ]
   },
   {
@@ -134,6 +135,7 @@ const domainsSidebar = [
     text: '领域设计',
     items: [
       { text: '领域总览', link: '/domains/' },
+      { text: '领域与功能关系', link: '/domains/FEATURE_RELATIONSHIP_MODEL' },
       { text: '文档系统规范', link: '/governance/DOMAIN_DOCUMENT_STANDARD' }
     ]
   },
@@ -144,7 +146,12 @@ const domainsSidebar = [
       { text: '领域概览', link: '/domains/identity/' },
       { text: '业务流程', link: '/domains/identity/flows' },
       { text: '领域模型', link: '/domains/identity/model' },
-      { text: '数据设计', link: '/domains/identity/database' }
+      { text: '数据设计', link: '/domains/identity/database' },
+      {
+        text: '相关功能',
+        collapsed: true,
+        items: [{ text: '登录与会话', link: '/features/login/' }]
+      }
     ]
   },
   {
@@ -162,7 +169,12 @@ const domainsSidebar = [
           { text: '练习', link: '/domains/content/practice' }
         ]
       },
-      { text: '数据设计', link: '/domains/content/database' }
+      { text: '数据设计', link: '/domains/content/database' },
+      {
+        text: '相关功能',
+        collapsed: true,
+        items: [{ text: '音频生产', link: '/features/audio-production/' }]
+      }
     ]
   },
   {
@@ -189,7 +201,12 @@ const domainsSidebar = [
         ]
       },
       { text: '契约与边界', link: '/domains/audio/contracts' },
-      { text: '数据设计', link: '/domains/audio/database' }
+      { text: '数据设计', link: '/domains/audio/database' },
+      {
+        text: '相关功能',
+        collapsed: true,
+        items: [{ text: '音频生产', link: '/features/audio-production/' }]
+      }
     ]
   },
   {
@@ -278,7 +295,12 @@ const domainsSidebar = [
         ]
       },
       { text: '公共契约与集成', link: '/domains/operations/contracts' },
-      { text: '数据设计', link: '/domains/operations/database' }
+      { text: '数据设计', link: '/domains/operations/database' },
+      {
+        text: '相关功能',
+        collapsed: true,
+        items: [{ text: '音频生产', link: '/features/audio-production/' }]
+      }
     ]
   },
   {
