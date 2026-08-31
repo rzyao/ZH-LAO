@@ -51,6 +51,7 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: pnpm, cache-dependency-path: "**/pnpm-lock.yaml" }
       - run: python scripts/generate_ai_stage_matrix.py --check
+      - run: python scripts/check_executable_specs.py
       - run: pnpm --dir docs install --frozen-lockfile
       - run: pnpm --dir docs docs:build
   # Mobile regression coverage.
