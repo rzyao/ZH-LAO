@@ -54,15 +54,24 @@ const objectLabel = (obj) =>
       <td v-for="[lane] in lanes" :key="lane">
         <template v-if="obj[lane]?.length">
           <template v-for="stage in obj[lane]" :key="stage[0]">
-            <a v-if="stage[3]" :href="stage[3]" :title="titleFor(stage)" :class="['stage', `stage-${statusMeta[stage[2]][1]}`]">{{ statusMeta[stage[2]][0] }} {{ stage[1] }}</a><br>
-            <span v-else :title="titleFor(stage)" :class="['stage', `stage-${statusMeta[stage[2]][1]}`]">{{ statusMeta[stage[2]][0] }} {{ stage[1] }}</span><br>
+            <template v-if="stage[3]">
+              <a :href="stage[3]" :title="titleFor(stage)" :class="['stage', `stage-${statusMeta[stage[2]][1]}`]">{{ statusMeta[stage[2]][0] }} {{ stage[1] }}</a>
+            </template>
+            <template v-else>
+              <span :title="titleFor(stage)" :class="['stage', `stage-${statusMeta[stage[2]][1]}`]">{{ statusMeta[stage[2]][0] }} {{ stage[1] }}</span>
+            </template>
+            <br>
           </template>
         </template>
         <span v-else class="stage stage-na">—</span>
       </td>
       <td>
-        <a v-if="obj.next[3]" :href="obj.next[3]" :title="titleFor(obj.next)" :class="['stage', `stage-${statusMeta[obj.next[2]][1]}`]">{{ statusMeta[obj.next[2]][0] }} {{ obj.next[1] }}</a>
-        <span v-else :title="titleFor(obj.next)" :class="['stage', `stage-${statusMeta[obj.next[2]][1]}`]">{{ statusMeta[obj.next[2]][0] }} {{ obj.next[1] }}</span>
+        <template v-if="obj.next[3]">
+          <a :href="obj.next[3]" :title="titleFor(obj.next)" :class="['stage', `stage-${statusMeta[obj.next[2]][1]}`]">{{ statusMeta[obj.next[2]][0] }} {{ obj.next[1] }}</a>
+        </template>
+        <template v-else>
+          <span :title="titleFor(obj.next)" :class="['stage', `stage-${statusMeta[obj.next[2]][1]}`]">{{ statusMeta[obj.next[2]][0] }} {{ obj.next[1] }}</span>
+        </template>
       </td>
     </tr>
   </tbody>
