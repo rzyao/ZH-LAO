@@ -1622,24 +1622,17 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "done",
-        "backend": "done",
-        "admin": "ready",
-        "mobile": "todo",
-        "integration": "ready",
+        "design": "todo",
+        "backend": "todo",
+        "admin": "todo",
+        "mobile": "na",
+        "integration": "todo",
         "acceptance": "todo"
       },
       "mobile_pages": [],
       "admin_pages": [],
       "blocks": {},
-      "evidence": {
-        "design": [
-          "/development/03-platform/PLATFORM_DESIGN_AUDIT.md"
-        ],
-        "backend": [
-          "/development/03-platform/PLATFORM_IMPLEMENTATION_REPORT.md"
-        ]
-      },
+      "evidence": {},
       "active_notes": {}
     },
     {
@@ -1651,24 +1644,17 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "done",
-        "backend": "done",
-        "admin": "ready",
-        "mobile": "todo",
-        "integration": "ready",
+        "design": "todo",
+        "backend": "todo",
+        "admin": "todo",
+        "mobile": "na",
+        "integration": "todo",
         "acceptance": "todo"
       },
       "mobile_pages": [],
       "admin_pages": [],
       "blocks": {},
-      "evidence": {
-        "design": [
-          "/development/03-platform/PLATFORM_DESIGN_AUDIT.md"
-        ],
-        "backend": [
-          "/development/03-platform/PLATFORM_IMPLEMENTATION_REPORT.md"
-        ]
-      },
+      "evidence": {},
       "active_notes": {}
     },
     {
@@ -1679,24 +1665,17 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "done",
-        "backend": "done",
-        "admin": "ready",
+        "design": "todo",
+        "backend": "todo",
+        "admin": "todo",
         "mobile": "todo",
-        "integration": "ready",
+        "integration": "todo",
         "acceptance": "todo"
       },
       "mobile_pages": [],
       "admin_pages": [],
       "blocks": {},
-      "evidence": {
-        "design": [
-          "/development/03-platform/PLATFORM_DESIGN_AUDIT.md"
-        ],
-        "backend": [
-          "/development/03-platform/PLATFORM_IMPLEMENTATION_REPORT.md"
-        ]
-      },
+      "evidence": {},
       "active_notes": {}
     },
     {
@@ -1708,24 +1687,17 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "done",
-        "backend": "done",
-        "admin": "ready",
+        "design": "todo",
+        "backend": "todo",
+        "admin": "todo",
         "mobile": "todo",
-        "integration": "ready",
+        "integration": "todo",
         "acceptance": "todo"
       },
       "mobile_pages": [],
       "admin_pages": [],
       "blocks": {},
-      "evidence": {
-        "design": [
-          "/development/03-platform/PLATFORM_DESIGN_AUDIT.md"
-        ],
-        "backend": [
-          "/development/03-platform/PLATFORM_IMPLEMENTATION_REPORT.md"
-        ]
-      },
+      "evidence": {},
       "active_notes": {}
     },
     {
@@ -1737,24 +1709,17 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "done",
-        "backend": "done",
-        "admin": "ready",
+        "design": "todo",
+        "backend": "todo",
+        "admin": "todo",
         "mobile": "na",
-        "integration": "ready",
+        "integration": "todo",
         "acceptance": "todo"
       },
       "mobile_pages": [],
       "admin_pages": [],
       "blocks": {},
-      "evidence": {
-        "design": [
-          "/development/03-platform/PLATFORM_DESIGN_AUDIT.md"
-        ],
-        "backend": [
-          "/development/03-platform/PLATFORM_IMPLEMENTATION_REPORT.md"
-        ]
-      },
+      "evidence": {},
       "active_notes": {}
     },
     {
