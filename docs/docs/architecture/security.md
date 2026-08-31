@@ -9,7 +9,7 @@ ZH-LAO 的安全模型不是由一个“万能权限模块”统一接管，而�
 
 ## 安全责任分层
 
-| 能力 | canonical owner | 主要职责 |
+| 能力 | 事实拥有者 | 主要职责 |
 | --- | --- | --- |
 | 用户认证 | 身份（Identity） | 登录身份、OTP、Session、Device、Access / Refresh Token、账号状态 |
 | 后台操作者 | 运营（Operations） | Operator、Role、Permission、RBAC、后台操作审计 |
