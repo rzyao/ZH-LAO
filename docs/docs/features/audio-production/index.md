@@ -1,6 +1,12 @@
 ---
 status: design-ready
 last_updated: 2026-08-31
+feature_id: audio-production
+feature_type: cross-domain
+primary_domain: audio
+participating_domains:
+  - content
+  - operations
 ---
 
 # 音频生产
@@ -29,12 +35,17 @@ official_asset_version_id 成为当前正式音频
 
 authoritative 业务规则见 [音频生产领域](/domains/audio/)、[生产与审核](/domains/audio/production) 与 [工作流与状态机](/domains/audio/lifecycle)。
 
-## 涉及领域与基础设施
+## 领域关系
 
-- [内容（Content）](/domains/content/)：拥有教学内容与规范生产输入。
-- [音频生产（Audio Production）](/domains/audio/)：拥有 Slot、Task、Attempt、Asset Version、Review、Publish 等生产事实。
-- [运营（Operations）](/domains/operations/)：后台操作员、RBAC 与审计身份。
-- [基础设施与集成](/architecture/infrastructure/)：物理 Asset/Storage、Outbox 与外部 Provider Adapter。
+| 角色 | 领域 | 本功能中的职责 |
+| --- | --- | --- |
+| 主要领域 | [音频生产（Audio Production）](/domains/audio/) | Slot、Task、Attempt、Asset Version、Review、Publish 与生产生命周期 |
+| 参与领域 | [内容（Content）](/domains/content/) | canonical 教学内容、发音要求与生产输入 |
+| 参与领域 | [运营（Operations）](/domains/operations/) | Operator、RBAC 与后台操作审计身份 |
+
+此外依赖 [基础设施与集成](/architecture/infrastructure/) 提供物理 Asset/Storage、Outbox 与外部 Provider Adapter；Infrastructure 不是业务 Domain，因此不放入 `participating_domains`。
+
+`primary_domain: audio` 只表示 Feature 的主要业务协调领域，不表示 Content 或 Operations 从属于 Audio，也不改变各自 canonical ownership。
 
 ## Backend
 
@@ -68,6 +79,7 @@ Mobile 不是音频**生产** Feature 的 required 操作端。App 对正式音�
 | 轨道 | 当前状态 |
 | --- | --- |
 | Audio Domain | 设计已冻结主要业务事实 |
+| Content / Operations | 已提供所需边界事实 |
 | Backend | 正式实现待推进 |
 | Admin Workbench | 待建立/执行页面实施任务 |
 | Mobile | 非生产主入口 |
