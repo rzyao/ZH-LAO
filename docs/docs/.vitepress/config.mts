@@ -27,9 +27,11 @@ const architectureSidebar = [
     items: [
       { text: '总体架构', link: '/architecture/overview' },
       { text: '领域关系图', link: '/architecture/domain-map' },
-      { text: 'PostgreSQL 总规范', link: '/architecture/database' },
       { text: '后端架构', link: '/architecture/backend' },
-      { text: '前端架构', link: '/architecture/frontend' }
+      { text: '客户端架构', link: '/architecture/frontend' },
+      { text: '基础设施与集成', link: '/architecture/infrastructure' },
+      { text: '安全与权限架构', link: '/architecture/security' },
+      { text: 'PostgreSQL 总规范', link: '/architecture/database' }
     ]
   }
 ]
