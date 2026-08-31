@@ -50,6 +50,10 @@ jobs:
         with: { version: 10.20.0 }
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: pnpm, cache-dependency-path: "**/pnpm-lock.yaml" }
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: python -m pip install pyyaml
+      - run: python scripts/audit_feature_detail_pages.py
       - run: python scripts/validate_feature_pages.py
       - run: python scripts/check_executable_specs.py
       - run: pnpm --dir docs install --frozen-lockfile
