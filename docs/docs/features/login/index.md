@@ -36,12 +36,16 @@ evidence:
 
 ## 设计
 
+状态：done
+
 - **Scope**：冻结 Phone OTP 请求/消费、Phone/Facebook 认证、首次注册、固定学习方向、Access/Refresh Token、Refresh rotation、Logout / Logout All、账号状态拒绝、设备绑定与 Provider unavailable 的产品/契约语义；Facebook 客户端只提交 opaque credential，服务端验证并推导 provider subject。
 - **Stage / Artifact**：`AI_STAGE_REGISTRY.json` 中 `LOGIN-FEATURE-DESIGN = done`；权威设计见 [Identity Domain](/domains/identity/)、[Identity Flows](/domains/identity/flows) 与 [Identity API](/development/02-identity/IDENTITY_API)。
 - **Gate / Evidence**：Login 的 Feature Design Stage 已在 Stage Registry 标记完成；冻结 API 明确登录/会话端点、状态码与 deferred 边界。Identity 最终审计只作为上游 Domain 证据，不单独证明其它 Feature Lane。
 - **Next Action**：保持已冻结的登录契约；若新增 provider、登录方式或会话语义，先进入新的正式 Design Stage，不在 Mobile/Integration Lane 中反向改写 canonical contract。
 
 ## Backend
+
+状态：done
 
 - **Scope**：已实现 `POST /phone-otp`、`POST /auth/phone`、`POST /auth/facebook`、`POST /sessions/refresh`、`POST /sessions/logout`、`POST /sessions/logout-all` 及 Bearer authentication；覆盖 OTP HMAC、冷却/次数限制、原子消费，首次注册与 Session 创建，Refresh token 每次轮换，disabled/closed 账号拒绝，设备撤销后的 Session 拒绝，以及统一验证/认证错误映射。
 - **Stage / Artifact**：`LOGIN-IDENTITY-DEPENDENCY = done`；实现位于 `apps/backend/src/modules/identity/`，核心路由为 `http/routes.ts`，Phone OTP 认证为 `application/use-cases/authenticate-with-phone-otp.ts`，Session 生命周期为 `application/use-cases/session-device-lifecycle.ts`。实施证据见 [Identity Backend](/development/backend/identity/)、[Identity Implementation Report](/development/02-identity/IDENTITY_IMPLEMENTATION_REPORT) 与 [Regression Hotfix Report](/development/02-identity/IDENTITY_REGRESSION_HOTFIX_REPORT)。
