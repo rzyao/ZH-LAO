@@ -163,6 +163,15 @@ const domainsSidebar = [
     collapsed: true,
     items: [
       { text: '领域概览', link: '/domains/audio/' },
+      {
+        text: '业务设计',
+        collapsed: true,
+        items: [
+          { text: '生产与审核', link: '/domains/audio/production' },
+          { text: '工作流与状态机', link: '/domains/audio/lifecycle' }
+        ]
+      },
+      { text: '契约与边界', link: '/domains/audio/contracts' },
       { text: '数据设计', link: '/domains/audio/database' }
     ]
   },
