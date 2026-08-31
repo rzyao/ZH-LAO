@@ -4,7 +4,7 @@ last_updated: 2026-08-31
 schema: identity
 ---
 
-# Identity 域
+# 身份（Identity）
 
 Identity Domain 回答“平台用户是谁、如何认证与登录”，拥有用户主体、认证身份、基础资料、固定学习方向、OTP、Session 与 Device。
 
@@ -18,6 +18,39 @@ Identity Domain 回答“平台用户是谁、如何认证与登录”，拥有�
 - 管理 OTP Challenge；
 - 管理 Session 与 Device；
 - 向其他领域提供稳定 logical/public user identity。
+
+## 领域能力地图
+
+Identity 当前提供的稳定业务能力包括：
+
+```text
+用户主体
+├─ 创建 / 识别用户
+├─ 基础资料
+└─ 固定学习方向
+
+认证
+├─ 手机 OTP Challenge
+├─ AuthIdentity 识别
+└─ 外部身份接入边界
+
+会话
+├─ 创建 Session
+├─ 刷新 Session
+├─ 单设备退出
+├─ 全设备退出
+└─ Device / Session 查询与撤销
+```
+
+这些是 Identity 自身的 Domain Capability，不等于具体 Mobile 页面或端到端 Feature。
+
+## 参与的产品功能
+
+| 产品功能 | 关系 | Identity 职责 |
+| --- | --- | --- |
+| [登录与会话](/features/login/) | 主要领域 | 认证、OTP、Session、Device 与认证状态事实 |
+
+Feature 只组织交付与 E2E 验收；认证规则和 Session 业务事实仍以 Identity 文档与契约为 authority。
 
 ## V1 数据模型
 
@@ -51,3 +84,5 @@ devices
 - [业务模型与边界](model.md)
 - [账户与会话流程](flows.md)
 - [数据设计](database.md)
+- [登录与会话 Feature](/features/login/)
+- [领域能力与产品功能关系模型](/domains/FEATURE_RELATIONSHIP_MODEL)
