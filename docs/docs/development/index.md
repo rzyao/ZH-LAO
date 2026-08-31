@@ -143,7 +143,7 @@ repository drift
 | 工件 | 职责 |
 | --- | --- |
 | `domains/` | 当前领域事实 |
-| `features/` | derived 端到端交付地图 |
+| `features/` | 人工维护的端到端 Feature Page 与交付地图 |
 | Task Manifest | 当前 Prompt Stage 边界与路径权限 |
 | Execution Brief | 当前 Stage 必须完成什么 |
 | Executable Spec | machine-readable MUST BE TRUE |

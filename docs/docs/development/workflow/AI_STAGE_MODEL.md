@@ -23,9 +23,9 @@ stage_id: LOGIN-MOBILE-IMPLEMENT
 
 各 Lane 的人工状态只允许 `todo`、`active`、`blocked`、`done`、`na`。`blocked` 必须记录原因；`done` 必须指向 Gate 或完成证据。
 
-`DOMAIN_LIFECYCLE_MATRIX.md` 是从 Feature Page Frontmatter 派生的全局视图，不保存第二套 Lane 状态。矩阵的功能名跳转到 Feature Page 顶部，任一 Lane 跳转到该 Feature 的对应章节；Stage 名与细节只在 Feature Page 和开发工件中展示。
+`DOMAIN_LIFECYCLE_MATRIX.md` 是从 Feature Page Frontmatter 派生的全局导航视图，不保存第二套 Lane 状态。矩阵的 Feature 名跳转到 Feature Page 顶部，任一 Lane 跳转到该 Feature 的对应章节；Stage 名与细节只在 Feature Page 和开发工件中展示。
 
-矩阵沿用已冻结的树状“对象 + 六条 Lane”UI。System、Domain 与 Feature 的视觉层级、状态标签和样式不得修改；其中 Feature 名和任一 Lane 都直接链接到该 Feature Page 的对应位置。
+矩阵固定为“开发对象 + 六条 Lane”UI：System / Foundation、Domain 是一级行，Feature 是其下的二级行。第一列不拆成 Domain / Feature 两列。矩阵只显示五种概览状态：`✅ 完成`、`▶ 进行中`、`! 阻塞`、`○ 未启动`、`— 不适用`；READY、Stage 名和细节不得泄漏到矩阵。
 
 ## Development Node
 

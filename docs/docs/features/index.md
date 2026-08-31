@@ -5,7 +5,7 @@ last_updated: 2026-08-31
 
 # 功能交付
 
-Feature 表达**用户或运营人员能够完成的端到端能力**。
+Feature 表达**用户或运营人员能够完成的端到端能力**。每个正式 Feature 都有一个人工维护的 canonical Feature Page；Matrix 和索引从这些页面派生。
 
 它是横向交付视图，不拥有第二份 Domain、API、数据库或状态机事实。
 
@@ -38,7 +38,7 @@ Feature E2E proves deliverable value
 
 ## Canonical Feature Page
 
-正式 Feature 清单中的每个功能都已经建立独立页面。页面由人工维护 Frontmatter 和六个固定模块，Matrix 的 Feature 行只读取这些页面。
+正式 Feature 清单中的每个功能都已经建立独立页面（当前 `102 / 102`）。页面由人工维护 Frontmatter 和六个固定模块，Matrix 的 Feature 行只读取这些页面。
 
 - [用户登录与会话](login/index.md)
 - [音频生产](audio-production/index.md)

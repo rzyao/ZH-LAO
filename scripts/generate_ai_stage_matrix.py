@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Refresh Feature-derived matrix data while enforcing the frozen matrix UI."""
+"""Refresh the Feature-derived matrix index and enforce its navigation contract."""
 from __future__ import annotations
 import argparse
 import json
@@ -13,25 +13,26 @@ NODE_MODEL = ROOT / 'docs/docs/development/workflow/node-model.mjs'
 NODES_DIR = ROOT / 'docs/docs/development/nodes'
 
 UI_CONTRACT = [
-    'ui_contract: tree-v1-frozen',
-    '<thead><tr><th>对象</th>',
-    "object.kind === 'feature' ? '↳ ◇ ' : '◆ '",
+    'ui_contract: domain-feature-lane-v2',
+    '<thead><tr><th>开发对象</th>',
+    "object.kind === 'feature' ? 'Feature' : object.kind === 'domain' ? 'Domain' : 'System'",
     "['object-cell', object.kind]",
     "['node-status', `node-${display(object, lane).status}`]",
-    '.object-cell.feature{padding-left:22px;font-weight:600}',
+    '.object-cell.feature{padding-left:26px;font-weight:600}',
+    '.object-cell.domain,.object-cell.system{font-weight:800',
     '.node-done{color:#166534',
-    '.node-ready{color:#1d4ed8',
     '.node-active{color:#6d28d9',
     '.node-todo{color:#4b5563',
     '.node-blocked{color:#b91c1c',
-    '.node-deferred{color:#92400e',
     '.node-na{color:#6b7280'
 ]
 
 LINK_CONTRACT = [
     'objectHref(object)',
-    'nodeHref(object.id, lane)'
+    'laneHref(object.id, lane)'
 ]
+
+MODEL_LINK_CONTRACT = ['featureHref = (featureId, lane = null)']
 
 def main():
     parser = argparse.ArgumentParser()
@@ -49,7 +50,7 @@ def main():
     matrix = MATRIX.read_text(encoding='utf-8')
     missing_ui = [marker for marker in UI_CONTRACT if marker not in matrix]
     if missing_ui:
-        raise ValueError(f'DOMAIN_LIFECYCLE_MATRIX frozen UI changed: {missing_ui}')
+        raise ValueError(f'DOMAIN_LIFECYCLE_MATRIX navigation UI changed: {missing_ui}')
     missing_links = [marker for marker in LINK_CONTRACT if marker not in matrix]
     if missing_links:
         raise ValueError(f'DOMAIN_LIFECYCLE_MATRIX Feature links changed: {missing_links}')
@@ -57,12 +58,17 @@ def main():
     model = NODE_MODEL.read_text(encoding='utf-8')
     if "import featureIndex from './FEATURE_PAGE_INDEX.json'" not in model:
         raise ValueError('Matrix Feature rows are not sourced from Feature Pages')
+    missing_model_links = [marker for marker in MODEL_LINK_CONTRACT if marker not in model]
+    if missing_model_links:
+        raise ValueError(f'Feature Page link model changed: {missing_model_links}')
     if '/development/nodes/' in matrix or '/development/nodes/' in model:
         raise ValueError('Matrix still links to generated Node Detail pages')
+    if any(marker in matrix for marker in ('node-ready', 'node-deferred', '⏸ 延期', '▶ 就绪')):
+        raise ValueError('Matrix exposes Stage-level ready/deferred statuses')
     if NODES_DIR.exists():
         raise ValueError('generated Development Node pages still exist')
 
-    print(f"Feature Matrix: PASS ({len(index['features'])} Feature Pages; frozen tree UI; zero Node Detail pages)")
+    print(f"Feature Matrix: PASS ({len(index['features'])} Feature Pages; Domain → Feature tree UI; zero Node Detail pages)")
 
 if __name__ == '__main__':
     main()

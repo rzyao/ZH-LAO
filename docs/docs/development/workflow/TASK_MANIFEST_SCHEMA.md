@@ -207,18 +207,16 @@ matrix:
   parent_object_id: null
 ```
 
-Task status → Matrix：
+Task status → Matrix 概览：
 
 | Task Status | Matrix |
 | --- | --- |
 | `complete` | `done` / ✅ |
-| `ready` | `ready` / ▶ |
-| `active`、`validating` | `active` / ⏳ |
+| `ready`、`active`、`validating`、`recovery_required` | `active` / ▶ |
 | `planned` | `todo` / ○ |
-| `blocked` | `blocked` / ⛔ |
-| `recovery_required` | `recovery` / 🟣 |
+| `blocked` | `blocked` / ! |
 
-Matrix 的 `▶` 必须来自真实 READY Manifest，禁止人工指定。
+Matrix 的 `▶` 是可执行 Stage 的概览投影，READY / validating / recovery 等细节只在 Feature Page 对应 Lane 和 Task Manifest 中展示；禁止人工指定 Matrix 状态。
 
 ## 五、Entry Gate
 

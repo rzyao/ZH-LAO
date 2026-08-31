@@ -5,7 +5,22 @@ import featureIndex from './FEATURE_PAGE_INDEX.json'
 export const lanes = ['design', 'backend', 'admin', 'mobile', 'integration', 'acceptance']
 export const phases = ['prep', 'design', 'execute', 'verify', 'gate']
 export const laneLabels = { design: '设计 AI', backend: 'Backend AI', admin: 'Admin AI', mobile: 'Mobile AI', integration: '集成 AI', acceptance: '验收 AI' }
-export const statusMeta = { done: ['✅', '完成'], ready: ['▶', '就绪'], active: ['⏳', '进行中'], todo: ['○', '未启动'], blocked: ['⛔', '阻塞'], recovery: ['🟣', '恢复'], deferred: ['⏸', '延期'], na: ['—', '不适用'] }
+export const statusMeta = { done: ['✅', '完成'], active: ['▶', '进行中'], todo: ['○', '未启动'], blocked: ['!', '阻塞'], na: ['—', '不适用'] }
+
+// Stage execution has more detail than the global matrix needs. Keep that
+// detail in the registry and collapse it at the matrix boundary.
+export const matrixStatus = (status) => ({
+  done: 'done',
+  active: 'active',
+  ready: 'active',
+  validating: 'active',
+  recovery: 'active',
+  blocked: 'blocked',
+  todo: 'todo',
+  planned: 'todo',
+  deferred: 'todo',
+  na: 'na'
+}[status] ?? 'todo')
 
 const laneAnchors = { design: '设计', backend: 'backend', admin: 'admin', mobile: 'mobile', integration: '集成', acceptance: '验收' }
 const cols = inventory.columns
@@ -47,7 +62,7 @@ export const objectHref = (object) => object.kind === 'feature'
   : object.kind === 'domain'
     ? `/domains/${object.id}/`
     : null
-export const nodeHref = (objectId, lane) => {
+export const laneHref = (objectId, lane) => {
   const object = objects().find((item) => item.id === objectId)
   if (!object) return null
   if (object.kind === 'feature') return featureHref(objectId, lane)

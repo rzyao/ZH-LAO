@@ -89,6 +89,8 @@ def canonical_domain(domain_id):
 def scan():
     inventory = json.loads(INVENTORY.read_text(encoding='utf-8'))
     expected = {row[0] for row in inventory['features']}
+    inventory_by_id = {row[0]: dict(zip(inventory['columns'], row)) for row in inventory['features']}
+    system_parents = {'application-foundation', 'admin-foundation', 'mobile-foundation'}
     records = []
     seen = set()
     domains = {}
@@ -105,6 +107,11 @@ def scan():
             raise ValueError(f'{path}: missing title')
         if not isinstance(data.get('domain'), list):
             raise ValueError(f'{path}: domain must be a list')
+        inventory_feature = inventory_by_id[feature_id]
+        if not data['domain'] and inventory_feature['parent'] not in system_parents:
+            raise ValueError(f'{path}: a Feature must reference at least one Domain unless it belongs to a System/Foundation parent')
+        if data['domain'] and inventory_feature.get('primary_domain') and inventory_feature['primary_domain'] not in data['domain']:
+            raise ValueError(f'{path}: primary_domain must be included in the Feature Page domain list')
         for domain_id in data['domain']:
             if not isinstance(domain_id, str):
                 raise ValueError(f'{path}: domain IDs must be strings')

@@ -4,16 +4,22 @@
 from __future__ import annotations
 
 import io
+import json
 import os
 import re
 
 ROOT = os.path.join("docs", "docs")
 CONFIG = os.path.join(ROOT, ".vitepress", "config.mts")
+FEATURE_INDEX = os.path.join(ROOT, "development", "workflow", "FEATURE_PAGE_INDEX.json")
 
 
 def main() -> None:
     cfg = io.open(CONFIG, encoding="utf-8").read()
     links = re.findall(r"link:\s*'([^']+)'", cfg)
+    # The feature sidebar is generated from the canonical Feature Page index,
+    # so include those links in the navigation audit as well.
+    feature_index = json.load(io.open(FEATURE_INDEX, encoding="utf-8"))
+    links.extend(f"/features/{feature['id']}/" for feature in feature_index["features"])
 
     broken = []
     resolved = set()

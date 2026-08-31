@@ -115,8 +115,8 @@ portfolio_status = active | planned | deferred | unresolved
 
 - `active`：已有正式设计/实施/交付工作；
 - `planned`：当前产品能力，但尚未形成 READY Task；
-- `deferred`：仓库明确延期，矩阵必须继续显示 `⏸`；
-- `unresolved`：产品范围与 Domain/Contract 需要裁决，必须显示 `⛔` 和明确 blocker。
+- `deferred`：仓库明确延期；Feature Page / Inventory 保留该组合语义，适用 Lane 在矩阵中显示 `○ 未启动`；
+- `unresolved`：产品范围与 Domain/Contract 需要裁决，Feature Page 的相关 Lane 使用 `blocked` 并记录明确 blocker，矩阵显示 `! 阻塞`。
 
 禁止：
 
@@ -162,18 +162,17 @@ Feature 根据实际需要识别：
 
 ## 7. Status Calculation
 
+Stage 事实仍可使用 `done`、`ready`、`active`、`validating`、`blocked`、`recovery` 等执行状态；但 Matrix 是全局扫描视图，只投影为：
+
 ```text
-✅ done       有充分 Gate / Audit / Report / code+CI 证据
-▶ ready      Manifest READY + Entry Gate + Claim + Blueprint + drift 校验全部满足
-⏳ active     存在真实 active Claim
-○ todo       适用，但还没有 READY
-⛔ blocked    有明确 task/gate/contract/decision blocker
-🟣 recovery  当前合法下一步是 Recovery/Fix/Revalidation
-⏸ deferred  明确延期
+✅ done       全部适用 Stage 有充分 Gate / Audit / Report / code+CI 证据
+▶ active     存在 ready、active、validating 或 recovery Stage
+○ todo       适用但尚未开始；明确 deferred 也在此概览为未启动
+! blocked    有明确 task/gate/contract/decision blocker
 — na         不适用
 ```
 
-只有 READY Stage 才允许显示 `▶`。
+READY 仍是 Stage 执行事实，不再成为 Matrix 的独立可视状态。
 
 ## 8. Registry 与 Task Manifest
 
@@ -204,7 +203,7 @@ matrix:
 
 ## 9. Matrix
 
-`DOMAIN_LIFECYCLE_MATRIX.md` 保留旧路径，但语义是 **AI 开发阶段矩阵**。
+`DOMAIN_LIFECYCLE_MATRIX.md` 保留旧路径，但语义是 **全局 Domain → Feature 开发导航矩阵**。
 
 页面必须继续只显示一个表格。
 
@@ -215,7 +214,7 @@ python scripts/generate_ai_stage_matrix.py --check
 pnpm --dir docs docs:build
 ```
 
-不得手工维护 Matrix 的 Feature 行状态；状态修改必须发生在 canonical Feature Page Frontmatter。System / Domain 汇总行继续读取 Stage Registry。生成器同时锁定矩阵树状 UI，禁止生成 Node Detail 页面。
+不得手工维护 Matrix 的 Feature 行状态；状态修改必须发生在 canonical Feature Page Frontmatter。System / Domain 汇总行继续读取 Stage Registry，并在矩阵边界投影为五种概览状态。生成器同时锁定 Domain → Feature 树状 UI，禁止生成 Node Detail 页面。
 
 ## 10. NEXT_ACTIONS
 

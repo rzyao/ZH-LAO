@@ -63,6 +63,11 @@ def resolve(src: str, href: str) -> str | None:
     path = href.split("#", 1)[0]
     if not path:
         return os.path.normpath(src)
+    if path.startswith("file:///"):
+        # Historical evidence reports link to checked-out source files. Treat
+        # those as local file references so Windows drive-letter paths are
+        # validated instead of being mistaken for docs-relative paths.
+        return os.path.normpath(unquote(path[len("file:///"):]))
     if path.startswith("/"):
         base = os.path.join(ROOT, path.lstrip("/"))
     else:

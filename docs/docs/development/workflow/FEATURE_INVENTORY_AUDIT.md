@@ -68,7 +68,7 @@ Social 的“距离筛选 / 模糊距离”也保留为待裁决项，因为产�
 
 ## Deferred 可见性
 
-以下类型不会再从矩阵消失，而是使用 `⏸ 延期`：
+以下类型不会再从矩阵消失；它们在 Inventory 保留 `portfolio_status = deferred`，其适用 Lane 在 Matrix 概览为 `○ 未启动`，具体延期语义在 Feature Page 展示：
 
 - 推送通知体系；
 - 广告变现；
@@ -82,23 +82,16 @@ Social 的“距离筛选 / 模糊距离”也保留为待裁决项，因为产�
 
 ## Formal Feature Doc Policy
 
-Inventory 完整性不等于创建 102 个 Markdown 目录。
-
-只有：
+Inventory 中每一个正式 Feature 都必须有一个人工维护的 canonical Page，即：
 
 ```text
-Feature 正式进入 Design / Implementation
-或
-已有稳定交付事实需要维护
+FEATURE_INVENTORY.features = 102
+docs/docs/features/<feature_id>/index.md = 102
 ```
 
-才创建：
+Feature 尚未启动、延期或待裁决，都不能成为缺页理由。最小页面仍必须包含功能定位、六个固定 Lane、状态与不适用/阻塞原因；只有进入正式清单才创建页面，数据库表、Repository、Worker 等内部实现不单独伪造成 Feature。
 
-```text
-docs/docs/features/<feature>/
-```
-
-当前已经建立正式 Feature 文档的仍是“用户登录与会话”和“音频生产”。
+当前正式 Feature Page 覆盖率为 `102 / 102`。后续新增正式 Feature 时，必须在同一变更中补齐页面、Frontmatter、六个章节和派生索引。
 
 ## 后续维护
 

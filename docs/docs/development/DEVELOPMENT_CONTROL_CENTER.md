@@ -38,7 +38,7 @@ Frozen Physical Migration（涉及物理 DB 时）
 → Implementation Blueprint
 ```
 
-Feature 是 derived delivery view，不插入上述 authority 链。
+Feature Page 是端到端交付的人工维护事实源；它不取代 Domain / Contract authority，只维护 Feature Lane 状态、范围和交付关联。`FEATURE_PAGE_INDEX.json`、Matrix 与其它控制视图才是派生视图。
 
 ### 完成状态
 
@@ -132,7 +132,7 @@ Implementation Worker 开始代码修改前至少确认：
 9. 没有 material repository drift；
 10. 输出文档路径符合 `backend | admin | mobile` track 规则。
 
-Feature 行显示 Feature Page 人工裁决的 Lane 状态；READY 等 Stage 细节只在 Feature Page 对应模块和 Task Manifest 中展示。System / Domain 汇总行仍可显示 Registry 派生的 Stage 状态。
+Feature 行显示 Feature Page 人工维护的 Lane 状态；READY 等 Stage 细节只在 Feature Page 对应模块和 Task Manifest 中展示。System / Domain 汇总行仍可显示 Registry 派生后投影的概览状态。
 
 ## 七、并行规则
 

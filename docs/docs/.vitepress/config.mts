@@ -62,6 +62,7 @@ const featuresSidebar = [
     items: [
       { text: '功能总览', link: '/features/' },
       { text: '功能文档规范', link: '/features/FEATURE_DOCUMENT_STANDARD' },
+      { text: 'Feature Page 模板', link: '/features/_template' },
       { text: '领域与功能关系', link: '/domains/FEATURE_RELATIONSHIP_MODEL' }
     ]
   },
