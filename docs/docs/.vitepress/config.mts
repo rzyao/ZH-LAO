@@ -24,9 +24,7 @@ const productSidebar = [
 const architectureSidebar = [
   {
     text: '架构总览',
-    items: [
-      { text: '总体架构', link: '/architecture/' }
-    ]
+    items: [{ text: '总体架构', link: '/architecture/' }]
   },
   {
     text: '领域架构',
@@ -51,8 +49,23 @@ const architectureSidebar = [
   },
   {
     text: '数据架构',
+    items: [{ text: 'PostgreSQL 架构规范', link: '/architecture/data/postgresql' }]
+  }
+]
+
+const featuresSidebar = [
+  {
+    text: '功能交付',
     items: [
-      { text: 'PostgreSQL 架构规范', link: '/architecture/data/postgresql' }
+      { text: '功能总览', link: '/features/' },
+      { text: '功能文档规范', link: '/features/FEATURE_DOCUMENT_STANDARD' }
+    ]
+  },
+  {
+    text: '当前功能',
+    items: [
+      { text: '登录与会话', link: '/features/login/' },
+      { text: '音频生产', link: '/features/audio-production/' }
     ]
   }
 ]
@@ -70,31 +83,48 @@ const developmentSidebar = [
   },
   {
     text: '开发规范',
+    collapsed: true,
     items: [
       { text: '可执行规格系统', link: '/development/SPEC_SYSTEM' },
       { text: '实现蓝图模板', link: '/development/IMPLEMENTATION_BLUEPRINT_TEMPLATE' },
       { text: 'AI 多会话工作流', link: '/development/workflow/' },
-      { text: '工作流启动简报', link: '/development/workflow/WORKFLOW_BOOTSTRAP_BRIEF' }
+      { text: '任务清单规范', link: '/development/workflow/TASK_MANIFEST_SCHEMA' },
+      { text: '文档系统规范', link: '/governance/DOMAIN_DOCUMENT_STANDARD' }
     ]
   },
   {
-    text: '客户端基础',
+    text: '后端开发',
     collapsed: true,
     items: [
-      { text: '后台基础计划', link: '/development/ADMIN_FOUNDATION_PLAN' },
-      { text: '移动端基础计划', link: '/development/MOBILE_FOUNDATION_PLAN' }
+      { text: '后端入口', link: '/development/backend/' },
+      { text: '应用基础', link: '/development/backend/foundation/' },
+      { text: '身份', link: '/development/backend/identity/' },
+      { text: '平台', link: '/development/backend/platform/' },
+      { text: '运营', link: '/development/backend/operations/' },
+      { text: '内容', link: '/development/backend/content/' },
+      { text: '学习', link: '/development/backend/learning/' },
+      { text: '音频生产', link: '/development/backend/audio/' }
     ]
   },
   {
-    text: '领域开发',
+    text: '后台开发',
     collapsed: true,
     items: [
-      { text: '身份', link: '/development/02-identity/IDENTITY_IMPLEMENTATION_PLAN' },
-      { text: '平台', link: '/development/03-platform/PLATFORM_IMPLEMENTATION_PLAN' },
-      { text: '运营', link: '/development/04-operations/OPERATIONS_IMPLEMENTATION_PLAN' },
-      { text: '内容', link: '/development/05-content/CONTENT_DESIGN_BRIEF' },
-      { text: '学习', link: '/development/06-learning/LEARNING_DESIGN_BRIEF' },
-      { text: '音频生产', link: '/development/07-audio/AUDIO_DESIGN_BRIEF' }
+      { text: '后台入口', link: '/development/admin/' },
+      { text: '后台基础', link: '/development/admin/foundation/' },
+      { text: '权限与操作员', link: '/development/admin/access-control/' },
+      { text: '平台控制', link: '/development/admin/platform-control/' },
+      { text: '内容管理', link: '/development/admin/content-management/' },
+      { text: '音频生产工作台', link: '/development/admin/audio-production/' }
+    ]
+  },
+  {
+    text: '移动端开发',
+    collapsed: true,
+    items: [
+      { text: '移动端入口', link: '/development/mobile/' },
+      { text: '移动端基础', link: '/development/mobile/foundation/' },
+      { text: '登录与认证', link: '/development/mobile/auth/' }
     ]
   }
 ]
@@ -104,7 +134,7 @@ const domainsSidebar = [
     text: '领域设计',
     items: [
       { text: '领域总览', link: '/domains/' },
-      { text: '领域文档规范', link: '/governance/DOMAIN_DOCUMENT_STANDARD' }
+      { text: '文档系统规范', link: '/governance/DOMAIN_DOCUMENT_STANDARD' }
     ]
   },
   {
@@ -112,13 +142,7 @@ const domainsSidebar = [
     collapsed: true,
     items: [
       { text: '领域概览', link: '/domains/identity/' },
-      {
-        text: '业务设计',
-        collapsed: true,
-        items: [
-          { text: '业务流程', link: '/domains/identity/flows' }
-        ]
-      },
+      { text: '业务流程', link: '/domains/identity/flows' },
       { text: '领域模型', link: '/domains/identity/model' },
       { text: '数据设计', link: '/domains/identity/database' }
     ]
@@ -146,13 +170,7 @@ const domainsSidebar = [
     collapsed: true,
     items: [
       { text: '领域概览', link: '/domains/learning/' },
-      {
-        text: '业务设计',
-        collapsed: true,
-        items: [
-          { text: '学习进度', link: '/domains/learning/progress' }
-        ]
-      },
+      { text: '学习进度', link: '/domains/learning/progress' },
       { text: '领域模型', link: '/domains/learning/model' },
       { text: '数据设计', link: '/domains/learning/database' }
     ]
@@ -241,13 +259,7 @@ const domainsSidebar = [
     collapsed: true,
     items: [
       { text: '领域概览', link: '/domains/trust/' },
-      {
-        text: '业务设计',
-        collapsed: true,
-        items: [
-          { text: '治理流程', link: '/domains/trust/moderation' }
-        ]
-      },
+      { text: '治理流程', link: '/domains/trust/moderation' },
       { text: '契约与边界', link: '/domains/trust/contracts' },
       { text: '数据设计', link: '/domains/trust/database' }
     ]
@@ -292,7 +304,7 @@ const governanceSidebar = [
   {
     text: '设计治理',
     items: [
-      { text: '领域文档规范', link: '/governance/DOMAIN_DOCUMENT_STANDARD' },
+      { text: '文档系统规范', link: '/governance/DOMAIN_DOCUMENT_STANDARD' },
       { text: '设计决策台账', link: '/governance/design-register' },
       { text: '未决事项', link: '/governance/open-questions' },
       { text: '来源覆盖清单', link: '/governance/source-coverage' }
@@ -321,8 +333,9 @@ export default defineConfig({
       { text: '首页', link: '/' },
       { text: '产品', link: '/product/product-overview' },
       { text: '架构', link: '/architecture/' },
-      { text: '开发', link: '/development/' },
       { text: '领域', link: '/domains/' },
+      { text: '功能', link: '/features/' },
+      { text: '开发', link: '/development/' },
       { text: '治理', link: '/governance/design-register' },
       { text: 'ADR', link: '/adr/' }
     ],
@@ -330,8 +343,9 @@ export default defineConfig({
       '/guide/': guideSidebar,
       '/product/': productSidebar,
       '/architecture/': architectureSidebar,
-      '/development/': developmentSidebar,
       '/domains/': domainsSidebar,
+      '/features/': featuresSidebar,
+      '/development/': developmentSidebar,
       '/governance/': governanceSidebar,
       '/adr/': adrSidebar
     },

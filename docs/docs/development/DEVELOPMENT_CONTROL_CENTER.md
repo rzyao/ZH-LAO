@@ -5,31 +5,25 @@ last_updated: 2026-08-31
 
 # 开发流程控制中心
 
-本页是开发控制面的**导航与裁决入口**，不再复制每个 Domain 的详细进度和排期。
-
-它回答：
-
-- 当前状态应该去哪里看；
-- 哪种证据优先级最高；
-- 什么条件允许 Task 开始；
-- 哪些轨道可以并行；
-- Gate FAIL、Spec Conflict 或 Repository Drift 时怎么处理。
+本页是开发控制面的导航与裁决入口，不复制每个 Domain / Feature 的详细进度和排期。
 
 ## 一、控制面入口
 
 | 问题 | 查看 |
 | --- | --- |
 | 现在最应该启动什么 | [当前下一动作](workflow/NEXT_ACTIONS.md) |
-| 某个 Domain 处于生命周期哪一步 | [领域生命周期矩阵](DOMAIN_LIFECYCLE_MATRIX.md) |
-| 某个阶段有哪些详细证据和历史 | [开发进度记录](DEVELOPMENT_PROGRESS.md) |
-| 新会话如何恢复角色、Task、Claim、依赖 | [Workflow Control Plane](workflow/) |
-| Executable Spec / Blueprint 怎么工作 | [Executable Spec System](SPEC_SYSTEM.md) |
-| Blueprint 应包含什么 | [Implementation Blueprint Template](IMPLEMENTATION_BLUEPRINT_TEMPLATE.md) |
-| 当前 Task 能不能开始 | 读取该 Task Manifest + Entry Gate + required sources |
+| 某个 Domain 处于哪一步 | [领域生命周期矩阵](DOMAIN_LIFECYCLE_MATRIX.md) |
+| 用户/运营功能是否真正交付 | [功能交付](/features/) |
+| Backend 任务如何组织 | [后端开发](backend/) |
+| Admin 页面如何组织 | [后台开发](admin/) |
+| Mobile 页面如何组织 | [移动端开发](mobile/) |
+| 详细证据和历史 | [开发进度记录](DEVELOPMENT_PROGRESS.md) |
+| 新会话如何恢复角色、Task、Claim | [Workflow Control Plane](workflow/) |
+| Spec / Blueprint 规则 | [Executable Spec System](SPEC_SYSTEM.md) |
 
-本页不保存另一份“当前 Task 排期表”。动态调度只在 `workflow/NEXT_ACTIONS.md` 维护，避免多份全局页面互相漂移。
+动态调度只在 `workflow/NEXT_ACTIONS.md` 维护，避免多份全局页面互相漂移。
 
-## 二、Source of Truth 优先级
+## 二、Source of Truth
 
 ### 产品 / 架构 / 领域事实
 
@@ -41,10 +35,9 @@ Frozen Physical Migration（涉及物理 DB 时）
 → Canonical Executable Spec（已采用时）
 → Execution Brief
 → Implementation Blueprint
-→ Implementation Notes
 ```
 
-Implementation Blueprint 是 derived HOW，不能覆盖上游 WHAT / MUST BE TRUE。
+Feature 是 derived delivery view，不插入上述 authority 链。
 
 ### 完成状态
 
@@ -57,194 +50,115 @@ Final Gate / Final Audit
 → NEXT_ACTIONS / Matrix / Control Center summary
 ```
 
-因此：
-
-- 有代码 commit 不等于 Gate PASS；
-- Matrix 显示 PASS 但 Final Gate 显示 FAIL 时，以 Final Gate 为准；
-- Blueprint Ready 不等于实现完成；
-- 聊天上下文不属于 authority。
-
-## 三、标准领域生命周期
-
-完整说明见[开发执行入口](index.md)。控制面使用以下状态骨架：
+## 三、开发轴
 
 ```text
-Baseline / Repository Grounding
-→ Domain Design
-   ├─ Product Semantics
-   ├─ Use Cases / Workflow
-   ├─ State Machine
-   ├─ API / Public / Cross-domain / Event Contract
-   └─ Security / Permission / Transaction / Concurrency / Idempotency
-→ Executable Spec（采用时）
+Backend Track = Domain / Domain capability driven
+Admin Track   = Page / Workbench / Operator Flow driven
+Mobile Track  = Screen / User Flow / Journey driven
+Feature       = cross-track delivery / E2E view
+```
+
+Backend、Admin、Mobile 的文档不得继续混在同一个数字 Phase 目录。
+
+## 四、标准 Domain → Delivery 流程
+
+```text
+产品定义
+→ 业务设计 / 状态机
+→ 领域模型与数据设计
+→ API / Public / Cross-domain / Event Contract
+→ 安全 / 权限 / 事务 / 并发 / 幂等
 → DESIGN_GATE
+→ Spec（采用时）
 → Execution Brief
 → Implementation Blueprint
-→ IMPLEMENTATION_READY_VALIDATION
 → Backend Implementation
-→ BACKEND_VERIFICATION_GATE
-→ Admin / Client / Cross-domain Integration（按适用范围并行）
-→ DOMAIN_ACCEPTANCE_GATE
-→ DOMAIN_ACCEPTED
-→ System Integration / Production Readiness / Release
+→ BACKEND_GATE
+        ↓
+Admin / Mobile / Integration（按 Feature 需要并行）
+        ↓
+对应 Track Gate
+        ↓
+Feature E2E / Domain Acceptance
 ```
 
-### 不能混用的状态
+不能混用：
 
 ```text
-DB_CONTRACT_FROZEN      ≠ Backend Implemented
-DESIGN_GATE PASS        ≠ Backend Verified
-BACKEND_VERIFIED        ≠ Domain Accepted
-ADMIN_GATE PASS         ≠ Client Complete
-DOMAIN_ACCEPTED         ≠ Production Ready
+DB_CONTRACT_FROZEN ≠ Backend Implemented
+DESIGN_GATE PASS   ≠ Backend Verified
+BACKEND_GATE PASS  ≠ Feature Delivered
+ADMIN_GATE PASS    ≠ Mobile Complete
+FEATURE_GATE PASS  ≠ Production Ready
 ```
 
-任何全局页面都不得把这些状态压缩成一个模糊的 `FROZEN`。
+## 五、Task 准入
 
-## 四、Task 准入
+Implementation Worker 开始代码修改前至少确认：
 
-Implementation Worker 开始代码修改前至少必须确认：
-
-1. 当前 Task Manifest 存在；
-2. Role 与 Task 匹配；
+1. Task Manifest 存在；
+2. Role / track 匹配；
 3. Entry Gate 满足；
 4. required sources 可读取；
-5. upstream dependency snapshot 仍有效；
-6. active Claim 不冲突；
-7. 如果 Blueprint required：Blueprint 存在且 `base_commit`、spec SHA、authority snapshot 可验证；
-8. 没有 material repository drift。
+5. dependency snapshot 有效；
+6. Claim 不冲突；
+7. Blueprint required 时 base/spec/authority snapshot 可验证；
+8. 没有 material repository drift；
+9. 输出文档路径符合 `backend | admin | mobile` track 规则。
 
-任何一项不满足，都不能通过“根据当前代码猜一下”绕过。
+## 六、并行规则
 
-## 五、并行规则
-
-严格的是**依赖链上的 Gate 顺序**，不是整个项目只能串行推进一个 Phase。
-
-可并行 Task 必须同时满足：
-
-```text
-upstream dependency satisfied
-+ conflicts_with check passed
-+ owned/shared/exclusive paths compatible
-+ public contract snapshot compatible
-+ active claims compatible
-```
-
-典型并行轨：
+严格的是依赖链 Gate 顺序，不是整个项目一次只能做一个 Phase。
 
 ```text
 Backend Worker
 + Admin Worker
-+ Client Worker
++ Mobile(client_worker)
 + Design / Spec Compiler
 + Recovery / Audit Worker
 ```
 
-详细规则见 [CONCURRENCY_RULES](workflow/CONCURRENCY_RULES.md)。
+只有依赖、路径、contract snapshot 与 Claim 都兼容时才允许并行。
 
-## 六、Gate FAIL / Recovery / Drift
-
-异常不是生命周期末尾的一列，而是任意状态都可能触发的转移：
+## 七、Gate FAIL / Recovery / Drift
 
 ```text
 ANY STATE
-→ GATE_FAIL
-  / SPEC_CONFLICT
-  / IMPLEMENTATION_BLOCKER
-  / REPOSITORY_DRIFT
+→ GATE_FAIL / SPEC_CONFLICT / IMPLEMENTATION_BLOCKER / REPOSITORY_DRIFT
 → RECOVERY_REQUIRED
 → Recovery / Design Fix / Revalidation
 → 重新运行原 Gate
 ```
 
-### 下游调度
+当前 Gate `!= PASS` 时：
 
 ```text
-当前 Gate != PASS
-→ dependent downstream = BLOCKED
-→ shortest legal Recovery = PRIMARY
-→ independent parallel-safe Task = 可继续
+dependent downstream = BLOCKED
+shortest legal Recovery = PRIMARY
+independent parallel-safe Task = 可继续
 ```
 
-Implementation Worker 不得自行：
+## 八、Grounding Gate
 
-- 改 frozen migration；
-- 改公共契约来迁就实现；
-- 扩大 Task Scope；
-- 把缺失设计解释成自己的自由决策。
+严重 finding 必须重新 grounding 到当前 `main`，给出 source path、exact heading/symbol/field、current commit、authority 交叉验证和可复现 evidence。
 
-## 七、Grounding Gate
+聊天上下文不是 authority。
 
-准备记录以下严重 finding 时：
+## 九、全局视图维护
 
-```text
-BLOCKER
-HIGH
-DATABASE_CONTRACT_CONFLICT
-DESIGN_CONTRACT_CONFLICT
-SPEC_CONFLICT
-REPOSITORY_DRIFT
-```
+Worker 主要写自己的 Task 事实：Manifest、Event、Brief/Blueprint、Report、Gate、Claim release。
 
-必须重新 grounding 到当前 `main`，至少给出：
-
-1. source path；
-2. exact heading / symbol / field；
-3. current commit；
-4. 与 frozen authority / public contract 的交叉验证；
-5. 可复现 evidence。
-
-无法在当前 source 中重新找到的 finding 不得进入 Gate 计数。
-
-## 八、全局视图维护
-
-Worker 的主要写入对象是自己的 Task 事实：
-
-```text
-Task Manifest
-Task Event
-Domain Report / Audit
-Gate Evidence
-Claim release
-Blueprint conformance / conflict evidence
-```
-
-以下属于派生全局视图：
+以下为派生视图，由 Dispatcher / Reconciliation 汇总：
 
 ```text
 workflow/NEXT_ACTIONS.md
 DOMAIN_LIFECYCLE_MATRIX.md
 DEVELOPMENT_PROGRESS.md
 DEVELOPMENT_CONTROL_CENTER.md
+features/* delivery status
 ```
 
-它们应由 Dispatcher / Reconciliation 汇总，不应由多个并行 Worker 同时把同一状态抄写到四个大文件。
+## 十、Production Readiness
 
-## 九、Production Readiness
-
-Production Readiness 是系统级生命周期，不是单个 Domain 在 Backend Gate 后自行宣布。
-
-只有 release-required 的 Domain、Admin、Client、Integration 全部满足要求后，才进入：
-
-```text
-Full-System E2E
-Performance
-Security
-Observability
-Migration / Deploy Validation
-Backup / Restore
-Secrets / Configuration
-Disaster Recovery
-PRODUCTION_READINESS_GATE
-Release
-```
-
-## 十、当前下一动作
-
-不要在本页维护静态“当前执行窗口”。
-
-直接读取：
-
-**[workflow/NEXT_ACTIONS.md →](workflow/NEXT_ACTIONS.md)**
-
-然后对准备启动的 Task 重新验证最新 `main`、Manifest、Claim 和 Entry Gate。
+Production Readiness 是系统级生命周期。只有 release-required Domain、Backend、Admin、Mobile、Feature/Integration 全部满足后，才进入全系统 E2E、性能、安全、可观测性、部署、备份恢复和正式发布门禁。

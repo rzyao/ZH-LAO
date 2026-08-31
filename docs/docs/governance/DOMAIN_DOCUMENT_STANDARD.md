@@ -1,451 +1,229 @@
-# 领域文档规范
+# 文档系统与领域文档规范
 
 **状态：ACTIVE / 文档治理规范**
 
-本规范用于统一 ZH-LAO 各领域文档的目录结构、侧边栏展示、中文显示规则与长期维护边界。
+本规范定义 ZH-LAO 文档的信息架构、中文显示规则、领域事实、功能交付以及 Backend / Admin / Mobile 三条实施轨的边界。
 
-目标不是强制一次性重写所有既有文档，而是从现在开始建立稳定的文档信息架构；已有文档可以在后续实质设计、审计或重构时逐步迁入本规范。
-
----
-
-## 一、核心原则
-
-### 1. 顶部导航按文档大类划分
-
-顶部导航只表达全站一级信息架构：
+## 一、全站信息架构
 
 ```text
-首页
-产品
-架构
-开发
-领域
-治理
-ADR
+product/       产品层
+architecture/  系统架构层
+domains/       领域事实层
+features/      功能交付层
+development/   实施与证据层
+governance/    设计治理层
+adr/           架构决策记录
+guide/         阅读与维护说明
 ```
 
-不同区域使用各自独立的侧边栏，不再使用一套全局侧边栏同时展示全部内容。
+### 1. `product/`
 
-### 2. 领域侧边栏按领域组织
+回答：为什么做、给谁用、提供什么价值、产品范围是什么。
 
-`/domains/` 下的侧边栏先按领域分组：
+### 2. `architecture/`
+
+回答：系统长期如何组织。只保存跨领域、跨应用或基础设施级稳定结构。
+
+### 3. `domains/`
+
+回答：这个领域最终是什么。
+
+领域设计按以下顺序组织：
 
 ```text
-身份
-内容
-学习
-音频生产
-社交
-聊天
-商业
-奖励
-信任与安全
-运营
-平台
+产品与范围
+→ 业务设计 / 用例 / 工作流 / 状态机
+→ 领域模型与事实所有权
+→ 数据设计
+→ API / Public / Cross-domain / Event Contract
+→ 权限 / 安全 / 事务 / 并发 / 幂等 / 审计
 ```
 
-每个领域默认可折叠，不得把所有领域的所有子页面连续平铺在同一级。
+数据库不是产品设计起点。必须先明确业务，再推导领域事实和数据模型。
 
-### 3. 领域内部按设计生命周期组织
+### 4. `features/`
 
-领域文档的阅读顺序遵循：
+回答：用户或运营人员最终能完成什么。
 
-```text
-产品定义
-↓
-业务设计
-↓
-领域设计
-↓
-数据设计
-↓
-契约设计
-↓
-可靠性与治理设计
-↓
-设计状态
-```
-
-具体业务能力属于“业务设计”的子项，不得与“数据设计”“契约设计”“领域模型”等文档类型混在同一级。
-
-### 4. 左侧导航与页面导航职责分离
-
-左侧侧边栏回答：
-
-> 我现在处于哪个文档区域、哪个领域、哪类设计？
-
-右侧页面导航回答：
-
-> 当前这篇文档内部有哪些章节？
-
-侧边栏原则上最多三级，不把页面内部的细节标题继续塞入左侧导航。
-
----
-
-## 二、中文显示规则
-
-### 1. 面向人的显示名称优先中文
-
-以下内容默认使用中文：
-
-- 顶部导航；
-- 侧边栏分组；
-- 页面标题与章节标题；
-- 表格列名；
-- 状态说明；
-- 业务概念说明；
-- 文档中的字段中文名称；
-- Gate / Report 的人类可读说明。
-
-例如优先显示：
-
-```text
-产品语义
-用例
-业务流程
-状态机
-领域模型
-数据设计
-接口契约
-公共契约
-跨域契约
-事件契约
-可靠性与治理
-实现蓝图
-设计审计
-设计门禁
-```
-
-而不是在导航中直接显示：
-
-```text
-Product Semantics
-Use Cases
-Workflow
-State Machine
-Domain Model
-Database
-Public Contracts
-Implementation Blueprint
-```
-
-### 2. 技术标识保持原值
-
-以下内容不得为了中文显示而改写技术标识：
-
-- 数据库 schema / table / column 名；
-- JSON / API payload 字段名；
-- TypeScript symbol；
-- class / function / variable 名；
-- HTTP method / path；
-- event type；
-- permission key；
-- Requirement ID；
-- Gate ID；
-- 文件路径；
-- commit SHA；
-- 枚举值和状态码。
+Feature 是**横向交付地图**，不是第二份产品、领域、API 或数据库事实源。它只引用 authoritative 文档并组织端到端验收。
 
 例如：
 
 ```text
-用户编号（`user_id`）
-会话编号（`conversation_id`）
-当前状态（`status`）
+登录
+完成一课
+音频生产
+发现用户
+发送消息
+购买礼物
+举报用户
+后台审核
 ```
 
-而不是把真实 API 字段从 `user_id` 改成 `用户编号`。
+### 5. `development/`
 
-### 3. 字段文档采用“双名称”表达
+回答：当前如何实施、做到哪一步、证据是什么。
 
-涉及数据库字段、API 字段、事件字段时，推荐使用：
-
-| 中文名称 | 技术字段 | 类型 | 必填 | 说明 |
-| --- | --- | --- | --- | --- |
-| 用户编号 | `user_id` | UUID | 是 | Identity 的稳定 logical UUID |
-| 当前状态 | `status` | string | 是 | 当前业务状态 |
-
-正文第一次出现时推荐：
-
-> 用户编号（`user_id`）用于保存 Identity 的稳定 logical UUID。
-
-之后上下文明确时可以只使用中文业务名称。
-
-### 4. Domain 名采用“中文优先 + 英文标识”
-
-导航和标题推荐：
+正式实施轴：
 
 ```text
-身份（Identity）
-内容（Content）
-学习（Learning）
-音频生产（Audio Production）
-社交（Social）
-聊天（Chat）
-商业（Commerce）
-奖励（Rewards）
-信任与安全（Trust & Safety）
-运营（Operations）
-平台（Platform）
+development/backend/   领域驱动
+development/admin/     页面 / 运营工作流驱动
+development/mobile/    页面 / 用户流程驱动
+development/workflow/  Task / Claim / Gate / Handoff 控制面
 ```
 
-代码、schema、目录名继续保持既有英文技术标识。
+## 二、Backend / Admin / Mobile 的组织规则
 
----
+### Backend：领域驱动
 
-## 三、标准领域文档结构
-
-新领域或发生实质重构的既有领域，推荐逐步形成以下结构。
-
-### 1. 领域概览
-
-回答：
+后端实施单位默认是 Domain 或 Domain capability：
 
 ```text
-这个领域负责什么？
-不负责什么？
-主要用户是谁？
-当前设计状态是什么？
-依赖哪些领域？
+development/backend/identity/
+development/backend/content/
+development/backend/learning/
+development/backend/audio/
 ```
 
-### 2. 产品与范围
+Backend 不按“登录页、聊天页、订单页”拆 Domain ownership，也不得按数据库表生成 CRUD 目录。
 
-包含：
+### Admin：页面与运营工作流驱动
+
+后台目录以运营人员看到的页面、工作台或完整工作流组织：
 
 ```text
-产品目标
-用户价值
-功能范围
-本期必须做
-本期明确不做
-成功条件
+development/admin/access-control/
+development/admin/platform-control/
+development/admin/content-management/
+development/admin/audio-production/
 ```
 
-### 3. 业务设计
+一个 Admin 工作台可以消费多个 Domain，但不能因此取得这些 Domain 的 canonical ownership。
 
-包含：
+### Mobile：页面与用户流程驱动
+
+移动端以 Screen、Flow、Journey 组织：
 
 ```text
-用例
-用户 / 运营流程
-业务规则
-工作流
-状态机
+development/mobile/auth/
+development/mobile/learning/
+development/mobile/discovery/
+development/mobile/chat/
 ```
 
-领域内部的具体业务能力也归入本组。
+前端目录不得机械照抄 Domain、数据库表或后端 Repository 结构。
 
-例如内容领域：
+## 三、Feature 的正确职责
+
+Feature 负责把以下内容串成一个可交付能力：
 
 ```text
-业务设计
-├─ 知识内容
-├─ 课程体系
-├─ 词典
-├─ 练习
-├─ 工作流
-└─ 状态机
+用户 / 运营目标
+→ 用户流程
+→ 涉及 Domain
+→ Backend capability
+→ Admin / Mobile experience
+→ Cross-domain / Infrastructure
+→ E2E acceptance
+→ Feature Gate
 ```
 
-聊天领域：
+Feature 文档禁止复制：
+
+- 数据库字段清单；
+- 完整 API schema；
+- Domain 状态机定义；
+- Public Contract 正文；
+- Implementation Blueprint；
+- 第二份业务规则。
+
+这些内容必须链接到原 authority。
+
+## 四、Authority 规则
 
 ```text
-业务设计
-├─ 会话
-├─ 消息
-├─ 工作流
-└─ 状态机
+产品事实       → product/ 或 authoritative Domain product semantics
+领域事实       → domains/
+物理数据库事实 → frozen migration + Domain 数据设计
+机器规格       → development/specs/
+任务范围       → Task Manifest + Execution Brief
+实现 HOW       → Implementation Blueprint
+完成事实       → Gate / Audit / Implementation Report + tests/CI
+功能交付状态   → features/ 的 derived delivery view
 ```
 
-### 4. 领域模型
+Feature Gate 不能覆盖 Domain Gate；UI 页面文档不能修改 API/Public Contract；Backend 文档不能反向决定产品应该有什么功能。
 
-包含：
+## 五、中文显示规则
+
+面向人的内容默认中文：
+
+- 顶部导航与侧边栏；
+- 页面/章节标题；
+- 表格列名；
+- 业务状态说明；
+- 字段的人类名称。
+
+技术标识保持原值：
+
+- schema / table / column；
+- JSON/API 字段；
+- HTTP method/path；
+- TypeScript symbol；
+- event type；
+- permission key；
+- Requirement ID / Gate ID；
+- 文件路径、commit SHA、枚举值。
+
+字段推荐双名称：
+
+| 中文名称 | 技术字段 | 类型 | 说明 |
+| --- | --- | --- | --- |
+| 用户编号 | `user_id` | UUID | Identity 稳定逻辑编号 |
+| 当前状态 | `status` | string | 当前业务状态 |
+
+Domain 显示采用“中文优先 + 英文技术名”，例如“身份（Identity）”。
+
+## 六、导航层级
+
+1. 顶部导航按文档大类划分。
+2. 每个区域拥有独立 sidebar。
+3. 领域侧边栏按 11 个正式 Domain 折叠。
+4. Backend 按 Domain 分组。
+5. Admin / Mobile 按页面或工作流分组。
+6. Feature 按用户/运营能力分组。
+7. 左侧侧边栏原则上最多三级；页面内部章节交给右侧 outline。
+8. ADR 不逐条常驻侧边栏，只保留索引入口。
+
+## 七、实施文档路径
+
+新任务从本规范启用后使用：
 
 ```text
-Domain boundary
-canonical fact owner
-aggregate
-entity
-value semantics
-跨域责任
+Backend:
+docs/docs/development/backend/<domain-or-capability>/
+
+Admin:
+docs/docs/development/admin/<page-or-workflow>/
+
+Mobile:
+docs/docs/development/mobile/<flow-or-screen-group>/
 ```
 
-文档显示名称使用中文，必要的 DDD 技术术语可以在首次出现时保留英文括注。
+Task Manifest、Brief、Blueprint、Report 的 path 必须与 track 一致。
 
-### 5. 数据设计
+## 八、非追溯迁移
 
-包含：
+历史 `development/01-foundation`～`development/07-audio` 与根目录 Foundation 文档已经形成 Gate/Report 引用链，因此不为了目录整齐批量搬迁。
 
-```text
-logical data model
-数据库表
-字段
-约束
-索引
-ID 策略
-migration
-```
+从本规范启用后：
 
-数据库真实标识保持原英文名称，解释使用中文。
+- 旧 Phase 目录只读，不再创建新实施工件；
+- 新 Task 必须进入 `backend/`、`admin/` 或 `mobile/`；
+- 历史 Task 发生 Recovery、实质设计变更或新版实施时，新工件进入新目录；
+- 旧文件继续作为历史 evidence，不自动成为新 Task authority；
+- 正常侧边栏只展示新入口，不再展示数字 Phase 目录。
 
-### 6. 契约设计
-
-包含：
-
-```text
-接口契约
-公共契约
-跨域契约
-事件契约
-```
-
-API 字段应遵循“双名称”规则；代码示例中的真实 payload 不翻译。
-
-### 7. 可靠性与治理
-
-包含：
-
-```text
-权限
-安全
-事务
-并发
-幂等
-重试
-审计
-一致性
-```
-
-这些内容属于设计一级内容，不得留到开发末期临时补充。
-
-### 8. 设计状态
-
-包含：
-
-```text
-设计审计
-设计门禁
-未决事项
-已知限制
-```
-
-开发执行工件不放入 `/domains/`。
-
----
-
-## 四、`domains` 与 `development` 的边界
-
-### `/domains/`
-
-回答：
-
-> 这个领域最终是什么？
-
-保存长期有效的设计事实：
-
-```text
-产品范围
-业务规则
-用例
-工作流
-状态机
-领域模型
-数据模型
-契约
-可靠性约束
-```
-
-### `/development/`
-
-回答：
-
-> 这个领域当前怎么开发、开发到哪一步？
-
-保存执行与证据：
-
-```text
-设计简报
-设计审计
-设计门禁
-执行简报
-实现蓝图
-实现计划
-实现报告
-恢复简报
-任务清单
-证据
-```
-
-不得因为 `/development/` 中出现了一份临时执行文档，就把它复制成 `/domains/` 下新的 canonical 业务事实。
-
----
-
-## 五、文件名与显示名
-
-### 1. 文件路径稳定优先
-
-既有文件不因为中文显示规范而批量改名。
-
-例如文件仍可保持：
-
-```text
-CONTENT_PRODUCT_SEMANTICS.md
-CONTENT_USE_CASES.md
-CONTENT_PUBLIC_CONTRACTS.md
-IMPLEMENTATION_BLUEPRINT_TEMPLATE.md
-```
-
-但侧边栏显示：
-
-```text
-产品语义
-用例
-公共契约
-实现蓝图模板
-```
-
-这样同时满足：
-
-```text
-人类阅读友好
-AI 引用稳定
-Git 历史稳定
-跨文档链接稳定
-```
-
-### 2. 新文件命名
-
-技术文件名继续优先使用稳定英文 / 大写标识；页面标题和导航显示中文。
-
-不要求为了中文阅读把所有 Markdown 文件名改成中文。
-
----
-
-## 六、侧边栏规则
-
-1. 不再使用全站统一 sidebar 数组。
-2. 产品、架构、开发、领域、治理、ADR 使用独立 sidebar。
-3. 领域侧边栏按 11 个正式 Domain 分组。
-4. Domain 分组默认折叠。
-5. 具体业务能力放入该 Domain 的“业务设计”子组。
-6. 历史归档不作为当前领域主导航常驻内容。
-7. ADR 侧边栏只保留 ADR 索引等入口，不常驻列出全部 ADR。
-8. 侧边栏最多三级；更细内容使用页面右侧导航。
-9. 导航显示尽量中文；代码标识保持原值。
-10. 不创建不存在的占位链接。某类文档尚不存在时，不为了导航完整而制造空白页面。
-
----
-
-## 七、非追溯迁移原则
-
-本规范从启用后对新文档、新 Domain 设计和实质重构生效。
-
-既有领域：
-
-- 不要求一次性重命名所有文件；
-- 不要求为了目录对齐重写 canonical 内容；
-- 可以先通过侧边栏重新分组；
-- 后续发生实质设计变更时，再逐步补齐缺失的“产品与范围 / 状态机 / 契约 / 可靠性”等文档。
-
-文档治理目标是减少漂移和阅读成本，不制造新的迁移风险。
+这叫**非追溯迁移**：改变未来工作方式，但不破坏既有证据链。
