@@ -2,22 +2,81 @@
 
 本目录承载 [Executable Spec System](../SPEC_SYSTEM.md) 的 machine-readable 工件。
 
-- `index.json` 是正式采用 registry；只有列入它的 Domain 才受本层强制检查。
-- `<domain>.spec.json` 是 authoritative canonical spec，格式由 `executable-spec.schema.json` 定义。
-- `evidence/<domain>.evidence.json` 是 derived evidence；它必须携带 canonical spec 的 SHA-256，不能独立改变 requirement。
-- `changes/`（需要时创建）保存 `SC-YYYY-NNN` change records。
+## Scope
 
-代码级实施说明不放在本目录伪装成 machine-readable spec。采用 Spec 的 implementation Task 应根据 [Implementation Blueprint Template](../IMPLEMENTATION_BLUEPRINT_TEMPLATE.md) 在对应 Domain development 目录生成 `*_IMPLEMENTATION_BLUEPRINT.md`，并由 Task Manifest 引用。
-
-Blueprint 是 derived guidance：
+Executable Spec 正式支持三种 scope：
 
 ```text
-canonical spec / frozen authority
-→ Execution Brief
-→ Implementation Blueprint
-→ code / tests / evidence
+domain   → domains/<id>.spec.json
+feature  → features/<id>.spec.json
+system   → system/<id>.spec.json
 ```
 
-它必须绑定 `base_commit` 与 canonical spec SHA（若 adopted），包含 Requirement→file/symbol/test trace、Decision Budget 和 Conflict Protocol，但不能定义新的 requirement，也不能独立宣称 Gate PASS。
+`index.json` 是 adoption 的唯一 registry。只有列入 `adopted_scopes` 的对象才可以宣称 Executable Spec Coverage。
 
-请不要为旧 Domain 批量伪造 manifests、Blueprint 或 coverage。采用发生在该 Domain 的下一次 Design/contract revision 中，或由具体 Task 显式升级，并由对应 Design Gate / Task Manifest 记录。
+## Canonical 与 Derived
+
+```text
+Authoritative Markdown / Migration / ADR / Public Contract
+        ↓
+canonical spec
+        ↓
+Execution Brief → Implementation Blueprint
+        ↓
+code / tests
+        ↓
+derived evidence
+```
+
+- `domains|features|system/*.spec.json`：authoritative canonical executable spec；
+- `evidence/<scope-dir>/*.evidence.json`：derived implementation/gate evidence；必须绑定 canonical spec SHA-256；
+- `changes/SC-YYYY-NNN.yaml`：已 adopted spec 的永久 change record；PR 描述不能代替；
+- `executable-spec.schema.json`：scope-aware artifact field contract；
+- `scripts/check_executable_specs.py`：结构、traceability 与 evidence drift checker。
+
+Blueprint 不放在本目录伪装成 canonical spec。它是当前 repository snapshot 上的 derived implementation guidance，必须绑定 base commit + canonical spec SHA。
+
+## 默认采用
+
+新的正式开发 Task 默认要求 Executable Spec。只有以下显式 exemption 可以跳过：
+
+```text
+legacy_pre_spec
+pure docs_only
+private_refactor with no observable behavior change
+recovery_no_semantic_change
+```
+
+豁免必须写入 Task Manifest 的 `executable_spec.exemption + reason`；不能使用“如采用”或沉默的 `required: false`。
+
+既有已完成 Domain 不追溯伪造 coverage。其原 Gate/FROZEN 事实继续有效，直到发生实质 design/contract revision 或由具体 Task 正式 adopt。
+
+## Checker
+
+全部 adopted scopes：
+
+```text
+python scripts/check_executable_specs.py
+```
+
+单一 scope：
+
+```text
+python scripts/check_executable_specs.py --scope domain:content
+python scripts/check_executable_specs.py --scope feature:login
+python scripts/check_executable_specs.py --scope system:mobile-foundation
+```
+
+Domain 兼容入口：
+
+```text
+python scripts/check_executable_specs.py --domain content
+```
+
+实现 Gate evidence：
+
+```text
+python scripts/check_executable_specs.py --scope domain:content --require-evidence
+```
+
+Checker PASS 只代表它负责的结构/trace/evidence 范围通过，不等于业务 Gate PASS。
