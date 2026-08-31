@@ -1,4 +1,10 @@
 import { defineConfig } from 'vitepress'
+import featureInventory from '../development/workflow/FEATURE_INVENTORY.json'
+
+const inventoryColumns = featureInventory.columns
+const inventoryFeatures = featureInventory.features.map((row) =>
+  Object.fromEntries(inventoryColumns.map((name, index) => [name, row[index]]))
+)
 
 const guideSidebar = [
   {
@@ -63,11 +69,15 @@ const featuresSidebar = [
     ]
   },
   {
-    text: '当前功能',
-    items: [
-      { text: '登录与会话', link: '/features/login/' },
-      { text: '音频生产', link: '/features/audio-production/' }
-    ]
+    text: '功能目录',
+    collapsed: true,
+    items: [...new Set(inventoryFeatures.map((feature) => feature.parent))].map((parent) => ({
+      text: parent,
+      collapsed: true,
+      items: inventoryFeatures
+        .filter((feature) => feature.parent === parent)
+        .map((feature) => ({ text: feature.label, link: `/features/${feature.id}/` }))
+    }))
   }
 ]
 

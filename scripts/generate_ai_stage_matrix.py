@@ -7,6 +7,7 @@ ROOT=Path(__file__).resolve().parents[1]
 REGISTRY=ROOT/'docs/docs/development/workflow/AI_STAGE_REGISTRY.json'
 INVENTORY=ROOT/'docs/docs/development/workflow/FEATURE_INVENTORY.json'
 OUTPUT=ROOT/'docs/docs/development/DOMAIN_LIFECYCLE_MATRIX.md'
+FEATURES_DIR=ROOT/'docs/docs/features'
 
 LANES=['design','backend','admin','mobile','integration','acceptance']
 STATUSES={'done','ready','active','todo','blocked','recovery','deferred','na'}
@@ -18,6 +19,7 @@ REQUIRED_MARKERS=[
     '<table class="ai-stage-table">',
     'v-for="obj in objects"',
     "deferred: ['⏸', 'deferred']",
+    "const featureDesignHref = (featureId) => `/features/${featureId}/`",
     '— 不适用'
 ]
 
@@ -105,14 +107,45 @@ def validate_renderer():
     if missing:
         raise ValueError(f'matrix renderer missing markers: {missing}')
 
+def write_missing_feature_pages(inventory):
+    columns=inventory['columns']
+    created=[]
+    for row in inventory['features']:
+        feature=dict(zip(columns,row))
+        path=FEATURES_DIR/feature['id']/'index.md'
+        if path.exists():
+            continue
+        primary=feature['primary_domain']
+        primary_link=f'[{primary}](/domains/{primary}/)' if primary else '未指定'
+        participating=', '.join(feature['participating_domains']) or '无'
+        surfaces=', '.join(feature['surfaces']) or '无'
+        blocker=(f"\n## 待决事项\n\n`{feature['decision_blocker']}`\n" if feature['decision_blocker'] else '')
+        design_status='已交付' if 'design' in feature['delivered_lanes'] else '待设计'
+        page=(
+            f"---\nstatus: {feature['portfolio_status']}\nfeature_id: {feature['id']}\ngenerated_from_feature_inventory: true\n---\n\n"
+            f"# {feature['label']}\n\n"
+            f"这是 `{feature['id']}` 的功能设计入口。领域规则、数据模型与跨领域边界仍以关联 Domain 文档为准。\n\n"
+            f"## 功能范围\n\n| 项目 | 内容 |\n| --- | --- |\n| 主要领域 | {primary_link} |\n| 参与领域 | {participating} |\n| 涉及端 | {surfaces} |\n| 当前状态 | {feature['portfolio_status']} |\n| 设计交付 | {design_status} |\n"
+            f"{blocker}\n## 设计入口\n\n从主要领域开始确认业务边界、生命周期与契约；需要跨领域协作时，再补充本功能的端到端交付设计。\n"
+        )
+        path.parent.mkdir(parents=True,exist_ok=True)
+        path.write_text(page,encoding='utf-8')
+        created.append(feature['id'])
+    return created
+
 def main():
     p=argparse.ArgumentParser()
     p.add_argument('--check',action='store_true')
     p.add_argument('--write',action='store_true')
+    p.add_argument('--write-missing-feature-pages',action='store_true')
     a=p.parse_args()
 
     registry=json.loads(REGISTRY.read_text(encoding='utf-8'))
     inventory=json.loads(INVENTORY.read_text(encoding='utf-8'))
+    if a.write_missing_feature_pages:
+        created=write_missing_feature_pages(inventory)
+        print(f'Feature pages: created {len(created)} page(s)')
+        return 0
     parent_ids,domains,detailed,ready=validate_registry(registry)
     feature_ids,counts=validate_inventory(inventory,parent_ids,domains,detailed)
     validate_renderer()

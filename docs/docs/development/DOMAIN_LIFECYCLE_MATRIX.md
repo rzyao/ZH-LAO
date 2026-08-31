@@ -72,8 +72,14 @@ const domainBackendStage = (domainId, featureId, index) => {
   return [`${featureId.toUpperCase()}-BACKEND-DEP-${index}`, label, 'todo']
 }
 
-const makeStage = (id, label, status, blocker = null) =>
-  blocker ? [id, label, status, '', blocker] : [id, label, status]
+const makeStage = (id, label, status, blocker = null, href = null) =>
+  blocker
+    ? [id, label, status, href ?? '', blocker]
+    : href
+      ? [id, label, status, href]
+      : [id, label, status]
+
+const featureDesignHref = (featureId) => `/features/${featureId}/`
 
 const deriveFeature = (feature) => {
   const id = feature.id.toUpperCase()
@@ -85,11 +91,12 @@ const deriveFeature = (feature) => {
   const domainIds = [...new Set([feature.primary_domain, ...(feature.participating_domains ?? [])].filter(Boolean))]
 
   let design
-  if (feature.portfolio_status === 'deferred') design = [makeStage(`${id}-FEATURE-DESIGN`, '功能设计', 'deferred')]
-  else if (feature.portfolio_status === 'unresolved') design = [makeStage(`${id}-FEATURE-DESIGN`, '功能设计', 'blocked', decision ?? 'FEATURE_SCOPE_DECISION')]
-  else if (delivered.has('design')) design = [makeStage(`${id}-FEATURE-DESIGN`, '功能设计', 'done')]
-  else if (!primaryReady) design = [makeStage(`${id}-FEATURE-DESIGN`, '功能设计', 'blocked', primaryBlocker)]
-  else design = [makeStage(`${id}-FEATURE-DESIGN`, '功能设计', 'todo')]
+  const designHref = featureDesignHref(feature.id)
+  if (feature.portfolio_status === 'deferred') design = [makeStage(`${id}-FEATURE-DESIGN`, '功能设计', 'deferred', null, designHref)]
+  else if (feature.portfolio_status === 'unresolved') design = [makeStage(`${id}-FEATURE-DESIGN`, '功能设计', 'blocked', decision ?? 'FEATURE_SCOPE_DECISION', designHref)]
+  else if (delivered.has('design')) design = [makeStage(`${id}-FEATURE-DESIGN`, '功能设计', 'done', null, designHref)]
+  else if (!primaryReady) design = [makeStage(`${id}-FEATURE-DESIGN`, '功能设计', 'blocked', primaryBlocker, designHref)]
+  else design = [makeStage(`${id}-FEATURE-DESIGN`, '功能设计', 'todo', null, designHref)]
 
   let backend = []
   if (domainIds.length) {
