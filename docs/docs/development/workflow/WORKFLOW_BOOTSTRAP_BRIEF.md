@@ -17,73 +17,57 @@ last_updated: 2026-08-31
 ```text
 Repository Re-Audit
 → Recover actual current state
+→ Rebuild complete Product Feature Inventory
 → Discover Domain + Feature AI Stages
 → Build / repair Task Registry
-→ Create task manifests
-→ Define dependency graph
-→ Establish claim/event structure
 → Calculate READY / BLOCKED / ACTIVE / RECOVERY_REQUIRED
 → Rebuild AI_STAGE_REGISTRY.json
-→ Generate AI 开发阶段矩阵
+→ Validate AI 开发阶段矩阵
 → Generate context-free next-session prompts
-→ Run matrix/docs validation
 → Push main
 → STOP
 ```
 
-## 2. Hard Rule：不依赖聊天上下文
+## 2. 完全不依赖聊天上下文
 
-假定：
-
-```text
-之前所有聊天都已经丢失
-```
-
-所有状态必须从当前 GitHub `main` 恢复。用户口述、AI 记忆和旧聊天只能帮助定位 source，不能直接成为状态事实。
+假定之前聊天全部丢失。所有状态必须从当前 GitHub `main` 恢复；聊天、用户口述和 AI 记忆只能帮助定位 source，不能成为完成状态事实。
 
 ## 3. Mandatory Reads
 
 至少读取：
 
 ```text
-docs/docs/development/DEVELOPMENT_CONTROL_CENTER.md
-docs/docs/development/DOMAIN_LIFECYCLE_MATRIX.md
-docs/docs/development/DEVELOPMENT_PROGRESS.md
+docs/docs/product/**
+docs/docs/domains/**
+docs/docs/features/**
+docs/docs/governance/open-questions.md
 
+docs/docs/development/DEVELOPMENT_CONTROL_CENTER.md
+docs/docs/development/DEVELOPMENT_PROGRESS.md
 docs/docs/development/workflow/index.md
 docs/docs/development/workflow/AI_STAGE_MODEL.md
 docs/docs/development/workflow/AI_STAGE_REGISTRY.json
-docs/docs/development/workflow/ROLE_MODEL.md
-docs/docs/development/workflow/SESSION_HANDOFF_CONTRACT.md
-docs/docs/development/workflow/CONCURRENCY_RULES.md
+docs/docs/development/workflow/FEATURE_INVENTORY.json
 docs/docs/development/workflow/TASK_MANIFEST_SCHEMA.md
+docs/docs/development/workflow/NEXT_ACTIONS.md
 
-docs/docs/features/index.md
-docs/docs/domains/index.md
-```
-
-同时扫描最新：
-
-```text
 docs/docs/development/backend/**
 docs/docs/development/admin/**
 docs/docs/development/mobile/**
-docs/docs/features/**
-docs/docs/domains/**
 ```
 
-历史 `01-foundation`～`07-audio` 只作为 legacy evidence source。
+并审查当前代码、Gate、Report、CI 与 active claims。历史 `01-foundation`～`07-audio` 只作为 legacy evidence source。
 
 ## 4. Authority
 
-架构 / 数据库 / 产品事实：
+产品/架构/领域事实：
 
 ```text
 Frozen Migration
 → Accepted ADR / Frozen Architecture
-→ canonical Domain docs
+→ canonical Product / Domain docs
 → upstream Public Contract
-→ canonical executable spec（adopted 时）
+→ canonical executable spec（采用时）
 → Execution Brief
 → Implementation Blueprint
 ```
@@ -93,17 +77,58 @@ Frozen Migration
 ```text
 Final Gate / Final Audit
 → Implementation Report
-→ current code/tests/CI evidence
+→ current code/tests/CI
 → Task Manifest / Event / Claim
 → DEVELOPMENT_PROGRESS
-→ Stage Registry / Matrix / Control views
+→ Registry / Matrix / Control views
 ```
 
-Matrix 和 Registry 是派生视图，不能反向覆盖更高 authority。
+Matrix、Registry 和 Feature Inventory 是派生控制视图，不能反向覆盖 authority。
 
-## 5. AI Stage Discovery
+## 5. Feature Inventory Bootstrap
 
-必须按 [AI_STAGE_MODEL.md](AI_STAGE_MODEL.md) 识别工作原子：
+每次 Bootstrap / Reconciliation 都必须重新检查是否出现新的产品能力，不能只扫描已有 `/features/` 目录。
+
+Feature 来源至少包括：
+
+```text
+Product scope / rollout / business model
++
+11 Domain capability & use case
++
+Admin operator workflows
++
+Mobile screen / user journey
++
+明确 deferred
++
+明确 designing / scope conflict
+```
+
+每个 Feature 必须声明：
+
+```text
+portfolio_status = active | planned | deferred | unresolved
+```
+
+规则：
+
+- `active`：已有正式设计/实施/交付工作；
+- `planned`：当前产品能力，但尚未形成 READY Task；
+- `deferred`：仓库明确延期，矩阵必须继续显示 `⏸`；
+- `unresolved`：产品范围与 Domain/Contract 需要裁决，必须显示 `⛔` 和明确 blocker。
+
+禁止：
+
+- 只因为 `/features/<slug>/` 不存在就忽略 Feature；
+- 为了完整性批量制造空白 Feature 文档；
+- 把数据库表、Repository、Worker、缓存/索引当成 Feature；
+- 把设计文档中的示例场景自动升级成产品承诺；
+- 把明确 excluded 的能力重新加入当前范围。
+
+Inventory 审计规则见 `FEATURE_INVENTORY_AUDIT.md` 与 `/features/FEATURE_DOCUMENT_STANDARD.md`。
+
+## 6. AI Stage Discovery
 
 ```text
 一段可独立复制的新会话 Prompt
@@ -111,21 +136,10 @@ Matrix 和 Registry 是派生视图，不能反向覆盖更高 authority。
 → 一个明确结果
 → Push
 → STOP
-= 一个 Stage
+= 一个 AI Stage
 ```
 
-禁止把需要两次独立会话的工作压成一个格子。
-
-例如：
-
-```text
-PLATFORM-ADMIN-STAGE-A
-PLATFORM-ADMIN-STAGE-B
-```
-
-必须是两个 Stage。
-
-Domain 默认重点识别：
+Domain 通常识别：
 
 ```text
 <DOMAIN>-DESIGN
@@ -134,56 +148,46 @@ Domain 默认重点识别：
 <DOMAIN>-BACKEND-AUDIT
 ```
 
-但不得为了模板完整伪造历史上不存在的 Stage。
-
-Feature 默认重点识别：
+Feature 根据实际需要识别：
 
 ```text
 <FEATURE>-FEATURE-DESIGN
-<FEATURE>-ADMIN-DESIGN
-<FEATURE>-ADMIN
-<FEATURE>-MOBILE-DESIGN
-<FEATURE>-MOBILE
+<FEATURE>-ADMIN-DESIGN / ADMIN
+<FEATURE>-MOBILE-DESIGN / MOBILE
 <FEATURE>-INTEGRATION
 <FEATURE>-ACCEPTANCE
 ```
 
-只建立实际需要的 Stage。
+不得为历史任务伪造当时不存在的 Stage。
 
-## 6. Domain / Feature Placement
-
-Matrix 对象类型：
+## 7. Status Calculation
 
 ```text
-system
-domain
-feature
+✅ done       有充分 Gate / Audit / Report / code+CI 证据
+▶ ready      Manifest READY + Entry Gate + Claim + Blueprint + drift 校验全部满足
+⏳ active     存在真实 active Claim
+○ todo       适用，但还没有 READY
+⛔ blocked    有明确 task/gate/contract/decision blocker
+🟣 recovery  当前合法下一步是 Recovery/Fix/Revalidation
+⏸ deferred  明确延期
+— na         不适用
 ```
 
-Feature 必须读取 frontmatter：
+只有 READY Stage 才允许显示 `▶`。
+
+## 8. Registry 与 Task Manifest
+
+重建：
 
 ```text
-feature_id
-primary_domain
-participating_domains
-```
-
-Feature 只在 `primary_domain` 下显示一次；参与其它 Domain 不重复行。
-
-Backend dependency 可以显示在 Feature 的 Backend Lane，但不能因此创建第二份 Domain implementation fact。
-
-## 7. Build Task Registry
-
-创建/修复：
-
-```text
+docs/docs/development/workflow/FEATURE_INVENTORY.json
+docs/docs/development/workflow/AI_STAGE_REGISTRY.json
 docs/docs/development/workflow/TASK_INDEX.md
 docs/docs/development/workflow/NEXT_ACTIONS.md
 docs/docs/development/workflow/tasks/*.yaml
-docs/docs/development/workflow/events/*.md   # 仅需要时
 ```
 
-每个新 Manifest 必须包含 `matrix`：
+新的可执行 Stage 必须有 Manifest，并使用 `matrix` 映射：
 
 ```yaml
 matrix:
@@ -193,175 +197,44 @@ matrix:
   sequence: <int>
   stage_id: <stable-id>
   label_zh: <中文名称>
-  parent_object_id: <primary-domain-or-null>
+  parent_object_id: <parent-or-null>
 ```
 
 一个 Manifest 默认只代表一个 Stage。
 
-## 8. Status Calculation
+## 9. Matrix
 
-### COMPLETE → `done` / ✅
+`DOMAIN_LIFECYCLE_MATRIX.md` 保留旧路径，但语义是 **AI 开发阶段矩阵**。
 
-只有更高优先级 Gate / Audit / Report / code+CI evidence 足够支持时才可完成。
-
-### READY → `ready` / ▶
-
-必须同时满足：
-
-```text
-Entry Gate satisfied
-AND no conflicting active claim
-AND no exclusive path collision
-AND required source exists
-AND Blueprint requirement satisfied
-AND no material repository drift
-```
-
-只有 READY Stage 才允许在 Matrix 中显示 `▶`。
-
-### ACTIVE → `active` / ⏳
-
-只能来自真实 active Claim。
-
-### PLANNED → `todo` / ○
-
-适用且已识别，但未满足 READY。
-
-### BLOCKED → `blocked` / ⛔
-
-必须记录明确：
-
-```text
-blocked_by task
-或 blocked_by Gate
-或 blocked_by contract
-或 blocked_by missing source
-```
-
-### RECOVERY_REQUIRED → `recovery` / 🟣
-
-Gate FAIL、Spec Conflict、Implementation Blocker 或 material Drift 应优先路由 Recovery / Design Fix / Revalidation Stage。
-
-## 9. Legacy Mapping
-
-非追溯原则：
-
-- 已有历史 Gate/Report 可以映射为 `done` Stage；
-- 可以显示“后端实现（历史）”“数据模型定稿（历史）”；
-- 不得补造当时不存在的 Blueprint、Prep、独立 Audit Stage；
-- 历史“代码存在”但无 Gate/Report 时不能自动标 COMPLETE。
-
-## 10. Stage Registry
-
-Bootstrap 必须重建：
-
-```text
-docs/docs/development/workflow/AI_STAGE_REGISTRY.json
-```
-
-完成 Bootstrap 后：
-
-```json
-"snapshot_status": "grounded"
-```
-
-Registry 是派生快照，来源于 Task / Gate / Claim / Report / Feature metadata。
-
-必须包含：
-
-```text
-object kind/id/label
-feature parent / primary domain
-各 Lane Stage
-每个 Stage 的 id / label / status / href
-blocked_by（适用时）
-next stage
-```
-
-## 11. Generate Matrix
+页面必须继续只显示一个表格。
 
 执行：
 
 ```text
-python scripts/generate_ai_stage_matrix.py --write
 python scripts/generate_ai_stage_matrix.py --check
+pnpm --dir docs docs:build
 ```
 
-`DOMAIN_LIFECYCLE_MATRIX.md` 的物理路径暂时保留，但显示语义为：
+不得手工维护 Matrix 状态；状态修改应发生在事实源 / Feature Inventory / Stage Registry。
+
+## 10. NEXT_ACTIONS
+
+固定输出：
 
 ```text
-AI 开发阶段矩阵
+PRIMARY
+PARALLEL SAFE
+ACTIVE
+BLOCKED
+RECOVERY REQUIRED
+NEXT CONVERSATION PROMPTS
 ```
 
-页面必须继续只显示一个表格，不追加说明正文。
+每个 READY Stage 必须有一份完整、无聊天上下文 Prompt，包含 repository、branch、Task/Stage ID、role、latest-main revalidation、Claim、Entry Gate、required sources、Blueprint/drift、允许路径、Gate/Report 与 STOP 边界。
 
-禁止手工编辑 Matrix 状态；应修改 Task/Gate/Registry 后重新生成。
+## 11. Concurrency
 
-## 12. TASK_INDEX.md
-
-至少：
-
-| Task ID | Stage ID | Object | Lane | Role | Status | Gate | Dependencies | Claim | Brief |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-
-它是索引，不是最终事实源。
-
-## 13. NEXT_ACTIONS.md
-
-固定结构：
-
-```text
-# Current Scheduling Snapshot
-HEAD
-Generated At
-
-## PRIMARY
-## PARALLEL SAFE
-## ACTIVE
-## BLOCKED
-## RECOVERY REQUIRED
-## NEXT CONVERSATION PROMPTS
-```
-
-每个 READY Stage 都必须有一份完整、无上下文 Prompt。
-
-Prompt 必须明确：
-
-```text
-repository / branch
-Task ID + Stage ID
-role
-latest main revalidation
-claim check
-entry gate check
-required sources
-Blueprint validation（适用时）
-allowed / forbidden paths
-pre-push revalidation
-expected Gate / Report
-STOP boundary
-```
-
-## 14. Prompt Quality Gate
-
-```text
-NO_CHAT_CONTEXT_REQUIRED = YES
-LATEST_MAIN_REVALIDATION = YES
-TASK_ID_EXPLICIT = YES
-STAGE_ID_EXPLICIT = YES
-ROLE_DISCOVERABLE = YES
-CLAIM_CHECK_REQUIRED = YES
-ENTRY_GATE_CHECK_REQUIRED = YES
-PRE_PUSH_REVALIDATION_REQUIRED = YES
-GATE_FAIL_ROUTING_INCLUDED = YES
-STOP_BOUNDARY_INCLUDED = YES
-```
-
-任一为 NO，不得把该 Prompt 标成 READY。
-
-## 15. Concurrency
-
-并行安全不靠凑数量，必须检查：
+并行安全必须检查：
 
 ```text
 dependency
@@ -372,57 +245,30 @@ Blueprint snapshot
 active claims
 ```
 
-Admin、Backend、Mobile、Design/Spec、Recovery/Audit 在依赖与路径安全时可并行。
+严格的是同一依赖链的 Gate 顺序，不是整个项目只能串行推进一个 Phase。
 
-## 16. No Business Work
+## 12. No Business Work
 
-Bootstrap 严禁：
+Bootstrap 严禁直接执行业务 Design/Implementation。它只恢复并校准控制面、Feature Inventory、Task/Stage 调度和下一会话 Prompt。
 
-- Domain 正式设计；
-- Backend Implementation；
-- Admin / Mobile Implementation；
-- 新业务表；
-- frozen migration rewrite；
-- 新产品需求；
-- 领取业务 Worker Claim。
+## 13. Final Audit
 
-它只恢复和建立控制面。
-
-## 17. Final Audit
-
-完成前确认：
+完成前至少确认：
 
 ```text
-TASK_REGISTRY_EXISTS = YES
 AI_STAGE_REGISTRY_GROUNDED = YES
-DOMAIN_AND_FEATURE_ROWS_MAPPED = YES
-READY_STAGES_GROUNDED = YES
+FEATURE_INVENTORY_RECONCILED = YES
+PORTFOLIO_STATUS_COMPLETE = YES
+DEFERRED_FEATURES_VISIBLE = YES
+UNRESOLVED_FEATURES_HAVE_BLOCKER = YES
+READY_STAGES_HAVE_MANIFEST = YES
 BLOCKED_STAGES_HAVE_REASON = YES
 ACTIVE_STAGES_HAVE_CLAIM = YES
 LEGACY_STAGES_NOT_FABRICATED = YES
 NEXT_PROMPTS_CONTEXT_FREE = YES
-MATRIX_GENERATION_CHECK = PASS
+MATRIX_CHECK = PASS
+DOCS_BUILD = PASS
 BUSINESS_IMPLEMENTATION_CHANGES = 0
 ```
 
-## 18. Final Response
-
-报告：
-
-```text
-BOOTSTRAP RESULT
-HEAD / COMMITS
-CREATED / UPDATED TASKS
-DOMAIN STAGES
-FEATURE STAGES
-READY
-PARALLEL SAFE
-ACTIVE
-BLOCKED
-RECOVERY REQUIRED
-NEXT CONVERSATION PROMPTS
-MATRIX CHECK
-STOP
-```
-
-完成后直接推送 GitHub `main`，然后 STOP。不要自动启动任何 READY 业务 Stage。
+完成后推送 `main` 并 STOP，不自动启动任何 READY 业务 Stage。
