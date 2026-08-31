@@ -13,6 +13,8 @@ docs/docs/development/workflow/tasks/<TASK_ID>.yaml
 
 Task Manifest 是当前任务的执行身份证明，不是聊天摘要。
 
+从 AI Stage 协议启用后，**一个 Task Manifest 默认只代表一段可以独立复制执行并在结束后 STOP 的 Prompt Stage**。详细定义见 [AI 开发阶段模型](AI_STAGE_MODEL.md)。
+
 ## 一、Track 与文档路径
 
 ZH-LAO 当前实施 track：
@@ -34,6 +36,7 @@ reconciliation
 workflow
 integration
 validation
+acceptance
 release
 ```
 
@@ -42,26 +45,31 @@ release
 ## 二、推荐结构
 
 ```yaml
-task_id: CONTENT-BACKEND
+task_id: CONTENT-BACKEND-PREP
 version: 1
 
-role: backend_worker
+role: design_worker
 domain: content
 track: backend
+
+matrix:
+  object_type: domain
+  object_id: content
+  lane: backend
+  sequence: 20
+  stage_id: CONTENT-BACKEND-PREP
+  label_zh: 后端实现准备
+  parent_object_id: null
 
 status: ready
 priority: primary
 parallel_safe: true
 
 brief:
-  path: docs/docs/development/backend/content/CONTENT_EXECUTION_BRIEF.md
+  path: docs/docs/development/backend/content/CONTENT_BACKEND_PREP_BRIEF.md
 
 implementation_blueprint:
-  required: true
-  path: docs/docs/development/backend/content/CONTENT_BACKEND_IMPLEMENTATION_BLUEPRINT.md
-  base_commit: <40-char-sha>
-  canonical_spec:
-    adopted: false
+  required: false
 
 entry_gates:
   - name: CONTENT_DESIGN_GATE
@@ -69,24 +77,18 @@ entry_gates:
 
 depends_on: []
 conflicts_with:
-  - CONTENT-BACKEND
+  - CONTENT-BACKEND-PREP
 
 owned_paths:
-  - apps/backend/src/modules/content/**
-  - apps/backend/test/content/**
+  - docs/docs/development/backend/content/**
 
-shared_paths:
-  - apps/backend/src/bootstrap/**
-  - apps/backend/src/http/**
-
+shared_paths: []
 exclusive_paths: []
 
 allowed_paths:
-  - apps/backend/**
   - docs/docs/development/backend/content/**
-  - docs/docs/development/workflow/tasks/CONTENT-BACKEND.yaml
+  - docs/docs/development/workflow/tasks/CONTENT-BACKEND-PREP.yaml
   - docs/docs/development/workflow/events/**
-  - docs/docs/development/workflow/claims/CONTENT-BACKEND.md
 
 forbidden_paths:
   - database/v2/migrations/0400_content.sql
@@ -95,26 +97,25 @@ forbidden_paths:
 
 required_sources:
   - docs/docs/development/SPEC_SYSTEM.md
+  - docs/docs/development/workflow/AI_STAGE_MODEL.md
   - docs/docs/domains/content/index.md
-  - docs/docs/development/backend/content/CONTENT_PUBLIC_CONTRACTS.md
 
 dependency_snapshot: []
 
 expected_gate:
-  name: CONTENT_BACKEND_GATE
+  name: CONTENT_IMPLEMENTATION_READY
   pass_value: PASS
 
 on_pass:
   unlock_candidates:
-    - CONTENT-ADMIN
-    - LEARNING-BACKEND
+    - CONTENT-BACKEND
 
 on_fail:
-  recovery_task_pattern: CONTENT-BACKEND-RECOVERY
+  recovery_task_pattern: CONTENT-BACKEND-PREP-RECOVERY
   block_dependents: true
 
 final_report:
-  path: docs/docs/development/backend/content/CONTENT_IMPLEMENTATION_REPORT.md
+  path: docs/docs/development/backend/content/CONTENT_BACKEND_PREP_REPORT.md
 ```
 
 示例 SHA 只能使用真实值；不得复制占位值到正式 Manifest。
@@ -123,13 +124,19 @@ final_report:
 
 ### `task_id`
 
-全局唯一、稳定、可读。推荐：
+全局唯一、稳定、可读。推荐直接等于 `matrix.stage_id`：
 
 ```text
+<DOMAIN>-DESIGN
+<DOMAIN>-BACKEND-PREP
 <DOMAIN>-BACKEND
+<DOMAIN>-BACKEND-AUDIT
+<FEATURE>-ADMIN-DESIGN
 <FEATURE>-ADMIN
+<FEATURE>-MOBILE-DESIGN
 <FEATURE>-MOBILE
-<DOMAIN>-BACKEND-RECOVERY
+<FEATURE>-INTEGRATION
+<FEATURE>-ACCEPTANCE
 ```
 
 ### `role`
@@ -159,7 +166,47 @@ complete
 cancelled
 ```
 
-## 四、Entry Gate
+## 四、`matrix`：AI Stage 映射
+
+所有新 Task 必填。
+
+```yaml
+matrix:
+  object_type: domain | feature | system
+  object_id: content
+  lane: design | backend | admin | mobile | integration | acceptance
+  sequence: 20
+  stage_id: CONTENT-BACKEND-PREP
+  label_zh: 后端实现准备
+  parent_object_id: null
+```
+
+字段：
+
+- `object_type`：矩阵对象类型；
+- `object_id`：稳定 Domain / Feature / System ID；
+- `lane`：该 Prompt Stage 在矩阵中的工作轨；
+- `sequence`：同对象、同 Lane 内顺序；
+- `stage_id`：稳定 Stage ID；
+- `label_zh`：面向人的中文名称；
+- `parent_object_id`：Feature 填 `primary_domain`，Domain 通常为 `null`。
+
+Recovery Task 的 `track` 可以是 `recovery`，但 `matrix.lane` 必须回到发生失败的原 Lane。例如 Backend Recovery 仍显示在 `backend`。
+
+Task status 映射：
+
+| Task Status | Matrix |
+| --- | --- |
+| `complete` | `done` / ✅ |
+| `ready` | `ready` / ▶ |
+| `active`、`validating` | `active` / ⏳ |
+| `planned` | `todo` / ○ |
+| `blocked` | `blocked` / ⛔ |
+| `recovery_required` | `recovery` / 🟣 |
+
+不适用的 Lane 不创建 Task，由派生 Registry 显示 `—`。
+
+## 五、Entry Gate
 
 `entry_gates` 是实施权限，不是提示信息。
 
@@ -171,7 +218,9 @@ Task != READY
 
 如果 `implementation_blueprint.required = true`，Blueprint 缺失、snapshot 无法验证或发生 material drift，也视为未具备安全实施条件。
 
-## 五、依赖与并发
+因此 Matrix 中的 `▶` 只能来自真实 READY Manifest，不能手工指定。
+
+## 六、依赖与并发
 
 ### `depends_on`
 
@@ -195,7 +244,7 @@ forbidden_paths  硬禁止
 
 Blueprint 只能进一步收紧 Manifest scope，不能扩大。
 
-## 六、Track Path Rule
+## 七、Track Path Rule
 
 新 Task 的文档路径必须与 track 一致：
 
@@ -214,7 +263,7 @@ mobile task
 
 历史 `01-foundation`～`07-audio` 仅作为 legacy evidence source，可以出现在 `required_sources`，但不得作为新 Task 的输出目录。
 
-## 七、`required_sources`
+## 八、`required_sources`
 
 必须列出新会话真正需要读取的 authority：
 
@@ -223,11 +272,12 @@ mobile task
 - upstream Public Contract；
 - Execution Brief；
 - canonical spec（采用时）；
-- Gate / Report dependency evidence。
+- Gate / Report dependency evidence；
+- `AI_STAGE_MODEL.md`。
 
-Feature 文档可以作为端到端交付地图读取，但不能代替 Domain/Public Contract authority。
+Feature Task 还必须读取对应 `/features/<feature>/` 和参与 Domain authority。
 
-## 八、Implementation Blueprint
+## 九、Implementation Blueprint
 
 推荐结构：
 
@@ -259,7 +309,7 @@ implementation_blueprint:
 显式升级的旧 Task                              → required
 ```
 
-## 九、Drift Validation
+## 十、Drift Validation
 
 第一处代码修改前比较：
 
@@ -269,14 +319,7 @@ vs
 latest main
 ```
 
-发生变化时检查：
-
-- Manifest / Brief / Blueprint；
-- canonical spec / SHA；
-- upstream contract；
-- frozen migration / ADR / architecture authority；
-- owned/shared/exclusive path；
-- Blueprint target symbols。
+发生变化时检查 Manifest / Brief / Blueprint、canonical spec / SHA、upstream contract、frozen migration / ADR / architecture authority、owned/shared/exclusive path 和 Blueprint target symbols。
 
 结论只能是：
 
@@ -287,7 +330,7 @@ REPOSITORY_DRIFT
 
 material drift 必须 STOP。
 
-## 十、Implementation Conflict
+## 十一、Implementation Conflict
 
 实现 Worker 遇到超出 Decision Budget 的问题时使用：
 
@@ -299,28 +342,30 @@ REPOSITORY_DRIFT
 
 不得通过改需求、改 Public Contract、改 frozen migration 或扩大 Task Scope 来继续主链。
 
-## 十一、`expected_gate`
+## 十二、`expected_gate`
 
-Task 必须声明自己最终关闭什么 Gate。
+Task 必须声明自己最终关闭什么可客观验证的结果。
 
-建议新 Gate 名明确 track：
+建议：
 
 ```text
+CONTENT_DESIGN_GATE
+CONTENT_IMPLEMENTATION_READY
 CONTENT_BACKEND_GATE
 AUDIO_ADMIN_GATE
 LOGIN_MOBILE_GATE
-LOGIN_FEATURE_GATE   # Feature/E2E task 使用
+LOGIN_FEATURE_GATE
 ```
 
 Backend Gate 不自动代表 Feature Gate，Admin/Mobile Gate 也不能互相替代。
 
-## 十二、`on_pass` / `on_fail`
+## 十三、`on_pass` / `on_fail`
 
 `on_pass.unlock_candidates` 只是候选解锁，Dispatcher 必须重新计算依赖、Claim、冲突和 Blueprint requirement。
 
 `on_fail` 必须路由最短合法 Recovery / Design Fix，并阻塞真正依赖当前 Gate 的下游 Task。
 
-## 十三、Task Event
+## 十四、Task Event
 
 关键状态变化追加：
 
@@ -347,3 +392,18 @@ RELEASED
 ```
 
 Event 是追加式事实，不改写旧事件伪造历史。
+
+## 十五、Stage Registry 与 Matrix
+
+Task Manifest 是当前 Stage 的工作边界事实；`AI_STAGE_REGISTRY.json` 是 Dispatcher / Reconciliation 产生的派生快照。
+
+```text
+Task Manifest + Claim + Event + Gate + Report + Feature metadata
+→ AI_STAGE_REGISTRY.json
+→ scripts/generate_ai_stage_matrix.py
+→ DOMAIN_LIFECYCLE_MATRIX.md
+```
+
+Worker 不得直接手工修改 Matrix 状态。
+
+历史 Task 非追溯：允许 Registry 记录“后端实现（历史）”等已证实阶段，但不得伪造过去不存在的 Blueprint/Prep Task。
