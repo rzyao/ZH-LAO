@@ -5,7 +5,9 @@ last_updated: 2026-08-31
 
 # AI 开发阶段模型
 
-本协议定义 ZH-LAO 的 AI 开发原子单位、阶段矩阵、完整 Feature Inventory 与 Task Manifest 的映射关系。
+本协议定义 ZH-LAO 的 Development Node、AI 开发原子单位、阶段矩阵、完整 Feature Inventory 与 Task Manifest 的映射关系。
+
+> 规范入口：[Development Node 模型](DEVELOPMENT_NODE_MODEL.md) 与 [Node 生命周期](NODE_LIFECYCLE.md)。Node = `object_id × lane`；Stage 归属 Node，Node 状态只能由 Stage 派生。
 
 ## 1. 原子单位
 
@@ -139,19 +141,21 @@ matrix:
   object_type: domain | feature | system
   object_id: content
   lane: backend
+  node_id: content.backend
+  phase: prep
   sequence: 20
   stage_id: CONTENT-BACKEND-PREP
   label_zh: 后端实现准备
   parent_object_id: null
 ```
 
-`stage_id` 是矩阵中的稳定原子编号，同时也是下一会话 Prompt 的身份。
+`stage_id` 是矩阵中的稳定原子编号，同时也是下一会话 Prompt 的身份。`object_id`、`lane`、`node_id`、`phase`、`sequence` 是 Stage 对 Node 的归属字段；不得将状态写入 Node 作为第二个来源。
 
 一个 Task Manifest 默认只能代表一个 Stage。需要独立 STOP 的步骤必须拆成多个 Manifest。
 
 ## 8. Stage Registry 与 Feature Inventory
 
-`AI_STAGE_REGISTRY.json` 保存已经实际进入 Stage 调度的详细状态；`FEATURE_INVENTORY.json` 保存完整产品能力清单。
+`AI_STAGE_REGISTRY.json` 保存已经实际进入 Stage 调度的详细状态以及由其生成的 Node 索引；`FEATURE_INVENTORY.json` 保存完整产品能力清单。
 
 两者都是派生控制数据，不是新的产品/完成事实源。
 
