@@ -65,8 +65,7 @@ const developmentSidebar = [
       { text: '开发流程控制中心', link: '/development/DEVELOPMENT_CONTROL_CENTER' },
       { text: '领域生命周期矩阵', link: '/development/DOMAIN_LIFECYCLE_MATRIX' },
       { text: '当前下一动作', link: '/development/workflow/NEXT_ACTIONS' },
-      { text: '开发进度', link: '/development/DEVELOPMENT_PROGRESS' },
-      { text: '全量开发总计划', link: '/development/MASTER_DEVELOPMENT_PLAN' }
+      { text: '开发进度', link: '/development/DEVELOPMENT_PROGRESS' }
     ]
   },
   {
