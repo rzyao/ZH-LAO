@@ -14,6 +14,13 @@ mobile_pages:
   - mobile-login
   - mobile-otp
 admin_pages: []
+evidence:
+  design:
+    - /domains/identity/
+  backend:
+    - /development/backend/identity/
+active_notes:
+  mobile: LOGIN-MOBILE-DESIGN 已进入可执行阶段，真实 API 集成与设备验证推进中。
 ---
 
 # 用户登录与会话

@@ -120,8 +120,8 @@ portfolio_status = active | planned | deferred | unresolved
 
 禁止：
 
-- 只因为 `/features/<slug>/` 不存在就忽略 Feature；
-- 为了完整性批量制造空白 Feature 文档；
+- 只因为某个 Feature 尚未启动就忽略它；
+- 创建缺少功能定位、Domain、六个 Lane 和适用性说明的空白 Feature 文档；
 - 把数据库表、Repository、Worker、缓存/索引当成 Feature；
 - 把设计文档中的示例场景自动升级成产品承诺；
 - 把明确 excluded 的能力重新加入当前范围。
@@ -215,7 +215,7 @@ python scripts/generate_ai_stage_matrix.py --check
 pnpm --dir docs docs:build
 ```
 
-不得手工维护 Matrix 状态；状态修改应发生在事实源 / Feature Inventory / Stage Registry。
+不得手工维护 Matrix 的 Feature 行状态；状态修改必须发生在 canonical Feature Page Frontmatter。System / Domain 汇总行继续读取 Stage Registry。生成器同时锁定矩阵树状 UI，禁止生成 Node Detail 页面。
 
 ## 10. NEXT_ACTIONS
 

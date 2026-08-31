@@ -42,6 +42,41 @@ def page_ids(root):
             result.add(page_id)
     return result
 
+def scan_surface_pages(root, kind, feature_ids, domain_ids):
+    records = {}
+    for path in root.rglob('*.md'):
+        text = path.read_text(encoding='utf-8')
+        if not text.startswith('---\n'):
+            continue
+        data = frontmatter(text, path)
+        page_id = data.get('page_id')
+        if not page_id:
+            continue
+        if page_id in records:
+            raise ValueError(f'{path}: duplicate page_id {page_id}')
+        if not isinstance(data.get('title'), str) or not isinstance(data.get('route'), str):
+            raise ValueError(f'{path}: page title and route are required')
+        if not isinstance(data.get('features'), list) or not data['features']:
+            raise ValueError(f'{path}: at least one Feature reference is required')
+        if set(data['features']) - feature_ids:
+            raise ValueError(f"{path}: unknown Feature references {sorted(set(data['features'])-feature_ids)}")
+        if not isinstance(data.get('domains'), list) or set(data['domains']) - domain_ids:
+            raise ValueError(f'{path}: invalid Domain references')
+        if data.get('status') not in STATUSES:
+            raise ValueError(f'{path}: invalid page status {data.get("status")!r}')
+        if kind == 'admin' and not isinstance(data.get('permissions'), list):
+            raise ValueError(f'{path}: Admin permissions must be a list')
+        required_headings = (
+            ['页面目标', 'UI State 与操作', 'Backend API、权限与测试']
+            if kind == 'admin'
+            else ['页面目标', 'Navigation', 'UI State', 'API 与错误处理', '权限与测试']
+        )
+        missing_headings = [heading for heading in required_headings if f'## {heading}' not in text]
+        if missing_headings:
+            raise ValueError(f'{path}: missing {kind} page sections {missing_headings}')
+        records[page_id] = {'features': data['features'], 'path': path}
+    return records
+
 def canonical_domain(domain_id):
     path = DOMAINS_DIR / domain_id / 'index.md'
     if not path.exists():
@@ -54,8 +89,6 @@ def canonical_domain(domain_id):
 def scan():
     inventory = json.loads(INVENTORY.read_text(encoding='utf-8'))
     expected = {row[0] for row in inventory['features']}
-    mobile_page_ids = page_ids(MOBILE_DIR)
-    admin_page_ids = page_ids(ADMIN_DIR)
     records = []
     seen = set()
     domains = {}
@@ -88,21 +121,36 @@ def scan():
         for lane, value in status.items():
             if value == 'blocked' and not blocks.get(lane):
                 raise ValueError(f'{path}: blocked {lane} needs blocks.{lane}')
+            if value == 'done' and not data.get('evidence', {}).get(lane):
+                raise ValueError(f'{path}: done {lane} needs evidence.{lane}')
+            if value == 'active' and not data.get('active_notes', {}).get(lane):
+                raise ValueError(f'{path}: active {lane} needs active_notes.{lane}')
             if f'## {HEADINGS[lane]}' not in text:
                 raise ValueError(f'{path}: missing section {HEADINGS[lane]}')
-        for page_id in data.get('mobile_pages', []):
-            if page_id not in mobile_page_ids:
-                raise ValueError(f'{path}: missing Mobile page {page_id}')
-        for page_id in data.get('admin_pages', []):
-            if page_id not in admin_page_ids:
-                raise ValueError(f'{path}: missing Admin page {page_id}')
+        heading_offsets = [text.index(f'## {HEADINGS[lane]}') for lane in LANES]
+        if heading_offsets != sorted(heading_offsets):
+            raise ValueError(f'{path}: Feature Lane sections are out of order')
         records.append({
             'id': feature_id, 'title': data['title'], 'domain': data['domain'],
             'status': {lane: status[lane] for lane in LANES},
-            'mobile_pages': data.get('mobile_pages', []), 'admin_pages': data.get('admin_pages', [])
+            'mobile_pages': data.get('mobile_pages', []), 'admin_pages': data.get('admin_pages', []),
+            'blocks': blocks, 'evidence': data.get('evidence', {}), 'active_notes': data.get('active_notes', {})
         })
     if seen != expected:
         raise ValueError(f'Feature Page coverage mismatch; missing={sorted(expected-seen)}, extra={sorted(seen-expected)}')
+    mobile_pages = scan_surface_pages(MOBILE_DIR, 'mobile', seen, set(domains))
+    admin_pages = scan_surface_pages(ADMIN_DIR, 'admin', seen, set(domains))
+    duplicate_page_ids = set(mobile_pages) & set(admin_pages)
+    if duplicate_page_ids:
+        raise ValueError(f'page_id reused across Mobile/Admin: {sorted(duplicate_page_ids)}')
+    for record in records:
+        feature_id = record['id']
+        expected_mobile = {page_id for page_id, page in mobile_pages.items() if feature_id in page['features']}
+        expected_admin = {page_id for page_id, page in admin_pages.items() if feature_id in page['features']}
+        if set(record['mobile_pages']) != expected_mobile:
+            raise ValueError(f'{feature_id}: Mobile page references are not bidirectional')
+        if set(record['admin_pages']) != expected_admin:
+            raise ValueError(f'{feature_id}: Admin page references are not bidirectional')
     return {
         'version': 1,
         'lanes': LANES,

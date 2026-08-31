@@ -378,11 +378,11 @@ export default defineConfig({
       '/domains/': domainsSidebar,
       '/features/': featuresSidebar,
       '/mobile/': [
-        { text: 'Mobile', items: [{ text: '概览', link: '/mobile/' }, { text: '导航结构', link: '/mobile/navigation' }, { text: '页面清单', link: '/mobile/pages' }] },
+        { text: 'Mobile', items: [{ text: '概览', link: '/mobile/' }, { text: '导航结构', link: '/mobile/navigation' }, { text: '页面清单', link: '/mobile/pages' }, { text: '页面文档规范', link: '/mobile/PAGE_STANDARD' }] },
         { text: '认证', items: [{ text: '登录页', link: '/mobile/login' }, { text: 'OTP 验证页', link: '/mobile/otp' }] }
       ],
       '/admin/': [
-        { text: 'Admin', items: [{ text: '概览', link: '/admin/' }, { text: '导航结构', link: '/admin/navigation' }, { text: '页面清单', link: '/admin/pages' }] },
+        { text: 'Admin', items: [{ text: '概览', link: '/admin/' }, { text: '导航结构', link: '/admin/navigation' }, { text: '页面清单', link: '/admin/pages' }, { text: '页面文档规范', link: '/admin/PAGE_STANDARD' }] },
         { text: '账号权限', items: [{ text: '操作员管理', link: '/admin/operators' }] },
         { text: '音频', items: [{ text: '音频生产工作台', link: '/admin/audio-production' }] }
       ],

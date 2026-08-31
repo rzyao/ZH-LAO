@@ -25,27 +25,26 @@ Feature E2E proves deliverable value
 
 [AI 开发阶段矩阵](/development/DOMAIN_LIFECYCLE_MATRIX)
 
-矩阵同时显示：
+矩阵沿用固定的树状 UI，并同时显示：
 
 - 当前正式功能；
 - 已识别但尚未启动的功能；
 - 明确阻塞 / 待裁决的功能；
 - 明确延期的功能；
-- 每个 Feature 的 Design / Backend / Admin / Mobile / Integration / Acceptance AI Stage；
-- 当前下一段可执行 Prompt。
+- 每个 Feature 的 Design / Backend / Admin / Mobile / Integration / Acceptance Lane 状态；
+- System / Domain 的派生汇总状态。
 
 这样功能数量增加后不会出现“Feature 首页、Domain 概览、开发矩阵各维护一套状态”的漂移。
 
-## 已建立正式 Feature 文档
+## Canonical Feature Page
 
-当前已经建立稳定 delivery 文档的 Feature：
+正式 Feature 清单中的每个功能都已经建立独立页面。页面由人工维护 Frontmatter 和六个固定模块，Matrix 的 Feature 行只读取这些页面。
 
-| 功能 | 主要领域 | 当前交付重点 |
-| --- | --- | --- |
-| [用户登录与会话](login/index.md) | Identity | Mobile 真实 Identity 集成与 E2E |
-| [音频生产](audio-production/index.md) | Audio Production | Audio Backend、Admin Workbench、跨层集成与 E2E |
+- [用户登录与会话](login/index.md)
+- [音频生产](audio-production/index.md)
+- 其余功能通过左侧按 Domain 分组的“功能目录”进入。
 
-其它已识别 Feature 先存在于 Feature Inventory / Matrix 中。只有正式进入 Feature Design 或已有稳定交付事实时才创建页面，禁止批量创建空白 Feature 文档。
+尚未启动的 Feature Page 也必须存在，但必须写明功能定位、所属 Domain、六个 Lane 状态及不适用原因，不能是真正的空白页。
 
 ## Domain ↔ Feature
 

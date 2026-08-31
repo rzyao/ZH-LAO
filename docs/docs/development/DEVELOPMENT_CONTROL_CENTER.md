@@ -132,7 +132,7 @@ Implementation Worker 开始代码修改前至少确认：
 9. 没有 material repository drift；
 10. 输出文档路径符合 `backend | admin | mobile` track 规则。
 
-只有满足全部 READY 条件的 Stage 才能在 Matrix 显示 `▶`。
+Feature 行显示 Feature Page 人工裁决的 Lane 状态；READY 等 Stage 细节只在 Feature Page 对应模块和 Task Manifest 中展示。System / Domain 汇总行仍可显示 Registry 派生的 Stage 状态。
 
 ## 七、并行规则
 
@@ -173,13 +173,13 @@ Worker 主要写自己的 Task 事实：Manifest、Event、Brief/Blueprint、Rep
 Dispatcher / Reconciliation 负责：
 
 ```text
-Task / Gate / Claim / Feature metadata
-→ workflow/AI_STAGE_REGISTRY.json
+Task / Gate / Claim / Feature Page Frontmatter
+→ workflow/FEATURE_PAGE_INDEX.json
 → scripts/generate_ai_stage_matrix.py
 → DOMAIN_LIFECYCLE_MATRIX.md
 ```
 
-Matrix 不允许手工维护状态；CI 使用 `generate_ai_stage_matrix.py --check` 防止漂移。
+Feature 行状态不允许在 Matrix 手工维护；CI 使用 `generate_ai_stage_matrix.py --check` 同时防止数据漂移、Node 页面回归和冻结 UI 变化。System / Domain 汇总行仍读取 `AI_STAGE_REGISTRY.json`。
 
 其它派生视图：
 

@@ -11,7 +11,8 @@ status:
   integration: todo
   acceptance: todo
 mobile_pages: []
-admin_pages: []
+admin_pages:
+  - admin-operators
 ---
 
 # 操作员管理

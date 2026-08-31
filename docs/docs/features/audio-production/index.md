@@ -18,6 +18,11 @@ admin_pages:
 blocks:
   backend: CONTENT_BACKEND_GATE
   integration: AUDIO_BACKEND_GATE + CONTENT_BACKEND_GATE
+evidence:
+  design:
+    - /domains/audio/
+active_notes:
+  admin: AUDIO-PRODUCTION-ADMIN-DESIGN 已进入可执行阶段。
 ---
 
 # 音频生产

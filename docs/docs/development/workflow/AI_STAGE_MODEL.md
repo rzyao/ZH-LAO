@@ -25,7 +25,7 @@ stage_id: LOGIN-MOBILE-IMPLEMENT
 
 `DOMAIN_LIFECYCLE_MATRIX.md` 是从 Feature Page Frontmatter 派生的全局视图，不保存第二套 Lane 状态。矩阵的功能名跳转到 Feature Page 顶部，任一 Lane 跳转到该 Feature 的对应章节；Stage 名与细节只在 Feature Page 和开发工件中展示。
 
-矩阵列固定为“领域、功能、设计 AI、Backend AI、Admin AI、Mobile AI、集成 AI、验收 AI”。领域来自 Feature Page 的 `domain` 元数据并链接到对应 canonical Domain 页面；多领域 Feature 只保留一行，以 `/` 并列显示。
+矩阵沿用已冻结的树状“对象 + 六条 Lane”UI。System、Domain 与 Feature 的视觉层级、状态标签和样式不得修改；其中 Feature 名和任一 Lane 都直接链接到该 Feature Page 的对应位置。
 
 ## Development Node
 

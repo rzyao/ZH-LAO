@@ -11,6 +11,13 @@ status:
   acceptance: done
 mobile_pages: []
 admin_pages: []
+evidence:
+  design:
+    - /development/mobile/foundation/
+  mobile:
+    - /development/mobile/foundation/
+  acceptance:
+    - /development/mobile/foundation/
 ---
 
 # 界面语言切换

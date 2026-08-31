@@ -85,7 +85,19 @@
       "mobile_pages": [],
       "admin_pages": [
         "admin-audio-production"
-      ]
+      ],
+      "blocks": {
+        "backend": "CONTENT_BACKEND_GATE",
+        "integration": "AUDIO_BACKEND_GATE + CONTENT_BACKEND_GATE"
+      },
+      "evidence": {
+        "design": [
+          "/domains/audio/"
+        ]
+      },
+      "active_notes": {
+        "admin": "AUDIO-PRODUCTION-ADMIN-DESIGN 已进入可执行阶段。"
+      }
     },
     {
       "id": "chat-read-state",
@@ -104,7 +116,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "chat-own-delete",
@@ -123,7 +138,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "direct-conversation",
@@ -142,7 +160,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "chat-image",
@@ -161,7 +182,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "chat-realtime",
@@ -180,7 +204,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "chat-text",
@@ -199,7 +226,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "chat-reactions",
@@ -218,7 +248,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "chat-recall",
@@ -237,7 +270,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "conversation-settings",
@@ -256,7 +292,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "group-chat",
@@ -275,7 +314,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "conversation-list",
@@ -294,7 +336,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "chat-translation",
@@ -314,7 +359,16 @@
         "acceptance": "blocked"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {
+        "design": "CHAT_SCOPE_DECISION",
+        "backend": "CHAT_SCOPE_DECISION",
+        "mobile": "CHAT_SCOPE_DECISION",
+        "integration": "CHAT_SCOPE_DECISION",
+        "acceptance": "CHAT_SCOPE_DECISION"
+      },
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "chat-voice-message",
@@ -334,7 +388,16 @@
         "acceptance": "blocked"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {
+        "design": "CHAT_SCOPE_DECISION",
+        "backend": "CHAT_SCOPE_DECISION",
+        "mobile": "CHAT_SCOPE_DECISION",
+        "integration": "CHAT_SCOPE_DECISION",
+        "acceptance": "CHAT_SCOPE_DECISION"
+      },
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "chat-speech-to-text",
@@ -354,7 +417,16 @@
         "acceptance": "blocked"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {
+        "design": "CHAT_SCOPE_DECISION",
+        "backend": "CHAT_SCOPE_DECISION",
+        "mobile": "CHAT_SCOPE_DECISION",
+        "integration": "CHAT_SCOPE_DECISION",
+        "acceptance": "CHAT_SCOPE_DECISION"
+      },
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "chat-message-receipts",
@@ -373,7 +445,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "coin-pack-catalog",
@@ -391,7 +466,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "wallet-balance",
@@ -409,7 +487,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "promotions-coupons",
@@ -427,7 +508,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "send-gift",
@@ -447,7 +531,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "commerce-catalog-admin",
@@ -465,7 +552,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "gift-admin",
@@ -483,7 +573,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "creator-earnings",
@@ -501,7 +594,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "gift-catalog",
@@ -519,7 +615,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "social-membership-entitlements",
@@ -538,7 +637,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "commerce-transaction-admin",
@@ -556,7 +658,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "order-payment-history",
@@ -574,7 +679,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "buy-coins",
@@ -592,7 +700,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "commerce-refund-admin",
@@ -610,7 +721,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "wallet-adjustment-admin",
@@ -628,7 +742,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "wallet-history",
@@ -646,7 +763,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "content-revision-publishing",
@@ -664,7 +784,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "mobile-home",
@@ -684,7 +807,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "knowledge-content-management",
@@ -702,7 +828,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "practice-content-management",
@@ -720,7 +849,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "dictionary-content-management",
@@ -738,7 +870,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "curriculum-management",
@@ -756,7 +891,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "guest-cloud-sync",
@@ -773,7 +911,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "login",
@@ -793,7 +934,19 @@
         "mobile-login",
         "mobile-otp"
       ],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {
+        "design": [
+          "/domains/identity/"
+        ],
+        "backend": [
+          "/development/backend/identity/"
+        ]
+      },
+      "active_notes": {
+        "mobile": "LOGIN-MOBILE-DESIGN 已进入可执行阶段，真实 API 集成与设备验证推进中。"
+      }
     },
     {
       "id": "identity-user-admin",
@@ -811,7 +964,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "login-devices",
@@ -828,7 +984,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "account-profile",
@@ -845,7 +1004,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "account-lifecycle",
@@ -862,7 +1024,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "lesson-learning",
@@ -881,7 +1046,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "instant-translation",
@@ -900,7 +1068,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "learning-bookmarks",
@@ -919,7 +1090,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "learning-activity-history",
@@ -938,7 +1112,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "ads-monetization",
@@ -956,7 +1133,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "mastery-review",
@@ -975,7 +1155,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "pronunciation-playback",
@@ -995,7 +1178,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "guest-learning-browse",
@@ -1013,7 +1199,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "practice-exercises",
@@ -1032,7 +1221,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "translation-history",
@@ -1051,7 +1243,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "dictionary-search",
@@ -1070,7 +1265,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "dictionary-history",
@@ -1089,7 +1287,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "knowledge-learning",
@@ -1108,7 +1309,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "learning-progress",
@@ -1127,7 +1331,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "course-catalog",
@@ -1146,7 +1353,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "wrong-answer-notebook",
@@ -1165,7 +1375,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "advanced-learning-entitlements",
@@ -1184,7 +1397,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "admin-auth-hardening",
@@ -1202,7 +1418,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "operator-audit-log",
@@ -1219,7 +1438,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "admin-login",
@@ -1237,7 +1459,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "operator-management",
@@ -1254,7 +1479,12 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [
+        "admin-operators"
+      ],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "permission-assignment",
@@ -1271,7 +1501,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "role-management",
@@ -1288,7 +1521,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "first-admin-bootstrap",
@@ -1305,7 +1541,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "region-management",
@@ -1323,7 +1562,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "feature-rollout-control",
@@ -1341,7 +1583,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "app-version-governance",
@@ -1358,7 +1603,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "platform-announcements",
@@ -1376,7 +1624,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "runtime-config-management",
@@ -1394,7 +1645,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "runtime-config-history",
@@ -1411,7 +1665,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "advanced-feature-rollout",
@@ -1428,7 +1685,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "advanced-reward-types",
@@ -1446,7 +1706,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "reward-operations",
@@ -1465,7 +1728,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "automatic-coin-rewards",
@@ -1486,7 +1752,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "social-match",
@@ -1505,7 +1774,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "social-profile-view",
@@ -1524,7 +1796,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "social-feed",
@@ -1543,7 +1818,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "social-follow",
@@ -1562,7 +1840,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "social-relationships",
@@ -1580,7 +1861,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "social-post-interactions",
@@ -1599,7 +1883,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "social-posting",
@@ -1618,7 +1905,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "social-discovery",
@@ -1638,7 +1928,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "social-discovery-preferences",
@@ -1656,7 +1949,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "social-lifecycle",
@@ -1675,7 +1971,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "social-block",
@@ -1695,7 +1994,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "social-profile-media",
@@ -1714,7 +2016,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "social-profile",
@@ -1733,7 +2038,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "social-distance",
@@ -1751,7 +2059,16 @@
         "acceptance": "blocked"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {
+        "design": "SOCIAL_LOCATION_SCOPE_DECISION",
+        "backend": "SOCIAL_LOCATION_SCOPE_DECISION",
+        "mobile": "SOCIAL_LOCATION_SCOPE_DECISION",
+        "integration": "SOCIAL_LOCATION_SCOPE_DECISION",
+        "acceptance": "SOCIAL_LOCATION_SCOPE_DECISION"
+      },
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "theme-settings",
@@ -1766,7 +2083,20 @@
         "acceptance": "done"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {
+        "design": [
+          "/development/mobile/foundation/"
+        ],
+        "mobile": [
+          "/development/mobile/foundation/"
+        ],
+        "acceptance": [
+          "/development/mobile/foundation/"
+        ]
+      },
+      "active_notes": {}
     },
     {
       "id": "admin-dashboard",
@@ -1781,7 +2111,10 @@
         "acceptance": "na"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "interface-language",
@@ -1796,7 +2129,20 @@
         "acceptance": "done"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {
+        "design": [
+          "/development/mobile/foundation/"
+        ],
+        "mobile": [
+          "/development/mobile/foundation/"
+        ],
+        "acceptance": [
+          "/development/mobile/foundation/"
+        ]
+      },
+      "active_notes": {}
     },
     {
       "id": "push-notifications",
@@ -1811,7 +2157,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "moderation-workbench",
@@ -1829,7 +2178,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "enforcement-management",
@@ -1850,7 +2202,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "user-reporting",
@@ -1871,7 +2226,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "user-appeal",
@@ -1889,7 +2247,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "appeal-review",
@@ -1907,7 +2268,10 @@
         "acceptance": "todo"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {},
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "verification-review",
@@ -1926,7 +2290,16 @@
         "acceptance": "blocked"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {
+        "design": "TRUST_VERIFICATION_DESIGN",
+        "backend": "TRUST_VERIFICATION_DESIGN",
+        "admin": "TRUST_VERIFICATION_DESIGN",
+        "integration": "TRUST_VERIFICATION_DESIGN",
+        "acceptance": "TRUST_VERIFICATION_DESIGN"
+      },
+      "evidence": {},
+      "active_notes": {}
     },
     {
       "id": "real-person-verification",
@@ -1945,7 +2318,16 @@
         "acceptance": "blocked"
       },
       "mobile_pages": [],
-      "admin_pages": []
+      "admin_pages": [],
+      "blocks": {
+        "design": "TRUST_VERIFICATION_DESIGN",
+        "backend": "TRUST_VERIFICATION_DESIGN",
+        "mobile": "TRUST_VERIFICATION_DESIGN",
+        "integration": "TRUST_VERIFICATION_DESIGN",
+        "acceptance": "TRUST_VERIFICATION_DESIGN"
+      },
+      "evidence": {},
+      "active_notes": {}
     }
   ]
 }
