@@ -17,7 +17,7 @@ mobile_pages: []
 admin_pages: []
 evidence:
   design:
-    - /domains/social/discovery-and-relationships/
+    - /domains/social/discovery-and-relationships
     - /governance/design-register/
 ---
 
@@ -35,7 +35,7 @@ Portfolio Status：`active`。
 
 范围：`social_profiles.profile_status` 使用 `draft / active / paused / closed`。`paused` 只退出普通 Discovery，既有 Match 与聊天继续；`closed` 关闭 Social 功能，但不是账号注销或资料物理删除。关闭后未来是否恢复原资料仍为 deferred，本 Feature 不提前裁决。Social 生命周期不得被解释为 Trust 封禁或处罚状态。
 
-Stage / 工件：canonical 已冻结：[Social 偏好、发现与关系](/domains/social/discovery-and-relationships/)；物理状态契约见 `database/v2/migrations/0700_social.sql` 的 `social.social_profiles.profile_status`。
+Stage / 工件：canonical 已冻结：[Social 偏好、发现与关系](/domains/social/discovery-and-relationships)；物理状态契约见 `database/v2/migrations/0700_social.sql` 的 `social.social_profiles.profile_status`。
 
 Gate / Evidence：canonical frontmatter 为 `status: frozen`，并明确 `paused` / `closed` 的当前语义；Design Register D-135～D-138 是 Social 全域审计最终冻结证据。仓库未发现独立 `SOCIAL_DESIGN_GATE` 文件，本页不制造额外 Gate 结论。
 

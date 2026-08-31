@@ -88,16 +88,31 @@
         "admin-audio-production"
       ],
       "blocks": {
-        "backend": "CONTENT_BACKEND_GATE",
-        "integration": "AUDIO_BACKEND_GATE + CONTENT_BACKEND_GATE"
+        "backend": "CONTENT_GATE",
+        "integration": "AUDIO_GATE + CONTENT_GATE"
       },
       "evidence": {
         "design": [
-          "/domains/audio/"
+          "/domains/audio/production",
+          "/domains/audio/contracts",
+          "/development/07-audio/AUDIO_DESIGN_RECOVERY_BRIEF.md",
+          "/development/07-audio/AUDIO_DESIGN_AUDIT.md"
+        ],
+        "backend": [
+          "/development/07-audio/AUDIO_IMPLEMENTATION_PLAN.md",
+          "/development/07-audio/AUDIO_PRODUCTION_CONTRACTS.md"
+        ],
+        "admin": [
+          "/development/admin/audio-production/",
+          "/development/admin/audio-production/AUDIO_PRODUCTION_ADMIN_DESIGN_BRIEF.md"
+        ],
+        "integration": [
+          "/domains/audio/contracts",
+          "/development/07-audio/AUDIO_PRODUCTION_CONTRACTS.md"
         ]
       },
       "active_notes": {
-        "admin": "AUDIO-PRODUCTION-ADMIN-DESIGN 已进入可执行阶段。"
+        "admin": "AUDIO-PRODUCTION-ADMIN-DESIGN 仅进入 ready 的 Admin 设计 Stage；尚未形成 AUDIO_PRODUCTION_ADMIN_DESIGN_GATE PASS，也未开始 Admin Implementation。"
       }
     },
     {
@@ -110,7 +125,7 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "todo",
+        "design": "done",
         "backend": "todo",
         "admin": "na",
         "mobile": "todo",
@@ -120,7 +135,12 @@
       "mobile_pages": [],
       "admin_pages": [],
       "blocks": {},
-      "evidence": {},
+      "evidence": {
+        "design": [
+          "/domains/chat/conversation",
+          "/adr/ADR-013-read-state-as-cursor-not-receipt-table"
+        ]
+      },
       "active_notes": {}
     },
     {
@@ -156,7 +176,7 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "todo",
+        "design": "done",
         "backend": "todo",
         "admin": "na",
         "mobile": "todo",
@@ -166,7 +186,12 @@
       "mobile_pages": [],
       "admin_pages": [],
       "blocks": {},
-      "evidence": {},
+      "evidence": {
+        "design": [
+          "/domains/chat/conversation",
+          "/adr/ADR-011-chat-conversation-identity-and-direct-uniqueness"
+        ]
+      },
       "active_notes": {}
     },
     {
@@ -179,7 +204,7 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "todo",
+        "design": "active",
         "backend": "todo",
         "admin": "na",
         "mobile": "todo",
@@ -190,7 +215,9 @@
       "admin_pages": [],
       "blocks": {},
       "evidence": {},
-      "active_notes": {}
+      "active_notes": {
+        "design": "IMAGE subtype 与 asset_id 引用语义已冻结；上传资产校验及公共 API 请求响应、错误契约仍未形成 Feature 级 Design Gate。"
+      }
     },
     {
       "id": "chat-realtime",
@@ -202,7 +229,7 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "todo",
+        "design": "active",
         "backend": "todo",
         "admin": "na",
         "mobile": "todo",
@@ -213,7 +240,9 @@
       "admin_pages": [],
       "blocks": {},
       "evidence": {},
-      "active_notes": {}
+      "active_notes": {
+        "design": "Chat 已确定事务提交后事件分发、Outbox 与 seq 同步边界；Chat 专用频道协议、重连与 replay 策略仍未冻结，Mobile 仅有无真实 transport 的 Foundation skeleton。"
+      }
     },
     {
       "id": "chat-text",
@@ -225,7 +254,7 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "todo",
+        "design": "active",
         "backend": "todo",
         "admin": "na",
         "mobile": "todo",
@@ -236,7 +265,9 @@
       "admin_pages": [],
       "blocks": {},
       "evidence": {},
-      "active_notes": {}
+      "active_notes": {
+        "design": "Chat 消息主体、TEXT subtype、顺序与幂等语义已冻结；应用层请求响应、错误码等公共契约仍处于 designing，尚无 Feature 级 Design Gate。"
+      }
     },
     {
       "id": "chat-reactions",
@@ -271,7 +302,7 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "todo",
+        "design": "active",
         "backend": "todo",
         "admin": "na",
         "mobile": "todo",
@@ -282,7 +313,9 @@
       "admin_pages": [],
       "blocks": {},
       "evidence": {},
-      "active_notes": {}
+      "active_notes": {
+        "design": "撤回已冻结为 chat_message 自身的 normal/recalled 生命周期；公共 recallMessage API 与错误契约仍未形成 Feature 级 Design Gate。"
+      }
     },
     {
       "id": "conversation-settings",
@@ -294,7 +327,7 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "todo",
+        "design": "done",
         "backend": "todo",
         "admin": "na",
         "mobile": "todo",
@@ -304,7 +337,13 @@
       "mobile_pages": [],
       "admin_pages": [],
       "blocks": {},
-      "evidence": {},
+      "evidence": {
+        "design": [
+          "/domains/chat/conversation",
+          "/adr/ADR-011-chat-conversation-identity-and-direct-uniqueness",
+          "/adr/ADR-013-read-state-as-cursor-not-receipt-table"
+        ]
+      },
       "active_notes": {}
     },
     {
@@ -340,7 +379,7 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "todo",
+        "design": "done",
         "backend": "todo",
         "admin": "na",
         "mobile": "todo",
@@ -350,7 +389,13 @@
       "mobile_pages": [],
       "admin_pages": [],
       "blocks": {},
-      "evidence": {},
+      "evidence": {
+        "design": [
+          "/domains/chat/conversation",
+          "/adr/ADR-011-chat-conversation-identity-and-direct-uniqueness",
+          "/adr/ADR-013-read-state-as-cursor-not-receipt-table"
+        ]
+      },
       "active_notes": {}
     },
     {
@@ -475,7 +520,7 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "todo",
+        "design": "done",
         "backend": "todo",
         "admin": "na",
         "mobile": "todo",
@@ -485,7 +530,13 @@
       "mobile_pages": [],
       "admin_pages": [],
       "blocks": {},
-      "evidence": {},
+      "evidence": {
+        "design": [
+          "/domains/commerce/",
+          "/domains/commerce/purchase-and-payment",
+          "/domains/commerce/database"
+        ]
+      },
       "active_notes": {}
     },
     {
@@ -497,7 +548,7 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "todo",
+        "design": "done",
         "backend": "todo",
         "admin": "na",
         "mobile": "todo",
@@ -507,7 +558,13 @@
       "mobile_pages": [],
       "admin_pages": [],
       "blocks": {},
-      "evidence": {},
+      "evidence": {
+        "design": [
+          "/domains/commerce/",
+          "/domains/commerce/wallet",
+          "/domains/commerce/database"
+        ]
+      },
       "active_notes": {}
     },
     {
@@ -543,7 +600,7 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "todo",
+        "design": "done",
         "backend": "todo",
         "admin": "na",
         "mobile": "todo",
@@ -553,7 +610,13 @@
       "mobile_pages": [],
       "admin_pages": [],
       "blocks": {},
-      "evidence": {},
+      "evidence": {
+        "design": [
+          "/domains/commerce/gifting",
+          "/domains/commerce/wallet",
+          "/governance/design-register"
+        ]
+      },
       "active_notes": {}
     },
     {
@@ -631,7 +694,7 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "todo",
+        "design": "done",
         "backend": "todo",
         "admin": "na",
         "mobile": "todo",
@@ -641,7 +704,12 @@
       "mobile_pages": [],
       "admin_pages": [],
       "blocks": {},
-      "evidence": {},
+      "evidence": {
+        "design": [
+          "/domains/commerce/gifting",
+          "/domains/commerce/database"
+        ]
+      },
       "active_notes": {}
     },
     {
@@ -698,7 +766,7 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "todo",
+        "design": "done",
         "backend": "todo",
         "admin": "na",
         "mobile": "todo",
@@ -708,7 +776,13 @@
       "mobile_pages": [],
       "admin_pages": [],
       "blocks": {},
-      "evidence": {},
+      "evidence": {
+        "design": [
+          "/domains/commerce/",
+          "/domains/commerce/purchase-and-payment",
+          "/domains/commerce/database"
+        ]
+      },
       "active_notes": {}
     },
     {
@@ -720,7 +794,7 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "todo",
+        "design": "done",
         "backend": "todo",
         "admin": "na",
         "mobile": "todo",
@@ -730,7 +804,14 @@
       "mobile_pages": [],
       "admin_pages": [],
       "blocks": {},
-      "evidence": {},
+      "evidence": {
+        "design": [
+          "/domains/commerce/",
+          "/domains/commerce/purchase-and-payment",
+          "/domains/commerce/wallet",
+          "/domains/commerce/database"
+        ]
+      },
       "active_notes": {}
     },
     {
@@ -786,7 +867,7 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "todo",
+        "design": "done",
         "backend": "todo",
         "admin": "na",
         "mobile": "todo",
@@ -796,7 +877,13 @@
       "mobile_pages": [],
       "admin_pages": [],
       "blocks": {},
-      "evidence": {},
+      "evidence": {
+        "design": [
+          "/domains/commerce/",
+          "/domains/commerce/wallet",
+          "/domains/commerce/database"
+        ]
+      },
       "active_notes": {}
     },
     {
@@ -808,17 +895,21 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "todo",
-        "backend": "todo",
-        "admin": "todo",
+        "design": "done",
+        "backend": "ready",
+        "admin": "blocked",
         "mobile": "na",
         "integration": "todo",
         "acceptance": "todo"
       },
       "mobile_pages": [],
       "admin_pages": [],
-      "blocks": {},
-      "evidence": {},
+      "blocks": {
+        "admin": "CONTENT_GATE 尚未 PASS，当前 main 不存在 Content Backend module，无法开始真实 Content Admin 集成。"
+      },
+      "evidence": {
+        "design": "CONTENT_DESIGN_AUDIT.md -> CONTENT_DESIGN_GATE = PASS"
+      },
       "active_notes": {}
     },
     {
@@ -854,17 +945,21 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "todo",
-        "backend": "todo",
-        "admin": "todo",
+        "design": "done",
+        "backend": "ready",
+        "admin": "blocked",
         "mobile": "na",
         "integration": "todo",
         "acceptance": "todo"
       },
       "mobile_pages": [],
       "admin_pages": [],
-      "blocks": {},
-      "evidence": {},
+      "blocks": {
+        "admin": "CONTENT_GATE 尚未 PASS，当前 main 不存在 Content Backend module，无法开始真实 Content Admin 集成。"
+      },
+      "evidence": {
+        "design": "CONTENT_DESIGN_AUDIT.md -> CONTENT_DESIGN_GATE = PASS"
+      },
       "active_notes": {}
     },
     {
@@ -876,17 +971,21 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "todo",
-        "backend": "todo",
-        "admin": "todo",
+        "design": "done",
+        "backend": "ready",
+        "admin": "blocked",
         "mobile": "na",
         "integration": "todo",
         "acceptance": "todo"
       },
       "mobile_pages": [],
       "admin_pages": [],
-      "blocks": {},
-      "evidence": {},
+      "blocks": {
+        "admin": "CONTENT_GATE 尚未 PASS，当前 main 不存在 Content Backend module，无法开始真实 Content Admin 集成。"
+      },
+      "evidence": {
+        "design": "CONTENT_DESIGN_AUDIT.md -> CONTENT_DESIGN_GATE = PASS"
+      },
       "active_notes": {}
     },
     {
@@ -898,17 +997,21 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "todo",
-        "backend": "todo",
-        "admin": "todo",
+        "design": "done",
+        "backend": "ready",
+        "admin": "blocked",
         "mobile": "na",
         "integration": "todo",
         "acceptance": "todo"
       },
       "mobile_pages": [],
       "admin_pages": [],
-      "blocks": {},
-      "evidence": {},
+      "blocks": {
+        "admin": "CONTENT_GATE 尚未 PASS，当前 main 不存在 Content Backend module，无法开始真实 Content Admin 集成。"
+      },
+      "evidence": {
+        "design": "CONTENT_DESIGN_AUDIT.md -> CONTENT_DESIGN_GATE = PASS"
+      },
       "active_notes": {}
     },
     {
@@ -920,17 +1023,21 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "todo",
-        "backend": "todo",
-        "admin": "todo",
+        "design": "done",
+        "backend": "ready",
+        "admin": "blocked",
         "mobile": "na",
         "integration": "todo",
         "acceptance": "todo"
       },
       "mobile_pages": [],
       "admin_pages": [],
-      "blocks": {},
-      "evidence": {},
+      "blocks": {
+        "admin": "CONTENT_GATE 尚未 PASS，当前 main 不存在 Content Backend module，无法开始真实 Content Admin 集成。"
+      },
+      "evidence": {
+        "design": "CONTENT_DESIGN_AUDIT.md -> CONTENT_DESIGN_GATE = PASS"
+      },
       "active_notes": {}
     },
     {
@@ -965,7 +1072,7 @@
         "design": "done",
         "backend": "done",
         "admin": "na",
-        "mobile": "active",
+        "mobile": "ready",
         "integration": "todo",
         "acceptance": "todo"
       },
@@ -977,15 +1084,17 @@
       "blocks": {},
       "evidence": {
         "design": [
-          "/domains/identity/"
+          "/domains/identity/",
+          "/domains/identity/flows"
         ],
         "backend": [
-          "/development/backend/identity/"
+          "/development/backend/identity/",
+          "/development/02-identity/IDENTITY_API",
+          "/development/02-identity/IDENTITY_IMPLEMENTATION_REPORT",
+          "/development/02-identity/IDENTITY_REGRESSION_HOTFIX_REPORT"
         ]
       },
-      "active_notes": {
-        "mobile": "LOGIN-MOBILE-DESIGN 已进入可执行阶段，真实 API 集成与设备验证推进中。"
-      }
+      "active_notes": {}
     },
     {
       "id": "identity-user-admin",
@@ -1082,8 +1191,8 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "todo",
-        "backend": "todo",
+        "design": "done",
+        "backend": "blocked",
         "admin": "na",
         "mobile": "todo",
         "integration": "todo",
@@ -1091,8 +1200,15 @@
       },
       "mobile_pages": [],
       "admin_pages": [],
-      "blocks": {},
-      "evidence": {},
+      "blocks": {
+        "backend": "Content runtime read implementation and formal Content Backend Gate are not yet complete; Learning Backend execution remains blocked."
+      },
+      "evidence": {
+        "design": [
+          "/development/05-content/CONTENT_DESIGN_AUDIT",
+          "/development/06-learning/LEARNING_DESIGN_AUDIT"
+        ]
+      },
       "active_notes": {}
     },
     {
@@ -1105,7 +1221,7 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "todo",
+        "design": "done",
         "backend": "todo",
         "admin": "na",
         "mobile": "todo",
@@ -1115,7 +1231,13 @@
       "mobile_pages": [],
       "admin_pages": [],
       "blocks": {},
-      "evidence": {},
+      "evidence": {
+        "design": [
+          "/development/06-learning/LEARNING_DESIGN_AUDIT.md",
+          "/development/06-learning/LEARNING_USE_CASES.md",
+          "/development/06-learning/LEARNING_API.md"
+        ]
+      },
       "active_notes": {}
     },
     {
@@ -1128,8 +1250,8 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "todo",
-        "backend": "todo",
+        "design": "done",
+        "backend": "blocked",
         "admin": "na",
         "mobile": "todo",
         "integration": "todo",
@@ -1137,8 +1259,17 @@
       },
       "mobile_pages": [],
       "admin_pages": [],
-      "blocks": {},
-      "evidence": {},
+      "blocks": {
+        "backend": "Learning implementation is blocked at LRN-00 because Content final implementation / CONTENT_GATE is not PASS."
+      },
+      "evidence": {
+        "design": [
+          "docs/docs/development/06-learning/LEARNING_PRODUCT_SEMANTICS.md",
+          "docs/docs/development/06-learning/LEARNING_USE_CASES.md",
+          "docs/docs/development/06-learning/LEARNING_API.md",
+          "docs/docs/development/06-learning/LEARNING_DESIGN_AUDIT.md"
+        ]
+      },
       "active_notes": {}
     },
     {
@@ -1151,8 +1282,8 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "todo",
-        "backend": "todo",
+        "design": "done",
+        "backend": "blocked",
         "admin": "na",
         "mobile": "todo",
         "integration": "todo",
@@ -1160,8 +1291,17 @@
       },
       "mobile_pages": [],
       "admin_pages": [],
-      "blocks": {},
-      "evidence": {},
+      "blocks": {
+        "backend": "Learning implementation is blocked at LRN-00 because Content final implementation / CONTENT_GATE is not PASS."
+      },
+      "evidence": {
+        "design": [
+          "docs/docs/development/06-learning/LEARNING_PRODUCT_SEMANTICS.md",
+          "docs/docs/development/06-learning/LEARNING_USE_CASES.md",
+          "docs/docs/development/06-learning/LEARNING_API.md",
+          "docs/docs/development/06-learning/LEARNING_DESIGN_AUDIT.md"
+        ]
+      },
       "active_notes": {}
     },
     {
@@ -1196,8 +1336,8 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "todo",
-        "backend": "todo",
+        "design": "done",
+        "backend": "blocked",
         "admin": "na",
         "mobile": "todo",
         "integration": "todo",
@@ -1205,8 +1345,17 @@
       },
       "mobile_pages": [],
       "admin_pages": [],
-      "blocks": {},
-      "evidence": {},
+      "blocks": {
+        "backend": "Learning implementation is blocked at LRN-00 because Content final implementation / CONTENT_GATE is not PASS."
+      },
+      "evidence": {
+        "design": [
+          "docs/docs/development/06-learning/LEARNING_PRODUCT_SEMANTICS.md",
+          "docs/docs/development/06-learning/LEARNING_USE_CASES.md",
+          "docs/docs/development/06-learning/LEARNING_API.md",
+          "docs/docs/development/06-learning/LEARNING_DESIGN_AUDIT.md"
+        ]
+      },
       "active_notes": {}
     },
     {
@@ -1220,7 +1369,7 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "todo",
+        "design": "done",
         "backend": "todo",
         "admin": "na",
         "mobile": "todo",
@@ -1230,7 +1379,14 @@
       "mobile_pages": [],
       "admin_pages": [],
       "blocks": {},
-      "evidence": {},
+      "evidence": {
+        "design": [
+          "/development/05-content/CONTENT_API.md",
+          "/development/05-content/CONTENT_PUBLIC_CONTRACTS.md",
+          "/development/07-audio/AUDIO_PUBLIC_CONTRACTS.md",
+          "/development/07-audio/AUDIO_DESIGN_AUDIT.md"
+        ]
+      },
       "active_notes": {}
     },
     {
@@ -1242,8 +1398,8 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "todo",
-        "backend": "todo",
+        "design": "done",
+        "backend": "blocked",
         "admin": "na",
         "mobile": "todo",
         "integration": "todo",
@@ -1251,8 +1407,15 @@
       },
       "mobile_pages": [],
       "admin_pages": [],
-      "blocks": {},
-      "evidence": {},
+      "blocks": {
+        "backend": "Content runtime read implementation and formal Content Backend Gate are not yet complete; Learning Backend execution remains blocked."
+      },
+      "evidence": {
+        "design": [
+          "/development/05-content/CONTENT_DESIGN_AUDIT",
+          "/development/06-learning/LEARNING_DESIGN_AUDIT"
+        ]
+      },
       "active_notes": {}
     },
     {
@@ -1265,8 +1428,8 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "todo",
-        "backend": "todo",
+        "design": "done",
+        "backend": "blocked",
         "admin": "na",
         "mobile": "todo",
         "integration": "todo",
@@ -1274,8 +1437,15 @@
       },
       "mobile_pages": [],
       "admin_pages": [],
-      "blocks": {},
-      "evidence": {},
+      "blocks": {
+        "backend": "Content runtime read implementation and formal Content Backend Gate are not yet complete; Learning Backend execution remains blocked."
+      },
+      "evidence": {
+        "design": [
+          "/development/05-content/CONTENT_DESIGN_AUDIT",
+          "/development/06-learning/LEARNING_DESIGN_AUDIT"
+        ]
+      },
       "active_notes": {}
     },
     {
@@ -1311,7 +1481,7 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "todo",
+        "design": "done",
         "backend": "todo",
         "admin": "na",
         "mobile": "todo",
@@ -1321,7 +1491,12 @@
       "mobile_pages": [],
       "admin_pages": [],
       "blocks": {},
-      "evidence": {},
+      "evidence": {
+        "design": [
+          "/development/05-content/CONTENT_DESIGN_AUDIT.md",
+          "/development/05-content/CONTENT_API.md"
+        ]
+      },
       "active_notes": {}
     },
     {
@@ -1334,7 +1509,7 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "todo",
+        "design": "done",
         "backend": "todo",
         "admin": "na",
         "mobile": "todo",
@@ -1344,7 +1519,13 @@
       "mobile_pages": [],
       "admin_pages": [],
       "blocks": {},
-      "evidence": {},
+      "evidence": {
+        "design": [
+          "/development/06-learning/LEARNING_DESIGN_AUDIT.md",
+          "/development/06-learning/LEARNING_USE_CASES.md",
+          "/development/06-learning/LEARNING_API.md"
+        ]
+      },
       "active_notes": {}
     },
     {
@@ -1357,8 +1538,8 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "todo",
-        "backend": "todo",
+        "design": "done",
+        "backend": "blocked",
         "admin": "na",
         "mobile": "todo",
         "integration": "todo",
@@ -1366,8 +1547,15 @@
       },
       "mobile_pages": [],
       "admin_pages": [],
-      "blocks": {},
-      "evidence": {},
+      "blocks": {
+        "backend": "Content runtime read implementation and formal Content Backend Gate are not yet complete; Learning Backend execution remains blocked."
+      },
+      "evidence": {
+        "design": [
+          "/development/05-content/CONTENT_DESIGN_AUDIT",
+          "/development/06-learning/LEARNING_DESIGN_AUDIT"
+        ]
+      },
       "active_notes": {}
     },
     {
@@ -1380,8 +1568,8 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "todo",
-        "backend": "todo",
+        "design": "done",
+        "backend": "blocked",
         "admin": "na",
         "mobile": "todo",
         "integration": "todo",
@@ -1389,8 +1577,15 @@
       },
       "mobile_pages": [],
       "admin_pages": [],
-      "blocks": {},
-      "evidence": {},
+      "blocks": {
+        "backend": "Content runtime read implementation and formal Content Backend Gate are not yet complete; Learning Backend execution remains blocked."
+      },
+      "evidence": {
+        "design": [
+          "/development/05-content/CONTENT_DESIGN_AUDIT",
+          "/development/06-learning/LEARNING_DESIGN_AUDIT"
+        ]
+      },
       "active_notes": {}
     },
     {
@@ -1403,8 +1598,8 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "todo",
-        "backend": "todo",
+        "design": "done",
+        "backend": "blocked",
         "admin": "na",
         "mobile": "todo",
         "integration": "todo",
@@ -1412,8 +1607,15 @@
       },
       "mobile_pages": [],
       "admin_pages": [],
-      "blocks": {},
-      "evidence": {},
+      "blocks": {
+        "backend": "Content runtime read implementation and formal Content Backend Gate are not yet complete; Learning Backend execution remains blocked."
+      },
+      "evidence": {
+        "design": [
+          "/development/05-content/CONTENT_DESIGN_AUDIT",
+          "/development/06-learning/LEARNING_DESIGN_AUDIT"
+        ]
+      },
       "active_notes": {}
     },
     {
@@ -1492,8 +1694,8 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "todo",
-        "backend": "todo",
+        "design": "done",
+        "backend": "done",
         "admin": "todo",
         "mobile": "na",
         "integration": "todo",
@@ -1502,7 +1704,17 @@
       "mobile_pages": [],
       "admin_pages": [],
       "blocks": {},
-      "evidence": {},
+      "evidence": {
+        "design": [
+          "docs/docs/domains/operations/audit.md",
+          "docs/docs/development/04-operations/OPERATIONS_RBAC_CONTRACTS.md"
+        ],
+        "backend": [
+          "docs/docs/development/04-operations/OPERATIONS_IMPLEMENTATION_REPORT.md",
+          "apps/backend/src/modules/operations/http/routes.ts",
+          "apps/backend/src/modules/operations/application/services/operations-service.ts"
+        ]
+      },
       "active_notes": {}
     },
     {
@@ -1514,8 +1726,8 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "todo",
-        "backend": "todo",
+        "design": "done",
+        "backend": "done",
         "admin": "todo",
         "mobile": "na",
         "integration": "todo",
@@ -1524,7 +1736,18 @@
       "mobile_pages": [],
       "admin_pages": [],
       "blocks": {},
-      "evidence": {},
+      "evidence": {
+        "design": [
+          "docs/docs/domains/operations/index.md",
+          "docs/docs/development/04-operations/OPERATIONS_RBAC_CONTRACTS.md",
+          "docs/docs/development/04-operations/OPERATIONS_API.md"
+        ],
+        "backend": [
+          "docs/docs/development/04-operations/OPERATIONS_IMPLEMENTATION_REPORT.md",
+          "apps/backend/src/modules/operations/http/routes.ts",
+          "apps/backend/test/integration/operations-e2e.test.ts"
+        ]
+      },
       "active_notes": {}
     },
     {
@@ -1535,8 +1758,8 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "todo",
-        "backend": "todo",
+        "design": "done",
+        "backend": "done",
         "admin": "todo",
         "mobile": "na",
         "integration": "todo",
@@ -1547,7 +1770,17 @@
         "admin-operators"
       ],
       "blocks": {},
-      "evidence": {},
+      "evidence": {
+        "design": [
+          "docs/docs/domains/operations/index.md",
+          "docs/docs/development/04-operations/OPERATIONS_RBAC_CONTRACTS.md"
+        ],
+        "backend": [
+          "docs/docs/development/04-operations/OPERATIONS_IMPLEMENTATION_REPORT.md",
+          "apps/backend/src/modules/operations/http/routes.ts",
+          "apps/backend/src/modules/operations/application/services/operations-service.ts"
+        ]
+      },
       "active_notes": {}
     },
     {
@@ -1558,8 +1791,8 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "todo",
-        "backend": "todo",
+        "design": "done",
+        "backend": "done",
         "admin": "todo",
         "mobile": "na",
         "integration": "todo",
@@ -1568,7 +1801,17 @@
       "mobile_pages": [],
       "admin_pages": [],
       "blocks": {},
-      "evidence": {},
+      "evidence": {
+        "design": [
+          "docs/docs/domains/operations/rbac.md",
+          "docs/docs/development/04-operations/OPERATIONS_RBAC_CONTRACTS.md"
+        ],
+        "backend": [
+          "docs/docs/development/04-operations/OPERATIONS_IMPLEMENTATION_REPORT.md",
+          "apps/backend/src/modules/operations/public/permissions.ts",
+          "apps/backend/src/modules/operations/application/services/operations-service.ts"
+        ]
+      },
       "active_notes": {}
     },
     {
@@ -1579,8 +1822,8 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "todo",
-        "backend": "todo",
+        "design": "done",
+        "backend": "done",
         "admin": "todo",
         "mobile": "na",
         "integration": "todo",
@@ -1589,7 +1832,17 @@
       "mobile_pages": [],
       "admin_pages": [],
       "blocks": {},
-      "evidence": {},
+      "evidence": {
+        "design": [
+          "docs/docs/domains/operations/rbac.md",
+          "docs/docs/development/04-operations/OPERATIONS_RBAC_CONTRACTS.md"
+        ],
+        "backend": [
+          "docs/docs/development/04-operations/OPERATIONS_IMPLEMENTATION_REPORT.md",
+          "apps/backend/src/modules/operations/http/routes.ts",
+          "apps/backend/src/modules/operations/application/services/operations-service.ts"
+        ]
+      },
       "active_notes": {}
     },
     {
@@ -1600,17 +1853,30 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "todo",
-        "backend": "todo",
+        "design": "done",
+        "backend": "done",
         "admin": "na",
         "mobile": "na",
         "integration": "na",
-        "acceptance": "todo"
+        "acceptance": "done"
       },
       "mobile_pages": [],
       "admin_pages": [],
       "blocks": {},
-      "evidence": {},
+      "evidence": {
+        "design": [
+          "docs/docs/domains/operations/audit.md",
+          "docs/docs/development/04-operations/OPERATIONS_RBAC_CONTRACTS.md"
+        ],
+        "backend": [
+          "docs/docs/development/04-operations/OPERATIONS_IMPLEMENTATION_REPORT.md",
+          "apps/backend/src/modules/operations/application/services/operations-service.ts"
+        ],
+        "acceptance": [
+          "docs/docs/development/04-operations/OPERATIONS_IMPLEMENTATION_REPORT.md",
+          "apps/backend/test/integration/operations-e2e.test.ts"
+        ]
+      },
       "active_notes": {}
     },
     {
@@ -1622,17 +1888,24 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "todo",
-        "backend": "todo",
-        "admin": "todo",
-        "mobile": "na",
-        "integration": "todo",
+        "design": "done",
+        "backend": "done",
+        "admin": "ready",
+        "mobile": "todo",
+        "integration": "ready",
         "acceptance": "todo"
       },
       "mobile_pages": [],
       "admin_pages": [],
       "blocks": {},
-      "evidence": {},
+      "evidence": {
+        "design": [
+          "/development/03-platform/PLATFORM_DESIGN_AUDIT.md"
+        ],
+        "backend": [
+          "/development/03-platform/PLATFORM_IMPLEMENTATION_REPORT.md"
+        ]
+      },
       "active_notes": {}
     },
     {
@@ -1644,17 +1917,24 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "todo",
-        "backend": "todo",
-        "admin": "todo",
-        "mobile": "na",
-        "integration": "todo",
+        "design": "done",
+        "backend": "done",
+        "admin": "ready",
+        "mobile": "todo",
+        "integration": "ready",
         "acceptance": "todo"
       },
       "mobile_pages": [],
       "admin_pages": [],
       "blocks": {},
-      "evidence": {},
+      "evidence": {
+        "design": [
+          "/development/03-platform/PLATFORM_DESIGN_AUDIT.md"
+        ],
+        "backend": [
+          "/development/03-platform/PLATFORM_IMPLEMENTATION_REPORT.md"
+        ]
+      },
       "active_notes": {}
     },
     {
@@ -1665,17 +1945,24 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "todo",
-        "backend": "todo",
-        "admin": "todo",
+        "design": "done",
+        "backend": "done",
+        "admin": "ready",
         "mobile": "todo",
-        "integration": "todo",
+        "integration": "ready",
         "acceptance": "todo"
       },
       "mobile_pages": [],
       "admin_pages": [],
       "blocks": {},
-      "evidence": {},
+      "evidence": {
+        "design": [
+          "/development/03-platform/PLATFORM_DESIGN_AUDIT.md"
+        ],
+        "backend": [
+          "/development/03-platform/PLATFORM_IMPLEMENTATION_REPORT.md"
+        ]
+      },
       "active_notes": {}
     },
     {
@@ -1687,17 +1974,24 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "todo",
-        "backend": "todo",
-        "admin": "todo",
+        "design": "done",
+        "backend": "done",
+        "admin": "ready",
         "mobile": "todo",
-        "integration": "todo",
+        "integration": "ready",
         "acceptance": "todo"
       },
       "mobile_pages": [],
       "admin_pages": [],
       "blocks": {},
-      "evidence": {},
+      "evidence": {
+        "design": [
+          "/development/03-platform/PLATFORM_DESIGN_AUDIT.md"
+        ],
+        "backend": [
+          "/development/03-platform/PLATFORM_IMPLEMENTATION_REPORT.md"
+        ]
+      },
       "active_notes": {}
     },
     {
@@ -1709,17 +2003,24 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "todo",
-        "backend": "todo",
-        "admin": "todo",
+        "design": "done",
+        "backend": "done",
+        "admin": "ready",
         "mobile": "na",
-        "integration": "todo",
+        "integration": "ready",
         "acceptance": "todo"
       },
       "mobile_pages": [],
       "admin_pages": [],
       "blocks": {},
-      "evidence": {},
+      "evidence": {
+        "design": [
+          "/development/03-platform/PLATFORM_DESIGN_AUDIT.md"
+        ],
+        "backend": [
+          "/development/03-platform/PLATFORM_IMPLEMENTATION_REPORT.md"
+        ]
+      },
       "active_notes": {}
     },
     {
@@ -1796,7 +2097,7 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "todo",
+        "design": "done",
         "backend": "todo",
         "admin": "todo",
         "mobile": "na",
@@ -1806,7 +2107,14 @@
       "mobile_pages": [],
       "admin_pages": [],
       "blocks": {},
-      "evidence": {},
+      "evidence": {
+        "design": [
+          "docs/docs/domains/rewards/index.md",
+          "docs/docs/domains/rewards/application-and-events.md",
+          "docs/docs/domains/rewards/database.md",
+          "docs/docs/adr/ADR-017-rewards-boundary-and-event-driven-grant.md"
+        ]
+      },
       "active_notes": {}
     },
     {
@@ -1821,7 +2129,7 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "todo",
+        "design": "done",
         "backend": "todo",
         "admin": "na",
         "mobile": "todo",
@@ -1831,7 +2139,14 @@
       "mobile_pages": [],
       "admin_pages": [],
       "blocks": {},
-      "evidence": {},
+      "evidence": {
+        "design": [
+          "docs/docs/domains/rewards/index.md",
+          "docs/docs/domains/rewards/database.md",
+          "docs/docs/domains/rewards/application-and-events.md",
+          "docs/docs/adr/ADR-017-rewards-boundary-and-event-driven-grant.md"
+        ]
+      },
       "active_notes": {}
     },
     {
@@ -1844,8 +2159,8 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "todo",
-        "backend": "todo",
+        "design": "done",
+        "backend": "ready",
         "admin": "na",
         "mobile": "todo",
         "integration": "todo",
@@ -1854,7 +2169,12 @@
       "mobile_pages": [],
       "admin_pages": [],
       "blocks": {},
-      "evidence": {},
+      "evidence": {
+        "design": [
+          "/domains/social/discovery-and-relationships",
+          "/governance/design-register/"
+        ]
+      },
       "active_notes": {}
     },
     {
@@ -1867,7 +2187,7 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "todo",
+        "design": "active",
         "backend": "todo",
         "admin": "na",
         "mobile": "todo",
@@ -1878,7 +2198,9 @@
       "admin_pages": [],
       "blocks": {},
       "evidence": {},
-      "active_notes": {}
+      "active_notes": {
+        "design": "已冻结的数据模型与业务边界见本页设计 Lane；公共应用 Contract 与正式 Social Design Gate 仍在收口。"
+      }
     },
     {
       "id": "social-feed",
@@ -1890,7 +2212,7 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "todo",
+        "design": "done",
         "backend": "todo",
         "admin": "na",
         "mobile": "todo",
@@ -1900,7 +2222,13 @@
       "mobile_pages": [],
       "admin_pages": [],
       "blocks": {},
-      "evidence": {},
+      "evidence": {
+        "design": [
+          "/domains/social/community-content",
+          "/domains/social/database",
+          "/governance/design-register"
+        ]
+      },
       "active_notes": {}
     },
     {
@@ -1913,8 +2241,8 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "todo",
-        "backend": "todo",
+        "design": "done",
+        "backend": "ready",
         "admin": "na",
         "mobile": "todo",
         "integration": "todo",
@@ -1923,7 +2251,12 @@
       "mobile_pages": [],
       "admin_pages": [],
       "blocks": {},
-      "evidence": {},
+      "evidence": {
+        "design": [
+          "/domains/social/discovery-and-relationships",
+          "/governance/design-register/"
+        ]
+      },
       "active_notes": {}
     },
     {
@@ -1935,8 +2268,8 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "todo",
-        "backend": "todo",
+        "design": "done",
+        "backend": "ready",
         "admin": "na",
         "mobile": "todo",
         "integration": "todo",
@@ -1945,7 +2278,12 @@
       "mobile_pages": [],
       "admin_pages": [],
       "blocks": {},
-      "evidence": {},
+      "evidence": {
+        "design": [
+          "/domains/social/discovery-and-relationships",
+          "/governance/design-register/"
+        ]
+      },
       "active_notes": {}
     },
     {
@@ -1958,7 +2296,7 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "todo",
+        "design": "done",
         "backend": "todo",
         "admin": "na",
         "mobile": "todo",
@@ -1968,7 +2306,13 @@
       "mobile_pages": [],
       "admin_pages": [],
       "blocks": {},
-      "evidence": {},
+      "evidence": {
+        "design": [
+          "/domains/social/community-content",
+          "/domains/social/database",
+          "/governance/design-register"
+        ]
+      },
       "active_notes": {}
     },
     {
@@ -1981,7 +2325,7 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "todo",
+        "design": "done",
         "backend": "todo",
         "admin": "na",
         "mobile": "todo",
@@ -1991,7 +2335,13 @@
       "mobile_pages": [],
       "admin_pages": [],
       "blocks": {},
-      "evidence": {},
+      "evidence": {
+        "design": [
+          "/domains/social/community-content",
+          "/domains/social/database",
+          "/governance/design-register"
+        ]
+      },
       "active_notes": {}
     },
     {
@@ -2005,7 +2355,7 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "todo",
+        "design": "active",
         "backend": "todo",
         "admin": "na",
         "mobile": "todo",
@@ -2016,7 +2366,9 @@
       "admin_pages": [],
       "blocks": {},
       "evidence": {},
-      "active_notes": {}
+      "active_notes": {
+        "design": "已冻结的数据模型与业务边界见本页设计 Lane；公共应用 Contract 与正式 Social Design Gate 仍在收口。"
+      }
     },
     {
       "id": "social-discovery-preferences",
@@ -2027,7 +2379,7 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "todo",
+        "design": "active",
         "backend": "todo",
         "admin": "na",
         "mobile": "todo",
@@ -2038,7 +2390,9 @@
       "admin_pages": [],
       "blocks": {},
       "evidence": {},
-      "active_notes": {}
+      "active_notes": {
+        "design": "已冻结的数据模型与业务边界见本页设计 Lane；公共应用 Contract 与正式 Social Design Gate 仍在收口。"
+      }
     },
     {
       "id": "social-lifecycle",
@@ -2050,8 +2404,8 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "todo",
-        "backend": "todo",
+        "design": "done",
+        "backend": "ready",
         "admin": "na",
         "mobile": "todo",
         "integration": "todo",
@@ -2060,7 +2414,12 @@
       "mobile_pages": [],
       "admin_pages": [],
       "blocks": {},
-      "evidence": {},
+      "evidence": {
+        "design": [
+          "/domains/social/discovery-and-relationships",
+          "/governance/design-register/"
+        ]
+      },
       "active_notes": {}
     },
     {
@@ -2074,8 +2433,8 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "todo",
-        "backend": "todo",
+        "design": "done",
+        "backend": "ready",
         "admin": "na",
         "mobile": "todo",
         "integration": "todo",
@@ -2084,7 +2443,12 @@
       "mobile_pages": [],
       "admin_pages": [],
       "blocks": {},
-      "evidence": {},
+      "evidence": {
+        "design": [
+          "/domains/social/discovery-and-relationships",
+          "/governance/design-register/"
+        ]
+      },
       "active_notes": {}
     },
     {
@@ -2097,7 +2461,7 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "todo",
+        "design": "active",
         "backend": "todo",
         "admin": "na",
         "mobile": "todo",
@@ -2108,7 +2472,9 @@
       "admin_pages": [],
       "blocks": {},
       "evidence": {},
-      "active_notes": {}
+      "active_notes": {
+        "design": "已冻结的数据模型与业务边界见本页设计 Lane；公共应用 Contract 与正式 Social Design Gate 仍在收口。"
+      }
     },
     {
       "id": "social-profile",
@@ -2120,7 +2486,7 @@
       ],
       "portfolio_status": "active",
       "status": {
-        "design": "todo",
+        "design": "active",
         "backend": "todo",
         "admin": "na",
         "mobile": "todo",
@@ -2131,7 +2497,9 @@
       "admin_pages": [],
       "blocks": {},
       "evidence": {},
-      "active_notes": {}
+      "active_notes": {
+        "design": "已冻结的数据模型与业务边界见本页设计 Lane；公共应用 Contract 与正式 Social Design Gate 仍在收口。"
+      }
     },
     {
       "id": "social-distance",

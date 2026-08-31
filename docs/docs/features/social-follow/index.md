@@ -17,7 +17,7 @@ mobile_pages: []
 admin_pages: []
 evidence:
   design:
-    - /domains/social/discovery-and-relationships/
+    - /domains/social/discovery-and-relationships
     - /governance/design-register/
 ---
 
@@ -27,7 +27,7 @@ evidence:
 
 Portfolio Status：`active`。
 
-`social-follow` 负责 Social 内单向关注关系的建立与取消。唯一领域事实源为 [Social 偏好、发现与关系](/domains/social/discovery-and-relationships/)；Identity 只提供跨域用户身份，Trust & Safety 不拥有 Follow 关系事实。
+`social-follow` 负责 Social 内单向关注关系的建立与取消。唯一领域事实源为 [Social 偏好、发现与关系](/domains/social/discovery-and-relationships)；Identity 只提供跨域用户身份，Trust & Safety 不拥有 Follow 关系事实。
 
 ## 设计
 
@@ -35,7 +35,7 @@ Portfolio Status：`active`。
 
 范围：冻结单向 Follow 当前关系事实。`social_follows` 以 `(follower_profile_id, following_profile_id)` 表示一条当前关注边，禁止自关注；取消关注是 physical DELETE。首期没有关注请求、Like/Dislike/Favorite 平行关系图谱。互关产生 Match、取消任一方向 Follow 结束 active Match，属于 Social Domain Service 的关系不变量。
 
-Stage / 工件：canonical 已冻结：[Social 偏好、发现与关系](/domains/social/discovery-and-relationships/)；物理契约见 `database/v2/migrations/0700_social.sql`。
+Stage / 工件：canonical 已冻结：[Social 偏好、发现与关系](/domains/social/discovery-and-relationships)；物理契约见 `database/v2/migrations/0700_social.sql`。
 
 Gate / Evidence：canonical frontmatter 为 `status: frozen`；Design Register 的 D-135～D-138 为 Social 全域审计最终冻结证据，其中 D-138 明确 Follow 单向及跨表 invariant 由 Social Application/Domain Service 事务保证。仓库未发现独立 `SOCIAL_DESIGN_GATE` 文件，本页不制造额外 Gate 结论。
 

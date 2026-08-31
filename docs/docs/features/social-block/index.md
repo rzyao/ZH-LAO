@@ -18,7 +18,7 @@ mobile_pages: []
 admin_pages: []
 evidence:
   design:
-    - /domains/social/discovery-and-relationships/
+    - /domains/social/discovery-and-relationships
     - /governance/design-register/
 ---
 
@@ -36,7 +36,7 @@ Portfolio Status：`active`。
 
 范围：`social_blocks(blocker_profile_id, blocked_profile_id)` 保存单向当前 Block，禁止自 Block；Unblock 可 physical DELETE。Block 触发“删除双方当前 Follow、结束 active Match、禁止新互动”属于 Social Domain Service 的事务 invariant，不由 DB CHECK 伪装，也不得写入或复用 Trust `enforcement_actions`。跨域 Chat 只消费允许/禁止互动的业务结果，不拥有 Block 真相。
 
-Stage / 工件：canonical 已冻结：[Social 偏好、发现与关系](/domains/social/discovery-and-relationships/)；物理契约见 `database/v2/migrations/0700_social.sql` 的 `social.social_blocks`。
+Stage / 工件：canonical 已冻结：[Social 偏好、发现与关系](/domains/social/discovery-and-relationships)；物理契约见 `database/v2/migrations/0700_social.sql` 的 `social.social_blocks`。
 
 Gate / Evidence：Design Register D-034 冻结 `social_blocks` 为 Social 当前用户 Block 关系，D-138 冻结 Block→删除双方 Follow / 结束 active Match 的 application-level invariant；canonical 明确写出 `social_blocks ≠ enforcement_actions`。仓库未发现独立 `SOCIAL_DESIGN_GATE`，本页不编造 Gate。
 

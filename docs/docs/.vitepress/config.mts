@@ -1,7 +1,22 @@
 import { defineConfig } from 'vitepress'
 import featurePageIndex from '../development/workflow/FEATURE_PAGE_INDEX.json'
 
-const featureGroups = [...new Set(featurePageIndex.features.map((feature) => feature.domain[0] ?? 'product'))]
+const domainTitleMap: Record<string, string> = {
+  foundation: '应用与基础（Foundation）',
+  identity: '身份（Identity）',
+  content: '内容（Content）',
+  learning: '学习（Learning）',
+  audio: '音频（Audio）',
+  social: '社交（Social）',
+  chat: '聊天（Chat）',
+  commerce: '商业（Commerce）',
+  rewards: '奖励（Rewards）',
+  trust: '信任与安全（Trust & Safety）',
+  operations: '运营（Operations）',
+  platform: '平台（Platform）'
+}
+
+const featureGroups = [...new Set(featurePageIndex.features.map((feature) => feature.domain[0] ?? 'foundation'))]
 
 const guideSidebar = [
   {
@@ -68,12 +83,11 @@ const featuresSidebar = [
   },
   {
     text: '功能目录',
-    collapsed: true,
     items: featureGroups.map((domain) => ({
-      text: domain,
+      text: domainTitleMap[domain] ?? domain,
       collapsed: true,
       items: featurePageIndex.features
-        .filter((feature) => (feature.domain[0] ?? 'product') === domain)
+        .filter((feature) => (feature.domain[0] ?? 'foundation') === domain)
         .map((feature) => ({ text: feature.title, link: `/features/${feature.id}/` }))
     }))
   }
@@ -113,7 +127,7 @@ const developmentSidebar = [
       { text: '运营', link: '/development/backend/operations/' },
       { text: '内容', link: '/development/backend/content/' },
       { text: '学习', link: '/development/backend/learning/' },
-      { text: '音频生产', link: '/development/backend/audio/' }
+      { text: '音频', link: '/development/backend/audio/' }
     ]
   },
   {
@@ -197,7 +211,7 @@ const domainsSidebar = [
     ]
   },
   {
-    text: '音频生产（Audio Production）',
+    text: '音频（Audio）',
     collapsed: true,
     items: [
       { text: '领域概览', link: '/domains/audio/' },
@@ -369,6 +383,7 @@ export default defineConfig({
       { text: '领域', link: '/domains/' },
       { text: '架构', link: '/architecture/' },
       { text: '开发', link: '/development/' },
+      { text: '进度', link: '/development/DOMAIN_LIFECYCLE_MATRIX' },
       { text: '治理', link: '/governance/design-register' },
       { text: 'ADR', link: '/adr/' }
     ],

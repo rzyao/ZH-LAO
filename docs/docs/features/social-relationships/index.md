@@ -16,7 +16,7 @@ mobile_pages: []
 admin_pages: []
 evidence:
   design:
-    - /domains/social/discovery-and-relationships/
+    - /domains/social/discovery-and-relationships
     - /governance/design-register/
 ---
 
@@ -34,7 +34,7 @@ Portfolio Status：`active`。
 
 范围：`我关注的`由 `social_follows.follower_profile_id = current profile` 查询，`关注我的`由 `following_profile_id = current profile` 查询，`已匹配`由当前 `social_matches.status='active'` 查询。普通 Discovery 排除已有任一 Follow / Match；关系 UI 独立提供上述列表。Block 会在 Social Domain Service 事务内删除双方当前 Follow 并结束 active Match，因此列表不得自行维护重复关系状态。
 
-Stage / 工件：canonical 已冻结：[Social 偏好、发现与关系](/domains/social/discovery-and-relationships/)；表与索引物理契约见 `database/v2/migrations/0700_social.sql`。
+Stage / 工件：canonical 已冻结：[Social 偏好、发现与关系](/domains/social/discovery-and-relationships)；表与索引物理契约见 `database/v2/migrations/0700_social.sql`。
 
 Gate / Evidence：canonical `status: frozen` 明确关系列表“均由 Follow/Match 查询得出，不建新表”；Design Register D-135～D-138 冻结 Social 关系模型与跨表 invariant。仓库未发现独立 `SOCIAL_DESIGN_GATE`，不虚构 Gate 名称。
 
