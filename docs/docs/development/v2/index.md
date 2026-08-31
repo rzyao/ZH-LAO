@@ -9,15 +9,22 @@ last_updated: 2026-08-31
 
 ## 推荐阅读顺序
 
-1. [开发流程控制中心](DEVELOPMENT_CONTROL_CENTER.md)：回答“现在该做什么、哪些能并行、哪些 Gate 没关、是否存在 Recovery/Drift”。
-2. [Domain 全生命周期矩阵](DOMAIN_LIFECYCLE_MATRIX.md)：全宽查看每个 Domain 从 DB / Spec / Backend / Admin / Client 到 Integration / Release 的完整状态。
-3. [开发进度记录表](DEVELOPMENT_PROGRESS.md)：查看各 Phase 的详细状态、Gate、验证证据、阻塞项和历史。
-4. [ZH-LAO V2 全量开发总计划](MASTER_DEVELOPMENT_PLAN.md)：查看冻结的全局 Phase 顺序、依赖和开发原则。
+1. [AI 多会话 Workflow Control Plane](workflow/)：新会话无上下文接手、多角色、Task、Claim、并发与 Handoff 的正式入口。
+2. [当前下一动作](workflow/NEXT_ACTIONS.md)：查看当前应启动的 PRIMARY / PARALLEL SAFE / BLOCKED / RECOVERY REQUIRED 任务。
+3. [开发流程控制中心](DEVELOPMENT_CONTROL_CENTER.md)：回答“现在为什么这样推进、哪些 Gate 没关、是否存在 Recovery/Drift”。
+4. [Domain 全生命周期矩阵](DOMAIN_LIFECYCLE_MATRIX.md)：全宽查看每个 Domain 从 DB / Spec / Backend / Admin / Client 到 Integration / Release 的完整状态。
+5. [开发进度记录表](DEVELOPMENT_PROGRESS.md)：查看各 Phase 的详细状态、Gate、验证证据、阻塞项和历史。
+6. [ZH-LAO V2 全量开发总计划](MASTER_DEVELOPMENT_PLAN.md)：查看冻结的全局 Phase 顺序、依赖和开发原则。
 
-## 四类控制文档
+> 当前 Workflow 规范已经建立；如果 `workflow/NEXT_ACTIONS.md` 显示 `BOOTSTRAP REQUIRED`，先执行 `workflow/WORKFLOW_BOOTSTRAP_BRIEF.md`，不要根据旧聊天上下文猜下一任务。
+
+## 控制文档职责
 
 | 文档 | 作用 | 是否直接决定 Gate |
 | --- | --- | --- |
+| `workflow/index.md` | AI 多角色、多会话并行、无上下文接手协议入口 | 否，定义执行协议 |
+| `workflow/TASK_INDEX.md` | Task Registry 人类可读索引 | 否，状态需回到 Manifest/Gate/Report |
+| `workflow/NEXT_ACTIONS.md` | 当前调度快照与下一批独立会话 Prompt | 否，由真实 Gate/Task/Claim 派生 |
 | `MASTER_DEVELOPMENT_PLAN.md` | 全局 Phase / Dependency / Architecture 规则 | 定义 Gate 规则，但不记录单次执行结果 |
 | `DEVELOPMENT_CONTROL_CENTER.md` | 当前流程、并行窗口、Gate / Recovery / Drift 控制 | 否，必须回到实际 Gate/Report |
 | `DOMAIN_LIFECYCLE_MATRIX.md` | 每个 Domain 的全生命周期横向状态矩阵 | 否，是派生控制视图 |
@@ -26,7 +33,8 @@ last_updated: 2026-08-31
 ## 标准执行模型
 
 ```text
-Frozen DB / Architecture
+Workflow Task / Claim
+→ Frozen DB / Architecture
 → Product Semantics / Use Cases
 → API / Public Contract
 → Design Audit
@@ -42,7 +50,7 @@ Frozen DB / Architecture
 → Launch
 ```
 
-每个工作会话必须先读取自己对应的 Brief 和当前 `main` 真实状态；不得仅凭入口页、矩阵页或进度页判断实施权限。
+每个工作会话必须从最新 `main` 恢复自己的 Role、Task、Brief、Entry Gate、Claim 和依赖快照；不得仅凭聊天上下文、入口页、矩阵页或进度页判断实施权限。
 
 ## 维护规则
 
@@ -50,6 +58,9 @@ Frozen DB / Architecture
 2. 依赖阶段只有在 Gate 为 `PASS` 时才能继续；`PASS_WITH_BLOCKERS` 不满足严格依赖准入。
 3. Backend、Admin、Mobile/Client 是独立完成轨，不能互相代替。
 4. Design 可以按 Brief 的 Parallel Rule 错位并行；Implementation 不得绕过上游 Gate。
-5. 任何 `BLOCKER/HIGH/DB_CONFLICT` 必须二次 Grounding 到当前 `main` 的真实 source。
-6. Phase 状态变化时同步更新进度表和生命周期矩阵；流程结构、并行窗口或 Recovery 状态变化时同步更新控制中心。
-7. Master Plan 的冻结规则发生变化时，必须记录 `MASTER PLAN REVISION`，不得由单个 Phase 隐式修改。
+5. 多会话并行必须遵守 `workflow/CONCURRENCY_RULES.md` 的 Claim、Path Scope、Dependency Snapshot 和 Pre-Push Revalidation。
+6. 当前 Gate `!= PASS` 时，下游 dependent task 必须 BLOCKED；优先推荐 Recovery/Fix/Re-audit，同时允许真正无依赖关系的 Parallel Safe Task 继续。
+7. 每个会话完成后必须按 `workflow/SESSION_HANDOFF_CONTRACT.md` 输出下一合法动作和完整新会话 Prompt。
+8. 任何 `BLOCKER/HIGH/DB_CONFLICT` 必须二次 Grounding 到当前 `main` 的真实 source。
+9. Phase 状态变化时同步相关 Task/Gate 事实；全局 Matrix/Progress/Control Center 优先由 Dispatcher/Reconciliation 汇总，避免并行 Worker 互相覆盖共享大文件。
+10. Master Plan 的冻结规则发生变化时，必须记录 `MASTER PLAN REVISION`，不得由单个 Phase 隐式修改。
