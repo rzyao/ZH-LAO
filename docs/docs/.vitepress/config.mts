@@ -11,7 +11,7 @@ export default defineConfig({
       { text: '首页', link: '/' },
       { text: '产品', link: '/product/product-overview' },
       { text: '架构', link: '/architecture/overview' },
-      { text: '开发计划', link: '/development/v2/' },
+      { text: '开发计划', link: '/development/' },
       { text: '领域设计', link: '/domains/' },
       { text: '设计治理', link: '/governance/design-register' },
       { text: 'ADR', link: '/adr/' }
@@ -45,15 +45,15 @@ export default defineConfig({
       {
         text: 'V2 开发计划',
         items: [
-          { text: '开发计划入口', link: '/development/v2/' },
-          { text: 'Executable Spec System', link: '/development/v2/SPEC_SYSTEM' },
-          { text: '开发流程控制中心', link: '/development/v2/DEVELOPMENT_CONTROL_CENTER' },
-          { text: 'AI 多会话工作流', link: '/development/v2/workflow/' },
-          { text: '当前下一动作', link: '/development/v2/workflow/NEXT_ACTIONS' },
-          { text: 'Workflow Bootstrap', link: '/development/v2/workflow/WORKFLOW_BOOTSTRAP_BRIEF' },
-          { text: 'Domain 全生命周期矩阵', link: '/development/v2/DOMAIN_LIFECYCLE_MATRIX' },
-          { text: '全量开发总计划', link: '/development/v2/MASTER_DEVELOPMENT_PLAN' },
-          { text: '开发进度记录表', link: '/development/v2/DEVELOPMENT_PROGRESS' }
+          { text: '开发计划入口', link: '/development/' },
+          { text: 'Executable Spec System', link: '/development/SPEC_SYSTEM' },
+          { text: '开发流程控制中心', link: '/development/DEVELOPMENT_CONTROL_CENTER' },
+          { text: 'AI 多会话工作流', link: '/development/workflow/' },
+          { text: '当前下一动作', link: '/development/workflow/NEXT_ACTIONS' },
+          { text: 'Workflow Bootstrap', link: '/development/workflow/WORKFLOW_BOOTSTRAP_BRIEF' },
+          { text: 'Domain 全生命周期矩阵', link: '/development/DOMAIN_LIFECYCLE_MATRIX' },
+          { text: '全量开发总计划', link: '/development/MASTER_DEVELOPMENT_PLAN' },
+          { text: '开发进度记录表', link: '/development/DEVELOPMENT_PROGRESS' }
         ]
       },
       {

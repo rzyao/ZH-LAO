@@ -38,11 +38,11 @@ OPERATIONS_IMPLEMENTATION_STARTED    = NO
 
 Canonical application design：
 
-- [Operations Implementation Plan](../../development/v2/04-operations/OPERATIONS_IMPLEMENTATION_PLAN.md)
-- [Operations Use Cases](../../development/v2/04-operations/OPERATIONS_USE_CASES.md)
-- [Operations RBAC Contracts](../../development/v2/04-operations/OPERATIONS_RBAC_CONTRACTS.md)
-- [Operations API / Public Contract](../../development/v2/04-operations/OPERATIONS_API.md)
-- [Operations Design Audit](../../development/v2/04-operations/OPERATIONS_DESIGN_AUDIT.md)
+- [Operations Implementation Plan](../../development/04-operations/OPERATIONS_IMPLEMENTATION_PLAN.md)
+- [Operations Use Cases](../../development/04-operations/OPERATIONS_USE_CASES.md)
+- [Operations RBAC Contracts](../../development/04-operations/OPERATIONS_RBAC_CONTRACTS.md)
+- [Operations API / Public Contract](../../development/04-operations/OPERATIONS_API.md)
+- [Operations Design Audit](../../development/04-operations/OPERATIONS_DESIGN_AUDIT.md)
 
 数据库字段、FK、CHECK、INDEX、状态和删除策略仍以 [Operations 数据库总览](database.md) 与 `database/v2/migrations/0200_operations.sql` 为 frozen authority。
 

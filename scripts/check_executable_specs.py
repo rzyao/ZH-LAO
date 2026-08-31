@@ -17,7 +17,7 @@ from typing import Any
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SPECS = ROOT / "docs" / "docs" / "development" / "v2" / "specs"
+SPECS = ROOT / "docs" / "docs" / "development" / "specs"
 ID_RE = re.compile(r"^(?:[A-Z][A-Z0-9]*-(?:CORE|UC|API|PUB|SEC|CON|STATE|DB|RBAC)|SYS)-\d{3}$")
 DOMAIN_RE = re.compile(r"^[a-z][a-z0-9-]*$")
 
@@ -176,7 +176,7 @@ def check_evidence(domain: str, canonical_path: Path, requirement_ids: set[str],
         return
     if evidence.get("artifact_type") != "derived_evidence" or evidence.get("schema_version") != "1.0" or evidence.get("domain") != domain:
         errors.append(f"{label}: invalid artifact_type, schema_version, or domain")
-    expected_source = f"docs/docs/development/v2/specs/{domain}.spec.json"
+    expected_source = f"docs/docs/development/specs/{domain}.spec.json"
     if evidence.get("source_spec") != expected_source:
         errors.append(f"{label}.source_spec: must equal {expected_source}")
     digest = hashlib.sha256(canonical_path.read_bytes()).hexdigest()

@@ -211,5 +211,5 @@ last_updated: 2026-08-30
 
 | 会话结论 | 状态 | 唯一事实源 |
 | --- | --- | --- |
-| Phase 0–17 的开发顺序、Application Foundation 为唯一下一阶段、逐 Phase 的计划/审核/实施/测试/报告/Gate 流程、Domain 与跨域规则、API-from-Use-Case 原则、测试与上线标准 | `frozen` | [V2 全量开发总计划](../development/v2/MASTER_DEVELOPMENT_PLAN.md) |
-| 当前执行状态与 Gate 证据记录 | `baseline` | [V2 开发进度记录表](../development/v2/DEVELOPMENT_PROGRESS.md) |
+| Phase 0–17 的开发顺序、Application Foundation 为唯一下一阶段、逐 Phase 的计划/审核/实施/测试/报告/Gate 流程、Domain 与跨域规则、API-from-Use-Case 原则、测试与上线标准 | `frozen` | [V2 全量开发总计划](../development/MASTER_DEVELOPMENT_PLAN.md) |
+| 当前执行状态与 Gate 证据记录 | `baseline` | [V2 开发进度记录表](../development/DEVELOPMENT_PROGRESS.md) |

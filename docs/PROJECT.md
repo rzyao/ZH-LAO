@@ -22,9 +22,9 @@
 
 ## 文档地图
 
-- [V2 开发计划入口](docs/development/v2/index.md)
-- [V2 全量开发总计划](docs/development/v2/MASTER_DEVELOPMENT_PLAN.md)
-- [V2 开发进度记录表](docs/development/v2/DEVELOPMENT_PROGRESS.md)
+- [V2 开发计划入口](docs/development/index.md)
+- [V2 全量开发总计划](docs/development/MASTER_DEVELOPMENT_PLAN.md)
+- [V2 开发进度记录表](docs/development/DEVELOPMENT_PROGRESS.md)
 - [领域文档入口](docs/domains/index.md)
 - [Content 域](docs/domains/content/index.md)
 - [Learning 域](docs/domains/learning/index.md)
