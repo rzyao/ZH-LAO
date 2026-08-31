@@ -1,6 +1,10 @@
 ---
 status: integration-pending
 last_updated: 2026-08-31
+feature_id: login
+feature_type: single-domain
+primary_domain: identity
+participating_domains: []
 ---
 
 # 登录与会话
@@ -29,9 +33,11 @@ Mobile 保存和恢复会话
 
 手机号 OTP、Facebook、Session、Device 的 authoritative 业务流程见 [身份领域账户与会话流程](/domains/identity/flows)。
 
-## 涉及领域
+## 领域关系
 
-- [身份（Identity）](/domains/identity/)
+| 角色 | 领域 | 本功能中的职责 |
+| --- | --- | --- |
+| 主要领域 | [身份（Identity）](/domains/identity/) | 认证身份、OTP、Session、Device 与会话生命周期 |
 
 本 Feature 不创建第二份认证规则或 Session 状态机。
 
