@@ -1,0 +1,61 @@
+task_id: PLATFORM-ADMIN-STAGE-B
+version: 1
+role: admin_worker
+domain: platform
+track: admin
+matrix:
+  object_type: domain
+  object_id: platform
+  lane: admin
+  sequence: 30
+  stage_id: PLATFORM-ADMIN-STAGE-B
+  label_zh: Admin Stage B
+  parent_object_id: null
+status: ready
+priority: parallel
+parallel_safe: true
+brief:
+  path: docs/docs/development/03-platform/PLATFORM_ADMIN_EXECUTION_BRIEF.md
+implementation_blueprint:
+  required: false
+entry_gates:
+  - name: ADMIN_FOUNDATION_GATE
+    required: PASS
+  - name: PLATFORM_GATE
+    required: PASS
+  - name: OPERATIONS_GATE
+    required: PASS
+depends_on: []
+conflicts_with:
+  - PLATFORM-ADMIN-STAGE-B
+owned_paths:
+  - apps/admin/**
+  - docs/docs/development/admin/platform-control/**
+shared_paths: []
+exclusive_paths: []
+allowed_paths:
+  - apps/admin/**
+  - docs/docs/development/admin/platform-control/**
+  - docs/docs/development/workflow/tasks/PLATFORM-ADMIN-STAGE-B.yaml
+  - docs/docs/development/workflow/events/**
+  - docs/docs/development/workflow/claims/PLATFORM-ADMIN-STAGE-B.md
+forbidden_paths:
+  - apps/backend/**
+  - apps/mobile/**
+  - database/v2/migrations/**
+required_sources:
+  - docs/docs/development/workflow/AI_STAGE_MODEL.md
+  - docs/docs/development/03-platform/PLATFORM_ADMIN_EXECUTION_BRIEF.md
+  - docs/docs/development/03-platform/PLATFORM_ADMIN_IMPLEMENTATION_REPORT.md
+  - docs/docs/development/04-operations/OPERATIONS_IMPLEMENTATION_REPORT.md
+  - docs/docs/development/ADMIN_FOUNDATION_REPORT.md
+expected_gate:
+  name: PLATFORM_ADMIN_GATE
+  pass_value: PASS
+on_pass:
+  unlock_candidates: []
+on_fail:
+  recovery_task_pattern: PLATFORM-ADMIN-STAGE-B-RECOVERY
+  block_dependents: true
+final_report:
+  path: docs/docs/development/admin/platform-control/PLATFORM_ADMIN_STAGE_B_REPORT.md

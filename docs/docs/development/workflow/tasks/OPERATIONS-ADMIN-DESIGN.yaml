@@ -1,0 +1,61 @@
+task_id: OPERATIONS-ADMIN-DESIGN
+version: 1
+role: design_worker
+domain: operations
+track: admin
+matrix:
+  object_type: domain
+  object_id: operations
+  lane: admin
+  sequence: 20
+  stage_id: OPERATIONS-ADMIN-DESIGN
+  label_zh: Admin 设计
+  parent_object_id: null
+status: ready
+priority: parallel
+parallel_safe: true
+brief:
+  path: docs/docs/development/admin/access-control/OPERATIONS_ADMIN_DESIGN_BRIEF.md
+implementation_blueprint:
+  required: false
+entry_gates:
+  - name: ADMIN_FOUNDATION_GATE
+    required: PASS
+  - name: OPERATIONS_GATE
+    required: PASS
+depends_on: []
+conflicts_with:
+  - OPERATIONS-ADMIN-DESIGN
+owned_paths:
+  - docs/docs/development/admin/access-control/**
+shared_paths: []
+exclusive_paths: []
+allowed_paths:
+  - docs/docs/development/admin/access-control/**
+  - docs/docs/development/workflow/tasks/OPERATIONS-ADMIN-DESIGN.yaml
+  - docs/docs/development/workflow/events/**
+  - docs/docs/development/workflow/claims/OPERATIONS-ADMIN-DESIGN.md
+forbidden_paths:
+  - apps/admin/**
+  - apps/backend/**
+  - apps/mobile/**
+  - database/v2/migrations/**
+required_sources:
+  - docs/docs/development/workflow/AI_STAGE_MODEL.md
+  - docs/docs/development/admin/access-control/OPERATIONS_ADMIN_DESIGN_BRIEF.md
+  - docs/docs/domains/operations/index.md
+  - docs/docs/development/04-operations/OPERATIONS_API.md
+  - docs/docs/development/04-operations/OPERATIONS_RBAC_CONTRACTS.md
+  - docs/docs/development/04-operations/OPERATIONS_IMPLEMENTATION_REPORT.md
+  - docs/docs/development/ADMIN_FOUNDATION_REPORT.md
+expected_gate:
+  name: OPERATIONS_ADMIN_DESIGN_GATE
+  pass_value: PASS
+on_pass:
+  unlock_candidates:
+    - OPERATIONS-ADMIN
+on_fail:
+  recovery_task_pattern: OPERATIONS-ADMIN-DESIGN-RECOVERY
+  block_dependents: true
+final_report:
+  path: docs/docs/development/admin/access-control/OPERATIONS_ADMIN_DESIGN_REPORT.md
