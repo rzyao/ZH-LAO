@@ -7,8 +7,10 @@ import json
 from validate_feature_pages import OUTPUT, scan
 
 REQUIRED_MARKERS = [
-    "import { lanes, laneLabels, featureHref, features, statusMeta } from './workflow/feature-model.mjs'",
+    "import { lanes, laneLabels, domainHref, domainLabel, featureHref, features, statusMeta } from './workflow/feature-model.mjs'",
     'v-for="feature in features"',
+    '<th>领域</th><th>功能</th>',
+    'domainHref(feature)',
     'featureHref(feature.id, lane)'
 ]
 MATRIX = OUTPUT.parent.parent / 'DOMAIN_LIFECYCLE_MATRIX.md'
