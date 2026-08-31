@@ -7,11 +7,13 @@ primary_domain: identity
 participating_domains: []
 ---
 
-# 登录与会话
+# 用户登录与会话
 
 ## 用户目标
 
 App 用户能够建立自己的 Identity，会话恢复后进入已认证状态，并可以安全退出。
+
+本 Feature 专指 **C 端 / Mobile 用户认证体验**，不代表 Admin Operator 登录。后台登录单独作为“后台登录与操作员认证” Feature 跟踪。
 
 ## 用户流程
 
@@ -48,7 +50,9 @@ Mobile 保存和恢复会话
 
 ## Admin
 
-不属于当前用户登录 Feature 的 required experience。
+`— 不适用`。
+
+Admin 管理后台仍然需要登录，但属于独立的“后台登录与操作员认证” Feature，其认证主体、Operator Resolution 与 RBAC 会组合 Identity + Operations。
 
 ## Mobile
 
@@ -76,4 +80,4 @@ Mobile 保存和恢复会话
 | Admin | 不适用 |
 | E2E Feature Gate | 待完成 |
 
-因此当前不能把“Identity Backend 已通过”解释成“登录功能已经完整交付”。
+因此当前不能把“Identity Backend 已通过”解释成“用户登录功能已经完整交付”。
