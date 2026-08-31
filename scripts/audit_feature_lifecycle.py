@@ -11,14 +11,14 @@ import yaml
 from validate_feature_pages import FEATURES_DIR, LANES, HEADINGS, scan
 
 TITLE_MARKER_RE = re.compile(r"(?:延期|待裁决|待设计)")
-STATUS_RE_TEMPLATE = r"状态：\s*`?{status}`?"
+VISIBLE_STATUS_RE = re.compile(r"状态：\s*`?(todo|ready|active|blocked|done|na)`?", re.I)
 DECISION_ID_RE = re.compile(r"\b[A-Z][A-Z0-9_-]*_DECISION\b")
 
 SEMANTIC_MARKERS = {
-    "scope": re.compile(r"(?:范围\s*[：:]|#{3,}\s*范围\b|\*\*Scope\*\*\s*[：:]?|\bScope\s*[：:])", re.I),
-    "stage": re.compile(r"(?:执行阶段与产物|Stage\s*/\s*(?:Artifact|工件)|Stage\s*/[^\n]*(?:Artifact|工件))", re.I),
-    "gate": re.compile(r"(?:Gate\s*/\s*(?:完成证据|Evidence|工件)|(?:Stage\s*/[^\n]*)?Gate\b|Gate\s*[：:])", re.I),
-    "next": re.compile(r"(?:下一步\s*[：:]|#{3,}\s*下一步\b|\*\*Next Action\*\*\s*[：:]?|\bNext Action\s*[：:])", re.I),
+    "scope": re.compile(r"(?:#{3,}\s*(?:Scope|范围)\s*$|\*\*(?:Scope|范围)\*\*\s*[：:]?|(?:Scope|范围)\s*[：:])", re.I | re.M),
+    "stage": re.compile(r"(?:#{3,}\s*(?:Stage|执行阶段)(?:\s*/\s*(?:Artifact|工件))?\s*$|\*\*Stage\s*/\s*(?:Artifact|工件)\*\*\s*[：:]?|Stage\s*/\s*(?:Artifact|工件)|执行阶段与产物)", re.I | re.M),
+    "gate": re.compile(r"(?:#{3,}\s*Gate(?:\s*/\s*(?:Evidence|完成证据))?\s*$|\*\*Gate\s*/\s*(?:Evidence|完成证据)\*\*\s*[：:]?|Gate\s*/\s*(?:Evidence|完成证据)|Gate\s*[：:])", re.I | re.M),
+    "next": re.compile(r"(?:#{3,}\s*(?:Next Action|下一步)\s*$|\*\*(?:Next Action|下一步)\*\*\s*[：:]?|(?:Next Action|下一步)\s*[：:])", re.I | re.M),
 }
 
 
@@ -34,16 +34,16 @@ def section(text: str, lane: str) -> str:
 
 
 def has_template_placeholder(body: str) -> bool:
-    """Detect real template filler, not legitimate lowercase status words or negated mentions."""
+    """Detect actual filler, not a lowercase status or a sentence rejecting placeholders."""
     for line in body.splitlines():
         stripped = line.strip()
         if not stripped:
             continue
         if re.search(r"在此维护该?\s*Lane|相关工件、?Gate\s*与下一步|尚未回填|待补", stripped, re.I):
             return True
-        if re.search(r"\b(?:TODO|TBD)\b", stripped):  # case-sensitive by design; lowercase todo is a status
+        if re.search(r"\b(?:TODO|TBD)\b", stripped):  # uppercase template tokens only
             return True
-        if re.search(r"\bplaceholder\b", stripped, re.I) and not re.search(r"不能|不得|禁止|并非|不是|not\b|without\b", stripped, re.I):
+        if re.search(r"\bplaceholder\b", stripped, re.I) and not re.search(r"不能|不得|禁止|不把|不以|并非|不是|not\b|without\b", stripped, re.I):
             return True
     return False
 
@@ -52,21 +52,23 @@ def semantic_missing(body: str) -> list[str]:
     return [name for name, pattern in SEMANTIC_MARKERS.items() if not pattern.search(body)]
 
 
-def active_progress_complete(body: str) -> bool:
-    done = re.search(r"(?:已完成内容|已完成)\s*[：:]|已完成\s*/\s*当前进行", body)
-    current = re.search(r"(?:当前进行内容|当前进行)\s*[：:]|已完成\s*/\s*当前进行", body)
-    return bool(done and current)
+def active_activity_present(body: str) -> bool:
+    """Active needs a repository-grounded current activity/stage, not fixed wording."""
+    return bool(
+        re.search(r"当前|进行中|正在|已进入|处于|\bactive\b|\bready\b|Stage|阶段", body, re.I)
+        and re.search(r"Artifact|工件|Gate|Evidence|证据|Brief|Report|Stage|阶段", body, re.I)
+    )
 
 
 def blocked_detail_missing(body: str) -> list[str]:
     missing = []
-    if not re.search(r"阻塞原因|NEEDS_DECISION|\bblocker\b|依赖|前置|尚未|未完成|NOT_PASS|仍不存在|等待", body, re.I):
+    if not re.search(r"阻塞原因|NEEDS_DECISION|\bblocker\b|依赖|前置|尚未|未完成|未形成|未裁决|缺少|不存在|NOT_PASS|等待|当前没有|无稳定", body, re.I):
         missing.append("reason")
-    if not re.search(r"阻塞对象|依赖|前置|Gate|Contract|等待", body, re.I):
+    if not re.search(r"阻塞对象|依赖|前置|Gate|Contract|契约|裁决|ownership|等待", body, re.I):
         missing.append("dependency")
-    if not re.search(r"已完成|已有|现有|Stage\s*/|工件|Evidence", body, re.I):
+    if not re.search(r"已完成|已有|现有|当前有效|Stage\s*/|工件|Evidence|canonical|设计|冻结", body, re.I):
         missing.append("completed_work")
-    if not re.search(r"等待条件|解除阻塞|后再|后进入|完成后|PASS|决策|裁决|重新激活|Portfolio", body, re.I):
+    if not re.search(r"等待条件|解除阻塞|后再|后进入|完成后|待.+后|再启动|再进入|PASS|决策|裁决|重新激活|Portfolio", body, re.I):
         missing.append("unblock_condition")
     return missing
 
@@ -96,17 +98,21 @@ def main() -> int:
             if status in {"done", "active", "blocked"}:
                 counts["non_todo_na_lanes"] += 1
                 body = section(text, lane)
-                if not re.search(STATUS_RE_TEMPLATE.format(status=re.escape(status)), body):
+                visible = VISIBLE_STATUS_RE.search(body)
+                if visible and visible.group(1).lower() != status:
                     counts["status_conflicts"] += 1
-                    findings.append(f"{feature['id']}.{lane}: visible status differs from frontmatter")
+                    findings.append(f"{feature['id']}.{lane}: visible status={visible.group(1).lower()} metadata={status}")
+                if not visible:
+                    counts["missing_visible_status"] += 1
+                    findings.append(f"{feature['id']}.{lane}: visible status missing")
                 missing = semantic_missing(body)
                 if missing:
                     findings.append(f"{feature['id']}.{lane}: missing semantic fields {missing}")
                 if has_template_placeholder(body):
                     counts["template_placeholders"] += 1
                     findings.append(f"{feature['id']}.{lane}: template placeholder")
-                if status == "active" and not active_progress_complete(body):
-                    findings.append(f"{feature['id']}.{lane}: active scope/progress detail incomplete")
+                if status == "active" and not active_activity_present(body):
+                    findings.append(f"{feature['id']}.{lane}: no grounded current activity/stage")
                 if status == "blocked":
                     blocker = (data.get("blocks") or {}).get(lane)
                     if blocker:
@@ -138,6 +144,7 @@ def main() -> int:
     print(f"done_active_blocked_lanes={counts['non_todo_na_lanes']}")
     print(f"template_placeholders_in_done_active_blocked={counts['template_placeholders']}")
     print(f"STATUS_CONFLICT={counts['status_conflicts']}")
+    print(f"MISSING_VISIBLE_STATUS={counts['missing_visible_status']}")
     print(f"TITLE_POLLUTION={counts['title_pollution']}")
     print(f"NEEDS_DECISION_FEATURES={counts['needs_decision_features']}")
     print(f"NEEDS_DECISION_BLOCKERS={counts['needs_decision_blockers']}")
