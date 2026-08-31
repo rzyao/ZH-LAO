@@ -23,15 +23,36 @@ const productSidebar = [
 
 const architectureSidebar = [
   {
-    text: '架构设计',
+    text: '架构总览',
     items: [
-      { text: '总体架构', link: '/architecture/overview' },
-      { text: '领域关系图', link: '/architecture/domain-map' },
-      { text: '后端架构', link: '/architecture/backend' },
-      { text: '客户端架构', link: '/architecture/frontend' },
-      { text: '基础设施与集成', link: '/architecture/infrastructure' },
-      { text: '安全与权限架构', link: '/architecture/security' },
-      { text: 'PostgreSQL 总规范', link: '/architecture/database' }
+      { text: '总体架构', link: '/architecture/' }
+    ]
+  },
+  {
+    text: '领域架构',
+    items: [
+      { text: '领域边界', link: '/architecture/domains/' },
+      { text: '领域依赖与协作', link: '/architecture/domains/dependencies' }
+    ]
+  },
+  {
+    text: '应用架构',
+    items: [
+      { text: '后端架构', link: '/architecture/applications/backend' },
+      { text: '客户端架构', link: '/architecture/applications/clients' }
+    ]
+  },
+  {
+    text: '基础设施',
+    items: [
+      { text: '基础设施与集成', link: '/architecture/infrastructure/' },
+      { text: '安全与权限', link: '/architecture/infrastructure/security' }
+    ]
+  },
+  {
+    text: '数据架构',
+    items: [
+      { text: 'PostgreSQL 架构规范', link: '/architecture/data/postgresql' }
     ]
   }
 ]
@@ -254,7 +275,7 @@ export default defineConfig({
     nav: [
       { text: '首页', link: '/' },
       { text: '产品', link: '/product/product-overview' },
-      { text: '架构', link: '/architecture/overview' },
+      { text: '架构', link: '/architecture/' },
       { text: '开发', link: '/development/' },
       { text: '领域', link: '/domains/' },
       { text: '治理', link: '/governance/design-register' },
