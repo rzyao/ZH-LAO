@@ -11,10 +11,11 @@ last_updated: 2026-08-31
 
 1. [AI 多会话 Workflow Control Plane](workflow/)：新会话无上下文接手、多角色、Task、Claim、并发与 Handoff 的正式入口。
 2. [当前下一动作](workflow/NEXT_ACTIONS.md)：查看当前应启动的 PRIMARY / PARALLEL SAFE / BLOCKED / RECOVERY REQUIRED 任务。
-3. [开发流程控制中心](DEVELOPMENT_CONTROL_CENTER.md)：回答“现在为什么这样推进、哪些 Gate 没关、是否存在 Recovery/Drift”。
-4. [Domain 全生命周期矩阵](DOMAIN_LIFECYCLE_MATRIX.md)：全宽查看每个 Domain 从 DB / Spec / Backend / Admin / Client 到 Integration / Release 的完整状态。
-5. [开发进度记录表](DEVELOPMENT_PROGRESS.md)：查看各 Phase 的详细状态、Gate、验证证据、阻塞项和历史。
-6. [ZH-LAO V2 全量开发总计划](MASTER_DEVELOPMENT_PLAN.md)：查看冻结的全局 Phase 顺序、依赖和开发原则。
+3. [Executable Spec System](SPEC_SYSTEM.md)：Requirement ID、machine-readable contract、traceability、evidence 与 machine gate 的规范。
+4. [开发流程控制中心](DEVELOPMENT_CONTROL_CENTER.md)：回答“现在为什么这样推进、哪些 Gate 没关、是否存在 Recovery/Drift”。
+5. [Domain 全生命周期矩阵](DOMAIN_LIFECYCLE_MATRIX.md)：全宽查看每个 Domain 从 DB / Spec / Backend / Admin / Client 到 Integration / Release 的完整状态。
+6. [开发进度记录表](DEVELOPMENT_PROGRESS.md)：查看各 Phase 的详细状态、Gate、验证证据、阻塞项和历史。
+7. [ZH-LAO V2 全量开发总计划](MASTER_DEVELOPMENT_PLAN.md)：查看冻结的全局 Phase 顺序、依赖和开发原则。
 
 > 当前 Workflow 规范已经建立；如果 `workflow/NEXT_ACTIONS.md` 显示 `BOOTSTRAP REQUIRED`，先执行 `workflow/WORKFLOW_BOOTSTRAP_BRIEF.md`，不要根据旧聊天上下文猜下一任务。
 
@@ -25,6 +26,7 @@ last_updated: 2026-08-31
 | `workflow/index.md` | AI 多角色、多会话并行、无上下文接手协议入口 | 否，定义执行协议 |
 | `workflow/TASK_INDEX.md` | Task Registry 人类可读索引 | 否，状态需回到 Manifest/Gate/Report |
 | `workflow/NEXT_ACTIONS.md` | 当前调度快照与下一批独立会话 Prompt | 否，由真实 Gate/Task/Claim 派生 |
+| `SPEC_SYSTEM.md` | Executable Spec Layer 的 authoritative 规则与采用协议 | 定义结构 Gate；不单独宣布 Domain Gate |
 | `MASTER_DEVELOPMENT_PLAN.md` | 全局 Phase / Dependency / Architecture 规则 | 定义 Gate 规则，但不记录单次执行结果 |
 | `DEVELOPMENT_CONTROL_CENTER.md` | 当前流程、并行窗口、Gate / Recovery / Drift 控制 | 否，必须回到实际 Gate/Report |
 | `DOMAIN_LIFECYCLE_MATRIX.md` | 每个 Domain 的全生命周期横向状态矩阵 | 否，是派生控制视图 |

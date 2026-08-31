@@ -46,6 +46,7 @@ export default defineConfig({
         text: 'V2 开发计划',
         items: [
           { text: '开发计划入口', link: '/development/v2/' },
+          { text: 'Executable Spec System', link: '/development/v2/SPEC_SYSTEM' },
           { text: '开发流程控制中心', link: '/development/v2/DEVELOPMENT_CONTROL_CENTER' },
           { text: 'AI 多会话工作流', link: '/development/v2/workflow/' },
           { text: '当前下一动作', link: '/development/v2/workflow/NEXT_ACTIONS' },

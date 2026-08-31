@@ -52,19 +52,21 @@ Repository Audit
         ↓
 Product Semantics
         ↓
-Use Cases / Workflows
+Requirement IDs + Use Cases / Workflows
         ↓
-HTTP API + Public Contract
+HTTP API + Public Contract + machine-readable contract references
         ↓
-Implementation Plan
+Acceptance scenarios / state machines + Implementation Plan
         ↓
-Design Audit
+Design Audit + `spec:check`
         ↓
 DESIGN_GATE = PASS
         ↓
 Execution Brief
         ↓
 Backend Implementation
+        ↓
+Implementation/Test traceability + independently executed machine evidence
         ↓
 Integration / Security / Race / Regression
         ↓
@@ -92,6 +94,7 @@ Launch
 - `*_GATE = PASS`：Backend Domain Implementation 完成并可冻结。
 - `*_ADMIN_GATE = PASS`：管理后台按真实 API / RBAC / Audit / E2E 完成。
 - Client/Mobile 需要独立实现和验收证据，Backend PASS 不自动代表客户端完成。
+- [Executable Spec System](SPEC_SYSTEM.md) 的结构检查与 evidence 是 Domain Gate 的必需输入（已采用的 Domain）；它不取代独立审计，也不允许实施 AI 自证 `PASS`。
 
 ---
 

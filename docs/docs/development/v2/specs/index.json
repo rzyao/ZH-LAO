@@ -1,0 +1,5 @@
+{
+  "$schema": "./executable-spec.schema.json",
+  "schema_version": "1.0",
+  "adopted_domains": []
+}

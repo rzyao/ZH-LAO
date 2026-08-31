@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ZH-LAO V2 Executable Spec artifacts",
+  "description": "Normative field contract. Validation is implemented by scripts/check_executable_specs.py without a third-party JSON Schema runtime.",
+  "oneOf": [
+    { "$ref": "#/$defs/canonicalSpec" },
+    { "$ref": "#/$defs/evidence" }
+  ],
+  "$defs": {
+    "reference": {
+      "type": "object",
+      "required": ["path"],
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "symbol": { "type": "string" },
+        "kind": { "enum": ["markdown", "http", "public", "db", "event", "state_machine", "schema", "code", "test"] }
+      },
+      "additionalProperties": false
+    },
+    "canonicalSpec": {
+      "type": "object",
+      "required": ["artifact_type", "schema_version", "domain", "requirements", "use_cases", "acceptance_scenarios", "state_machines"],
+      "properties": {
+        "artifact_type": { "const": "canonical_spec" },
+        "schema_version": { "const": "1.0" },
+        "domain": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+        "requirements": { "type": "array", "minItems": 1 },
+        "use_cases": { "type": "array" },
+        "acceptance_scenarios": { "type": "array" },
+        "state_machines": { "type": "array" }
+      },
+      "additionalProperties": false
+    },
+    "evidence": {
+      "type": "object",
+      "required": ["artifact_type", "schema_version", "domain", "source_spec", "source_spec_sha256", "requirements", "gate_checks"],
+      "properties": {
+        "artifact_type": { "const": "derived_evidence" },
+        "schema_version": { "const": "1.0" },
+        "domain": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+        "source_spec": { "type": "string" },
+        "source_spec_sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+        "requirements": { "type": "array" },
+        "gate_checks": { "type": "array" }
+      },
+      "additionalProperties": false
+    }
+  }
+}

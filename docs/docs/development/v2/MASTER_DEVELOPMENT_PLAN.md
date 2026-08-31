@@ -2339,6 +2339,24 @@ Exit Gate
 
 ---
 
+# 94A. Executable Spec Layer
+
+新增或实质变更的 Domain/跨域契约必须遵守 [SPEC_SYSTEM](SPEC_SYSTEM.md)。现有 Design Package 仍是人类可读的完整语义来源；Executable Spec Layer 提供 Requirement ID、machine-readable contract reference、acceptance scenario、state machine 与 Requirement→implementation/test/gate evidence 的可验证追溯。
+
+执行顺序补充为：
+
+```text
+Design：冻结 mandatory Requirement IDs、canonical spec、scenario/state machine
+→ Design Gate：spec:check PASS（只证明设计结构）
+→ Execution Brief：列 Required IDs、tests、machine checks
+→ Implementation：更新 derived evidence
+→ Domain Gate：独立执行 checks + traceability evidence + existing Gate conditions
+```
+
+不得将 checker 的结构成功、AI 文字结论或手工 `PASS` 字段当作 Implementation/Domain Gate PASS。未采用本层的历史 Domain 保持 `coverage = NOT_CLAIMED`，直到其正式 revision 接入。
+
+---
+
 # 95. Exit Gate 状态
 
 统一只能使用：
