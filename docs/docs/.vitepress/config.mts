@@ -214,6 +214,17 @@ const domainsSidebar = [
     collapsed: true,
     items: [
       { text: '领域概览', link: '/domains/commerce/' },
+      {
+        text: '业务设计',
+        collapsed: true,
+        items: [
+          { text: '购买、支付与退款', link: '/domains/commerce/purchase-and-payment' },
+          { text: '钱包与账本', link: '/domains/commerce/wallet' },
+          { text: '礼物', link: '/domains/commerce/gifting' },
+          { text: '工作流与状态机', link: '/domains/commerce/lifecycle' }
+        ]
+      },
+      { text: '契约与边界', link: '/domains/commerce/contracts' },
       { text: '数据设计', link: '/domains/commerce/database' }
     ]
   },
