@@ -1,141 +1,125 @@
 ---
 status: frozen
-last_updated: 2026-08-30
+last_updated: 2026-08-31
 schema: chat
-source: 设计聊天领域
-source_conversation_id: 6a9319c2-2204-83ea-9341-7a57757a3082
-source_share_url: https://chatgpt.com/share/6a9329e5-9f28-83ea-8eb1-f85be6e414fa
 ---
 
 # Chat 域
 
-Chat Domain 负责**会话与消息本身**。它不维护社交关系，不持有媒体文件，不记账，也不实现推送通道。
+Chat Domain 负责**会话与消息本身**：会话身份、成员关系、用户侧会话状态、消息顺序、消息内容与消息生命周期。
 
-来源：ChatGPT 会话「设计聊天领域」。会话先以「把 Chat Domain 所有表定稿」收尾（主架构方明确「原则上不再改核心结构」）；随后主架构方又追加「全域审计后的最终修正版」（消息 [64] 指令 + [71] 产出）：`public_id` 定为 UUID、跨域引用统一 logical UUID（无跨域物理 FK）、移除 `last_message` 组合 CHECK、`last_message_id` 补 FK、37 条 application-level invariants。本文档以最终修正版为准。
-
-来源标识说明：`source_conversation_id` 是 ChatGPT 内部会话 ID，与本项目其他会话的记录方式一致；`source_share_url` 是唯一仍可访问的分享副本。以内部会话 ID 直接拼出的分享链接当前返回 `Conversation has been deleted`，不可作为回溯依据。
-
-## 命名裁决
-
-| 层面 | 裁决 |
-| --- | --- |
-| 业务域名称 | **Chat**（一级域） |
-| Schema / 代码 / 模块 | `chat` |
-| 表名 | 保留会话定稿的 `chat_*` 单数命名 |
-| “Messaging” | **已废弃**，不再作为域、Schema、目录或文档标题 |
-
-此前存在的 `messaging` Schema + `chat_*` 表名的双命名体系已废止。表名仍为单数且带前缀，这与[全局规范](../../architecture/database.md)的「复数」要求不同，已登记为**正式例外**：Chat 是会话逐表定稿的域，表名与其会话结论逐字保持一致，且 `chat` 前缀与 Schema 名一致，不存在语义冲突。
+它不拥有社交关系、用户资料、媒体文件、资金交易，也不负责推送或 WebSocket 传输。
 
 ## 领域定位
 
 ```text
 Social Domain
      │
-     │  授予聊天权限（canChat）
+     │  决定当前是否允许发起 / 继续聊天
      ▼
-Chat Domain                    ← 只负责会话与消息
-     ▲
-     │  礼物交易真相（deferred，不进 Chat 当前模型）
-Commerce Domain
+Chat Domain
+     │
+     ├─ Conversation
+     ├─ Message
+     └─ User Conversation State
 ```
 
-- Social 表达**为什么两个人可以聊天**；Chat 表达**他们聊天产生的数据容器**。二者生命周期不同。
-- 匹配成功、取消关注、重新互关都不改变会话身份；历史聊天记录仍然存在。
-- Commerce 拥有礼物商品、购买、余额、订单与支付。**礼物与 Chat 的集成属 `deferred`**，本域当前不存在任何礼物相关实体、消息类型或用例。
-- 审核、举报、封禁可以作用于聊天，但完整 Moderation 逻辑不属于 Chat。
+- Social 表达**为什么两个人当前可以聊天**；Chat 表达**聊天产生的会话与消息事实**。
+- Social 关系变化不改变既有 Conversation 的身份，也不删除历史消息。
+- Commerce 拥有礼物与资金事实；当前 Chat 模型不包含礼物消息或礼物交易副本。
+- Trust & Safety 可以治理聊天对象，但治理案件与处罚事实不归 Chat。
 
 ## 职责与非职责
 
-| 负责 | 明确不负责 |
+| Chat 负责 | Chat 不负责 |
 | --- | --- |
-| 会话实体与会话身份 | 社交关系、Follow、Match 状态机 |
-| 会话成员与成员已读游标 | 用户头像、昵称、资料（属 Social/Profile 查询模型） |
-| 消息身份、会话内顺序、消息生命周期 | 媒体文件存储、URL、转码、缩略图（属 Platform Media） |
-| 文本内容、图片资源引用 | 礼物定价、扣款、余额、退款（属 Commerce） |
-| 用户侧会话状态：置顶、免打扰、隐藏、清空 | 推送通道、WebSocket 传输实现（属 Application/Infrastructure） |
-| 撤回事实与撤回审计所需原始数据 | 翻译结果存储（属 Learning/Translation 能力） |
-| 事务提交后发布聊天领域事件 | 新增独立的 Notification 域（主方案明确否决） |
-| — | 礼物消息、礼物交易引用（`deferred`） |
+| 会话实体与稳定会话身份 | Follow / Match / Block 等社交关系事实 |
+| Direct Conversation 的成员约束 | 用户头像、昵称、资料 |
+| 会话成员与已读游标 | 资产文件存储、URL、转码、缩略图 |
+| 用户个人的置顶、免打扰、隐藏、清空状态 | 礼物定价、扣款、钱包、支付、退款 |
+| 消息身份、会话内顺序与生命周期 | 推送通道、WebSocket 连接管理 |
+| 文本内容与图片 `asset_id` 引用 | 翻译结果或语言知识事实 |
+| 撤回事实及审核所需原始内容保留 | Moderation Case / Enforcement Action |
+| 事务提交后的领域事件 | 独立 Notification 业务域 |
 
-## 子域、实体与表
+## 核心模型
 
-| 子域 | 实体 | 定稿表 | 规格 |
-| --- | --- | --- | --- |
-| Conversation | Conversation | `chat_conversation` | [会话模型](conversation.md) |
-| Conversation | DirectConversation | `chat_direct_conversation` | [会话模型](conversation.md) |
-| Conversation | ConversationMember | `chat_conversation_member` | [会话模型](conversation.md) |
-| Conversation | ConversationUserState | `chat_conversation_user_state` | [会话模型](conversation.md) |
-| Message | Message | `chat_message` | [消息模型](message.md) |
-| Message | TextMessage | `chat_message_text` | [消息模型](message.md) |
-| Message | ImageMessage | `chat_message_image` | [消息模型](message.md) |
+Chat V1 固定 7 张业务表：
 
-第一阶段共 **7 张表**，由[数据库总览](database.md)维护 DDL。
-
-**当前不存在** `MessageReceipt`、`MessageRecall`、`MessageTranslation`、`GiftMessageReference` 等实体。撤回是 `chat_message` 的生命周期状态；已读是 `chat_conversation_member` 的游标；礼物集成与翻译均 `deferred`。详见[未来扩展](#未来扩展deferred)。
-
-## 业务规则定稿
-
-1. **Chat Conversation 与 Social Match 解耦。** Chat 不存 `match_id`、`follow_id`、relationship status；发送时通过 `canChat()` 判断权限。
-2. **同一用户对全生命周期只有一个 Direct Conversation。** 由 `UNIQUE(user_low_id, user_high_id)` 在数据库层保证。
-3. **Direct 会话成员集合恒定。** `DirectConversationMembers = {user_low_id, user_high_id}`；只能由 `getOrCreateDirectConversation()` 创建，禁止任意 `addMember()`。
-4. **共享会话状态与用户个人会话状态分离。** 置顶、免打扰、隐藏、清空都不写入共享实体。
-5. **消息永久按 `seq` 排序**，不依赖 `created_at` 做严格顺序。
-6. **消息发送必须事务化**：分配 seq、插入消息主体、插入内容、更新会话水位、推进发送者已读、恢复隐藏状态，一个事务完成。
-7. **已读不用 Receipt 表**：`last_read_seq` 游标即为真相，未读数是派生值。
-8. **清空记录不删除 Message**，只移动 `cleared_before_seq` 可见起点。
-9. **隐藏会话不代表已读**；收到新消息或用户主动再次发送时恢复 `hidden_at = NULL`。
-10. **撤回不删除原消息**：只改 `status` 与 `recalled_at`，原始 subtype 内容保留供审核与纠纷处理。
-11. **空 conversation 不进入聊天列表**：`last_message_id IS NULL` 的会话不展示。
-
-## 与其他域的协作
-
-| 协作方 | 方向 | 内容 |
+| 子模型 | 表 | 说明 |
 | --- | --- | --- |
-| Identity | Chat ← Identity | 直接引用全局用户主体 ID；不另建 `chat_user`/`chat_profile` |
-| Social | Chat ← Social | 发送前调用 `canChat()`；Social 关系变化不写 Chat 表 |
-| Platform Media | Chat → Media | `asset_id` 引用统一媒体资源；Chat 不存 URL、宽高、MIME |
-| Commerce | — | 礼物集成 `deferred`，当前无协作契约 |
-| Trust & Safety | Chat → T&S | 撤回与强制处置保留原始数据供审计；完整案件属 T&S |
-| Platform / Infra | Chat → 基础设施 | 领域事件由 Outbox 可靠投递；推送与 WebSocket 不属于业务域 |
+| Conversation | `chat_conversation` | 会话主体与会话级水位 |
+| Conversation | `chat_direct_conversation` | 两个用户之间唯一 Direct Conversation |
+| Conversation | `chat_conversation_member` | 会话成员与已读游标 |
+| Conversation | `chat_conversation_user_state` | 用户个人的置顶、免打扰、隐藏、清空状态 |
+| Message | `chat_message` | 消息主体、顺序与生命周期 |
+| Message | `chat_message_text` | 文本消息内容 |
+| Message | `chat_message_image` | 图片消息的资产引用 |
 
-## 应用服务用例
+字段、约束与索引见[数据设计](database.md)。
+
+## 核心业务规则
+
+1. **Conversation 与 Social relationship 解耦。** Chat 不保存 `match_id`、`follow_id` 或 relationship status；发送时通过公共授权能力判断当前是否允许聊天。
+2. **同一用户对全生命周期只有一个 Direct Conversation。** `UNIQUE(user_low_id, user_high_id)` 保证业务唯一性。
+3. **Direct Conversation 成员集合恒定。** Direct 会话只能通过正式创建入口建立，不能任意增删成员。
+4. **共享状态与个人状态分离。** 置顶、免打扰、隐藏、清空只属于单个用户，不修改共享 Conversation。
+5. **消息严格按 `seq` 排序。** `created_at` 不承担会话内严格顺序。
+6. **发送消息是单事务。** 分配 `seq`、写 Message、写 subtype、推进 Conversation 水位、推进发送者已读、恢复发送者隐藏状态必须原子完成。
+7. **已读使用游标，不建逐消息 Receipt。** `last_read_seq` 是已读真相，未读数量由它派生。
+8. **清空历史不删除消息。** 只推进 `cleared_before_seq`，改变该用户的可见起点。
+9. **隐藏不等于已读。** 新消息或用户再次主动发送时可以恢复隐藏状态。
+10. **撤回不删除原始消息。** Message 进入撤回状态，原 subtype 内容继续保留用于治理、纠纷和审计。
+11. **空 Conversation 不进入聊天列表。** 没有 `last_message_id` 的会话不作为正常聊天列表项展示。
+
+## 与其他领域协作
+
+| 协作方 | Chat 的处理 |
+| --- | --- |
+| Identity | 保存用户稳定 logical UUID，不复制用户主体 |
+| Social | 发送前消费聊天资格 / `canChat` 能力，不复制关系状态 |
+| Media / Asset Infrastructure | 图片只保存 `asset_id` logical UUID；不复制物理文件事实 |
+| Trust & Safety | 保留可治理的消息事实；治理案件与处罚归 Trust |
+| Commerce | 当前无礼物消息 canonical 模型；未来只消费已完成交易结果，不拥有交易事实 |
+| Infrastructure | 可靠事件使用共享 Outbox；传输与连接机制不进入 Chat 业务模型 |
+
+跨 Domain 引用一律使用稳定 logical/public UUID，不建立跨域 physical FK。
+
+## 主要应用用例
 
 ```text
-getOrCreateDirectConversation   sendTextMessage      sendImageMessage
-listConversations               listMessages         markConversationRead
-recallMessage                   hideConversation     clearConversationHistory
-pinConversation                 muteConversation
+getOrCreateDirectConversation
+listConversations
+sendTextMessage
+sendImageMessage
+listMessages
+markConversationRead
+recallMessage
+hideConversation
+clearConversationHistory
+pinConversation
+muteConversation
 ```
 
-**当前不存在 `sendGiftMessage()`。** 完整的用例行为、字段契约与 `canChat()` 权限契约见[应用服务与事件](application-and-events.md)。
+用例行为、公共授权边界和事件契约见[应用服务与事件](application-and-events.md)。
 
-## 未来扩展（`deferred`）
+## 当前明确不包含
 
-以下能力均不在第一阶段，也没有对应的实体、表或字段。未来若重新进入设计，应通过新增表或新增枚举值扩展，而不是推翻当前七表模型：
+以下能力不属于当前 7 表模型：
 
-- 礼物消息与 Commerce 集成（`chat_message_gift` / `sendGiftMessage()` / `GiftMessageReference`）
-- 逐条已读回执与送达回执（`chat_message_receipt` / `chat_delivery_receipt`）
-- 单条消息「仅自己删除」（`chat_message_user_state`）
-- 消息表情回应（`chat_message_reaction`）
-- 聊天翻译与语音转文字（`chat_message_translation` / VOICE MessageType）
-- 群聊（`chat_group` / `chat_group_member`）
+- 礼物消息 / `sendGiftMessage()`；
+- 逐消息已读或送达回执；
+- 单条消息“仅自己删除”；
+- 消息 Reaction；
+- 消息翻译；
+- Voice Message；
+- 群聊。
 
-领域边界原则仍然成立：**礼物交易真相属于 Commerce，Chat 最多只消费已完成的送礼结果**。但在礼物集成被正式设计之前，该原则不产生任何 Chat 实体、字段或用例。
-
-## 状态
-
-| 层面 | 状态 |
-| --- | --- |
-| 领域边界与业务模型 | `frozen` |
-| 7 张表的字段语义、约束、索引意图、业务规则 | `frozen` |
-| 跨域契约（public_id UUID、跨域 logical UUID、无跨域物理 FK） | `frozen`（全域审计最终修正版） |
-| 物理 DDL（Outbox 物理表、UUID 分配实现） | `designing`（见[数据库总览](database.md)） |
-| 应用服务用例与事件的字段级规格 | `designing` |
-| 上述未来扩展 | `deferred` |
+未来增加这些能力时应作为明确的新设计扩展，不应通过修改现有事实含义来暗中兼容。
 
 ## 文档地图
 
-- [会话模型](conversation.md)：Conversation、Direct、Member、UserState、Direct 成员不变量与聊天列表查询模型。
-- [消息模型](message.md)：Message、Text、Image、`seq`、幂等、撤回与发送事务。
-- [应用服务与事件](application-and-events.md)：用例清单、`canChat()` 权限契约、领域事件与 Outbox 边界。
-- [数据库总览](database.md)：DDL、索引意图、明确不建的表、与全局规范的差异。
+- [会话](conversation.md)：Conversation、Direct Conversation、Member、User State 与列表查询模型。
+- [消息](message.md)：Message、Text、Image、`seq`、幂等、撤回与发送事务。
+- [应用服务与事件](application-and-events.md)：应用用例、聊天资格边界、领域事件与 Outbox。
+- [数据设计](database.md)：7 张表、约束、索引与数据库不变量。
