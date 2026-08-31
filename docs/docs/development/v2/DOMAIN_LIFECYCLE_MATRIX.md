@@ -9,21 +9,11 @@ status: control-matrix
 last_updated: 2026-08-31
 ---
 
-# ZH-LAO V2 Domain 全生命周期矩阵
-
-本页把每个 Domain 从 **数据库契约 → 规格设计 → 后端 → 管理后台 → 客户端 → 集成 → 验证 → 发布** 的状态放在同一张控制矩阵中。
-
-它是流程控制视图，不直接创造 Gate 事实。发生冲突时按：**最终 Gate / 最终审计 → Implementation Report → Design Audit → 当前代码与测试 → DEVELOPMENT_PROGRESS → 本页摘要** 的顺序裁决。
-
-**阅读方式：** 页面已关闭左侧 Sidebar 与右侧 Aside；矩阵本身横向滚动。第一列 Domain 尽量保持固定。
-
-快速入口：[流程控制中心](DEVELOPMENT_CONTROL_CENTER.md) · [详细进度台账](DEVELOPMENT_PROGRESS.md) · [Master Plan](MASTER_DEVELOPMENT_PLAN.md)
-
 状态图例：<span class="st st-pass">通过 / 完成</span> <span class="st st-frozen">已冻结</span> <span class="st st-ready">已就绪</span> <span class="st st-blocked">阻塞 / 失败</span> <span class="st st-pending">待处理</span> <span class="st st-recovered">已恢复</span> <span class="st st-na">不适用 / 未单列</span>
 
 ## Domain 生命周期总矩阵
 
-| 领域 | 数据库契约 | 产品语义 | 用例 / 工作流 | HTTP API | 公共契约 | 实施计划 | 设计 Gate | 执行简报 | 后端实现 | 后端 Gate / 冻结 | Admin 简报 | Admin 实现 | Admin Gate | 客户端契约 / UX | 客户端实现 | 客户端 Gate | 跨域契约 | 事件 / Worker / Job | 安全 / 并发 | 回归 / CI | 生产就绪 | 恢复 / 漂移 | 依赖 / 阻塞 | 下一动作 |
+| 领域 | 数据库契约 | 产品语义 | 用例 / 工作流 | 接口契约 | 公共契约 | 实施计划 | 设计门禁 | 执行简报 | 后端实现 | 后端门禁 / 冻结 | 后台简报 | 后台实现 | 后台门禁 | 客户端契约 / 交互 | 客户端实现 | 客户端门禁 | 跨域契约 | 事件 / 后台任务 | 安全 / 并发 | 回归 / 持续集成 | 生产就绪 | 恢复 / 漂移 | 依赖 / 阻塞 | 下一动作 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | Identity | <span class="st st-frozen">已冻结</span> | <span class="st st-pass">通过</span> | <span class="st st-pass">通过</span> | <span class="st st-pass">通过</span> | <span class="st st-frozen">已冻结</span> | <span class="st st-pass">已完成</span> | <span class="st st-pass">通过</span> | <span class="st st-pass">已执行</span> | <span class="st st-pass">已完成</span> | <span class="st st-frozen">通过 / 已冻结</span> | <span class="st st-na">未单列</span> | <span class="st st-na">未单列</span> | <span class="st st-na">—</span> | Auth / Session / Device 契约可消费 | <span class="st st-pending">待 Phase 14 收口</span> | <span class="st st-pending">待 Phase 14</span> | Identity public contract 已冻结 | OTP / Provider / Session runtime | <span class="st st-pass">通过</span> | <span class="st st-pass">通过</span> | <span class="st st-pending">待 Phase 16</span> | <span class="st st-na">无 active recovery</span> | 无当前阻塞 | 保持冻结；后续只做回归修复与 Client Integration |
 | Platform | <span class="st st-frozen">已冻结</span> | <span class="st st-pass">通过</span> | <span class="st st-pass">通过</span> | <span class="st st-frozen">已冻结</span> | <span class="st st-frozen">已冻结</span> | <span class="st st-pass">已完成</span> | <span class="st st-pass">通过</span> | <span class="st st-pass">已执行</span> | <span class="st st-pass">已完成</span> | <span class="st st-frozen">通过 / 已冻结</span> | <span class="st st-ready">已就绪</span> | <span class="st st-ready">Stage A 已完成</span>；<span class="st st-pending">Stage B 待处理</span> | <span class="st st-pending">待 Stage B</span> | Runtime feature / app-version / announcement / region APIs | <span class="st st-pending">待 Phase 14 收口</span> | <span class="st st-pending">待 Phase 14</span> | Operations RBAC integration contract | Runtime control-plane logic | <span class="st st-pass">通过</span> | <span class="st st-pass">Backend 通过</span>；<span class="st st-pending">Admin live E2E 待处理</span> | <span class="st st-pending">待 Phase 16</span> | <span class="st st-na">无 active recovery</span> | Stage B 尚未收口 | 完成 Platform Admin Stage B |
@@ -57,6 +47,7 @@ last_updated: 2026-08-31
 6. 状态变化时同步检查 `DEVELOPMENT_PROGRESS.md` 与 `DEVELOPMENT_CONTROL_CENTER.md`。
 7. 表格必须保持为标准 Markdown table；不要再次改成包含空行的 raw HTML `<table>`，避免 VitePress 将 `<tr>/<td>` 解析成文本。
 8. 状态值使用本页 `.st` 徽章样式；不要退回无颜色的裸状态文本。
+9. 主矩阵数据列固定宽度，禁止长文本自动撑宽列；长内容必须在固定列宽内换行。
 
 <style>
 .domain-lifecycle-matrix-page .VPContent,
@@ -71,38 +62,42 @@ last_updated: 2026-08-31
   padding-left: 0 !important;
   padding-right: 0 !important;
 }
-.domain-lifecycle-matrix-page h1,
 .domain-lifecycle-matrix-page h2,
 .domain-lifecycle-matrix-page > p {
-  margin-left: 20px;
-  margin-right: 20px;
+  margin-left: 12px;
+  margin-right: 12px;
 }
 .domain-lifecycle-matrix-page table {
   display: block !important;
-  width: calc(100vw - 16px) !important;
+  width: calc(100vw - 8px) !important;
   max-width: none !important;
-  margin: 16px 8px 28px !important;
+  margin: 10px 4px 24px !important;
   overflow-x: auto !important;
   white-space: normal;
   border-collapse: separate;
   border-spacing: 0;
-  font-size: 12px;
-  line-height: 1.4;
+  font-size: 11.5px;
+  line-height: 1.35;
 }
-.domain-lifecycle-matrix-page table th,
-.domain-lifecycle-matrix-page table td {
-  min-width: 145px;
-  max-width: 220px;
-  padding: 9px 10px;
+.domain-lifecycle-matrix-page table:first-of-type th,
+.domain-lifecycle-matrix-page table:first-of-type td {
+  box-sizing: border-box;
+  width: 124px !important;
+  min-width: 124px !important;
+  max-width: 124px !important;
+  padding: 7px 8px;
   vertical-align: top;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
-.domain-lifecycle-matrix-page table th:first-child,
-.domain-lifecycle-matrix-page table td:first-child {
+.domain-lifecycle-matrix-page table:first-of-type th:first-child,
+.domain-lifecycle-matrix-page table:first-of-type td:first-child {
   position: sticky;
   left: 0;
   z-index: 2;
-  min-width: 135px;
-  max-width: 135px;
+  width: 112px !important;
+  min-width: 112px !important;
+  max-width: 112px !important;
   font-weight: 700;
   background: var(--vp-c-bg-soft);
 }
@@ -113,14 +108,16 @@ last_updated: 2026-08-31
 .st {
   display: inline-block;
   box-sizing: border-box;
+  max-width: 100%;
   margin: 1px 2px 2px 0;
-  padding: 2px 7px;
+  padding: 2px 6px;
   border: 1px solid transparent;
   border-radius: 999px;
-  font-size: 11px;
+  font-size: 10.5px;
   font-weight: 700;
-  line-height: 1.45;
-  white-space: nowrap;
+  line-height: 1.35;
+  white-space: normal;
+  text-align: center;
 }
 .st-pass { color: #166534; background: #dcfce7; border-color: #86efac; }
 .st-frozen { color: #3730a3; background: #e0e7ff; border-color: #a5b4fc; }
@@ -137,16 +134,16 @@ last_updated: 2026-08-31
 .dark .st-recovered { color: #ddd6fe; background: rgba(109,40,217,.30); border-color: #7c3aed; }
 .dark .st-na { color: #d1d5db; background: rgba(75,85,99,.30); border-color: #6b7280; }
 @media (max-width: 768px) {
-  .domain-lifecycle-matrix-page h1,
   .domain-lifecycle-matrix-page h2,
   .domain-lifecycle-matrix-page > p {
-    margin-left: 12px;
-    margin-right: 12px;
+    margin-left: 8px;
+    margin-right: 8px;
   }
-  .domain-lifecycle-matrix-page table {
-    width: calc(100vw - 8px) !important;
-    margin-left: 4px !important;
-    margin-right: 4px !important;
+  .domain-lifecycle-matrix-page table:first-of-type th,
+  .domain-lifecycle-matrix-page table:first-of-type td {
+    width: 112px !important;
+    min-width: 112px !important;
+    max-width: 112px !important;
   }
 }
 </style>
