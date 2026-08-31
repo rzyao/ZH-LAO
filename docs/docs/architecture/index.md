@@ -17,7 +17,7 @@ ZH-LAO 采用 **单仓库、多应用、模块化单体后端、单 PostgreSQL �
 | 后台管理端 | `apps/admin` | 面向运营人员的管理、审核、配置和工作台能力 |
 | 后端 API | `apps/backend` | HTTP API、认证、应用服务、事务协调、公共契约 |
 | 后台 Worker | `apps/backend/src/worker.ts` | Outbox 发布、轮询任务和异步后台工作 |
-| PostgreSQL | `database/v2` | 业务事实、领域内完整性、事务与共享基础设施元数据 |
+| PostgreSQL | `database` | 业务事实、领域内完整性、事务与共享基础设施元数据 |
 | 文档站 | `docs` | 产品、架构、领域设计、开发控制与 ADR |
 
 ## 运行拓扑
@@ -95,7 +95,7 @@ infrastructure.system_outbox_events
 - 禁止跨领域 / 跨 Schema 物理 FK；
 - 跨领域、API、事件与客户端标识统一使用稳定逻辑 UUID；
 - 内部 BIGINT 主键不得跨领域传播；
-- `database/v2` 是 migration 的唯一物理权威；
+- `database` 是 migration 的唯一物理权威；
 - 后端启动和 readiness 不自动修改生产 Schema。
 
 详见 [PostgreSQL 架构规范](data/postgresql.md)。

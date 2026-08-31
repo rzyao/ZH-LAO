@@ -3,12 +3,12 @@ status: implemented
 phase: 1
 phase_name: Application Foundation
 last_updated: 2026-08-30
-depends_on: PostgreSQL V2 Baseline PASS
+depends_on: PostgreSQL  Baseline PASS
 exit_gate: FOUNDATION_GATE
 authority: MASTER_DEVELOPMENT_PLAN.md
 ---
 
-# ZH-LAO V2 — APPLICATION FOUNDATION PLAN
+# ZH-LAO  — APPLICATION FOUNDATION PLAN
 
 > 目标文件路径：`docs/docs/development/01-foundation/APPLICATION_FOUNDATION_PLAN.md`
 >
@@ -22,7 +22,7 @@ authority: MASTER_DEVELOPMENT_PLAN.md
 本计划服从以下既有事实源，优先级不得在 Phase 1 内被改变：
 
 1. `docs/docs/development/MASTER_DEVELOPMENT_PLAN.md`
-2. `database/v2/` 冻结 PostgreSQL Baseline
+2. `database/` 冻结 PostgreSQL Baseline
 3. `docs/docs/architecture/overview.md`
 4. `docs/docs/architecture/domain-map.md`
 5. `docs/docs/architecture/database.md`
@@ -41,13 +41,13 @@ Phase 1 不允许产生隐式 `MASTER PLAN REVISION`。
 
 当前状态：
 
-- PostgreSQL V2 Baseline：`COMPLETE / PASS`
+- PostgreSQL  Baseline：`COMPLETE / PASS`
 - Application Foundation：`COMPLETE / PASS`
 - Identity：`NOT_STARTED`
 
 进入 Phase 1 实施前必须满足：
 
-- [x] PostgreSQL V2 Baseline Gate = `PASS`
+- [x] PostgreSQL  Baseline Gate = `PASS`
 - [x] Cross-Domain FK = 0
 - [x] Logical UUID Violation = 0
 - [x] Frozen migrations 已形成权威数据库契约
@@ -64,7 +64,7 @@ Phase 1 不允许产生隐式 `MASTER PLAN REVISION`。
 
 Phase 1 的唯一目标是：
 
-> 建立一个可启动、可连接 PostgreSQL V2、可安全执行事务、可承载后续 11 个 Domain、具备统一 API/日志/错误/测试/Outbox/Asset/后台任务基础的模块化单体应用骨架。
+> 建立一个可启动、可连接 PostgreSQL 、可安全执行事务、可承载后续 11 个 Domain、具备统一 API/日志/错误/测试/Outbox/Asset/后台任务基础的模块化单体应用骨架。
 
 完成以后，后续 Domain Phase 不再重复解决：
 
@@ -142,7 +142,7 @@ Phase 1 的唯一目标是：
 
 ```text
 ZH-LAO/
-├── database/v2/
+├── database/
 ├── docs/
 ├── scripts/
 ├── .gitignore
@@ -161,7 +161,7 @@ ZH-LAO/
 
 ## 5.2 已有 Node / PostgreSQL 基础
 
-`database/v2` 已有独立 Node.js ESM 工具包，使用：
+`database` 已有独立 Node.js ESM 工具包，使用：
 
 - `pnpm`
 - Node.js ESM
@@ -198,7 +198,7 @@ Phase 1 不复制第二套 migration system。
 
 1. 先确认不是应用实现问题；
 2. 形成明确设计变更；
-3. 在 `database/v2/migrations/` 增加新的 forward-only migration；
+3. 在 `database/migrations/` 增加新的 forward-only migration；
 4. 重新执行完整 database audit；
 5. 不修改 0000–1240 已冻结 migration。
 
@@ -220,7 +220,7 @@ Phase 1 不复制第二套 migration system。
 
 理由：
 
-- 与现有 `database/v2` Node / ESM / pnpm 工具链一致；
+- 与现有 `database` Node / ESM / pnpm 工具链一致；
 - 适合单人开发；
 - 不引入多语言后端运维负担；
 - 可以用同一运行时承载 HTTP API 与 Worker；
@@ -254,7 +254,7 @@ Phase 1 **不引入 ORM 作为数据库 schema authority**。
 
 原因：
 
-- PostgreSQL V2 migration 已经是冻结物理事实源；
+- PostgreSQL  migration 已经是冻结物理事实源；
 - 不允许由 ORM schema 重新定义 122 张业务表；
 - Repository 必须适配数据库，而不是让数据库适配 ORM；
 - 直接 SQL 更容易审计 Domain → Schema ownership。
@@ -379,7 +379,7 @@ ZH-LAO/
 │               ├── migrate-test-database.ts
 │               └── test-app.ts
 │
-├── database/v2/          # 保持数据库权威，不搬迁
+├── database/          # 保持数据库权威，不搬迁
 └── docs/
 ```
 
@@ -389,7 +389,7 @@ ZH-LAO/
 2. 每个 Domain 到自己的 Phase 时再创建：
    `src/modules/<domain>/...`
 3. `modules/README.md` 只冻结模块目录规范和 import 规则。
-4. `database/v2` 不移动、不复制、不重写 migration runner。
+4. `database` 不移动、不复制、不重写 migration runner。
 5. 不建立一个巨大的 `common-service`。
 
 ---
@@ -1027,7 +1027,7 @@ ADMIN_DATABASE_URL
     ↓
 create unique disposable database
     ↓
-run database/v2 frozen migrations
+run database frozen migrations
     ↓
 run integration tests
     ↓
@@ -1045,7 +1045,7 @@ drop disposable database
 - 测试失败时明确打印 test database 名称和阶段；
 - 正常结束自动删除；
 - 可选 debug 模式允许保留失败库；
-- migration 使用 `database/v2` 现有 runner，不复制 migration 逻辑。
+- migration 使用 `database` 现有 runner，不复制 migration 逻辑。
 
 Integration Test DB 至少验证：
 
@@ -1072,7 +1072,7 @@ Integration Test DB 至少验证：
 ```text
 Deployment / Test Setup
     ↓
-database/v2 migrate
+database migrate
     ↓
 Backend starts
 ```
@@ -1204,7 +1204,7 @@ unit tests
 ↓
 start PostgreSQL
 ↓
-fresh V2 migrations
+fresh  migrations
 ↓
 database audit
 ↓
@@ -1298,7 +1298,7 @@ Phase 1 不负责完整 production deployment pipeline。
 
 测试：
 
-- [ ] V2 PostgreSQL connection PASS
+- [ ]  PostgreSQL connection PASS
 - [ ] pool acquire/release PASS
 - [ ] DB unavailable error PASS
 - [ ] pool shutdown PASS
@@ -1512,7 +1512,7 @@ Phase 1 不负责完整 production deployment pipeline。
 
 测试：
 
-- [ ] correct V2 DB PASS
+- [ ] correct  DB PASS
 - [ ] empty DB readiness FAIL
 - [ ] incomplete baseline readiness FAIL
 - [ ] application does not auto-create business tables
@@ -1603,7 +1603,7 @@ CI workflow files
 必要时可新增：
 
 ```text
-database/v2/migrations/<new incremental migration>.sql
+database/migrations/<new incremental migration>.sql
 ```
 
 但只有遇到已经确认的 Foundation blocker 才允许。
@@ -1622,7 +1622,7 @@ database/v2/migrations/<new incremental migration>.sql
 
 ## 保留
 
-- `database/v2`
+- `database`
 - 现有 17 个 migration
 - migration hash / advisory lock 机制
 - database audit
@@ -1662,7 +1662,7 @@ database/v2/migrations/<new incremental migration>.sql
 
 > 不自动迁移、不自动保留。
 
-先判断它是否属于当前 V2 产品与架构，再由对应 Phase 明确处理。
+先判断它是否属于当前  产品与架构，再由对应 Phase 明确处理。
 
 ---
 
@@ -1707,7 +1707,7 @@ FOUNDATION_GATE = PASS
 
 ## 32.2 Database
 
-- [ ] V2 PostgreSQL connection PASS
+- [ ]  PostgreSQL connection PASS
 - [ ] connection pool PASS
 - [ ] fresh DB migration PASS
 - [ ] database audit PASS
@@ -1947,7 +1947,7 @@ Shared technical layer 白名单仅限：
 
 Phase 1 的 Definition of Done：
 
-> 在一台干净开发/CI 环境中，从空 PostgreSQL 数据库开始，可以自动执行冻结 V2 migration，启动 ZH-LAO Backend 和 Worker，成功连接数据库，正确执行 commit/rollback，使用统一 Repository pattern，生成 logical UUID，在同一事务中写入 Outbox，后台安全投递 Outbox，读取/维护 Asset canonical metadata，输出结构化日志和统一错误，提供 liveness/readiness，运行完整 unit/integration tests，并通过 architecture boundary 检查；全过程不实现任何具体业务 Domain 功能，也不修改冻结数据库主体设计。
+> 在一台干净开发/CI 环境中，从空 PostgreSQL 数据库开始，可以自动执行冻结  migration，启动 ZH-LAO Backend 和 Worker，成功连接数据库，正确执行 commit/rollback，使用统一 Repository pattern，生成 logical UUID，在同一事务中写入 Outbox，后台安全投递 Outbox，读取/维护 Asset canonical metadata，输出结构化日志和统一错误，提供 liveness/readiness，运行完整 unit/integration tests，并通过 architecture boundary 检查；全过程不实现任何具体业务 Domain 功能，也不修改冻结数据库主体设计。
 
 ---
 

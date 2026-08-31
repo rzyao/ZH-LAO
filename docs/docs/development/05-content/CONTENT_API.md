@@ -9,7 +9,7 @@ last_updated: 2026-08-31
 repository_commit_audited: 007d6ad705a9afcc4fefb03442e371b4dec07fad
 ---
 
-# ZH-LAO V2 — Content HTTP/API Contract
+# ZH-LAO  — Content HTTP/API Contract
 
 > 本文冻结 HTTP contract，不实现 route。API 从 Use Cases 推导，禁止把 31 张表暴露成 CRUD。
 

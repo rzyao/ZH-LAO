@@ -50,7 +50,7 @@ CONTENT-BACKEND-AUDIT
 
 如果 Admin Stage A 与 Stage B 需要两个独立会话，也必须显示成两个 Stage，而不是合并成“后台进行中”。
 
-正式协议见 [AI 开发阶段模型](workflow/AI_STAGE_MODEL.md)。
+正式协议见 [Task Manifest Schema](workflow/TASK_MANIFEST_SCHEMA.md) 与各 Stage 的 Brief / Gate / Report。
 
 ## 三、领域设计与后端
 
@@ -68,7 +68,7 @@ Domain 的典型链路：
 
 一个设计 Prompt 内部可以同时完成产品语义、Use Case、Workflow、State Machine、Domain Model、Data、Contract、Reliability，只要它本来就是一个连续 AI 会话的职责。
 
-因此这些不再各占 Matrix 一列。
+因此这些不再各自占用独立的执行轨道。
 
 ## 四、Admin / Mobile
 
@@ -108,7 +108,7 @@ Content Backend
 + E2E Acceptance
 ```
 
-Feature 行直接显示在 AI 开发阶段矩阵中，并挂在 `primary_domain` 下方。
+Feature 按 `primary_domain` 归属组织，并通过 Feature Page、Task Manifest 与 Gate / Report 跟踪交付。
 
 ## 六、任务启动核验
 
@@ -128,15 +128,13 @@ repository drift
 
 ## 七、控制面阅读顺序
 
-1. [AI 开发阶段矩阵](DOMAIN_LIFECYCLE_MATRIX.md)
-2. [当前下一动作](workflow/NEXT_ACTIONS.md)
-3. [AI Stage 模型](workflow/AI_STAGE_MODEL.md)
-4. [AI 多会话 Workflow](workflow/index.md)
-5. [Task Manifest Schema](workflow/TASK_MANIFEST_SCHEMA.md)
-6. [可执行规格系统](SPEC_SYSTEM.md)
-7. [实现蓝图模板](IMPLEMENTATION_BLUEPRINT_TEMPLATE.md)
-8. [开发流程控制中心](DEVELOPMENT_CONTROL_CENTER.md)
-9. 当前 Stage Manifest 指向的 Brief / Blueprint / Gate / Report
+1. [当前下一动作](workflow/NEXT_ACTIONS.md)
+2. [AI 多会话 Workflow](workflow/index.md)
+3. [Task Manifest Schema](workflow/TASK_MANIFEST_SCHEMA.md)
+4. [可执行规格系统](SPEC_SYSTEM.md)
+5. [实现蓝图模板](IMPLEMENTATION_BLUEPRINT_TEMPLATE.md)
+6. [开发流程控制中心](DEVELOPMENT_CONTROL_CENTER.md)
+7. 当前 Stage Manifest 指向的 Brief / Blueprint / Gate / Report
 
 ## 八、Authority
 
@@ -150,7 +148,7 @@ repository drift
 | Implementation Blueprint | 当前 snapshot 上如何实现 |
 | Gate / Audit / Report | 完成状态证据 |
 | `AI_STAGE_REGISTRY.json` | derived Stage 快照 |
-| AI Stage Matrix | derived 可视化与下一 Prompt 入口 |
+| `FEATURE_PAGE_INDEX.json` | Feature Page 的派生索引 |
 
 ## 九、并行
 

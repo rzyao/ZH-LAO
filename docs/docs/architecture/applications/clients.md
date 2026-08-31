@@ -42,7 +42,7 @@ ZH-LAO 当前有两类正式客户端：
 | 语言 | TypeScript |
 | 导航 | React Navigation 7 |
 | 服务端状态 | TanStack Query |
-| HTTP | Axios，经统一 `V2HttpClient` 包装 |
+| HTTP | Axios，经统一 `HttpClient` 包装 |
 | 表单 | React Hook Form + Zod |
 | 样式 | NativeWind 4 + Tailwind CSS 3.4 |
 | 动画 | Reanimated 4 |
@@ -109,7 +109,7 @@ SafeAreaProvider
 
 ### HTTP 与认证存储
 
-所有请求通过统一 `V2HttpClient`。
+所有请求通过统一 `HttpClient`。
 
 Screen / Component 不应直接调用 `fetch()`、直接 import Axios、自行拼 Authorization 或硬编码开发服务器地址。
 

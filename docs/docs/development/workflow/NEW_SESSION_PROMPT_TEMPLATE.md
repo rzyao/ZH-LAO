@@ -37,7 +37,7 @@ last_updated: 2026-08-31
 当需要人工复制一个完全自解释的 Prompt 时使用：
 
 ```text
-你正在执行 ZH-LAO V2 的一个仓库驱动 AI Workflow Task。
+你正在执行 ZH-LAO  的一个仓库驱动 AI Workflow Task。
 
 远程仓库：`rzyao/ZH-LAO`
 branch：`main`

@@ -8,7 +8,7 @@ implementation_started: false
 last_updated: 2026-08-31
 ---
 
-# ZH-LAO V2 — Learning Execution Brief
+# ZH-LAO  — Learning Execution Brief
 
 > 本文件是 Learning Domain 正式执行开发会话入口。
 >
@@ -89,7 +89,7 @@ LEARNING_DESIGN_AUDIT.md
 数据库 authority：
 
 ```text
-database/v2/migrations/0500_learning.sql
+database/migrations/0500_learning.sql
 ```
 
 Learning frozen core tables = 10：

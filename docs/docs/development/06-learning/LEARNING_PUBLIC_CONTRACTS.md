@@ -8,7 +8,7 @@ implementation_started: false
 last_updated: 2026-08-31
 ---
 
-# ZH-LAO V2 — Learning Public / Cross-Domain Contracts
+# ZH-LAO  — Learning Public / Cross-Domain Contracts
 
 > Target boundary：`apps/backend/src/modules/learning/public/`。Learning public contract只暴露经过最小化的业务事实；不把用户私有学习数据库变成跨域查询接口。
 

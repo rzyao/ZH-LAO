@@ -11,7 +11,7 @@ depends_on:
 implementation_started: false
 ---
 
-# ZH-LAO V2 — Operations API / Public Contract
+# ZH-LAO  — Operations API / Public Contract
 
 > 本文冻结 Operations V1 HTTP/API 与 backend public boundary。API 从 Use Cases 推导，不从数据库表机械生成 CRUD。
 

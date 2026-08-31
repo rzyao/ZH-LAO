@@ -47,7 +47,7 @@ Portfolio Status：`active`。
 - [Social 域](/domains/social/)：Social / Identity / Trust / Media ownership 边界。
 - [Social 数据库](/domains/social/database)：稳定 `public_id` 与跨域 logical UUID 规则。
 - [ADR-010](/adr/ADR-010-social-profile-discovery-and-relationships)：Profile 作为独立社交身份的决策。
-- `database/v2/migrations/0700_social.sql`：Profile、Photo、Prompt 等 physical schema 已存在。
+- `database/migrations/0700_social.sql`：Profile、Photo、Prompt 等 physical schema 已存在。
 
 当前 Gate 事实：正式 `SOCIAL-DESIGN` 在 Workflow Registry 中仍未完成，仓库没有公开资料读取 Feature 的公共 API Contract / Design Gate PASS。因此设计已有大量 frozen artifact，但 Lane 仍为 `active`。
 

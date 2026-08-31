@@ -7,7 +7,7 @@ entry_gate: CONTENT_GATE = PASS
 last_updated: 2026-08-31
 ---
 
-# ZH-LAO V2 — Content Admin Execution Brief
+# ZH-LAO  — Content Admin Execution Brief
 
 > 本文件是 Content Admin 集成执行会话入口。执行 AI 必须先使用 GitHub 连接器读取远程 `main` 的真实 Gate、API、权限与 Admin 代码，再开始工作。
 >

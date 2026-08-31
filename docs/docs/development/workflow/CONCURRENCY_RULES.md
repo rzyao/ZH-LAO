@@ -234,7 +234,6 @@ Potentially Parallel Safe:
 以下文件默认视为高冲突 shared/control views：
 
 - `DEVELOPMENT_CONTROL_CENTER.md`
-- `DOMAIN_LIFECYCLE_MATRIX.md`
 - `DEVELOPMENT_PROGRESS.md`
 - `workflow/TASK_INDEX.md`
 - `workflow/NEXT_ACTIONS.md`

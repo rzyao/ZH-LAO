@@ -1,4 +1,4 @@
-# ZH-LAO V2 — Identity 实施最终报告
+# ZH-LAO  — Identity 实施最终报告
 
 ```text
 IDENTITY_DESIGN_GATE    = PASS

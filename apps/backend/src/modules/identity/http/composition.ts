@@ -3,7 +3,7 @@ import type { DatabaseExecutor } from '../../../database/executor.js';
 import { OutboxWriter } from '../../../outbox/outbox-writer.js';
 import type { IdentityRepositories } from '../application/ports/index.js';
 import { AccessTokenService, CryptoOtpGenerator, HmacOtpHasher, IdentityEventWriter, OtpConsumptionEngine, RefreshTokenService, UnavailableFacebookCredentialVerifier, type FacebookCredentialVerifier, type OtpDeliveryProvider } from '../application/services/index.js';
-import { AuthenticateWithFacebook, AuthenticateWithPhoneOtp, DeviceLifecycle, IdentityState, PhoneCredentialOperations, ProfileOperations, RequestPhoneOtp, SessionLifecycle } from '../application/index.js';
+import { AdminAuthenticationService, AuthenticateWithFacebook, AuthenticateWithPhoneOtp, DeviceLifecycle, IdentityState, PhoneCredentialOperations, ProfileOperations, RequestPhoneOtp, SessionLifecycle } from '../application/index.js';
 import { IdentityAuthenticationProvider } from '../infrastructure/index.js';
 import type { IdentityHttpDependencies } from './routes.js';
 
@@ -35,6 +35,7 @@ export function createIdentityHttpDependencies(options: IdentityHttpCompositionO
   const refresh = new RefreshTokenService();
   return {
     authentication: new IdentityAuthenticationProvider(access, options.repositories, options.executor),
+    adminAuth: new AdminAuthenticationService(options.transactionManager, options.repositories, access, refresh, now),
     requestOtp: new RequestPhoneOtp(options.transactionManager, options.repositories, new CryptoOtpGenerator(), otpHasher, options.otpDelivery, undefined, undefined, now),
     phoneAuth: new AuthenticateWithPhoneOtp(options.transactionManager, options.repositories, new OtpConsumptionEngine(options.repositories, otpHasher, now), { prepareRefresh: () => refresh.prepare(), issueAccess: user => access.issue(user) }, events, now),
     facebookAuth: new AuthenticateWithFacebook(options.facebookVerifier ?? new UnavailableFacebookCredentialVerifier(), options.transactionManager, options.repositories, { prepareRefresh: () => refresh.prepare(), issueAccess: user => access.issue(user) }, events, now),

@@ -1,4 +1,4 @@
-# ZH-LAO V2 — Admin Foundation Plan
+# ZH-LAO  — Admin Foundation Plan
 
 **文件名：`ADMIN_FOUNDATION_PLAN.md`**  
 **Phase：PHASE 1A — Admin Foundation**  
@@ -9,7 +9,7 @@
 
 # 1. 目标
 
-本阶段用于建立 ZH-LAO V2 Admin 的统一前端基础设施。
+本阶段用于建立 ZH-LAO  Admin 的统一前端基础设施。
 
 目标是：
 
@@ -24,7 +24,7 @@
 当前已经完成：
 
 ```text
-PostgreSQL V2 Baseline        PASS
+PostgreSQL  Baseline        PASS
 Application Foundation       PASS
 Backend Foundation           PASS
 ```
@@ -508,7 +508,7 @@ Invalidation helper
 
 # 17. API Client
 
-必须建立统一 V2 API Client。
+必须建立统一  API Client。
 
 至少统一处理：
 
@@ -1878,7 +1878,7 @@ Domain Workflow
 
 本阶段禁止：
 
-1. 修改 PostgreSQL V2 Domain 设计。
+1. 修改 PostgreSQL  Domain 设计。
 2. 修改 Domain 顺序。
 3. 提前实现具体 Admin Domain。
 4. 用数据库表自动生成 CRUD 页面。
@@ -1899,7 +1899,7 @@ Domain Workflow
 
 而是：
 
-> **ZH-LAO V2 已经拥有一套稳定、统一、可测试、可扩展的 Admin Application Platform，后续所有 Domain 后台页面都可以在不重新搭建技术基础的情况下直接进行正式开发。**
+> **ZH-LAO  已经拥有一套稳定、统一、可测试、可扩展的 Admin Application Platform，后续所有 Domain 后台页面都可以在不重新搭建技术基础的情况下直接进行正式开发。**
 
 ---
 

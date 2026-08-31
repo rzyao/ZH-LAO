@@ -7,12 +7,12 @@ last_updated: 2026-08-31
 depends_on:
   - PLATFORM_USE_CASES.md
 database_authority:
-  - database/v2/migrations/0300_platform.sql
+  - database/migrations/0300_platform.sql
   - docs/docs/domains/platform/database.md
 next_artifact: PLATFORM_API.md
 ---
 
-# ZH-LAO V2 — PLATFORM CONFIG CONTRACTS
+# ZH-LAO  — PLATFORM CONFIG CONTRACTS
 
 > 目标路径：`docs/docs/development/03-platform/PLATFORM_CONFIG_CONTRACTS.md`
 >

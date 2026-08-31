@@ -34,7 +34,7 @@ Portfolio Status：`active`。
 
 执行阶段与产物：仓库没有本 Feature 独立 Design Stage / Brief；设计输入已冻结在 [Trust & Safety](/domains/trust/)、[Moderation](/domains/trust/moderation)、[Contracts](/domains/trust/contracts) 和 [Trust 数据库](/domains/trust/database)。
 
-Gate / 完成证据：`database/v2/migrations/1100_trust.sql` 已落地 `trust.appeals`、Decision FK、appellant logical UUID、状态机与唯一约束，数据库 baseline PASS；但没有“用户申诉”Feature 级 Design Gate，因此保持 `todo`。
+Gate / 完成证据：`database/migrations/1100_trust.sql` 已落地 `trust.appeals`、Decision FK、appellant logical UUID、状态机与唯一约束，数据库 baseline PASS；但没有“用户申诉”Feature 级 Design Gate，因此保持 `todo`。
 
 下一步：建立本 Feature Design Stage，在既有 canonical 模型上冻结“哪些 Decision/Enforcement 可申诉”、提交/撤回/查询契约、错误码与用户可见状态，不改变 immutable Decision 规则。
 

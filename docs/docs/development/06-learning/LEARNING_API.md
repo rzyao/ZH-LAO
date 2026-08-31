@@ -8,7 +8,7 @@ implementation_started: false
 last_updated: 2026-08-31
 ---
 
-# ZH-LAO V2 — Learning HTTP/API Contract
+# ZH-LAO  — Learning HTTP/API Contract
 
 > Frozen Learning V1 HTTP contract。No routes are implemented by this design task。API从 Use Cases推导，不暴露 10-table CRUD。
 

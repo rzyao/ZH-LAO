@@ -37,7 +37,7 @@ Portfolio Status：`active`。
 
 执行阶段与产物：仓库没有本 Feature 独立的 Design Stage / Brief。可用设计输入已经冻结在 [Trust & Safety](/domains/trust/)、[Moderation](/domains/trust/moderation) 与 [Contracts](/domains/trust/contracts)；数据模型见 [Trust 数据库](/domains/trust/database)。
 
-Gate / 完成证据：Trust canonical 已冻结，`database/v2/migrations/1100_trust.sql` 已物理创建 `trust.reports`，数据库基线报告为 PASS；但仓库没有“用户举报提交”Feature 级 Design Gate，因此本 Lane 保持 `todo`，不把 Domain/DB 完成误写为 Feature Design 完成。
+Gate / 完成证据：Trust canonical 已冻结，`database/migrations/1100_trust.sql` 已物理创建 `trust.reports`，数据库基线报告为 PASS；但仓库没有“用户举报提交”Feature 级 Design Gate，因此本 Lane 保持 `todo`，不把 Domain/DB 完成误写为 Feature Design 完成。
 
 下一步：建立本 Feature 的正式设计阶段，基于既有 canonical fact 冻结请求/响应、鉴权、错误码与重复提交策略；不得新增 Social / Chat / Commerce 举报事实表。
 

@@ -255,7 +255,7 @@ Evidence
 
 ---
 
-## 8. 状态机规范
+## 8. State Machine 规范
 
 涉及业务生命周期的 Feature 必须定义状态机。
 
@@ -287,24 +287,7 @@ Evidence
 
 ---
 
-## 9. 中文化规范
-
-展示层优先中文。
-
-代码、API、数据库字段保持英文。
-
-|英文|中文|
-|-|-|
-|Capability|核心能力|
-|Lifecycle|生命周期|
-|Evidence|证据|
-|Gate|阶段门禁|
-|Contract|契约|
-|Dependency|依赖|
-
----
-
-## 10. 合格标准
+## 9. Acceptance Criteria
 
 Feature Page 必须回答：
 

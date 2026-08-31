@@ -45,7 +45,7 @@ Portfolio Status：`active`。
 - [Social 偏好、发现与关系](/domains/social/discovery-and-relationships)：偏好表、双向硬条件与 V1 筛选维度。
 - [ADR-010](/adr/ADR-010-social-profile-discovery-and-relationships)：实时 Discovery 与正规化偏好的决策。
 - [Social 数据库](/domains/social/database)：Preference / Exposure 表组及完整性边界。
-- `database/v2/migrations/0700_social.sql` 已落 `social_preferences` 与三个多选偏好表。
+- `database/migrations/0700_social.sql` 已落 `social_preferences` 与三个多选偏好表。
 
 当前 Gate 事实：正式 `SOCIAL-DESIGN` 仍未通过工作流 Gate，仓库没有 Preference Feature 的公共应用 Contract / Design Gate PASS。因此本 Lane 为 `active`。
 

@@ -6,7 +6,7 @@ repository_commit_audited: df1a21bfdf1d50372ff6bce7902b9757e478270d
 
 # Feature Inventory Bootstrap Audit
 
-本报告记录 AI 开发阶段矩阵的第一次全产品 Feature Inventory 扩展。
+本报告记录第一次全产品 Feature Inventory 扩展。
 
 ## 结论
 
@@ -61,13 +61,13 @@ portfolio_status:
 
 - Chat 产品范围提到 Voice Message / Chat Translation / Speech-to-Text；
 - 当前冻结 Chat V1 模型只覆盖 TEXT / IMAGE，并明确把 Voice / Translation 排除；
-- 因此这三项进入 Matrix，但 `portfolio_status = pending_decision`，由 `CHAT_SCOPE_DECISION` 阻塞。
+- 因此这三项进入 Feature Inventory，但 `portfolio_status = pending_decision`，由 `CHAT_SCOPE_DECISION` 阻塞。
 
 Social 的“距离筛选 / 模糊距离”也保留为待裁决项，因为产品范围包含距离体验，而当前 Social 数据模型只冻结粗粒度地区信息，尚不足以自行推导精确位置方案。
 
 ## Deferred 可见性
 
-以下类型不会再从矩阵消失；它们在 Inventory 与 Feature Page 保留 `portfolio_status = deferred`，其适用 Lane 在 Matrix 概览为 `○ 未启动`，具体延期语义以独立 Badge 展示：
+以下类型保留在 Inventory 与 Feature Page 中，并使用 `portfolio_status = deferred`；具体延期语义以独立 Badge 展示：
 
 - 推送通知体系；
 - 广告变现；
@@ -102,4 +102,4 @@ Feature 尚未启动、延期或待裁决，都不能成为缺页理由。最小
 - 改变 primary / participating Domain；
 - 产生新的 READY Task；
 
-Dispatcher / Reconciliation 必须同步更新 `FEATURE_INVENTORY.json` 与必要的 `AI_STAGE_REGISTRY.json` 详细 Stage。CI 负责校验两者与 Matrix renderer 合法性。
+Dispatcher / Reconciliation 必须同步更新 `FEATURE_INVENTORY.json` 与必要的 `AI_STAGE_REGISTRY.json` 详细 Stage。CI 负责校验两者与 Feature Page 结构的一致性。

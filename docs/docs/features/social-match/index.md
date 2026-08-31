@@ -35,7 +35,7 @@ Portfolio Status：`active`。
 
 范围：当双方 Follow 同时存在时，Social Domain Service 建立 `social_matches` active 记录；取消任一方向 Follow 或发生 Block 时结束 active Match，但保留历史。Match pair 规范化为 `profile_a_id < profile_b_id`，同一 pair 允许结束后再次 Match；跨域引用只能使用 Match `public_id`，当前 V1 Chat 不保存 `match_id`。Match 后聊天免费，但会话建立方式与 Conversation 生命周期由 Chat 规格负责。
 
-Stage / 工件：canonical 已冻结：[Social 偏好、发现与关系](/domains/social/discovery-and-relationships)；物理表见 `database/v2/migrations/0700_social.sql` 的 `social.social_matches`。
+Stage / 工件：canonical 已冻结：[Social 偏好、发现与关系](/domains/social/discovery-and-relationships)；物理表见 `database/migrations/0700_social.sql` 的 `social.social_matches`。
 
 Gate / Evidence：Design Register D-136 冻结 Match 的跨域 UUID 契约，D-137 冻结 active-pair partial unique 与历史保留，D-138 冻结 Mutual Follow→Match 及跨表事务 invariant；canonical frontmatter 为 `status: frozen`。仓库未发现独立 `SOCIAL_DESIGN_GATE` 文件，因此不制造额外 Gate 结论。
 
@@ -47,7 +47,7 @@ Next Action：Backend 按 frozen invariant 实现“第二条 Follow 建立 Matc
 
 范围：实现 active Match 的创建、结束、查询与历史保护，以及 Follow/Unfollow/Block 触发的事务一致性；与 Chat 的集成只传业务资格/稳定 logical UUID，不让 Chat 持有 Social 内部 BIGINT。
 
-Stage / 工件：`database/v2/migrations/0700_social.sql` 已落地 `social_matches` 的 `public_id`、pair CHECK、`active/ended` 状态与 active-pair partial unique index。当前 `backend/src/modules/` 尚无 Social module、Match Domain Service、routes 或 Match tests。
+Stage / 工件：`database/migrations/0700_social.sql` 已落地 `social_matches` 的 `public_id`、pair CHECK、`active/ended` 状态与 active-pair partial unique index。当前 `backend/src/modules/` 尚无 Social module、Match Domain Service、routes 或 Match tests。
 
 Gate / Evidence：这里只存在 frozen design 与数据库 schema 前置，没有 Social Match implementation report / backend gate / service/API/test 证据；因此明确保持 `ready`，绝不以设计或建表事实写成 `done`。
 

@@ -482,7 +482,7 @@ function PermissionSection() {
   return (
     <Card
       title="Auth / Permission Skeleton"
-      description="真实登录由 Identity / Operations 阶段接入"
+      description="登录态与 Operations 权限由服务端统一校验"
     >
       <div className="space-y-3">
         <div className="flex items-center gap-3">

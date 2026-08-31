@@ -39,7 +39,7 @@ Portfolio Status：`active`。
 
 **Stage / Artifact**
 
-当前有效设计工件为 [Commerce](/domains/commerce/)、[购买、支付与退款](/domains/commerce/purchase-and-payment) 与 [数据设计](/domains/commerce/database)。16-table canonical 已冻结，`database/v2/migrations/0900_commerce.sql` 已包含 Order / OrderItem / Payment / PaymentEvent / Fulfillment 的物理结构。
+当前有效设计工件为 [Commerce](/domains/commerce/)、[购买、支付与退款](/domains/commerce/purchase-and-payment) 与 [数据设计](/domains/commerce/database)。16-table canonical 已冻结，`database/migrations/0900_commerce.sql` 已包含 Order / OrderItem / Payment / PaymentEvent / Fulfillment 的物理结构。
 
 **Gate / Evidence**
 

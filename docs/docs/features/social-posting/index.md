@@ -30,7 +30,7 @@ Portfolio Status：`active`。
 
 `social-posting` 负责文字 / 图片动态的发布与删除交付跟踪。Post 与 Media 的 canonical 事实以 [Social 动态](/domains/social/community-content) 和 [Social 数据库](/domains/social/database) 为准；图片只保存 Media/Asset logical UUID，不把 URL 或存储元数据复制进 Social。举报事实只归 `trust.reports`。
 
-当前真实状态是：Social Post / Media 设计已冻结，`database/v2/migrations/0700_social.sql` 已落地对应表结构；但 Backend runtime 尚无 Social Module/API，Mobile 也没有 Social Feature 实现。因此仅 Design Lane 完成，后续 Lane 保持真实 `todo/na`。
+当前真实状态是：Social Post / Media 设计已冻结，`database/migrations/0700_social.sql` 已落地对应表结构；但 Backend runtime 尚无 Social Module/API，Mobile 也没有 Social Feature 实现。因此仅 Design Lane 完成，后续 Lane 保持真实 `todo/na`。
 
 ## 设计
 
@@ -40,7 +40,7 @@ Portfolio Status：`active`。
 
 Stage / 工件：当前有效 canonical 工件为 [Social 动态](/domains/social/community-content) 与 [Social 数据库](/domains/social/database)；[设计决策台账](/governance/design-register) D-135～D-138 已冻结 Post/Media 字段、跨域 UUID 规则以及“正文或图片至少一个”等 application-level invariant。
 
-Gate / 完成证据：仓库当前没有独立 `SOCIAL_DESIGN_GATE` 文件，因此不虚构 Gate。Design 完成依据为 canonical 文档 `status: frozen` 与 D-135～D-138 `frozen`；`database/v2/migrations/0700_social.sql` 实际创建 `social_posts` 与 `social_post_media`，并没有 `social_reports`；`database/v2/migrations/1100_trust.sql` 实际创建 `trust.reports`，与唯一 canonical report fact 一致。
+Gate / 完成证据：仓库当前没有独立 `SOCIAL_DESIGN_GATE` 文件，因此不虚构 Gate。Design 完成依据为 canonical 文档 `status: frozen` 与 D-135～D-138 `frozen`；`database/migrations/0700_social.sql` 实际创建 `social_posts` 与 `social_post_media`，并没有 `social_reports`；`database/migrations/1100_trust.sql` 实际创建 `trust.reports`，与唯一 canonical report fact 一致。
 
 下一步：正式 Social Backend Stage 启动后，基于冻结 contract 实现发布 / 删除 API、事务级 Service invariant、Asset logical UUID 接入与真实测试，再以 Backend Gate 判定实现状态。
 

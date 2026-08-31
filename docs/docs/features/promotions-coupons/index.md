@@ -28,7 +28,6 @@ admin_pages: []
 
 - [Commerce canonical](../../domains/commerce/index.md)：V1 范围明确延后 `Promotion / Coupon`，且当前不建表。
 - `FEATURE_PAGE_INDEX.json`：记录 canonical title、`portfolio_status: deferred` 与当前六 Lane 状态。
-- [Domain Lifecycle Matrix](../../development/DOMAIN_LIFECYCLE_MATRIX.md)：作为派生视图展示当前 Feature 与 Lane 状态，不作为新增设计事实来源。
 
 ## 设计
 

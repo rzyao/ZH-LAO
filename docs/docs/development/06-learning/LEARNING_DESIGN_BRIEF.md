@@ -8,7 +8,7 @@ implementation_started: false
 last_updated: 2026-08-31
 ---
 
-# ZH-LAO V2 — Learning Domain Design Brief
+# ZH-LAO  — Learning Domain Design Brief
 
 > 本文件是 **Learning Domain 产品方案 / 契约设计会话入口**。
 >
@@ -69,7 +69,7 @@ Admin Foundation current status
 Learning 权威至少读取：
 
 ```text
-database/v2/migrations/0500_learning.sql
+database/migrations/0500_learning.sql
 docs/docs/domains/learning/index.md
 docs/docs/domains/learning/database.md
 docs/docs/domains/learning/model.md
@@ -122,7 +122,7 @@ Learning Implementation = BLOCKED_BY_CONTENT_GATE
 Learning database authority：
 
 ```text
-database/v2/migrations/0500_learning.sql
+database/migrations/0500_learning.sql
 ```
 
 当前 canonical docs 定义 **10 张 frozen Learning 用户事实表**：

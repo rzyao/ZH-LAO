@@ -47,7 +47,7 @@ Gate / 完成证据：冻结设计要求 `last_read_seq` 通过 `GREATEST(old, n
 
 范围：实现 read cursor 更新用例/API、单调更新与边界校验、列表未读聚合，以及发送成功/清历史时对 read cursor 的原子协同；如产品需要展示对方已读位置，也应从对方 Member cursor 派生而不是创建 receipt 行。
 
-执行阶段与产物：尚未进入 Chat Backend Feature 实现 Stage。数据库前置工件 `database/v2/migrations/0800_chat.sql` 已包含 `chat_conversation_member.last_read_seq`、`last_read_at`，且没有 message receipt 表；但 `main` 未发现对应 F13 read-state Backend Stage/Report 或应用/API 实现。
+执行阶段与产物：尚未进入 Chat Backend Feature 实现 Stage。数据库前置工件 `database/migrations/0800_chat.sql` 已包含 `chat_conversation_member.last_read_seq`、`last_read_at`，且没有 message receipt 表；但 `main` 未发现对应 F13 read-state Backend Stage/Report 或应用/API 实现。
 
 Gate / 证据：数据库字段与冻结 ADR 只能证明模型已落地，不能证明已读/未读业务已实现；没有可运行接口、Service/Repository 测试或 Backend PASS，因此保持 `todo`。
 

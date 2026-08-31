@@ -51,7 +51,7 @@ Gate / Evidence：仓库没有独立 `COMMERCE_DESIGN_GATE` 文件；上述 froz
 
 范围：实现 GiftSend application service、Gift/Wallet/GiftSend/Ledger repositories、事务与并发控制、幂等 / 错误语义及必要 Outbox；禁止由 Chat、Social、Rewards 或管理员直接改 Wallet。
 
-Stage / 工件 / Gate：`database/v2/migrations/0900_commerce.sql` 已有 `commerce_gifts`、`commerce_wallets`、`commerce_wallet_ledger`、`commerce_gift_sends` 等物理表，但 [开发进度](/development/DEVELOPMENT_PROGRESS) 的 Commerce 仍为 `NOT_STARTED`，`apps/backend/src/modules/` 没有 Commerce module，也没有 GiftSend Backend Stage / Report / Gate。数据库基线不能替代应用实现证据。
+Stage / 工件 / Gate：`database/migrations/0900_commerce.sql` 已有 `commerce_gifts`、`commerce_wallets`、`commerce_wallet_ledger`、`commerce_gift_sends` 等物理表，但 [开发进度](/development/DEVELOPMENT_PROGRESS) 的 Commerce 仍为 `NOT_STARTED`，`apps/backend/src/modules/` 没有 Commerce module，也没有 GiftSend Backend Stage / Report / Gate。数据库基线不能替代应用实现证据。
 
 下一步：进入 Commerce Backend 后实现原子送礼事务与并发 / 重放测试，形成真实 Backend Gate。
 

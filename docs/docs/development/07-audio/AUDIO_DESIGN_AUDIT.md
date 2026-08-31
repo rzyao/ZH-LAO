@@ -12,7 +12,7 @@ trusted_brief_commit: f98127c421067875f5ae2a0cf4f56703240a17d1
 invalidated_contaminated_commit: ab1d4ebe75e79283fc6fab7ca033ee87a9787843
 ---
 
-# ZH-LAO V2 — Audio Design Recovery / Independent Audit
+# ZH-LAO  — Audio Design Recovery / Independent Audit
 
 ## 1. Recovery Verdict
 
@@ -32,7 +32,7 @@ Recovery started from current `main` and was rebased during audit when main adva
 HEAD = cc6b3d79f5224ef0ee4e2e3435a542ffae5edf6e
 branch = main
 CI workflow = .github/workflows/foundation.yml
-Audio migration = database/v2/migrations/0600_audio.sql
+Audio migration = database/migrations/0600_audio.sql
 Audio migration blob = d1227e28db6a82e1584bd882cba695f8b321bf21
 ```
 
@@ -116,7 +116,7 @@ Previous severity: HIGH.
 
 Grounding:
 
-The current trusted Brief itself names the current repository paths, including `database/v2/migrations/0600_audio.sql`, `docs/docs/development/...`, `apps/backend/src/modules/audio/public/` and the existing Admin/worker foundations. The stale path strings used by the contaminated finding are not requirements of the trusted Brief.
+The current trusted Brief itself names the current repository paths, including `database/migrations/0600_audio.sql`, `docs/docs/development/...`, `apps/backend/src/modules/audio/public/` and the existing Admin/worker foundations. The stale path strings used by the contaminated finding are not requirements of the trusted Brief.
 
 Decision:
 

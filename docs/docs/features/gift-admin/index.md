@@ -40,7 +40,7 @@ Stage / 工件 / Gate：[礼物 canonical](/domains/commerce/gifting) 与 [Comme
 
 范围：实现 Gift 定义的运营查询和受控 mutation service / repository，包括唯一 code、正数 `coin_cost`、状态、排序与 Asset logical reference 校验；任何管理操作不得改写历史 GiftSend Snapshot。
 
-Stage / 工件 / Gate：`database/v2/migrations/0900_commerce.sql` 已有 `commerce_gifts` 及其约束，但当前 `apps/backend/src/modules/` 没有 Commerce module、Gift management service/API 或 Backend Gate。[开发进度](/development/DEVELOPMENT_PROGRESS) 仍记录 Commerce `NOT_STARTED`。
+Stage / 工件 / Gate：`database/migrations/0900_commerce.sql` 已有 `commerce_gifts` 及其约束，但当前 `apps/backend/src/modules/` 没有 Commerce module、Gift management service/API 或 Backend Gate。[开发进度](/development/DEVELOPMENT_PROGRESS) 仍记录 Commerce `NOT_STARTED`。
 
 下一步：在 Commerce Implementation Stage 中实现 Gift management API 与测试，并形成真实 Backend Gate。
 

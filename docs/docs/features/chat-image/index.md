@@ -35,7 +35,7 @@ Portfolio Status：`active`。
 
 范围：定义 IMAGE 消息主体、图片资产引用、多图顺序、发送前资产准备边界，以及消息创建与远程上传之间的事务边界。权威事实来自 [消息模型](/domains/chat/message)、[应用服务与领域事件](/domains/chat/application-and-events) 与 [Chat 数据库总览](/domains/chat/database)。
 
-Stage / 工件：`chat_message_image(message_id, asset_id, position)` 与 `sendImageMessage(asset_ids[])` 的核心语义已经进入 canonical；`database/v2/migrations/0800_chat.sql` 已物理创建该 subtype 表，`expected-schema.json` 也将其列入 Chat 预期 Schema。
+Stage / 工件：`chat_message_image(message_id, asset_id, position)` 与 `sendImageMessage(asset_ids[])` 的核心语义已经进入 canonical；`database/migrations/0800_chat.sql` 已物理创建该 subtype 表，`expected-schema.json` 也将其列入 Chat 预期 Schema。
 
 已完成内容：已固定图片先经 Media / Asset 上传并达到可用状态，再调用 Chat 发送；Chat 数据库事务只负责验证可用资产引用、创建 message、插入 N 条 subtype 行并更新会话水位。远程对象存储操作不得放入 Chat 数据库事务；任何一张 subtype 写入失败都应使整条 IMAGE message 回滚。
 

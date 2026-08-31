@@ -1,4 +1,4 @@
-// Generated from database/v2/migrations by scripts/generate-migration-manifest.mjs.
+// Generated from database/migrations by scripts/generate-migration-manifest.mjs.
 // Do not edit manually. Frozen migration files remain the sole schema authority.
 export const requiredMigrations = [
   { filename: '0000_infrastructure.sql', sha256: '5d918e0280348c62b2f9ca1a8a7d57cf15a779f2da40c2f2cb0493ce70099e5a' },
@@ -19,4 +19,5 @@ export const requiredMigrations = [
   { filename: '1230_system_outbox.sql', sha256: 'e110b36048b6f842833601c86a4ab825ba8a044d0b708b7a3527b9391743cd29' },
   { filename: '1240_content_revision.sql', sha256: '89fca2f3e362f8e254167dae4a55edd27d5f320942b63a65c70fbd8f63569cb2' },
   { filename: '1250_platform_override_indexes.sql', sha256: '3cab64c353926d8b5c9ae890d15e04789dcd1739a927812be876488792dc836f' },
+  { filename: '1260_admin_credentials.sql', sha256: 'a61edef0fc199688303852f7c73725e11b05b82ab3371d780fd5f33d9fbac96f' },
 ] as const;

@@ -35,7 +35,7 @@ Portfolio Status：`active`。
 
 范围：冻结单向 Follow 当前关系事实。`social_follows` 以 `(follower_profile_id, following_profile_id)` 表示一条当前关注边，禁止自关注；取消关注是 physical DELETE。首期没有关注请求、Like/Dislike/Favorite 平行关系图谱。互关产生 Match、取消任一方向 Follow 结束 active Match，属于 Social Domain Service 的关系不变量。
 
-Stage / 工件：canonical 已冻结：[Social 偏好、发现与关系](/domains/social/discovery-and-relationships)；物理契约见 `database/v2/migrations/0700_social.sql`。
+Stage / 工件：canonical 已冻结：[Social 偏好、发现与关系](/domains/social/discovery-and-relationships)；物理契约见 `database/migrations/0700_social.sql`。
 
 Gate / Evidence：canonical frontmatter 为 `status: frozen`；Design Register 的 D-135～D-138 为 Social 全域审计最终冻结证据，其中 D-138 明确 Follow 单向及跨表 invariant 由 Social Application/Domain Service 事务保证。仓库未发现独立 `SOCIAL_DESIGN_GATE` 文件，本页不制造额外 Gate 结论。
 
@@ -47,7 +47,7 @@ Next Action：Backend 按冻结关系语义实现 Follow/Unfollow repository、D
 
 范围：实现关注/取消关注写路径、按关注方向读取关系、必要的事务并发约束，以及与 Match / Block 的 Social 域内联动；不得把 Trust enforcement 当作 Follow 写路径的一部分。
 
-Stage / 工件：数据库前置工件已落地：`database/v2/migrations/0700_social.sql` 已包含 `social.social_follows`、pair 主键、自关注 CHECK 与反向读取索引。当前 `backend/src/modules/` 仅存在 Identity、Operations、Platform 等模块，尚无 Social module / repository / service / HTTP routes / Social tests。
+Stage / 工件：数据库前置工件已落地：`database/migrations/0700_social.sql` 已包含 `social.social_follows`、pair 主键、自关注 CHECK 与反向读取索引。当前 `backend/src/modules/` 仅存在 Identity、Operations、Platform 等模块，尚无 Social module / repository / service / HTTP routes / Social tests。
 
 Gate / Evidence：具备 frozen design + DB schema 前置证据，但仓库尚无 Social Backend Implementation Report 或 Backend Gate，也没有可证明 Follow API/Service 已实现的代码与测试，因此状态仅为 `ready`，不是 `active/done`。
 

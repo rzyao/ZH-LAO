@@ -92,7 +92,7 @@ All responses use strict Zod schemas and Foundation error envelopes. Zero intern
 - **Unit Tests**: 17 test files, 47 tests passing, including opaque Runtime Config public-handle compile-time coverage.
 - **Integration Tests**: 17 test files, 101 tests passing on real PostgreSQL, including explicit advisory-lock wait observation and App Version invariant concurrency coverage.
 - **Backend CI**: `verify`, `build`, `test:integration` all PASS on the final Platform code fix commit.
-- **Database Baseline Validation**: `database/v2 test` and `database/v2 validate` PASS; 18 migrations remain the frozen baseline with no Platform schema expansion.
+- **Database Baseline Validation**: `database test` and `database validate` PASS; 18 migrations remain the frozen baseline with no Platform schema expansion.
 
 ### 5.2 Findings
 - **BLOCKER**: 0

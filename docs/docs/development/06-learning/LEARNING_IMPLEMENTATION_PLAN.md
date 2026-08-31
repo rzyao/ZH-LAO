@@ -8,7 +8,7 @@ implementation_started: false
 last_updated: 2026-08-31
 ---
 
-# ZH-LAO V2 — Learning Implementation Plan
+# ZH-LAO  — Learning Implementation Plan
 
 > 本计划只冻结未来 Learning Implementation 的执行顺序、依赖、文件边界与 Gate。**本设计任务不得执行以下 implementation tasks。**
 
@@ -422,8 +422,8 @@ docs/docs/development/06-learning/LEARNING_IMPLEMENTATION_REPORT.md
 pnpm --dir apps/backend verify
 pnpm --dir apps/backend build
 pnpm --dir apps/backend test:integration
-pnpm --dir database/v2 test
-pnpm --dir database/v2 validate
+pnpm --dir database test
+pnpm --dir database validate
 pnpm --dir docs docs:build
 ```
 

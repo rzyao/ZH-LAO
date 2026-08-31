@@ -3,10 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "docs:dev": "vitepress dev docs",
+    "docs:dev": "vitepress dev docs --host 127.0.0.1 --port 15172",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs",
-    "docs:matrix-check": "python ../scripts/check_feature_navigation.py",
     "docs:lifecycle-audit": "python ../scripts/audit_feature_lifecycle.py",
     "spec:check": "python ../scripts/check_executable_specs.py"
   },

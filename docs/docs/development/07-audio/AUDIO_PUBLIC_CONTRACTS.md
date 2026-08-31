@@ -8,7 +8,7 @@ implementation_started: false
 last_updated: 2026-08-31
 ---
 
-# ZH-LAO V2 — Audio Public / Cross-Domain Contracts
+# ZH-LAO  — Audio Public / Cross-Domain Contracts
 
 > Target boundary: `apps/backend/src/modules/audio/public/`. It exposes stable business capability, never repositories/SQL/DB rows.
 

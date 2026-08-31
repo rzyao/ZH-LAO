@@ -48,7 +48,7 @@ Portfolio Status：`active`。
 - [Social 资料与展示内容](/domains/social/profile)：冻结 `social_profiles` 字段、生命周期、公开资格与跨域 UUID 规则。
 - [ADR-010](/adr/ADR-010-social-profile-discovery-and-relationships)：冻结一人一份 Social Profile、资料正规化与实时 Discovery 原则。
 - [Social 数据库](/domains/social/database)：冻结 Social V1 19 表及 Trust / Media / Identity 跨域边界。
-- Repository artifact：`database/v2/migrations/0700_social.sql` 已创建 `social.social_profiles` 及约束。
+- Repository artifact：`database/migrations/0700_social.sql` 已创建 `social.social_profiles` 及约束。
 
 当前 Gate 事实：`docs/docs/development/workflow/AI_STAGE_REGISTRY.json` 仍把正式 `SOCIAL-DESIGN` 登记为 `todo`；当前 `main` 未发现可证明 `SOCIAL_DESIGN_GATE = PASS` 的 Feature / Domain Gate 产物。因此本 Lane 只记为 `active`，不冒充 `done`。
 

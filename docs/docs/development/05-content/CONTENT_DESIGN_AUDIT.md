@@ -9,7 +9,7 @@ last_updated: 2026-08-31
 repository_commit_audited: 007d6ad705a9afcc4fefb03442e371b4dec07fad
 ---
 
-# ZH-LAO V2 — Content Independent Design Audit
+# ZH-LAO  — Content Independent Design Audit
 
 > 本审计独立检查 `0400_content.sql <-> docs <-> Product Semantics <-> Use Cases <-> API/Public IDs <-> Learning/Audio/Asset/Operations`。不以“为了 PASS”补不存在的 schema 或实现。
 

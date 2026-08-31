@@ -8,7 +8,7 @@ implementation_started: false
 last_updated: 2026-08-31
 ---
 
-# ZH-LAO V2 — Audio Production Use Cases
+# ZH-LAO  — Audio Production Use Cases
 
 ## 1. Classification
 

@@ -9,12 +9,12 @@ depends_on:
   - IDENTITY_IMPLEMENTATION_PLAN.md
   - IDENTITY_USE_CASES.md
 database_authority:
-  - database/v2/migrations/0100_identity.sql
-  - database/v2/migrations/1220_identity_auth_runtime.sql
+  - database/migrations/0100_identity.sql
+  - database/migrations/1220_identity_auth_runtime.sql
 next_step: Identity Design Audit
 ---
 
-# ZH-LAO V2 — IDENTITY API
+# ZH-LAO  — IDENTITY API
 
 > 目标路径：`docs/docs/development/02-identity/IDENTITY_API.md`
 >
@@ -2382,7 +2382,7 @@ IDENTITY_DESIGN_GATE = PASS
 # 76. 当前最终状态
 
 ```text
-PostgreSQL V2 Baseline = COMPLETE / PASS
+PostgreSQL  Baseline = COMPLETE / PASS
 Application Foundation = COMPLETE / PASS
 
 IDENTITY_IMPLEMENTATION_PLAN = COMPLETE

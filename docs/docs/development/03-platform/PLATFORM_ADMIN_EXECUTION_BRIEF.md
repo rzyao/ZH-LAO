@@ -7,7 +7,7 @@ entry_gate: PLATFORM_GATE = PASS
 last_updated: 2026-08-31
 ---
 
-# ZH-LAO V2 — Platform Admin Execution Brief
+# ZH-LAO  — Platform Admin Execution Brief
 
 > 本文件是 Platform Admin 集成执行会话的入口文档。执行 AI 必须先使用 GitHub 连接器读取远程 `main` 的真实代码、API 和 Gate 状态，再开始工作。
 >

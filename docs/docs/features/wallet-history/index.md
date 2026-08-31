@@ -39,7 +39,7 @@ Portfolio Status：`active`。
 
 **Stage / Artifact**
 
-当前有效设计工件为 [Commerce](/domains/commerce/)、[钱包与账本](/domains/commerce/wallet) 与 [数据设计](/domains/commerce/database)。16-table canonical 已冻结，`commerce_wallet_ledger` 的余额连续性、业务唯一性与幂等约束已定义；`database/v2/migrations/0900_commerce.sql` 已包含对应物理迁移。
+当前有效设计工件为 [Commerce](/domains/commerce/)、[钱包与账本](/domains/commerce/wallet) 与 [数据设计](/domains/commerce/database)。16-table canonical 已冻结，`commerce_wallet_ledger` 的余额连续性、业务唯一性与幂等约束已定义；`database/migrations/0900_commerce.sql` 已包含对应物理迁移。
 
 **Gate / Evidence**
 

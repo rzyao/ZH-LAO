@@ -99,8 +99,6 @@ const developmentSidebar = [
     items: [
       { text: '开发入口', link: '/development/' },
       { text: '开发流程控制中心', link: '/development/DEVELOPMENT_CONTROL_CENTER' },
-      { text: 'AI 开发阶段矩阵', link: '/development/DOMAIN_LIFECYCLE_MATRIX' },
-      { text: '当前下一动作', link: '/development/workflow/NEXT_ACTIONS' },
       { text: '开发进度', link: '/development/DEVELOPMENT_PROGRESS' }
     ]
   },
@@ -108,7 +106,6 @@ const developmentSidebar = [
     text: '开发规范',
     collapsed: true,
     items: [
-      { text: 'AI 阶段模型', link: '/development/workflow/AI_STAGE_MODEL' },
       { text: '可执行规格系统', link: '/development/SPEC_SYSTEM' },
       { text: '实现蓝图模板', link: '/development/IMPLEMENTATION_BLUEPRINT_TEMPLATE' },
       { text: 'AI 多会话工作流', link: '/development/workflow/' },
@@ -383,7 +380,6 @@ export default defineConfig({
       { text: '领域', link: '/domains/' },
       { text: '架构', link: '/architecture/' },
       { text: '开发', link: '/development/' },
-      { text: '进度', link: '/development/DOMAIN_LIFECYCLE_MATRIX' },
       { text: '治理', link: '/governance/design-register' },
       { text: 'ADR', link: '/adr/' }
     ],

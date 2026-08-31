@@ -40,7 +40,7 @@ Stage / 工件 / Gate：[钱包与账本](/domains/commerce/wallet) 与 [Commerc
 
 范围：实现受控 Adjustment / Reversal application service、Wallet row lock、Ledger append、余额不变量、原 Ledger 校验、幂等与并发保护；管理员没有任何直接 `UPDATE commerce_wallets.balance` 的接口。
 
-Stage / 工件 / Gate：`database/v2/migrations/0900_commerce.sql` 已有 Wallet、Ledger、Adjustment、Reversal 物理表与约束，但当前 Backend 没有 Commerce module、Wallet Service 实现或管理 API；[开发进度](/development/DEVELOPMENT_PROGRESS) 没有 Commerce Implementation Report / Gate。
+Stage / 工件 / Gate：`database/migrations/0900_commerce.sql` 已有 Wallet、Ledger、Adjustment、Reversal 物理表与约束，但当前 Backend 没有 Commerce module、Wallet Service 实现或管理 API；[开发进度](/development/DEVELOPMENT_PROGRESS) 没有 Commerce Implementation Report / Gate。
 
 下一步：在 Commerce Backend Stage 中实现统一 Wallet mutation service 与 Adjustment/Reversal 用例，并用 PostgreSQL integration / race tests 证明一次冲正、余额锁定与 append-only 规则。
 

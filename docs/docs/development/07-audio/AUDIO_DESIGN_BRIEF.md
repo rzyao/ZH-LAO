@@ -8,7 +8,7 @@ implementation_started: false
 last_updated: 2026-08-31
 ---
 
-# ZH-LAO V2 — Audio Production Domain Design Brief
+# ZH-LAO  — Audio Production Domain Design Brief
 
 > 本文件是 Audio Production Domain 产品方案 / 契约设计会话入口。
 >
@@ -67,7 +67,7 @@ Admin Foundation current status
 Audio 权威至少读取：
 
 ```text
-database/v2/migrations/0600_audio.sql
+database/migrations/0600_audio.sql
 docs/docs/domains/audio/index.md
 docs/docs/domains/audio/database.md
 ADR-020 audio production domain
@@ -96,7 +96,7 @@ Audio Implementation = must obey actual upstream gates
 数据库 authority：
 
 ```text
-database/v2/migrations/0600_audio.sql
+database/migrations/0600_audio.sql
 ```
 
 当前 frozen Audio business tables = 9：

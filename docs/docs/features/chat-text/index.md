@@ -35,7 +35,7 @@ Portfolio Status：`active`。
 
 范围：定义文字与 Emoji 消息的消息身份、TEXT subtype、会话内严格顺序、客户端幂等、发送事务与跨域聊天资格边界。权威事实来自 [消息模型](/domains/chat/message) 与 [应用服务与领域事件](/domains/chat/application-and-events)。
 
-Stage / 工件：`chat_message.type = 'text'` 与 `chat_message_text(message_id, text)` 已在 [消息模型](/domains/chat/message) 冻结；`sendTextMessage` 的事务行为、`canChat()` 边界和 `MessageCreated` 事件在 [应用服务与领域事件](/domains/chat/application-and-events) 中维护；物理数据库基线已存在 `database/v2/migrations/0800_chat.sql`，且 `expected-schema.json` 将 `chat_message` / `chat_message_text` 列入 Chat 预期 Schema。
+Stage / 工件：`chat_message.type = 'text'` 与 `chat_message_text(message_id, text)` 已在 [消息模型](/domains/chat/message) 冻结；`sendTextMessage` 的事务行为、`canChat()` 边界和 `MessageCreated` 事件在 [应用服务与领域事件](/domains/chat/application-and-events) 中维护；物理数据库基线已存在 `database/migrations/0800_chat.sql`，且 `expected-schema.json` 将 `chat_message` / `chat_message_text` 列入 Chat 预期 Schema。
 
 已完成内容：已固定 `seq` 作为会话内严格顺序、`client_message_id` 作为发送幂等键；TEXT subtype 只保存非空原文；发送事务必须原子写入 message + text subtype + conversation 水位，并推进发送者已读游标。当前不建逐消息 receipt，也不把 `delivered/read` 写进 `chat_message.status`。
 
@@ -49,7 +49,7 @@ Gate / Evidence：消息与数据库核心语义已有 frozen canonical evidence
 
 状态：todo
 
-当前 `apps/backend/src/modules/` 只有 Identity、Operations、Platform 模块，没有 Chat Backend 模块。`database/v2/migrations/0800_chat.sql` 证明 Chat 物理表基线已存在，但它不等于 `sendTextMessage` API、Service、Repository 与事务实现已经交付，因此 Backend Lane 不提前提升状态。
+当前 `apps/backend/src/modules/` 只有 Identity、Operations、Platform 模块，没有 Chat Backend 模块。`database/migrations/0800_chat.sql` 证明 Chat 物理表基线已存在，但它不等于 `sendTextMessage` API、Service、Repository 与事务实现已经交付，因此 Backend Lane 不提前提升状态。
 
 ## Admin
 

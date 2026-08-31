@@ -8,7 +8,7 @@ implementation_started: false
 last_updated: 2026-08-31
 ---
 
-# ZH-LAO V2 — Learning Use Cases
+# ZH-LAO  — Learning Use Cases
 
 > Use Cases 从 learner journey 与用户事实推导，不是一表一 CRUD。Runtime全部 authenticated + user-owned；客户端不提交 `userId`。
 

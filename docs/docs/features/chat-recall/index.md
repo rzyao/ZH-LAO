@@ -35,7 +35,7 @@ Portfolio Status：`active`。
 
 范围：定义消息撤回权限、生命周期变化、原始内容保留、会话水位行为与 `MessageRecalled` 事件边界。权威事实来自 [消息模型](/domains/chat/message) 与 [应用服务与领域事件](/domains/chat/application-and-events)。
 
-Stage / 工件：`chat_message.status IN ('normal','recalled')`、`recalled_at` 一致性约束、仅发送者可撤回及原 subtype 保留已经进入 frozen canonical；`database/v2/migrations/0800_chat.sql` 已实际落地相同状态与 CHECK 约束。
+Stage / 工件：`chat_message.status IN ('normal','recalled')`、`recalled_at` 一致性约束、仅发送者可撤回及原 subtype 保留已经进入 frozen canonical；`database/migrations/0800_chat.sql` 已实际落地相同状态与 CHECK 约束。
 
 已完成内容：已明确撤回不是独立实体、不建 recall table、不物理删除、不覆盖原始内容；`recallMessage` 只允许操作本人消息，撤回后保留原 seq 和 conversation last-message 指针，并以 `MessageRecalled` 表达事务提交后的聊天事实。
 

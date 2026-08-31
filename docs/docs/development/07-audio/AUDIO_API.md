@@ -8,7 +8,7 @@ implementation_started: false
 last_updated: 2026-08-31
 ---
 
-# ZH-LAO V2 — Audio HTTP / Admin API Contract
+# ZH-LAO  — Audio HTTP / Admin API Contract
 
 > Paths are design contracts only. No route/backend/Admin implementation is created by this recovery task.
 

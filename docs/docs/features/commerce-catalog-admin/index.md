@@ -40,7 +40,7 @@ Stage / 工件 / Gate：[购买、支付与退款](/domains/commerce/purchase-an
 
 范围：实现 Product / ProductPrice / CoinPack 的管理查询与 mutation service、Repository、校验、审计所需 target/result context，并确保价格变更只影响未来交易。
 
-Stage / 工件 / Gate：`database/v2/migrations/0900_commerce.sql` 已包含 `commerce_products`、`commerce_product_prices`、`commerce_coin_packs`，但 `apps/backend/src/modules/` 当前没有 Commerce module；[开发进度](/development/DEVELOPMENT_PROGRESS) 没有 Commerce Implementation Stage / Report / Gate。物理表存在只是数据库基线，不是 Backend 管理 API 证据。
+Stage / 工件 / Gate：`database/migrations/0900_commerce.sql` 已包含 `commerce_products`、`commerce_product_prices`、`commerce_coin_packs`，但 `apps/backend/src/modules/` 当前没有 Commerce module；[开发进度](/development/DEVELOPMENT_PROGRESS) 没有 Commerce Implementation Stage / Report / Gate。物理表存在只是数据库基线，不是 Backend 管理 API 证据。
 
 下一步：在 Commerce Design/Implementation 授权后实现 owner-domain management API 与测试，并产生真实 Backend Gate。
 

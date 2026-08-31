@@ -5,7 +5,7 @@ const valid = { DATABASE_URL: 'postgresql://user:secret@localhost:5432/test' };
 describe('configuration', () => {
   it('loads immutable typed defaults without exposing credentials', () => {
     const config = loadConfig(valid);
-    expect(config.port).toBe(3000);
+    expect(config.port).toBe(18080);
     expect(Object.isFrozen(config)).toBe(true);
     expect(JSON.stringify(configSummary(config))).not.toContain('secret');
   });

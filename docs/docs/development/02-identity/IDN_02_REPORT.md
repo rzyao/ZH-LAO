@@ -6,7 +6,7 @@ task_name: Core Types
 completed_at: 2026-08-30
 ---
 
-# ZH-LAO V2 — IDN-02 Core Types Report
+# ZH-LAO  — IDN-02 Core Types Report
 
 ## 结果
 

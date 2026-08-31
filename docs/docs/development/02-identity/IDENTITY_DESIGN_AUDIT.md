@@ -8,7 +8,7 @@ design_gate: PASS
 implementation_started: false
 ---
 
-# ZH-LAO V2 — Identity Design Audit
+# ZH-LAO  — Identity Design Audit
 
 ## 1. Audit scope
 

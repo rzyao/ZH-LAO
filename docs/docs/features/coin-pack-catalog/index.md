@@ -39,7 +39,7 @@ Portfolio Status：`active`。
 
 **Stage / Artifact**
 
-当前有效设计工件为 [Commerce](/domains/commerce/)、[购买、支付与退款](/domains/commerce/purchase-and-payment) 与 [数据设计](/domains/commerce/database)。Commerce canonical 已标记 `frozen`，16-table 模型中目录事实由 `commerce_products`、`commerce_product_prices`、`commerce_coin_packs` 承载；仓库同时已有物理迁移工件 `database/v2/migrations/0900_commerce.sql`。
+当前有效设计工件为 [Commerce](/domains/commerce/)、[购买、支付与退款](/domains/commerce/purchase-and-payment) 与 [数据设计](/domains/commerce/database)。Commerce canonical 已标记 `frozen`，16-table 模型中目录事实由 `commerce_products`、`commerce_product_prices`、`commerce_coin_packs` 承载；仓库同时已有物理迁移工件 `database/migrations/0900_commerce.sql`。
 
 **Gate / Evidence**
 

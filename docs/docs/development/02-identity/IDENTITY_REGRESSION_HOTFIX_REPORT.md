@@ -56,7 +56,7 @@ SELECT ... FROM identity.users WHERE public_id = $1 FOR UPDATE
 **根因**：[foundation.yml](https://github.com/rzyao/ZH-LAO/blob/main/.github/workflows/foundation.yml) 仅覆盖 Backend + PostgreSQL，未覆盖 Admin / Docs / Mobile。
 
 **修复**：CI 重构为 4 个 job：
-- `backend`（mandatory）：install → `verify`（typecheck/lint/architecture/unit）→ `build` → `test:integration`（真实 PostgreSQL）→ `database/v2 test`（validation lifecycle）→ `database/v2 validate`（fresh migration / second no-op / audit / smoke）。
+- `backend`（mandatory）：install → `verify`（typecheck/lint/architecture/unit）→ `build` → `test:integration`（真实 PostgreSQL）→ `database test`（validation lifecycle）→ `database validate`（fresh migration / second no-op / audit / smoke）。
 - `admin`（mandatory）：install → `verify`（typecheck/lint/unit+build）→ `playwright install` → `e2e`（Playwright smoke）。
 - `docs`（mandatory）：install → `docs:build`（VitePress `ignoreDeadLinks: false`，broken internal link 会阻断 CI）。
 - `mobile`（**非 mandatory，`continue-on-error`**）：install → `verify`。原因：Mobile Foundation 当前 `IN_PROGRESS`，`MOBILE_FOUNDATION_GATE` 未声明 `PASS`，故作为独立验证、明确不阻塞，且**不**代表 `MOBILE_FOUNDATION_GATE = PASS`（YAML 内注释说明）。
@@ -166,9 +166,9 @@ Logical UUID violations  = 0
 timestamp without timezone violations = 0
 ```
 
-`V2_DATABASE_BASELINE_REPORT.md` 由 validate 重新生成：仅 generated-at 时间与 validation database 名变化；migration SHA-256 与 schema semantics 不变。
+`_DATABASE_BASELINE_REPORT.md` 由 validate 重新生成：仅 generated-at 时间与 validation database 名变化；migration SHA-256 与 schema semantics 不变。
 
-> 本地环境备注：本机 `zh_lao` dev 数据库装有 `postgis`（本地环境残留，非仓库内容），故本机直接 `pnpm --dir database/v2 validate`（命中 .env 的 DATABASE_URL）会命中 `forbidden extension: postgis`；以 fresh template0 validation database（清空 DATABASE_URL）验证为 PASS。CI 使用全新 postgres:18 容器，无 postgis，不受影响。
+> 本地环境备注：本机 `zh_lao` dev 数据库装有 `postgis`（本地环境残留，非仓库内容），故本机直接 `pnpm --dir database validate`（命中 .env 的 DATABASE_URL）会命中 `forbidden extension: postgis`；以 fresh template0 validation database（清空 DATABASE_URL）验证为 PASS。CI 使用全新 postgres:18 容器，无 postgis，不受影响。
 
 ## 9. Tests
 

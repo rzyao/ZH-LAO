@@ -6,14 +6,14 @@ document: OPERATIONS_RBAC_CONTRACTS
 last_updated: 2026-08-31
 repository_commit_audited: 000f4c4aafacf4938d74902eddc4d78323196a89
 database_authority:
-  - database/v2/migrations/0200_operations.sql
+  - database/migrations/0200_operations.sql
 depends_on:
   - ../02-identity/IDENTITY_IMPLEMENTATION_REPORT.md
   - ../03-platform/PLATFORM_IMPLEMENTATION_REPORT.md
 implementation_started: false
 ---
 
-# ZH-LAO V2 — Operations RBAC Contracts
+# ZH-LAO  — Operations RBAC Contracts
 
 > 本文冻结 Operations V1 的 Operator lifecycle、RBAC、Permission Catalog、Authorization、Audit 与 Bootstrap 契约。
 >
@@ -89,7 +89,7 @@ operations.role_permissions
 operations.operator_audit_logs
 ```
 
-`database/v2/migrations/0200_operations.sql` 不修改。
+`database/migrations/0200_operations.sql` 不修改。
 
 关键物理事实：
 

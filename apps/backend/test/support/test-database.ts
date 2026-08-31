@@ -28,7 +28,7 @@ export async function createEmptyTestDatabase(adminUrl: string, label = 'empty')
 
 export async function createTestDatabase(adminUrl: string): Promise<TestDatabase> {
   const database = await createEmptyTestDatabase(adminUrl, 'complete');
-  const migrationScript = path.resolve(import.meta.dirname, '../../../../database/v2/scripts/migrate.mjs');
+  const migrationScript = path.resolve(import.meta.dirname, '../../../../database/scripts/migrate.mjs');
   try {
     await execFileAsync(process.execPath, [migrationScript], { env: { ...process.env, DATABASE_URL: database.url } });
   } catch (error) {
@@ -47,7 +47,7 @@ export async function createPartialTestDatabase(adminUrl: string, migrationCount
       filename text PRIMARY KEY, sha256 char(64) NOT NULL, applied_at timestamptz NOT NULL DEFAULT now()
     )`);
     for (const migration of requiredMigrations.slice(0, migrationCount)) {
-      const sql = await readFile(path.resolve(import.meta.dirname, '../../../../database/v2/migrations', migration.filename), 'utf8');
+      const sql = await readFile(path.resolve(import.meta.dirname, '../../../../database/migrations', migration.filename), 'utf8');
       await client.query('BEGIN');
       try {
         await client.query(sql);

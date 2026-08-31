@@ -10,13 +10,13 @@ pnpm verify
 pnpm build
 ```
 
-Run integration tests against an administrator database URL. The test harness creates a unique database from `template0`, applies the frozen `database/v2` migrations, and drops the database afterward.
+Run integration tests against an administrator database URL. The test harness creates a unique database from `template0`, applies the frozen `database` migrations, and drops the database afterward.
 
 ```bash
 ADMIN_DATABASE_URL=postgresql://.../postgres pnpm test:integration
 ```
 
-Start the API or Worker only after applying the frozen migrations through `database/v2`:
+Start the API or Worker only after applying the frozen migrations through `database`:
 
 ```bash
 DATABASE_URL=postgresql://... pnpm dev

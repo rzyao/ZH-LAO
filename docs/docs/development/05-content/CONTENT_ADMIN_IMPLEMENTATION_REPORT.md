@@ -8,7 +8,7 @@ implementation: NOT_STARTED
 gate: FAIL
 ---
 
-# ZH-LAO V2 — Content Admin Implementation Report
+# ZH-LAO  — Content Admin Implementation Report
 
 ## 1. Executive Summary
 

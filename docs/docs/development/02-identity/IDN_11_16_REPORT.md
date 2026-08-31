@@ -1,4 +1,4 @@
-# ZH-LAO V2 — IDN-11 至 IDN-16 报告
+# ZH-LAO  — IDN-11 至 IDN-16 报告
 
 ```text
 IDN-11 = COMPLETE

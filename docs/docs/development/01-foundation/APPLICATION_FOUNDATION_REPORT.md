@@ -6,14 +6,14 @@ completed_at: 2026-08-30
 gate: PASS
 ---
 
-# ZH-LAO V2 — Application Foundation Implementation Report
+# ZH-LAO  — Application Foundation Implementation Report
 
 ## Result
 
 `APPLICATION_FOUNDATION = COMPLETE`  
 `FOUNDATION_GATE = PASS`
 
-Phase 1 established the application and Worker runtime without implementing any business Domain. The implementation uses the frozen PostgreSQL V2 baseline as its only physical schema authority and did not alter migrations `0000`–`1240`.
+Phase 1 established the application and Worker runtime without implementing any business Domain. The implementation uses the frozen PostgreSQL  baseline as its only physical schema authority and did not alter migrations `0000`–`1240`.
 
 ## Scope completed
 
@@ -43,14 +43,14 @@ Phase 1 established the application and Worker runtime without implementing any 
 - `apps/backend/src/events/`, `outbox/`, `jobs/`, `assets/` — event, Worker, Outbox, and Asset foundations.
 - `apps/backend/src/database/migration-compatibility.ts` and generated required-migration manifest — lightweight readiness compatibility.
 - `apps/backend/test/` — unit, architecture, and real PostgreSQL integration coverage.
-- `database/v2/scripts/migration-files.mjs`, `migrate.mjs`, and `validate.mjs` — shared migration hash loading and safe validation database cleanup.
-- `database/v2/test/validate.test.mjs` — real PostgreSQL validation lifecycle tests.
+- `database/scripts/migration-files.mjs`, `migrate.mjs`, and `validate.mjs` — shared migration hash loading and safe validation database cleanup.
+- `database/test/validate.test.mjs` — real PostgreSQL validation lifecycle tests.
 - `.github/workflows/foundation.yml` — Foundation CI gate.
 - `.gitignore` — environment and coverage exclusions.
 
 ## Technical decisions
 
-1. `database/v2` remains the only migration authority; the backend never auto-creates or migrates production schemas.
+1. `database` remains the only migration authority; the backend never auto-creates or migrates production schemas.
 2. Application services must pass an explicit transaction-scoped executor to repositories and the Outbox Writer.
 3. The frozen Outbox table has no claim column, so `available_at` is also the bounded lease deadline. Claims increment `attempt_count`; success writes `published_at`; failure writes `last_error` and a retry time.
 4. Unknown event types are retained and retried, never silently acknowledged.
@@ -106,10 +106,10 @@ The Backend performs no migration and the frozen migration files `0000`–`1240`
 - `pnpm --dir apps/backend test` → 14/14 PASS.
 - `pnpm --dir apps/backend test:integration` → 10/10 PASS on PostgreSQL 18.6.
 - Zero-test Vitest probe → exit code 1 as required.
-- `pnpm --dir database/v2 test` → 3/3 PASS on PostgreSQL 18.6.
+- `pnpm --dir database test` → 3/3 PASS on PostgreSQL 18.6.
 - Fresh validation with no explicit `DATABASE_URL` → 17 migrations applied; repeat → 0; database audit → PASS.
 - Temporary database cleanup query → no `zh_lao_fnd_*`, `zh_lao_v2_validation_*`, or `zh_lao_v2_explicit_*` databases remain.
-- CI workflow inspection → Backend verify/build/integration, database validation tests, and `database/v2 validate` remain mandatory; no zero-test bypass is configured.
+- CI workflow inspection → Backend verify/build/integration, database validation tests, and `database validate` remain mandatory; no zero-test bypass is configured.
 
 ## Architecture boundary evidence
 

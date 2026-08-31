@@ -15,12 +15,15 @@ export default defineConfig({
     },
   },
   server: {
-    // 5173 is occupied by the VitePress docs dev server in this repo.
-    port: 5174,
+    port: 15173,
     proxy: {
       // Admin -> V2 backend API. Backend base URL is still resolved from env at runtime.
       '/api': {
-        target: process.env.VITE_API_BASE_URL ?? 'http://localhost:8080',
+        target: process.env.VITE_API_BASE_URL ?? 'http://127.0.0.1:18080',
+        changeOrigin: true,
+      },
+      '/health': {
+        target: process.env.VITE_API_BASE_URL ?? 'http://127.0.0.1:18080',
         changeOrigin: true,
       },
     },

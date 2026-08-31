@@ -1,4 +1,4 @@
-你现在负责 ZH-LAO V2 的 **Platform Domain Implementation**。
+你现在负责 ZH-LAO  的 **Platform Domain Implementation**。
 
 这是一个纯执行开发会话。
 
@@ -64,7 +64,7 @@ PLATFORM_IMPLEMENTATION = BLOCKED
 必须保持：
 
 ```text
-PostgreSQL V2 Baseline = PASS
+PostgreSQL  Baseline = PASS
 Application Foundation = PASS
 Identity Domain = FROZEN
 ```
@@ -98,7 +98,7 @@ platform.regions
 读取：
 
 ```text
-database/v2/migrations/0300_platform.sql
+database/migrations/0300_platform.sql
 ```
 
 作为最高物理权威。

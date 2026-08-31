@@ -3,8 +3,7 @@
  *
  * Kept outside React so the API client singleton can read the current token
  * without depending on component context. The AuthProvider writes here when
- * auth state changes. Real Operator login/session lives in a later
- * Identity/Operations phase — this is the skeleton contract only.
+ * the server-backed Admin session changes.
  */
 
 let accessToken: string | null = null

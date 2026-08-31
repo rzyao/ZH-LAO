@@ -16,7 +16,7 @@ depends_on:
   - ../03-platform/PLATFORM_IMPLEMENTATION_REPORT.md
 ---
 
-# ZH-LAO V2 — Operations Implementation Plan
+# ZH-LAO  — Operations Implementation Plan
 
 ## 0. Implementation Closure Status
 
@@ -82,7 +82,7 @@ Platform 已完成 PLT-01 corrective migration（`1250_platform_override_indexes
 整个未来执行阶段禁止：
 
 ```text
-edit database/v2/migrations/0200_operations.sql
+edit database/migrations/0200_operations.sql
 add a sixth Operations table
 add permission dictionary table
 query identity.* directly

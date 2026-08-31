@@ -2,6 +2,10 @@ import * as React from 'react'
 import type { CurrentOperator, AuthStatus } from '../types'
 import { can as canCheck } from '../permissions'
 import type { Permission } from '../permissions'
+import { setAccessToken } from '../token-store'
+import { setUnauthorizedHandler } from '@/api/client'
+import { getCurrentOperator, loginAdmin, logoutAdmin } from '../api'
+import { clearAdminSession, readAdminSession, writeAdminSession, type AdminSession } from '../session-store'
 
 export interface AuthContextValue {
   status: AuthStatus
@@ -9,7 +13,7 @@ export interface AuthContextValue {
   /** Granted permission keys; may include wildcard patterns. */
   permissions: readonly string[]
   can: (permission: Permission) => boolean
-  /** Skeleton seam — replaced by real Identity/Operations login later. */
+  login: (username: string, password: string) => Promise<void>
   setAuthenticated: (operator: CurrentOperator, permissions?: string[]) => void
   signOut: () => void
 }
@@ -29,12 +33,24 @@ export interface AuthProviderProps {
 }
 
 export function AuthProvider({ children, initialState }: AuthProviderProps) {
+  const persisted = React.useMemo(() => initialState ? null : readAdminSession(), [initialState])
   const [operator, setOperator] = React.useState<CurrentOperator | null>(
-    initialState?.operator ?? null,
+    initialState?.operator ?? persisted?.operator ?? null,
   )
   const [permissions, setPermissions] = React.useState<readonly string[]>(
-    initialState?.permissions ?? [],
+    initialState?.permissions ?? persisted?.permissions ?? [],
   )
+
+  React.useEffect(() => {
+    setAccessToken(persisted?.accessToken ?? null)
+    setUnauthorizedHandler(() => {
+      setAccessToken(null)
+      clearAdminSession()
+      setOperator(null)
+      setPermissions([])
+    })
+    return () => setUnauthorizedHandler(null)
+  }, [persisted])
 
   const status: AuthStatus = operator ? 'authenticated' : 'anonymous'
 
@@ -44,11 +60,36 @@ export function AuthProvider({ children, initialState }: AuthProviderProps) {
       operator,
       permissions,
       can: (permission) => canCheck(permissions, permission),
+      login: async (username, password) => {
+        try {
+          const credentials = await loginAdmin(username, password)
+          setAccessToken(credentials.access_token)
+          const current = await getCurrentOperator()
+          const session: AdminSession = {
+            accessToken: credentials.access_token,
+            refreshToken: credentials.refresh_token,
+            operator: current.operator,
+            permissions: current.permissions,
+          }
+          writeAdminSession(session)
+          setOperator(current.operator)
+          setPermissions(current.permissions)
+        } catch (error) {
+          setAccessToken(null)
+          throw error
+        }
+      },
       setAuthenticated: (nextOperator, nextPermissions = []) => {
+        setAccessToken(null)
+        clearAdminSession()
         setOperator(nextOperator)
         setPermissions(nextPermissions)
       },
       signOut: () => {
+        const refreshToken = readAdminSession()?.refreshToken
+        if (refreshToken) void logoutAdmin(refreshToken).catch(() => undefined)
+        setAccessToken(null)
+        clearAdminSession()
         setOperator(null)
         setPermissions([])
       },

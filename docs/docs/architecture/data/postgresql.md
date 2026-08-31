@@ -245,7 +245,7 @@ asset_id UUID
 ## Migration 权威
 
 ```text
-database/v2
+database
 ```
 
 是数据库 Migration 唯一物理权威。

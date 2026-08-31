@@ -9,9 +9,9 @@ last_updated: 2026-08-31
 recovery_baseline: cc6b3d79f5224ef0ee4e2e3435a542ffae5edf6e
 ---
 
-# ZH-LAO V2 — Audio Production Product Semantics
+# ZH-LAO  — Audio Production Product Semantics
 
-> 本文由 `AUDIO_DESIGN_RECOVERY_BRIEF.md` 恢复生成。数据库权威仍是 `database/v2/migrations/0600_audio.sql`；本文不修改 migration、不增加 Audio 表、不开始实现。
+> 本文由 `AUDIO_DESIGN_RECOVERY_BRIEF.md` 恢复生成。数据库权威仍是 `database/migrations/0600_audio.sql`；本文不修改 migration、不增加 Audio 表、不开始实现。
 
 ## 1. Domain Mission
 

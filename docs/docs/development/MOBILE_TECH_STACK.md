@@ -1,7 +1,7 @@
-# ZH-LAO V2 — Mobile Technology Stack
+# ZH-LAO  — Mobile Technology Stack
 
 **文件：`MOBILE_TECH_STACK.md`**  
-**适用范围：ZH-LAO V2 Mobile Application**  
+**适用范围：ZH-LAO  Mobile Application**
 **状态：FROZEN**  
 **上级约束：`MASTER_DEVELOPMENT_PLAN.md`**
 
@@ -9,7 +9,7 @@
 
 # 1. 目的
 
-本文档冻结 ZH-LAO V2 Mobile 的基础技术选型与工程原则。
+本文档冻结 ZH-LAO  Mobile 的基础技术选型与工程原则。
 
 本文件只定义：
 
@@ -42,11 +42,11 @@
 
 # 2. 核心原则
 
-ZH-LAO V2 Mobile 不进行无意义的全量 UI 重写。
+ZH-LAO  Mobile 不进行无意义的全量 UI 重写。
 
 总体原则：
 
-> **保留成熟 UI/UX，升级技术基础，重建 V2 数据与业务接入层。**
+> **保留成熟 UI/UX，升级技术基础，重建  数据与业务接入层。**
 
 现有 Mobile 已经具备较成熟的：
 
@@ -63,7 +63,7 @@ ZH-LAO V2 Mobile 不进行无意义的全量 UI 重写。
 - Bottom Navigation；
 - 通用组件。
 
-因此 V2 Mobile 不采用：
+因此  Mobile 不采用：
 
 > 全部推倒重新设计。
 
@@ -80,7 +80,7 @@ Reuse UI / Theme / Assets
         ↓
 Refactor reusable Screens
         ↓
-Rebuild V2 Data Layer
+Rebuild  Data Layer
         ↓
 Connect Domain APIs incrementally
 ```
@@ -102,7 +102,7 @@ TypeScript
 
 继续使用 Expo / React Native。
 
-禁止因 V2 重构而切换：
+禁止因  重构而切换：
 
 ```text
 Flutter
@@ -118,7 +118,7 @@ Capacitor
 
 # 4. Expo 策略
 
-V2 Mobile 创建新的 Expo SDK 57 Application Foundation。
+ Mobile 创建新的 Expo SDK 57 Application Foundation。
 
 不从旧工程直接执行：
 
@@ -143,7 +143,7 @@ Navigation
 ↓
 Screens
 ↓
-V2 Data Integration
+ Data Integration
 ```
 
 ---
@@ -166,7 +166,7 @@ V2 Data Integration
 
 # 6. 不迁移 Expo Router
 
-V2 当前不采用 Expo Router。
+ 当前不采用 Expo Router。
 
 原因：
 
@@ -220,7 +220,7 @@ Admin 使用 Tailwind CSS v4 不代表 Mobile 必须同步。
 
 Mobile 与 Admin 是两个不同应用。
 
-V2 Mobile 当前：
+ Mobile 当前：
 
 ```text
 NativeWind 4
@@ -288,7 +288,7 @@ presets
 typography
 ```
 
-作为 V2 Theme Foundation 的主要复用来源。
+作为  Theme Foundation 的主要复用来源。
 
 Theme 应继续独立于 Domain Business Logic。
 
@@ -460,13 +460,13 @@ Axios
 
 但：
 
-> **现有 API Client 不作为 V2 Contract Authority。**
+> **现有 API Client 不作为  Contract Authority。**
 
-必须为 V2 重建统一 API Client。
+必须为  重建统一 API Client。
 
 ---
 
-# 19. V2 API Client
+# 19.  API Client
 
 必须统一处理：
 
@@ -499,7 +499,7 @@ TanStack Query
 ↓
 Domain API Adapter
 ↓
-V2 HTTP Client
+ HTTP Client
 ↓
 ZH-LAO Backend
 ```
@@ -524,13 +524,13 @@ Screen
 axios.get()
 ```
 
-所有请求必须经过统一 V2 Client / Domain API Layer。
+所有请求必须经过统一  Client / Domain API Layer。
 
 ---
 
 # 22. API Error Contract
 
-Mobile 应与 V2 Backend Contract 对齐。
+Mobile 应与  Backend Contract 对齐。
 
 客户端统一转换为标准 Error Model。
 
@@ -555,7 +555,7 @@ Unknown Error
 
 # 23. Auth Storage
 
-V2 必须修改现有 Token Storage 策略。
+ 必须修改现有 Token Storage 策略。
 
 正式规则：
 
@@ -604,7 +604,7 @@ Local UI Settings
 
 # 26. MMKV
 
-V2 当前不要求保留 MMKV。
+ 当前不要求保留 MMKV。
 
 如果实际代码没有真实依赖：
 
@@ -632,9 +632,9 @@ V2 当前不要求保留 MMKV。
 expo-av
 ```
 
-不得直接迁入 V2。
+不得直接迁入 。
 
-V2 应完成：
+ 应完成：
 
 ```text
 expo-av
@@ -721,7 +721,7 @@ Recording Practice
 
 # 32. Asset
 
-V2 Mobile 应建立统一 Asset Layer。
+ Mobile 应建立统一 Asset Layer。
 
 推荐基础：
 
@@ -839,7 +839,7 @@ OFFLINE_FIRST
 
 ---
 
-# 39. V2 第一阶段不建立完整 Offline Database
+# 39.  第一阶段不建立完整 Offline Database
 
 当前不引入：
 
@@ -1074,7 +1074,7 @@ iOS
 
 # 54. Existing Mobile Reuse Strategy
 
-V2 对现有 Mobile 文件进行：
+ 对现有 Mobile 文件进行：
 
 ```text
 REUSE
@@ -1106,7 +1106,7 @@ Visual Patterns
 
 # 56. REFACTOR
 
-优先保留 UI，但重新连接 V2 数据：
+优先保留 UI，但重新连接  数据：
 
 ```text
 Course Screens
@@ -1175,9 +1175,9 @@ wordbook
 
 > Product / UI Integration Reference
 
-不作为 V2 API Authority。
+不作为  API Authority。
 
-V2 Domain API 必须按照：
+ Domain API 必须按照：
 
 ```text
 Product Requirement
@@ -1298,9 +1298,9 @@ No Existing Equivalent
 
 # 66. 禁止事项
 
-V2 Mobile 禁止：
+ Mobile 禁止：
 
-1. 为了 V2 改成 Flutter。
+1. 为了  改成 Flutter。
 2. 为了新项目将现有 UI 全部重写。
 3. 强制迁 Expo Router。
 4. 强制把 Mobile Tailwind 升到 v4。
@@ -1318,7 +1318,7 @@ V2 Mobile 禁止：
 
 ---
 
-# 67. V2 Mobile Foundation 推荐结构
+# 67.  Mobile Foundation 推荐结构
 
 建议：
 
@@ -1433,7 +1433,7 @@ Navigation Foundation
 Theme
 UI Component Reuse
 TanStack Query
-V2 HTTP Client Infrastructure
+ HTTP Client Infrastructure
 Error Infrastructure
 Secure Storage
 Audio Foundation
@@ -1448,7 +1448,7 @@ Maestro Foundation
 
 # 71. Final Frozen Stack
 
-ZH-LAO V2 Mobile 最终基础技术栈：
+ZH-LAO  Mobile 最终基础技术栈：
 
 ```text
 Framework
@@ -1481,7 +1481,7 @@ Forms
 
 Networking
 └── Axios
-    └── New V2 API Client
+    └── New  API Client
 
 Storage
 ├── Memory
@@ -1582,7 +1582,7 @@ Existing UI Reuse Audit
 Theme / Asset Migration
 Navigation Migration
 TanStack Query Foundation
-V2 API Client Foundation
+ API Client Foundation
 Auth Storage Foundation
 Audio Foundation
 Asset Foundation
@@ -1598,10 +1598,10 @@ REUSE / REFACTOR / REWRITE Matrix
 
 # 75. 最终原则
 
-ZH-LAO V2 Mobile 的目标不是：
+ZH-LAO  Mobile 的目标不是：
 
 > 为了技术升级重新写一个看起来一样的 App。
 
 而是：
 
-> **保留已经成熟的产品体验和 UI 资产，同时把底层 API、认证、状态、音频、资产和领域接入升级为符合 ZH-LAO V2 架构的新客户端。**
+> **保留已经成熟的产品体验和 UI 资产，同时把底层 API、认证、状态、音频、资产和领域接入升级为符合 ZH-LAO  架构的新客户端。**

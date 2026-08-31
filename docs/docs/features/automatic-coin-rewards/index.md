@@ -57,7 +57,7 @@ Portfolio Status：`active`。
 状态：todo
 
 - **Scope**：实现可信 Source Domain Event 消费、`reward_events` 幂等落库、Rule 匹配与限额判定、Grant + Delivery 同事务创建、Delivery Worker、重试 / 取消，以及调用 Commerce Asset Credit Port。
-- **Stage / Artifact**：仓库已有 `database/v2/migrations/1000_rewards.sql`，已落盘 `reward_programs`、`reward_rules`、`reward_events`、`reward_grants`、`reward_deliveries` 五表和 V1 约束；但当前未发现 Rewards Backend Stage、Rewards 应用模块、API / Consumer / Worker 或对应测试工件。
+- **Stage / Artifact**：仓库已有 `database/migrations/1000_rewards.sql`，已落盘 `reward_programs`、`reward_rules`、`reward_events`、`reward_grants`、`reward_deliveries` 五表和 V1 约束；但当前未发现 Rewards Backend Stage、Rewards 应用模块、API / Consumer / Worker 或对应测试工件。
 - **Gate / Evidence**：现有 migration 证明数据库基线已存在，但数据库表存在不等于 Backend Lane 已完成，也不证明 Source Event → Grant → Delivery → Commerce 的运行链路已实现。
 - **Next Action**：创建真实 Rewards Backend Stage，按 canonical 实现事件消费、规则执行、Grant / Delivery 原子写入、幂等 Delivery Worker 与测试，再以 Backend Gate 证明行为契约。
 

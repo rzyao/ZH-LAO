@@ -8,12 +8,12 @@ depends_on:
   - FOUNDATION_GATE = PASS
   - IDENTITY_IMPLEMENTATION_PLAN.md
 database_authority:
-  - database/v2/migrations/0100_identity.sql
-  - database/v2/migrations/1220_identity_auth_runtime.sql
+  - database/migrations/0100_identity.sql
+  - database/migrations/1220_identity_auth_runtime.sql
 next_artifact: IDENTITY_API.md
 ---
 
-# ZH-LAO V2 — IDENTITY USE CASES
+# ZH-LAO  — IDENTITY USE CASES
 
 > 目标路径：`docs/docs/development/02-identity/IDENTITY_USE_CASES.md`
 >

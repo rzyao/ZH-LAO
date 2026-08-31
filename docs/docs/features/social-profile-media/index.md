@@ -49,7 +49,7 @@ Portfolio Status：`active`。
 - [Social 域](/domains/social/)：Social 与 Identity、Trust、Media/Asset 的 ownership 边界。
 - [ADR-010](/adr/ADR-010-social-profile-discovery-and-relationships)：资料正规化与平台字典原则。
 - [Social 数据库](/domains/social/database)：V1 19 表与 logical UUID 规则。
-- Repository artifact：`database/v2/migrations/0700_social.sql` 已落 `social_profile_photos`、`social_interests`、`social_profile_interests`、`social_profile_languages`、`social_prompt_templates`、`social_profile_prompts`。
+- Repository artifact：`database/migrations/0700_social.sql` 已落 `social_profile_photos`、`social_interests`、`social_profile_interests`、`social_profile_languages`、`social_prompt_templates`、`social_profile_prompts`。
 
 当前 Gate 事实：Workflow Registry 仍把正式 `SOCIAL-DESIGN` 记为 `todo`，当前 `main` 没有 F10 media/profile-content 专属 Design Gate PASS。因此本 Lane 为 `active` 而不是 `done`。
 

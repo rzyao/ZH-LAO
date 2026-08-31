@@ -5,7 +5,7 @@ last_updated: 2026-08-31
 
 # 功能交付
 
-Feature 表达**用户或运营人员能够完成的端到端能力**。每个正式 Feature 都有一个人工维护的 canonical Feature Page；Matrix 和索引从这些页面派生。
+Feature 表达**用户或运营人员能够完成的端到端能力**。每个正式 Feature 都有一个人工维护的 canonical Feature Page；索引从这些页面派生。
 
 它是横向交付视图，不拥有第二份 Domain、API、数据库或状态机事实。
 
@@ -23,22 +23,13 @@ Feature E2E proves deliverable value
 
 完整 Feature Inventory 不再手工复制到本页，统一查看：
 
-[AI 开发阶段矩阵](/development/DOMAIN_LIFECYCLE_MATRIX)
+完整功能状态以各 Feature Page 的六个 Lane 模块和 `FEATURE_PAGE_INDEX.json` 为准。
 
-矩阵沿用固定的树状 UI，并同时显示：
-
-- 当前正式功能；
-- 已识别但尚未启动的功能；
-- 明确阻塞 / 待裁决的功能；
-- 明确延期的功能；
-- 每个 Feature 的 Design / Backend / Admin / Mobile / Integration / Acceptance Lane 状态；
-- System / Domain 的派生汇总状态。
-
-这样功能数量增加后不会出现“Feature 首页、Domain 概览、开发矩阵各维护一套状态”的漂移。
+这样功能数量增加后不会出现多个页面各维护一套状态的漂移。
 
 ## Canonical Feature Page
 
-正式 Feature 清单中的每个功能都已经建立独立页面（当前 `102 / 102`）。页面由人工维护 Frontmatter 和六个固定模块，Matrix 的 Feature 行只读取这些页面。
+正式 Feature 清单中的每个功能都已经建立独立页面（当前 `102 / 102`）。页面由人工维护 Frontmatter 和六个固定模块，Feature 索引只读取这些页面。
 
 - [用户登录与会话](login/index.md)
 - [音频生产](audio-production/index.md)

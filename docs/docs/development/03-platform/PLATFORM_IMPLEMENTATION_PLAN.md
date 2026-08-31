@@ -8,13 +8,13 @@ depends_on:
   - FOUNDATION_GATE = PASS
   - IDENTITY_GATE = PASS
 database_authority:
-  - database/v2/migrations/0300_platform.sql
+  - database/migrations/0300_platform.sql
   - docs/docs/domains/platform/database.md
 exit_gate: PLATFORM_GATE
 implementation_started: false
 ---
 
-# ZH-LAO V2 — PLATFORM IMPLEMENTATION PLAN
+# ZH-LAO  — PLATFORM IMPLEMENTATION PLAN
 
 > 目标路径：`docs/docs/development/03-platform/PLATFORM_IMPLEMENTATION_PLAN.md`
 >
@@ -29,7 +29,7 @@ implementation_started: false
 前置：
 
 ```text
-PostgreSQL V2 Baseline = COMPLETE / PASS
+PostgreSQL  Baseline = COMPLETE / PASS
 Application Foundation = COMPLETE / PASS
 Identity Domain = COMPLETE / PASS / FROZEN
 ```
@@ -103,7 +103,7 @@ feature_flag_overrides partial UNIQUE x3
 + region reverse index
 ```
 
-但历史 frozen `database/v2/migrations/0300_platform.sql` 当前未包含这 4 个 index。
+但历史 frozen `database/migrations/0300_platform.sql` 当前未包含这 4 个 index。
 
 这不是重新设计数据库，而是**已冻结文档与实际物理 baseline 的一致性缺口**。
 
@@ -220,9 +220,9 @@ PLATFORM_DESIGN_GATE = PASS
 **Files**
 
 ```text
-database/v2/migrations/<next>_platform_override_indexes.sql
-database/v2/checks/** if needed
-database/v2/test/**
+database/migrations/<next>_platform_override_indexes.sql
+database/checks/** if needed
+database/test/**
 ```
 
 **Tests**
@@ -728,7 +728,7 @@ Greenfield pages/workflows for Platform management after Operations auth exists
 Mobile：
 
 ```text
-V2 Feature Flag client = REWRITE
+ Feature Flag client = REWRITE
 App Version bootstrap integration = REWRITE
 Region runtime integration = REFACTOR/REWRITE by current mobile state
 Announcement integration = REFACTOR/REWRITE by current page state
@@ -777,7 +777,7 @@ Client contract readiness PASS。
 
 ```text
 apps/backend/test/**
-database/v2/test/**
+database/test/**
 ```
 
 **Tests**

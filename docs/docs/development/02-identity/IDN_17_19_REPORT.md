@@ -1,4 +1,4 @@
-# ZH-LAO V2 — IDN-17 至 IDN-19 批次报告
+# ZH-LAO  — IDN-17 至 IDN-19 批次报告
 
 ```text
 IDN-17 = COMPLETE
@@ -201,7 +201,7 @@ Cross-domain SQL         = 0
 Fresh migrations         = 17
 Second migration run     = 0
 Database audit           = PASS（含 smoke：非法状态/跨域 FK/部分唯一/单活跃任务 全部拒绝）
-Baseline report          = 已刷新（database/v2/reports/V2_DATABASE_BASELINE_REPORT.md）
+Baseline report          = 已刷新（database/reports/_DATABASE_BASELINE_REPORT.md）
 ```
 
 ## 六、REQUIRED Use Cases（全部 IMPLEMENTED + TESTED）

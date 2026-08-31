@@ -8,12 +8,12 @@ depends_on:
   - FOUNDATION_GATE = PASS
   - IDENTITY_GATE = PASS
 database_authority:
-  - database/v2/migrations/0300_platform.sql
+  - database/migrations/0300_platform.sql
   - docs/docs/domains/platform/database.md
 next_artifact: PLATFORM_CONFIG_CONTRACTS.md
 ---
 
-# ZH-LAO V2 — PLATFORM USE CASES
+# ZH-LAO  — PLATFORM USE CASES
 
 > 目标路径：`docs/docs/development/03-platform/PLATFORM_USE_CASES.md`
 >

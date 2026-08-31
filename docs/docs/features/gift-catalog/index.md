@@ -46,7 +46,7 @@ Gate / Evidence：当前仓库没有独立 `COMMERCE_DESIGN_GATE` 文件；设�
 
 范围：提供 Gift Catalog 的读取能力，至少执行 Gift 状态过滤、稳定排序、Coin 价格与 Asset logical ID 输出；不得把 Product / ProductPrice 当成 Gift 的价格来源。
 
-Stage / 工件 / Gate：数据库基线已有 `database/v2/migrations/0900_commerce.sql` 中的 `commerce_gifts`，PostgreSQL Baseline 已 PASS；但 [开发进度](/development/DEVELOPMENT_PROGRESS) 仍为 Commerce=`NOT_STARTED`，`apps/backend/src/modules/` 当前没有 Commerce module，也没有 Gift Catalog Backend Stage / API / Gate。数据库表存在不是 Backend 完成证据。
+Stage / 工件 / Gate：数据库基线已有 `database/migrations/0900_commerce.sql` 中的 `commerce_gifts`，PostgreSQL Baseline 已 PASS；但 [开发进度](/development/DEVELOPMENT_PROGRESS) 仍为 Commerce=`NOT_STARTED`，`apps/backend/src/modules/` 当前没有 Commerce module，也没有 Gift Catalog Backend Stage / API / Gate。数据库表存在不是 Backend 完成证据。
 
 下一步：在正式 Commerce Implementation Stage 中建立 Commerce module、Catalog query service / repository / HTTP contract 与测试，再产生对应 Backend Gate 证据。
 

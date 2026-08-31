@@ -40,7 +40,7 @@ Portfolio Status：`deferred`。
 状态：todo
 
 - **Scope**：仅在新类型设计通过后，按确认后的目标 Domain / value model 扩展规则、Grant / Delivery 或新增必要模型，并保持幂等与状态机约束。
-- **Stage / Artifact**：当前没有 Advanced Reward Types Backend Stage。现有 `database/v2/migrations/1000_rewards.sql` 明确限制 V1 `reward_type='COIN'`，未实现会员天数、POINT、BADGE 等类型。
+- **Stage / Artifact**：当前没有 Advanced Reward Types Backend Stage。现有 `database/migrations/1000_rewards.sql` 明确限制 V1 `reward_type='COIN'`，未实现会员天数、POINT、BADGE 等类型。
 - **Gate / Evidence**：暂无 Backend 实现或测试证据；现有五表基线不能被解释为已经支持任意奖励类型。
 - **Next Action**：等待设计决策完成后再创建 migration / service / delivery adapter，并针对每种目标 Domain 建立真实 Backend Gate。
 

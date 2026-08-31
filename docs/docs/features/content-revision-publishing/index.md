@@ -33,7 +33,7 @@ Portfolio Status：`active`。
 状态：done
 
 - **Scope**：冻结 revision authority、支持的 entity types、translation-set revision 语义、published snapshot immutable、supersedes chain、current published transaction、historical revision resolution 与 Learning/Audio revision pin 边界。
-- **Stage / Artifact**：[CONTENT_PRODUCT_SEMANTICS.md](../../development/05-content/CONTENT_PRODUCT_SEMANTICS.md) §12；数据库 authority 为 `database/v2/migrations/1240_content_revision.sql`；[CONTENT_PUBLIC_CONTRACTS.md](../../development/05-content/CONTENT_PUBLIC_CONTRACTS.md) 与 [CONTENT_API.md](../../development/05-content/CONTENT_API.md) 冻结 revision resolution/publish contract。
+- **Stage / Artifact**：[CONTENT_PRODUCT_SEMANTICS.md](../../development/05-content/CONTENT_PRODUCT_SEMANTICS.md) §12；数据库 authority 为 `database/migrations/1240_content_revision.sql`；[CONTENT_PUBLIC_CONTRACTS.md](../../development/05-content/CONTENT_PUBLIC_CONTRACTS.md) 与 [CONTENT_API.md](../../development/05-content/CONTENT_API.md) 冻结 revision resolution/publish contract。
 - **Gate / Evidence**：[CONTENT_DESIGN_AUDIT.md](../../development/05-content/CONTENT_DESIGN_AUDIT.md) 的 Revision Audit 验证 stable roots、translation-set semantics 与 forward revision table 均可闭环，明确 `CONTENT_DESIGN_GATE = PASS`、revision support table = 1 via `1240`，无需修改 frozen `0400_content.sql`。
 - **Next Action**：保持单一 revision authority；实现阶段不得再建第二套 revision table，也不得把 Admin 展示状态或 Learning/Audio consumer state 写成 Content canonical fact。
 

@@ -11,7 +11,7 @@ tested_commit: e1330ba7db6de6b946ec529a84a8cca26f1ea8e9
 workflow_run: 33342744375
 ---
 
-# ZH-LAO V2 — Operations Implementation Report
+# ZH-LAO  — Operations Implementation Report
 
 ## 1. Final Status
 

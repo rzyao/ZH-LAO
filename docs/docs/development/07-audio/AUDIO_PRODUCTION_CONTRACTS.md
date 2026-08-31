@@ -8,7 +8,7 @@ implementation_started: false
 last_updated: 2026-08-31
 ---
 
-# ZH-LAO V2 — Audio Production / Review / Publish Contracts
+# ZH-LAO  — Audio Production / Review / Publish Contracts
 
 ## 1. Task State Machine
 

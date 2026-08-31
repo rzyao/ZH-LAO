@@ -5,7 +5,7 @@ const int = (minimum: number) => z.coerce.number().int().min(minimum);
 export const environmentSchema = z.object({
   APP_ENV: z.enum(['development', 'test', 'production']).default('development'),
   APP_HOST: z.string().min(1).default('127.0.0.1'),
-  APP_PORT: int(1).max(65_535).default(3000),
+  APP_PORT: int(1).max(65_535).default(18080),
   DATABASE_URL: z.url().refine((value) => value.startsWith('postgresql://') || value.startsWith('postgres://'), 'must be a PostgreSQL URL'),
   DATABASE_POOL_MIN: int(0).default(0),
   DATABASE_POOL_MAX: int(1).default(10),
@@ -22,6 +22,8 @@ export const environmentSchema = z.object({
   // 显式 OTP 投递 provider 裁决：默认 unavailable（未接真实 SMS 时失败安全 503）；
   // console 仅允许 development 显式启用，绝不静默 fake-success。
   IDENTITY_OTP_PROVIDER: z.enum(['console', 'unavailable']).default('unavailable'),
+  ADMIN_USERNAME: z.string().trim().min(1).max(100).default('admin'),
+  ADMIN_PASSWORD: z.string().min(1).max(200).default('123456'),
   SHUTDOWN_TIMEOUT_MS: int(100).default(10_000)
 }).superRefine((value, context) => {
   if (value.DATABASE_POOL_MIN > value.DATABASE_POOL_MAX) {

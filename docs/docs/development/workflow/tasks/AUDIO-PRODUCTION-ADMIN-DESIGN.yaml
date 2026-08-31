@@ -3,14 +3,6 @@ version: 1
 role: design_worker
 domain: audio
 track: admin
-matrix:
-  object_type: feature
-  object_id: audio-production
-  lane: admin
-  sequence: 20
-  stage_id: AUDIO-PRODUCTION-ADMIN-DESIGN
-  label_zh: Workbench 设计
-  parent_object_id: audio
 status: ready
 priority: parallel
 parallel_safe: true
@@ -43,9 +35,8 @@ forbidden_paths:
   - apps/admin/**
   - apps/backend/**
   - apps/mobile/**
-  - database/v2/migrations/**
+  - database/migrations/**
 required_sources:
-  - docs/docs/development/workflow/AI_STAGE_MODEL.md
   - docs/docs/development/admin/audio-production/AUDIO_PRODUCTION_ADMIN_DESIGN_BRIEF.md
   - docs/docs/features/audio-production/index.md
   - docs/docs/domains/audio/index.md

@@ -8,7 +8,7 @@ implementation_started: false
 last_updated: 2026-08-31
 ---
 
-# ZH-LAO V2 — Content Domain Design Brief
+# ZH-LAO  — Content Domain Design Brief
 
 > 本文件是 **Content Domain 产品方案 / 契约设计会话的入口文档**。
 >
@@ -66,7 +66,7 @@ Mobile Foundation current status
 重点读取 Content 权威：
 
 ```text
-database/v2/migrations/0400_content.sql
+database/migrations/0400_content.sql
 docs/docs/domains/content/index.md
 docs/docs/domains/content/database.md
 docs/docs/domains/content/knowledge.md
@@ -114,7 +114,7 @@ OPERATIONS_GATE != PASS
 Content database authority：
 
 ```text
-database/v2/migrations/0400_content.sql
+database/migrations/0400_content.sql
 ```
 
 当前 canonical database docs 定义 **31 张 Content 表**，分为：

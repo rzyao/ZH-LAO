@@ -126,7 +126,7 @@ HTTP 层只负责协议适配，不拥有业务状态机。
 - PostgreSQL 原始约束名和 stack 不直接暴露给客户端；
 - Backend 不自动执行生产 Migration。
 
-Migration 唯一物理权威为 `database/v2`。
+Migration 唯一物理权威为 `database`。
 
 ## Readiness
 

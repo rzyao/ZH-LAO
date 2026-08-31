@@ -153,8 +153,6 @@ jobs:
           cp docs/docs/development/workflow/FEATURE_PAGE_INDEX.json /tmp/FEATURE_PAGE_INDEX.json
           python scripts/validate_feature_pages.py --write
           cmp /tmp/FEATURE_PAGE_INDEX.json docs/docs/development/workflow/FEATURE_PAGE_INDEX.json
-      - name: Validate Matrix source contract
-        run: python scripts/generate_ai_stage_matrix.py --check
       - name: Feature lifecycle audit
         run: python scripts/audit_feature_lifecycle.py
       - name: Markdown link and anchor audit
@@ -165,8 +163,6 @@ jobs:
         run: |
           pnpm --dir docs install --frozen-lockfile
           pnpm --dir docs docs:build
-      - name: Built Matrix navigation audit
-        run: python scripts/check_feature_navigation.py
       - name: Final integration diagnostics
         run: |
           python - <<'PY'

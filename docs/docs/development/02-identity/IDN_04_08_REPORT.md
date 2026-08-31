@@ -4,7 +4,7 @@ tasks: IDN-04..IDN-08
 completed_at: 2026-08-30
 ---
 
-# ZH-LAO V2 — IDN-04 至 IDN-08 执行报告
+# ZH-LAO  — IDN-04 至 IDN-08 执行报告
 
 ```text
 IDN-04 = COMPLETE

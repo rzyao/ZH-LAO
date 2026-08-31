@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import {
   createMemoryHistory,
@@ -23,7 +23,19 @@ vi.mock('@/api/client', async (importOriginal) => {
   }
 })
 
-function renderAt(initialEntry: string) {
+beforeEach(() => {
+  window.localStorage.clear()
+})
+
+function renderAt(initialEntry: string, authenticated = true) {
+  if (authenticated) {
+    window.localStorage.setItem('zh-lao.admin.session', JSON.stringify({
+      accessToken: 'test-access-token',
+      refreshToken: 'test-refresh-token',
+      operator: { id: '00000000-0000-4000-8000-000000000001', name: 'admin', roleId: 'super_admin' },
+      permissions: ['*.*.*'],
+    }))
+  }
   const testRouter = createRouter({
     routeTree,
     history: createMemoryHistory({ initialEntries: [initialEntry] }),
@@ -57,8 +69,10 @@ describe('Router', () => {
     expect(await screen.findByText('页面不存在')).toBeInTheDocument()
   })
 
-  it('renders the login placeholder route', async () => {
-    renderAt('/login')
-    expect(await screen.findByText(/登录功能将在/)).toBeInTheDocument()
+  it('renders the login route', async () => {
+    renderAt('/login', false)
+    expect(await screen.findByRole('heading', { name: 'ZH-LAO Admin' })).toBeInTheDocument()
+    expect(screen.getByLabelText('账号')).toHaveValue('admin')
+    expect(screen.getByLabelText('密码')).toHaveAttribute('type', 'password')
   })
 })

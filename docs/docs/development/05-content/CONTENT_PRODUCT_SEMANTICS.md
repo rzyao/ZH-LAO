@@ -8,14 +8,14 @@ implementation_started: false
 last_updated: 2026-08-31
 repository_commit_audited: 007d6ad705a9afcc4fefb03442e371b4dec07fad
 database_authority:
-  - database/v2/migrations/0400_content.sql
-  - database/v2/migrations/1240_content_revision.sql
+  - database/migrations/0400_content.sql
+  - database/migrations/1240_content_revision.sql
 depends_on:
   - ../04-operations/OPERATIONS_DESIGN_AUDIT.md
   - ../03-platform/PLATFORM_IMPLEMENTATION_REPORT.md
 ---
 
-# ZH-LAO V2 — Content Product Semantics
+# ZH-LAO  — Content Product Semantics
 
 > 本文冻结 Content Domain V1 产品语义。设计必须适配 frozen database contract；不得从 31 张表机械生成 CRUD，不得修改 `0400_content.sql`，不得把 Learning / Audio / Asset / Operations 的 canonical state 搬进 Content。
 

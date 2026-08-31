@@ -35,7 +35,7 @@ Portfolio Status：`active`。
 
 范围：`social_profiles.profile_status` 使用 `draft / active / paused / closed`。`paused` 只退出普通 Discovery，既有 Match 与聊天继续；`closed` 关闭 Social 功能，但不是账号注销或资料物理删除。关闭后未来是否恢复原资料仍为 deferred，本 Feature 不提前裁决。Social 生命周期不得被解释为 Trust 封禁或处罚状态。
 
-Stage / 工件：canonical 已冻结：[Social 偏好、发现与关系](/domains/social/discovery-and-relationships)；物理状态契约见 `database/v2/migrations/0700_social.sql` 的 `social.social_profiles.profile_status`。
+Stage / 工件：canonical 已冻结：[Social 偏好、发现与关系](/domains/social/discovery-and-relationships)；物理状态契约见 `database/migrations/0700_social.sql` 的 `social.social_profiles.profile_status`。
 
 Gate / Evidence：canonical frontmatter 为 `status: frozen`，并明确 `paused` / `closed` 的当前语义；Design Register D-135～D-138 是 Social 全域审计最终冻结证据。仓库未发现独立 `SOCIAL_DESIGN_GATE` 文件，本页不制造额外 Gate 结论。
 
@@ -47,7 +47,7 @@ Next Action：Backend 实现 Social Profile pause / resume / close use case 与�
 
 范围：实现暂停、恢复与关闭 Social Profile 的状态迁移及相关读写资格检查；`paused` 必须退出普通 Discovery 但保留既有 Match/Chat，`closed` 必须关闭 Social 功能而不删除资料/关系历史，也不得写入 Trust `enforcement_actions` 或修改 Identity 账号生命周期。
 
-Stage / 工件：`database/v2/migrations/0700_social.sql` 已落地 `profile_status IN ('draft', 'active', 'paused', 'closed')` 的数据库前置契约。当前 `backend/src/modules/` 尚无 Social module、lifecycle service/routes 或 Social tests。
+Stage / 工件：`database/migrations/0700_social.sql` 已落地 `profile_status IN ('draft', 'active', 'paused', 'closed')` 的数据库前置契约。当前 `backend/src/modules/` 尚无 Social module、lifecycle service/routes 或 Social tests。
 
 Gate / Evidence：数据库 schema 已存在，但仓库没有 Social Lifecycle Implementation Report / Backend Gate，也没有 API、Service 或测试证明上述状态迁移语义，因此状态仅为 `ready`。
 

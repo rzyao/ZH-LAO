@@ -41,7 +41,17 @@ export interface ApiResponse<T> {
 }
 
 function joinUrl(baseUrl: string, path: string): string {
-  return `${baseUrl.replace(/\/+$/, '')}/${path.replace(/^\/+/, '')}`
+  const base = baseUrl.replace(/\/+$/, '')
+  const normalizedPath = path.replace(/^\/+/, '')
+  // The default frontend base is `/api`, while business contracts already
+  // include `/api/v1`; avoid producing `/api/api/v1`.
+  if (base.endsWith('/api') && normalizedPath.startsWith('api/')) {
+    return `${base}/${normalizedPath.slice(4)}`
+  }
+  if (base === '/api' && normalizedPath.startsWith('health/')) {
+    return `/${normalizedPath}`
+  }
+  return `${base}/${normalizedPath}`
 }
 
 function serializeQuery(
@@ -85,7 +95,7 @@ export class ApiClient {
     this.timeoutMs = options.timeoutMs ?? 15_000
     this.getAccessToken = options.getAccessToken
     this.onUnauthorized = options.onUnauthorized
-    this.fetchImpl = options.fetchImpl ?? fetch
+    this.fetchImpl = options.fetchImpl ?? ((input, init) => globalThis.fetch(input, init))
     this.defaultHeaders = options.defaultHeaders ?? {}
   }
 
@@ -126,9 +136,10 @@ export class ApiClient {
     path: string,
     options: RequestOptions,
   ): Promise<ApiResponse<T>> {
-    const url = `${joinUrl(this.baseUrl, path)}${serializeQuery(options.query)}`
+    const { query, json, timeoutMs: requestTimeoutMs, skipAuth, signal: externalSignal, body: rawBody, ...fetchOptions } = options
+    const url = `${joinUrl(this.baseUrl, path)}${serializeQuery(query)}`
     const requestId = createRequestId()
-    const timeoutMs = options.timeoutMs ?? this.timeoutMs
+    const timeoutMs = requestTimeoutMs ?? this.timeoutMs
 
     const controller = new AbortController()
     let timedOut = false
@@ -138,7 +149,6 @@ export class ApiClient {
     }, timeoutMs)
 
     // Forward external cancellation (e.g. React Query signal).
-    const externalSignal = options.signal
     const onExternalAbort = () => controller.abort()
     if (externalSignal) {
       if (externalSignal.aborted) controller.abort()
@@ -149,25 +159,25 @@ export class ApiClient {
     headers.set('Accept', 'application/json')
     headers.set('X-Request-Id', requestId)
 
-    const token = options.skipAuth ? null : this.getAccessToken?.() ?? null
+    const token = skipAuth ? null : this.getAccessToken?.() ?? null
     if (token) headers.set('Authorization', `Bearer ${token}`)
 
     let body: BodyInit | null = null
-    if (options.body !== undefined) {
-      body = options.body
-    } else if (options.json !== undefined) {
+    if (rawBody !== undefined) {
+      body = rawBody
+    } else if (json !== undefined) {
       headers.set('Content-Type', 'application/json')
-      body = JSON.stringify(options.json)
+      body = JSON.stringify(json)
     }
 
     try {
       const response = await this.fetchImpl(url, {
+        ...fetchOptions,
         method,
         headers,
         body,
         signal: controller.signal,
         credentials: 'include',
-        ...options,
       })
 
       if (!response.ok) {

@@ -10,7 +10,7 @@ repository_commit_audited: 007d6ad705a9afcc4fefb03442e371b4dec07fad
 implementation_dependency: OPERATIONS_GATE
 ---
 
-# ZH-LAO V2 — Content Implementation Plan
+# ZH-LAO  — Content Implementation Plan
 
 > 本文件只冻结未来执行顺序。本次 Design 会话不得执行任何 CNT implementation task。
 

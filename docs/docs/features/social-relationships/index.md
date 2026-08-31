@@ -34,7 +34,7 @@ Portfolio Status：`active`。
 
 范围：`我关注的`由 `social_follows.follower_profile_id = current profile` 查询，`关注我的`由 `following_profile_id = current profile` 查询，`已匹配`由当前 `social_matches.status='active'` 查询。普通 Discovery 排除已有任一 Follow / Match；关系 UI 独立提供上述列表。Block 会在 Social Domain Service 事务内删除双方当前 Follow 并结束 active Match，因此列表不得自行维护重复关系状态。
 
-Stage / 工件：canonical 已冻结：[Social 偏好、发现与关系](/domains/social/discovery-and-relationships)；表与索引物理契约见 `database/v2/migrations/0700_social.sql`。
+Stage / 工件：canonical 已冻结：[Social 偏好、发现与关系](/domains/social/discovery-and-relationships)；表与索引物理契约见 `database/migrations/0700_social.sql`。
 
 Gate / Evidence：canonical `status: frozen` 明确关系列表“均由 Follow/Match 查询得出，不建新表”；Design Register D-135～D-138 冻结 Social 关系模型与跨表 invariant。仓库未发现独立 `SOCIAL_DESIGN_GATE`，不虚构 Gate 名称。
 
@@ -46,7 +46,7 @@ Next Action：Backend 设计稳定的分页/排序 DTO 与查询 contract，复�
 
 范围：实现 following / followers / active matches 列表查询、分页排序、必要的 profile projection 与关系状态返回；不创建新的 relationship-list 持久表。
 
-Stage / 工件：`database/v2/migrations/0700_social.sql` 已提供 `social_follows`、`social_matches` 与相关索引作为查询前置。当前 `backend/src/modules/` 尚无 Social module、关系查询 service、HTTP routes 或对应测试。
+Stage / 工件：`database/migrations/0700_social.sql` 已提供 `social_follows`、`social_matches` 与相关索引作为查询前置。当前 `backend/src/modules/` 尚无 Social module、关系查询 service、HTTP routes 或对应测试。
 
 Gate / Evidence：DB schema 已具备，但没有 Social Backend Implementation Report / Gate，也没有关系列表 API 的实现证据；因此 Backend 仅 `ready`，不能写 `done`。
 

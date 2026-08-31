@@ -12,6 +12,8 @@
 # 启动本地开发服务
 pnpm docs:dev
 
+文档地址：http://127.0.0.1:15172
+
 # 构建生产站点
 pnpm docs:build
 

@@ -6,7 +6,7 @@ task_name: Identity Module Skeleton
 completed_at: 2026-08-30
 ---
 
-# ZH-LAO V2 — IDN-01 Identity Module Skeleton Report
+# ZH-LAO  — IDN-01 Identity Module Skeleton Report
 
 ## Result
 

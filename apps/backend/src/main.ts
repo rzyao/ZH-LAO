@@ -15,6 +15,7 @@ import { registerPlatformManagementRoutes } from './modules/platform/http/manage
 import { buildOperationsModule } from './modules/operations/http/composition.js';
 import { OperationsService } from './modules/operations/application/services/index.js';
 import { PostgresOperationsRepository } from './modules/operations/infrastructure/index.js';
+import { ensureDefaultAdmin } from './modules/identity/application/index.js';
 
 const config=loadConfig();
 const logger=createLogger(config.logLevel);
@@ -46,6 +47,7 @@ if(process.argv[2]==='--operations-bootstrap'){
   await identityModule.registerHttp(app,identityDependencies);
   const identityPublic=createIdentityPublicQuery(createIdentityRepositories,executor);
   const operations=buildOperationsModule({executor,transactionManager,identity:identityPublic,authentication:identityDependencies.authentication});
+  await ensureDefaultAdmin({transactions:transactionManager,repositories:createIdentityRepositories,bootstrap:(subjectId,displayName)=>operations.service.bootstrap(subjectId,displayName),username:config.identity.adminUsername,password:config.identity.adminPassword});
   await operations.registerHttp(app);
   const platform=buildPlatformModule({executor,transactionManager});
   await platformModule.registerHttp(app,{executor,featureFlagUseCases:platform.featureFlagUseCases,appVersionUseCases:platform.appVersionUseCases,announcementUseCases:platform.announcementUseCases,regionUseCases:platform.regionUseCases});

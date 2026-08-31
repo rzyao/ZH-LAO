@@ -9,7 +9,7 @@ last_updated: 2026-08-31
 repository_commit_audited: 007d6ad705a9afcc4fefb03442e371b4dec07fad
 ---
 
-# ZH-LAO V2 — Content Public / Cross-Domain Contracts
+# ZH-LAO  — Content Public / Cross-Domain Contracts
 
 > Target module boundary: `apps/backend/src/modules/content/public/`. Public contract 暴露业务 read/validation capability，不暴露 persistence。
 

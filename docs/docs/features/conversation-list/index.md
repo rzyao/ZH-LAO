@@ -48,7 +48,7 @@ Gate / 完成证据：canonical 已明确空会话不进入列表、隐藏会话
 
 范围：实现当前用户会话列表查询、分页/排序、最后消息 subtype projection、未读聚合，以及新消息或有效用户参与时将 `hidden_at` 恢复为 `NULL` 的应用服务行为。
 
-执行阶段与产物：尚未进入 Chat Backend Feature 实现 Stage。数据库前置工件 `database/v2/migrations/0800_chat.sql` 已提供 Conversation、Member、User State、Message 及相关索引/字段，但 `main` 未发现 F13 会话列表 Backend Stage/Report、API/Service/Repository 实现。
+执行阶段与产物：尚未进入 Chat Backend Feature 实现 Stage。数据库前置工件 `database/migrations/0800_chat.sql` 已提供 Conversation、Member、User State、Message 及相关索引/字段，但 `main` 未发现 F13 会话列表 Backend Stage/Report、API/Service/Repository 实现。
 
 Gate / 证据：有冻结设计与数据库结构，但没有可运行的列表接口、查询实现或 Backend PASS 证据，因此保持 `todo`。
 

@@ -2,6 +2,7 @@ import type { FastifyInstance, FastifyRequest } from 'fastify';
 import { z } from 'zod';
 import { requireAuthentication } from '../../../auth/auth-hook.js';
 import type { AuthenticationProvider } from '../../../auth/authentication-provider.js';
+import type { AdminAuthenticationService } from '../application/use-cases/admin-authentication.js';
 import { AppError } from '../../../errors/app-error.js';
 import { parseInstallationId, parseRawOtpCode, parseRawRefreshToken, parseUserPublicId } from '../domain/index.js';
 import type { AuthenticateWithFacebook, AuthenticateWithPhoneOtp, DeviceLifecycle, IdentityState, PhoneCredentialOperations, ProfileOperations, RequestPhoneOtp, SessionLifecycle } from '../application/index.js';
@@ -16,10 +17,18 @@ const tokenHeaders = { 'cache-control': 'no-store', pragma: 'no-cache' };
 const mapDevice = (value: z.infer<typeof device>) => ({ installationId: parseInstallationId(value.installation_id), platform: value.platform, ...(value.device_name !== undefined ? { deviceName: value.device_name } : {}), ...(value.app_version !== undefined ? { appVersion: value.app_version } : {}), ...(value.push_token !== undefined ? { pushToken: value.push_token } : {}) });
 const mapDirection = (value: z.infer<typeof direction>) => ({ nativeLanguage: value.native_language, learningLanguage: value.learning_language });
 
-export type IdentityHttpDependencies = Readonly<{ authentication: AuthenticationProvider; requestOtp: RequestPhoneOtp; phoneAuth: AuthenticateWithPhoneOtp; facebookAuth: AuthenticateWithFacebook; sessions: SessionLifecycle; devices: DeviceLifecycle; profile: ProfileOperations; state: IdentityState; phones: PhoneCredentialOperations }>;
+export type IdentityHttpDependencies = Readonly<{ authentication: AuthenticationProvider; adminAuth?: AdminAuthenticationService; requestOtp: RequestPhoneOtp; phoneAuth: AuthenticateWithPhoneOtp; facebookAuth: AuthenticateWithFacebook; sessions: SessionLifecycle; devices: DeviceLifecycle; profile: ProfileOperations; state: IdentityState; phones: PhoneCredentialOperations }>;
 
 export async function registerIdentityRoutes(app: FastifyInstance, dependencies: IdentityHttpDependencies): Promise<void> {
   const protectedRoute = requireAuthentication(dependencies.authentication);
+  if (dependencies.adminAuth) {
+    app.post('/api/v1/admin/auth/login', async (request, reply) => {
+      const body = parse(z.object({ username: z.string().trim().min(1).max(100), password: z.string().min(1).max(200) }).strict(), request.body);
+      const result = await dependencies.adminAuth!.login(body.username, body.password);
+      reply.headers(tokenHeaders);
+      return { user_id: result.userPublicId, access_token: result.accessToken, token_type: 'Bearer', expires_in: result.expiresIn, refresh_token: result.refreshToken, session_expires_at: result.sessionExpiresAt.toISOString() };
+    });
+  }
   app.post('/api/v1/identity/phone-otp', async (request) => {
     const body = parse(z.object({ phone: z.unknown(), purpose: z.enum(['login', 'bind_phone', 'change_phone']) }).strict(), request.body);
     if (body.purpose !== 'login') await protectedRoute(request);

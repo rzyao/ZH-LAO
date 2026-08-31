@@ -8,7 +8,7 @@ design_gate: PASS
 implementation_started: false
 ---
 
-# ZH-LAO V2 — Platform Design Audit
+# ZH-LAO  — Platform Design Audit
 
 ## 1. Audit Scope
 
@@ -37,7 +37,7 @@ Cross-Domain Boundary
 权威事实源：
 
 ```text
-database/v2/migrations/0300_platform.sql
+database/migrations/0300_platform.sql
 docs/docs/domains/platform/database.md
 docs/docs/domains/platform/index.md
 docs/docs/development/MASTER_DEVELOPMENT_PLAN.md
@@ -701,7 +701,7 @@ Unspecified concurrent-write semantics = 0
 
 PASS at design level。
 
-MASTER 19A 要求：Feature Flags 属 Mobile V2 必须重建的数据/业务接入层。
+MASTER 19A 要求：Feature Flags 属 Mobile  必须重建的数据/业务接入层。
 
 Phase 3 冻结：
 

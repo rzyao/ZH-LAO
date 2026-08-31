@@ -138,7 +138,7 @@ Object Storage Adapter → 具体 Provider
 ## Migration 权威
 
 ```text
-database/v2
+database
 ```
 
 是数据库 Migration 的唯一物理权威。

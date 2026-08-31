@@ -47,7 +47,7 @@ Portfolio Status：`active`。
 状态：todo
 
 - **Scope**：实现后台所需 Program / Rule CRUD 与生命周期接口、Event / Grant / Delivery 查询、允许条件下的 Event 重试、Grant void、Delivery retry / cancel，并接入 Operations 身份、RBAC 与审计基础设施。
-- **Stage / Artifact**：`database/v2/migrations/1000_rewards.sql` 已提供五张 Rewards 表的数据库基线，但当前未发现 Rewards Backend Stage、Admin API 实现、Service / Repository、Delivery Worker 或对应测试。
+- **Stage / Artifact**：`database/migrations/1000_rewards.sql` 已提供五张 Rewards 表的数据库基线，但当前未发现 Rewards Backend Stage、Admin API 实现、Service / Repository、Delivery Worker 或对应测试。
 - **Gate / Evidence**：migration 只能证明持久化结构已落盘，不能证明后台 API、权限校验、审计或异常操作已经实现。
 - **Next Action**：先建立 Rewards Backend Stage，按 canonical 实现只读查询与受控命令；为所有写操作补权限、审计和状态前置条件，并完成 Backend Gate。
 

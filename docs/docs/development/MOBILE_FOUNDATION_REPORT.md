@@ -1,4 +1,4 @@
-# ZH-LAO V2 — Mobile Foundation Report
+# ZH-LAO  — Mobile Foundation Report
 
 **文件：`MOBILE_FOUNDATION_REPORT.md`**
 **Phase：MOB-F01 → MOB-F22 + MOBILE_FOUNDATION_GATE**
@@ -30,7 +30,7 @@ iOS 按真实环境（Windows 主机）记录为 **Config/Compatibility PASS，R
 | MOB-F06 Navigation Foundation | PASS | React Navigation 7：Root native-stack + BottomTabs + 自定义 BottomTabBar；`RootStackParamList`/`TabParamList` 类型化，路由参数 UUID string，禁 BIGINT |
 | MOB-F07 Shared Components | PASS | 迁移 AppText/LaoText/BottomTabBar/Waveform；新建 AvatarCircle/AppButton/StateView/FormField/ScreenContainer/AppScrollView/Toast/ConfigErrorScreen |
 | MOB-F08 Query Foundation | PASS | `src/api/query/queryClient.ts` 全局唯一 QueryClient，统一 retry/staleTime/gcTime/networkMode |
-| MOB-F09 V2 API Client | PASS | `V2HttpClient`（axios 封装）：EXPO_PUBLIC_API_URL 唯一来源、requestId、超时、AbortSignal、Authorization hook、错误归一化；Screen 级 axios/fetch = 0 |
+| MOB-F09  API Client | PASS | `HttpClient`（axios 封装）：EXPO_PUBLIC_API_URL 唯一来源、requestId、超时、AbortSignal、Authorization hook、错误归一化；Screen 级 axios/fetch = 0 |
 | MOB-F10 Global Contracts | PASS | UUID（branded PublicId + 校验/路由解析）、Time（ISO 8601 + tz；formatDate/DateTime/RelativeTime）、Pagination（cursor + offset）、Error（10 类 + requestId） |
 | MOB-F11 Secure Storage | PASS | 三层：Memory(access) / SecureStore(refresh) / AsyncStorage(偏好)；`FORBIDDEN_ASYNC_STORAGE_KEYS` 防御；无 MMKV |
 | MOB-F12 Auth Skeleton | PASS | AuthProvider + SessionState（bootstrapping/anonymous/authenticated）+ SessionBootstrap；无真实 Identity API、无自造 refresh 端点，仅 future identity adapter 接口 |
@@ -99,7 +99,7 @@ apps/mobile/
 | 分类 | 数量 | 关键项目 |
 | --- | --- | --- |
 | REUSE | 27 | 5 套主题预设、typography、NotoSansLao 字体、icon/splash/adaptive 资源、AppText、LaoText、BottomTabBar、Waveform、AvatarCircle、zh/lo 语言包、i18n 结构 |
-| REFACTOR | 11 | ThemeContext（异步持久化 + hydration）、RootNavigator/TabNavigator（typed UUID routes）、Settings/Language/Theme 屏、App.tsx bootstrap、i18n 适配 V2 Preferences |
+| REFACTOR | 11 | ThemeContext（异步持久化 + hydration）、RootNavigator/TabNavigator（typed UUID routes）、Settings/Language/Theme 屏、App.tsx bootstrap、i18n 适配  Preferences |
 | REWRITE | 21 | colors 静态导出、QueryClient 单例、全局 ScrollView 配置、Route Param 契约、旧 api/client（code 1000/9401、硬编码 IP 全部丢弃）、storage 分层、auth 骨架、audio/asset/realtime/form 基础设施、状态组件、审计脚本 |
 | DEFER | 38 | 全部业务 API service（auth/course/scene/social/translate/wordbook）、ChatList/UserCard 等业务组件、全部 Domain 业务屏、旧 MMKV、旧离线逻辑 |
 | **Total** | **97** | 完整矩阵见 `MOBILE_REUSE_MATRIX.md` |
@@ -111,7 +111,7 @@ apps/mobile/
 - **App Providers**：`SafeArea → Theme → I18n → QueryClient → Auth → ErrorBoundary → ToastHost → NavigationContainer`，单 QueryClient 单 AuthProvider。
 - **Navigation**：React Navigation 7（native-stack + bottom-tabs + 自定义 tab bar），`RootStackParamList`/`TabParamList` 类型化，路由资源 ID 一律 public UUID string；`parseRouteId` 对深层链接做防御。
 - **Query**：`queryClient` 单例，统一 `retry(2)`、`staleTime`、`gcTime`、`networkMode:'online'`、mutation 默认；服务端状态不进全局 store。
-- **API Client**：`V2HttpClient` 唯一 axios 所有者；base URL 仅 `EXPO_PUBLIC_API_URL`；requestId 贯穿；`mapHttpFailure/normalizeHttpError` 归一化到 AppError 模型；Authorization hook 从 Auth 层取内存 token。
+- **API Client**：`HttpClient` 唯一 axios 所有者；base URL 仅 `EXPO_PUBLIC_API_URL`；requestId 贯穿；`mapHttpFailure/normalizeHttpError` 归一化到 AppError 模型；Authorization hook 从 Auth 层取内存 token。
 - **Auth**：SessionState 状态机 + bootstrap；access=memory、refresh=SecureStore；未注册 Identity adapter 时存储凭证解析为 anonymous（`identity_adapter_pending`），不自造 refresh 端点。
 - **Storage**：Memory / SecureStore / AsyncStorage 三层，credential-like key 写入 AsyncStorage 会被拒绝。
 - **Audio**：expo-audio 播放 + 录音，卸载清理与资源释放。
@@ -207,7 +207,7 @@ Gate 审计项：
 Expo 57 Foundation   PASS     React Navigation      PASS
 NativeWind           PASS     Theme                 PASS
 Fonts                PASS     TanStack Query        PASS
-V2 API Client        PASS     Error Contract        PASS
+ API Client        PASS     Error Contract        PASS
 Secure Storage       PASS     Auth Skeleton         PASS
 Audio Foundation     PASS     Asset Foundation      PASS
 Realtime Skeleton    PASS     Form Foundation       PASS

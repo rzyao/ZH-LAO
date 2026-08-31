@@ -8,11 +8,11 @@ repository_commit_audited: 000f4c4aafacf4938d74902eddc4d78323196a89
 depends_on:
   - OPERATIONS_RBAC_CONTRACTS.md
 database_authority:
-  - database/v2/migrations/0200_operations.sql
+  - database/migrations/0200_operations.sql
 implementation_started: false
 ---
 
-# ZH-LAO V2 — Operations Use Cases
+# ZH-LAO  — Operations Use Cases
 
 > Use Cases 从 Admin / Operator 产品行为推导，不从 5 张表机械生成 CRUD。
 

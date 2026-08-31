@@ -22,7 +22,7 @@ Repository Re-Audit
 → Build / repair Task Registry
 → Calculate READY / BLOCKED / ACTIVE / RECOVERY_REQUIRED
 → Rebuild AI_STAGE_REGISTRY.json
-→ Validate AI 开发阶段矩阵
+→ Validate Feature Pages and task registry
 → Generate context-free next-session prompts
 → Push main
 → STOP
@@ -45,7 +45,6 @@ docs/docs/governance/open-questions.md
 docs/docs/development/DEVELOPMENT_CONTROL_CENTER.md
 docs/docs/development/DEVELOPMENT_PROGRESS.md
 docs/docs/development/workflow/index.md
-docs/docs/development/workflow/AI_STAGE_MODEL.md
 docs/docs/development/workflow/AI_STAGE_REGISTRY.json
 docs/docs/development/workflow/FEATURE_INVENTORY.json
 docs/docs/development/workflow/TASK_MANIFEST_SCHEMA.md
@@ -80,10 +79,10 @@ Final Gate / Final Audit
 → current code/tests/CI
 → Task Manifest / Event / Claim
 → DEVELOPMENT_PROGRESS
-→ Registry / Matrix / Control views
+→ Registry / Control views
 ```
 
-Matrix、Registry 和 Feature Inventory 是派生控制视图，不能反向覆盖 authority。
+Registry 和 Feature Inventory 是派生控制视图，不能反向覆盖 authority。
 
 ## 5. Feature Inventory Bootstrap
 
@@ -114,8 +113,8 @@ portfolio_status = active | deferred | pending_decision
 规则：
 
 - `active`：属于当前产品/项目开发组合；是否已有 READY Task 由各 Lane 状态单独表示；
-- `deferred`：仓库明确延期；Feature Page / Inventory 保留该组合语义，适用 Lane 在矩阵中显示 `○ 未启动`；
-- `pending_decision`：产品范围与 Domain/Contract 需要裁决，Feature Page 的相关 Lane 使用 `blocked` 并记录明确 blocker，矩阵显示 `⛔ 阻塞`。
+- `deferred`：仓库明确延期；Feature Page / Inventory 保留该组合语义，适用 Lane 记录为未启动；
+- `pending_decision`：产品范围与 Domain/Contract 需要裁决，Feature Page 的相关 Lane 使用 `blocked` 并记录明确 blocker。
 
 禁止：
 
@@ -161,7 +160,7 @@ Feature 根据实际需要识别：
 
 ## 7. Status Calculation
 
-Stage 事实仍可使用 `done`、`ready`、`active`、`validating`、`blocked`、`recovery` 等执行状态；但 Matrix 是全局扫描视图，只投影为：
+Stage 事实仍可使用 `done`、`ready`、`active`、`validating`、`blocked`、`recovery` 等执行状态；状态语义如下：
 
 ```text
 ✅ done       全部适用 Stage 都已完成并有 Gate / Audit / Report / code+CI 证据
@@ -172,7 +171,7 @@ Stage 事实仍可使用 `done`、`ready`、`active`、`validating`、`blocked`�
 — na         不适用
 ```
 
-Stage 仍可保留更细的 `validating` / `recovery` 事实，但它们只投影为 Matrix 的 `⏳ 进行中`；Matrix 不显示 Stage 名或内部状态。
+Stage 仍可保留更细的 `validating` / `recovery` 事实；Stage 名、细节与证据留在 Task Manifest、Feature Page 和开发工件中。
 
 ## 8. Registry 与 Task Manifest
 
@@ -186,35 +185,16 @@ docs/docs/development/workflow/NEXT_ACTIONS.md
 docs/docs/development/workflow/tasks/*.yaml
 ```
 
-新的可执行 Stage 必须有 Manifest，并使用 `matrix` 映射：
-
-```yaml
-matrix:
-  object_type: domain | feature | system
-  object_id: <id>
-  lane: design | backend | admin | mobile | integration | acceptance
-  sequence: <int>
-  stage_id: <stable-id>
-  label_zh: <中文名称>
-  parent_object_id: <parent-or-null>
-```
-
 一个 Manifest 默认只代表一个 Stage。
 
-## 9. Matrix
+## 9. 校验与构建
 
-`DOMAIN_LIFECYCLE_MATRIX.md` 保留旧路径，但语义是 **全局 Domain → Feature 开发导航矩阵**。
-
-页面必须继续只显示一个表格。
-
-执行：
+执行文档校验与构建：
 
 ```text
-python scripts/generate_ai_stage_matrix.py --check
+python scripts/validate_feature_pages.py
 pnpm --dir docs docs:build
 ```
-
-不得手工维护 Matrix 的 Feature 行状态；状态修改必须发生在 canonical Feature Page Frontmatter。System / Domain 汇总行继续读取 Stage Registry，并在矩阵边界投影为六种概览状态：`○ 未启动`、`▶ 就绪`、`⏳ 进行中`、`⛔ 阻塞`、`✅ 完成`、`— 不适用`。生成器同时锁定 Domain → Feature 树状 UI，禁止生成 Node Detail 页面。
 
 ## 10. NEXT_ACTIONS
 
@@ -265,7 +245,7 @@ BLOCKED_STAGES_HAVE_REASON = YES
 ACTIVE_STAGES_HAVE_CLAIM = YES
 LEGACY_STAGES_NOT_FABRICATED = YES
 NEXT_PROMPTS_CONTEXT_FREE = YES
-MATRIX_CHECK = PASS
+FEATURE_PAGE_CHECK = PASS
 DOCS_BUILD = PASS
 BUSINESS_IMPLEMENTATION_CHANGES = 0
 ```

@@ -5,7 +5,7 @@ last_updated: 2026-08-31
 
 # AI Role Model
 
-本页定义 ZH-LAO V2 多会话工作流中的固定角色。角色定义“这个 AI 会话可以做什么”，Task Manifest 定义“这个角色这一次具体做什么”。
+本页定义 ZH-LAO  多会话工作流中的固定角色。角色定义“这个 AI 会话可以做什么”，Task Manifest 定义“这个角色这一次具体做什么”。
 
 本模型允许不同 AI 能力、不同执行环境分工：**高推理能力会话优先承担 Architect / Spec Compiler；本地编码能力更强但推理较弱的会话优先承担 Implementation Worker。** 角色仍是权限边界，不是模型品牌或人格标签。
 
@@ -203,7 +203,7 @@ Backend PASS 不代表 Admin PASS。
 
 - 汇总多个 Worker 已写入的 Task/Gate/Report/Event；
 - 修复全局控制页面漂移；
-- 更新 Matrix / Progress / Control Center；
+- 更新 Progress / Control Center；
 - 检查遗漏 Admin/Client/Recovery track；
 - 识别并发会话产生的状态不一致。
 

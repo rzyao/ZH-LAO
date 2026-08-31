@@ -5,7 +5,7 @@ last_updated: 2026-08-31
 
 # AI 多会话 Workflow Control Plane
 
-本目录是 ZH-LAO V2 的 **AI 多角色、多会话并行、无上下文接手** 控制协议。
+本目录是 ZH-LAO  的 **AI 多角色、多会话并行、无上下文接手** 控制协议。
 
 目标不是让某个 ChatGPT 会话“记住项目”，而是让任何新会话只依靠当前 GitHub `main` 就能恢复：
 
@@ -204,7 +204,6 @@ CONTENT_GATE = FAIL
 以下页面是全局控制视图：
 
 - `DEVELOPMENT_CONTROL_CENTER.md`
-- `DOMAIN_LIFECYCLE_MATRIX.md`
 - `DEVELOPMENT_PROGRESS.md`
 
 Worker 首先写自己 Task 的事实：
@@ -276,7 +275,7 @@ Final Gate / Final Audit
 → Current Code + Tests / CI
 → Task Manifest / Events
 → DEVELOPMENT_PROGRESS
-→ Control Center / Matrix Summary
+→ Control Center summary
 ```
 
 Blueprint 只回答“在当前 snapshot 上应如何实现”，不回答“实现已经完成”。

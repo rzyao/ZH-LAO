@@ -51,7 +51,7 @@ Portfolio Status：`active`。
 - [Social 资料与展示内容](/domains/social/profile)：Profile 参与 Discovery 的资格基础。
 - [ADR-010](/adr/ADR-010-social-profile-discovery-and-relationships)：实时计算候选、只持久化 Exposure 的决策。
 - [Social 数据库](/domains/social/database)：Exposure 索引、90 天 retention 与“不建 Candidate”边界。
-- `database/v2/migrations/0700_social.sql` 已落 `social_discovery_exposures` 与三个查询方向索引。
+- `database/migrations/0700_social.sql` 已落 `social_discovery_exposures` 与三个查询方向索引。
 
 当前 Gate 事实：Workflow Registry 的正式 `SOCIAL-DESIGN` 仍为 `todo`，并存在下游引用的 `SOCIAL_DESIGN_GATE` 依赖，但当前 `main` 没有该 Gate 的 PASS 证据，也没有 Discovery 公共 API / 排序配置 Contract。因此本 Lane 为 `active`。
 

@@ -5,13 +5,13 @@ phase_name: Identity Domain
 last_updated: 2026-08-30
 depends_on: FOUNDATION_GATE = PASS
 database_authority:
-  - database/v2/migrations/0100_identity.sql
-  - database/v2/migrations/1220_identity_auth_runtime.sql
+  - database/migrations/0100_identity.sql
+  - database/migrations/1220_identity_auth_runtime.sql
 exit_gate: IDENTITY_GATE
 authority: docs/docs/development/MASTER_DEVELOPMENT_PLAN.md
 ---
 
-# ZH-LAO V2 — IDENTITY IMPLEMENTATION PLAN
+# ZH-LAO  — IDENTITY IMPLEMENTATION PLAN
 
 > 目标路径：`docs/docs/development/02-identity/IDENTITY_IMPLEMENTATION_PLAN.md`
 >
@@ -28,7 +28,7 @@ authority: docs/docs/development/MASTER_DEVELOPMENT_PLAN.md
 前置阶段：
 
 ```text
-PostgreSQL V2 Baseline = COMPLETE / PASS
+PostgreSQL  Baseline = COMPLETE / PASS
 Application Foundation = COMPLETE / PASS
 ```
 
@@ -80,8 +80,8 @@ docs/docs/development/MASTER_DEVELOPMENT_PLAN.md
 Identity 当前最终物理契约：
 
 ```text
-database/v2/migrations/0100_identity.sql
-database/v2/migrations/1220_identity_auth_runtime.sql
+database/migrations/0100_identity.sql
+database/migrations/1220_identity_auth_runtime.sql
 ```
 
 如果旧文档仍包含：
@@ -2110,7 +2110,7 @@ frozen migration diff = 0
 Fresh DB 仍由：
 
 ```text
-database/v2
+database
 ```
 
 安装 schema。
@@ -2135,7 +2135,7 @@ docs/docs/development/DEVELOPMENT_PROGRESS.md
 默认不改：
 
 ```text
-database/v2/migrations/**
+database/migrations/**
 ```
 
 ---
@@ -2375,7 +2375,7 @@ PASS_WITH_BLOCKERS
 
 Identity Phase 完成意味着：
 
-> 从 fresh PostgreSQL V2 数据库启动后，系统能够安全完成 phone OTP 新用户注册、已有用户登录、Facebook 身份认证、固定学习方向创建、Device 归属、服务端可撤销 Session、Access/Refresh Token、Refresh Rotation、Logout、账户状态校验、Foundation AuthenticationProvider 接管以及冻结的 Identity Outbox 事件；所有核心流程通过真实 PostgreSQL Integration、并发、安全和 HTTP 测试；全过程不修改 frozen migrations、不泄漏 internal BIGINT、不越 Domain 边界。
+> 从 fresh PostgreSQL  数据库启动后，系统能够安全完成 phone OTP 新用户注册、已有用户登录、Facebook 身份认证、固定学习方向创建、Device 归属、服务端可撤销 Session、Access/Refresh Token、Refresh Rotation、Logout、账户状态校验、Foundation AuthenticationProvider 接管以及冻结的 Identity Outbox 事件；所有核心流程通过真实 PostgreSQL Integration、并发、安全和 HTTP 测试；全过程不修改 frozen migrations、不泄漏 internal BIGINT、不越 Domain 边界。
 
 ---
 

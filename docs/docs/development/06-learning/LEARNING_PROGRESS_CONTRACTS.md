@@ -8,7 +8,7 @@ implementation_started: false
 last_updated: 2026-08-31
 ---
 
-# ZH-LAO V2 — Learning Progress / Mastery / Review / Practice Contracts
+# ZH-LAO  — Learning Progress / Mastery / Review / Practice Contracts
 
 > Canonical current-state、attempt/scoring、transaction/concurrency contract。所有规则适配 frozen `0500_learning.sql`；不得用 generic JSON/hidden metadata伪造缺失字段。
 

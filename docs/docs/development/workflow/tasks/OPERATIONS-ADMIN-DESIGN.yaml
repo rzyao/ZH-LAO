@@ -3,14 +3,6 @@ version: 1
 role: design_worker
 domain: operations
 track: admin
-matrix:
-  object_type: domain
-  object_id: operations
-  lane: admin
-  sequence: 20
-  stage_id: OPERATIONS-ADMIN-DESIGN
-  label_zh: Admin 设计
-  parent_object_id: null
 status: ready
 priority: parallel
 parallel_safe: true
@@ -39,9 +31,8 @@ forbidden_paths:
   - apps/admin/**
   - apps/backend/**
   - apps/mobile/**
-  - database/v2/migrations/**
+  - database/migrations/**
 required_sources:
-  - docs/docs/development/workflow/AI_STAGE_MODEL.md
   - docs/docs/development/admin/access-control/OPERATIONS_ADMIN_DESIGN_BRIEF.md
   - docs/docs/domains/operations/index.md
   - docs/docs/development/04-operations/OPERATIONS_API.md

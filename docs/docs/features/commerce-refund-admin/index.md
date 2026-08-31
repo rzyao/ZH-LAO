@@ -40,7 +40,7 @@ Stage / 工件 / Gate：[购买、支付与退款](/domains/commerce/purchase-an
 
 范围：实现 Refund 与 RefundRecovery 的管理 application service、Provider 结果处理、幂等、状态转换、Recovery Wallet debit 与失败保留；不得使用 Wallet Adjustment 代替正常 RefundRecovery。
 
-Stage / 工件 / Gate：`database/v2/migrations/0900_commerce.sql` 已有 `commerce_refunds` 与 `commerce_refund_recoveries`，并有 Wallet/Ledger 物理约束；但当前没有 Commerce backend module、退款管理 API、Provider adapter 实现报告或 Backend Gate。[开发进度](/development/DEVELOPMENT_PROGRESS) 仍为 Commerce `NOT_STARTED`。
+Stage / 工件 / Gate：`database/migrations/0900_commerce.sql` 已有 `commerce_refunds` 与 `commerce_refund_recoveries`，并有 Wallet/Ledger 物理约束；但当前没有 Commerce backend module、退款管理 API、Provider adapter 实现报告或 Backend Gate。[开发进度](/development/DEVELOPMENT_PROGRESS) 仍为 Commerce `NOT_STARTED`。
 
 下一步：正式 Commerce Implementation 中实现 Refund/Recovery service、Provider/Wallet 协作与失败/重放测试，再形成真实 Backend Gate。
 

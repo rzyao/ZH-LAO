@@ -3,14 +3,6 @@ version: 1
 role: admin_worker
 domain: platform
 track: admin
-matrix:
-  object_type: domain
-  object_id: platform
-  lane: admin
-  sequence: 30
-  stage_id: PLATFORM-ADMIN-STAGE-B
-  label_zh: Admin Stage B
-  parent_object_id: null
 status: ready
 priority: parallel
 parallel_safe: true
@@ -42,9 +34,8 @@ allowed_paths:
 forbidden_paths:
   - apps/backend/**
   - apps/mobile/**
-  - database/v2/migrations/**
+  - database/migrations/**
 required_sources:
-  - docs/docs/development/workflow/AI_STAGE_MODEL.md
   - docs/docs/development/03-platform/PLATFORM_ADMIN_EXECUTION_BRIEF.md
   - docs/docs/development/03-platform/PLATFORM_ADMIN_IMPLEMENTATION_REPORT.md
   - docs/docs/development/04-operations/OPERATIONS_IMPLEMENTATION_REPORT.md

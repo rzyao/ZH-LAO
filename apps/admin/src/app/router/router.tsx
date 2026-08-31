@@ -16,6 +16,7 @@ import { DomainPlaceholder } from '@/pages/domain-placeholder'
 import { NotFoundPage } from '@/pages/not-found'
 import { LoginPage } from '@/pages/login'
 import { UnauthorizedPage } from '@/pages/unauthorized'
+import { AuthGuard } from '@/auth/guards/AuthGuard'
 
 /* ---------- Lazy page components (route-level code splitting) ---------- */
 
@@ -68,11 +69,7 @@ export const rootRoute = createRootRoute({ component: RootComponent })
 const shellRoute = createRoute({
   getParentRoute: () => rootRoute,
   id: 'shell',
-  component: () => (
-    <AppShell>
-      <Outlet />
-    </AppShell>
-  ),
+  component: () => <AuthGuard><AppShell><Outlet /></AppShell></AuthGuard>,
 })
 
 /* ---------- Routes inside the shell ---------- */

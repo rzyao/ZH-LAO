@@ -8,11 +8,11 @@ depends_on:
   - PLATFORM_USE_CASES.md
   - PLATFORM_CONFIG_CONTRACTS.md
 database_authority:
-  - database/v2/migrations/0300_platform.sql
+  - database/migrations/0300_platform.sql
 next_step: Platform Design Audit
 ---
 
-# ZH-LAO V2 — PLATFORM API
+# ZH-LAO  — PLATFORM API
 
 > 目标路径：`docs/docs/development/03-platform/PLATFORM_API.md`
 >

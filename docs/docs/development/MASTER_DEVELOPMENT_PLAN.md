@@ -20,8 +20,7 @@ last_updated: 2026-08-31
 3. [当前下一动作](workflow/NEXT_ACTIONS.md)
 4. [Executable Spec System](SPEC_SYSTEM.md)
 5. [开发流程控制中心](DEVELOPMENT_CONTROL_CENTER.md)
-6. [领域生命周期矩阵](DOMAIN_LIFECYCLE_MATRIX.md)
-7. 当前 Task Manifest、Execution Brief、Implementation Blueprint、Gate / Report
+6. 当前 Task Manifest、Execution Brief、Implementation Blueprint、Gate / Report
 
 ## 当前流程原则
 

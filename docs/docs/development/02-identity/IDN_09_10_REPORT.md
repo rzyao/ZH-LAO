@@ -1,4 +1,4 @@
-# ZH-LAO V2 — IDN-09 至 IDN-10 报告
+# ZH-LAO  — IDN-09 至 IDN-10 报告
 
 ```text
 IDN-09 = COMPLETE

@@ -28,7 +28,6 @@ admin_pages: []
 
 - [Commerce canonical](../../domains/commerce/index.md)：领域职责明确不负责 Creator Economy / 提现 / 结算（V1），V1 范围同时明确延后 `Creator earnings` 与 `Withdrawal / Settlement`，且当前不建表。
 - `FEATURE_PAGE_INDEX.json`：记录 canonical title、`portfolio_status: deferred` 与当前六 Lane 状态。
-- [Domain Lifecycle Matrix](../../development/DOMAIN_LIFECYCLE_MATRIX.md)：作为派生视图展示当前 Feature 与 Lane 状态，不作为新增设计事实来源。
 
 ## 设计
 

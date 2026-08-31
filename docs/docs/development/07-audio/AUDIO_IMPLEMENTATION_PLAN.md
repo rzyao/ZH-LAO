@@ -8,7 +8,7 @@ implementation_started: false
 last_updated: 2026-08-31
 ---
 
-# ZH-LAO V2 — Audio Production Implementation Plan
+# ZH-LAO  — Audio Production Implementation Plan
 
 > This plan is frozen by the recovered Design Gate. **Do not execute it until Entry Gate is satisfied in a separate implementation session.**
 

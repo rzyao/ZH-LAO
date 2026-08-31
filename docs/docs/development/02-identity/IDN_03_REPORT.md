@@ -6,7 +6,7 @@ task_name: Repository Layer
 completed_at: 2026-08-30
 ---
 
-# ZH-LAO V2 — IDN-03 Repository Layer Report
+# ZH-LAO  — IDN-03 Repository Layer Report
 
 ## 结果
 
@@ -64,7 +64,7 @@ OTP 验证/限流、电话或 Facebook 认证、JWT、refresh rotation、Device/
 
 ## 真实 PostgreSQL 验证
 
-新鲜 V2 migration 数据库的集成测试覆盖七类仓储的主要创建、读取、更新、nullable 映射、唯一冲突、事务回滚与 executor 隔离；并发测试证明同一 User 行、同一 refresh hash 行、同 phone + purpose advisory lock 会等待，而不同号码不会错误串行化。
+新鲜  migration 数据库的集成测试覆盖七类仓储的主要创建、读取、更新、nullable 映射、唯一冲突、事务回滚与 executor 隔离；并发测试证明同一 User 行、同一 refresh hash 行、同 phone + purpose advisory lock 会等待，而不同号码不会错误串行化。
 
 ```text
 Typecheck = PASS

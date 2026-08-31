@@ -1,4 +1,4 @@
-# ZH-LAO V2 — Mobile Foundation Plan
+# ZH-LAO  — Mobile Foundation Plan
 
 **文件名：`MOBILE_FOUNDATION_PLAN.md`**  
 **Phase：Mobile Foundation**  
@@ -12,13 +12,13 @@
 
 # 1. 目标
 
-本阶段用于建立 ZH-LAO V2 Mobile 的统一应用基础。
+本阶段用于建立 ZH-LAO  Mobile 的统一应用基础。
 
 目标不是重新设计和重写现有 Mobile UI。
 
 目标是：
 
-> **建立新的 Expo SDK 57 V2 Mobile Foundation，在保留成熟 UI/UX、Theme、Navigation 和通用组件的同时，重建 V2 API、Auth、Storage、Audio、Asset、Realtime Skeleton 和 Testing Infrastructure。**
+> **建立新的 Expo SDK 57  Mobile Foundation，在保留成熟 UI/UX、Theme、Navigation 和通用组件的同时，重建  API、Auth、Storage、Audio、Asset、Realtime Skeleton 和 Testing Infrastructure。**
 
 本阶段完成后，后续 Identity、Content、Learning、Social、Chat、Commerce 等 Domain 可以直接基于统一 Mobile Foundation 接入，而无需再次重建客户端底层基础。
 
@@ -29,7 +29,7 @@
 已经确定：
 
 ```text
-PostgreSQL V2 Baseline        PASS
+PostgreSQL  Baseline        PASS
 Application Foundation       PASS
 Admin Foundation             PASS
 Mobile Tech Stack            FROZEN
@@ -49,7 +49,7 @@ Mobile Foundation 必须遵循：
 
 ```text
 Reuse Product UI
-Rebuild V2 Infrastructure
+Rebuild  Infrastructure
 Avoid Premature Business Integration
 ```
 
@@ -81,7 +81,7 @@ Audio
 → 重建
 
 Asset
-→ 新建 V2 Foundation
+→ 新建  Foundation
 
 Realtime
 → 只建 Skeleton
@@ -151,7 +151,7 @@ Existing Navigation Migration
 Shared UI Component Migration
 
 TanStack Query Foundation
-V2 HTTP Client Foundation
+ HTTP Client Foundation
 Error Foundation
 
 UUID Contract
@@ -213,7 +213,7 @@ Trust API
 
 即使现有 Mobile 中已经有这些 API：
 
-也不得直接作为 V2 接口继续使用。
+也不得直接作为  接口继续使用。
 
 ---
 
@@ -385,7 +385,7 @@ REFACTOR
 
 ```text
 UI 已不符合最终产品
-旧结构严重阻碍 V2
+旧结构严重阻碍
 业务模型已经根本变化
 组件无法合理拆解
 ```
@@ -640,7 +640,7 @@ Axios 继续作为 Transport。
 建立新的：
 
 ```text
-V2HttpClient
+HttpClient
 ```
 
 或等价结构。
@@ -670,9 +670,9 @@ code === 9401
 旧 response envelope
 ```
 
-作为 V2 固定 Contract。
+作为  固定 Contract。
 
-必须依据 V2 Backend Foundation 的真实 API Error Contract。
+必须依据  Backend Foundation 的真实 API Error Contract。
 
 ---
 
@@ -743,7 +743,7 @@ Debugging
 string UUID
 ```
 
-禁止 Mobile V2 Contract 使用：
+禁止 Mobile  Contract 使用：
 
 ```text
 BIGINT
@@ -877,7 +877,7 @@ react-native-mmkv
 
 如果无真实用途：
 
-V2 不引入。
+ 不引入。
 
 ---
 
@@ -899,7 +899,7 @@ Recording Service / Hook
 
 ---
 
-# 39. expo-av 禁止进入 V2
+# 39. expo-av 禁止进入
 
 必须确认：
 
@@ -1021,7 +1021,7 @@ Progress type
 Cancellation
 ```
 
-但不得调用不存在的真实 V2 Upload Endpoint。
+但不得调用不存在的真实  Upload Endpoint。
 
 ---
 
@@ -1148,7 +1148,7 @@ fail clearly
 
 # 54. 删除硬编码开发机 IP
 
-V2 禁止保留类似：
+ 禁止保留类似：
 
 ```text
 192.168.x.x
@@ -1246,7 +1246,7 @@ SectionList.defaultProps
 
 的全局 mutation。
 
-V2 不应无评估直接复制。
+ 不应无评估直接复制。
 
 如确有需要：
 
@@ -1658,9 +1658,9 @@ Route Types
 
 ---
 
-## MOB-F09 — V2 API Client
+## MOB-F09 —  API Client
 
-建立新的 Axios-based V2 client。
+建立新的 Axios-based  client。
 
 完成：
 
@@ -2037,7 +2037,7 @@ Theme                       PASS
 Fonts                       PASS
 
 TanStack Query              PASS
-V2 API Client               PASS
+ API Client               PASS
 Error Contract              PASS
 
 Secure Storage              PASS
@@ -2265,7 +2265,7 @@ Foundation 不提前实现。
 10. Screen 直接操作底层 Audio Engine。
 11. 引入完整 SQLite Offline System。
 12. 猜测 Chat Protocol。
-13. 使用旧 Backend API 作为 V2 Contract。
+13. 使用旧 Backend API 作为  Contract。
 14. 使用 internal BIGINT。
 15. 为 Foundation 创建假的 Domain CRUD。
 16. 自动开始下一 Domain。
@@ -2280,7 +2280,7 @@ Foundation 不提前实现。
 
 而是：
 
-> **ZH-LAO V2 已经拥有一个稳定、现代、可测试的 Expo 57 Mobile Application Foundation；现有成熟 UI/UX 已经具备清晰的复用路径，底层 V2 API、Auth、Storage、Audio、Asset、Realtime 和 Testing 基础已经准备完毕，后续每个 Domain 可以按 API Contract 独立接入。**
+> **ZH-LAO  已经拥有一个稳定、现代、可测试的 Expo 57 Mobile Application Foundation；现有成熟 UI/UX 已经具备清晰的复用路径，底层  API、Auth、Storage、Audio、Asset、Realtime 和 Testing 基础已经准备完毕，后续每个 Domain 可以按 API Contract 独立接入。**
 
 ---
 
@@ -2303,7 +2303,7 @@ MOB-F07 Shared Components
 ↓
 MOB-F08 Query Foundation
 ↓
-MOB-F09 V2 API Client
+MOB-F09  API Client
 ↓
 MOB-F10 Global Contracts
 ↓
@@ -2360,4 +2360,4 @@ Continue
 
 # 100. 一句话执行原则
 
-> **Mobile Foundation 的目标不是重写一个新 App，而是把成熟的现有产品体验安全地搬到新的 V2 客户端基础上，并彻底切断对旧数据层、认证层和基础设施的依赖。**
+> **Mobile Foundation 的目标不是重写一个新 App，而是把成熟的现有产品体验安全地搬到新的  客户端基础上，并彻底切断对旧数据层、认证层和基础设施的依赖。**

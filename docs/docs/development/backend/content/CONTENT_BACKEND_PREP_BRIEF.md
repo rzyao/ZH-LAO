@@ -40,8 +40,8 @@ latest main grounding
 - `SPEC_SYSTEM.md`
 - `IMPLEMENTATION_BLUEPRINT_TEMPLATE.md`
 - Identity / Platform / Operations 当前 public contracts 与 final reports
-- `database/v2/migrations/0400_content.sql`
-- `database/v2/migrations/1240_content_revision.sql`
+- `database/migrations/0400_content.sql`
+- `database/migrations/1240_content_revision.sql`
 - 当前 `apps/backend` module conventions
 
 ## Required Outputs

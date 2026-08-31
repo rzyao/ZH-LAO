@@ -10,7 +10,7 @@ repository_entry_head: f5b3f3f41468036ecbd1544c6a9b3c5fbf9668db
 pre_audit_write_head: e11735eec9521e5bcf9aaefc6ed93d4a73bf8108
 ---
 
-# ZH-LAO V2 — Learning Independent Design Audit
+# ZH-LAO  — Learning Independent Design Audit
 
 > 本审计独立核对 remote repository reality、`0500_learning.sql`、Learning frozen domain docs、Content/Identity/Operations public boundaries、Product Semantics、Use Cases、Progress/Practice、HTTP/Public Contracts 与 Implementation Plan。没有为了 PASS 假装 schema 已经拥有不存在的 revision/public-attempt 字段，也没有进入 implementation。
 

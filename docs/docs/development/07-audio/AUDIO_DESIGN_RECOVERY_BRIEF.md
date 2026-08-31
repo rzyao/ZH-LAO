@@ -10,7 +10,7 @@ contaminated_commit: ab1d4ebe75e79283fc6fab7ca033ee87a9787843
 trusted_brief_commit: f98127c421067875f5ae2a0cf4f56703240a17d1
 ---
 
-# ZH-LAO V2 — Audio Design Recovery Brief
+# ZH-LAO  — Audio Design Recovery Brief
 
 > 本文件只用于 **Audio Design Recovery**。
 >
@@ -51,7 +51,7 @@ latest HEAD commit
 MASTER_DEVELOPMENT_PLAN.md
 DEVELOPMENT_PROGRESS.md
 07-audio/AUDIO_DESIGN_BRIEF.md
-database/v2/migrations/0600_audio.sql
+database/migrations/0600_audio.sql
 docs/docs/domains/audio/index.md
 docs/docs/domains/audio/database.md
 ADR-020 and relevant global DB/Asset ADRs
@@ -127,7 +127,7 @@ AUDIO_TTS_PIPELINE.md
 以下为 Recovery 的 source-of-truth：
 
 ```text
-1. database/v2/migrations/0600_audio.sql
+1. database/migrations/0600_audio.sql
 2. docs/docs/domains/audio/database.md
 3. docs/docs/domains/audio/index.md
 4. docs/docs/development/07-audio/AUDIO_DESIGN_BRIEF.md
@@ -153,7 +153,7 @@ docs/docs/development/07-audio/AUDIO_DESIGN_BRIEF.md
 Audio physical database authority 固定为：
 
 ```text
-database/v2/migrations/0600_audio.sql
+database/migrations/0600_audio.sql
 ```
 
 Frozen core tables = exactly 9：

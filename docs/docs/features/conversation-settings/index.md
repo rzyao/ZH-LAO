@@ -48,7 +48,7 @@ Gate / 完成证据：canonical 已固定 `hidden_at`、`cleared_before_seq`、`
 
 范围：实现置顶/取消置顶、免打扰开关、隐藏/恢复、清历史等 User State 写用例/API，并处理 `is_pinned` 与 `pinned_at` 一致性、`cleared_before_seq` 边界、清历史与 read cursor 协同，以及新消息/有效参与导致的隐藏恢复。
 
-执行阶段与产物：尚未进入 Chat Backend Feature 实现 Stage。数据库前置工件 `database/v2/migrations/0800_chat.sql` 已创建 `chat_conversation_user_state`，字段与 canonical 一致；但 `main` 未发现 F13 Conversation Settings 的 Backend Stage/Report、API/Service/Repository 实现。
+执行阶段与产物：尚未进入 Chat Backend Feature 实现 Stage。数据库前置工件 `database/migrations/0800_chat.sql` 已创建 `chat_conversation_user_state`，字段与 canonical 一致；但 `main` 未发现 F13 Conversation Settings 的 Backend Stage/Report、API/Service/Repository 实现。
 
 Gate / 证据：现有证据只能证明 canonical 数据模型已落库，不能证明用户状态操作已实现；没有 Backend PASS、接口和行为测试证据，因此保持 `todo`。
 

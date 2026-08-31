@@ -9,7 +9,7 @@ last_updated: 2026-08-31
 repository_commit_audited: 007d6ad705a9afcc4fefb03442e371b4dec07fad
 ---
 
-# ZH-LAO V2 — Content Use Cases
+# ZH-LAO  — Content Use Cases
 
 > Use Cases 从产品能力推导，不是一表一 CRUD。Runtime 与 Admin/Authoring 明确分离；用户学习事实全部留在 Learning。
 

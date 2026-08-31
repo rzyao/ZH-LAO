@@ -40,7 +40,7 @@ Portfolio Status：`active`。
 
 **Stage / Artifact**
 
-当前有效设计工件为 [Commerce](/domains/commerce/)、[购买、支付与退款](/domains/commerce/purchase-and-payment)、[钱包与账本](/domains/commerce/wallet) 与 [数据设计](/domains/commerce/database)。16-table canonical 对应 `commerce_orders`、`commerce_order_items`、`commerce_order_fulfillments`、`commerce_payments`、`commerce_payment_events`、`commerce_wallets`、`commerce_wallet_ledger`，仓库已有 `database/v2/migrations/0900_commerce.sql` 物理迁移工件。
+当前有效设计工件为 [Commerce](/domains/commerce/)、[购买、支付与退款](/domains/commerce/purchase-and-payment)、[钱包与账本](/domains/commerce/wallet) 与 [数据设计](/domains/commerce/database)。16-table canonical 对应 `commerce_orders`、`commerce_order_items`、`commerce_order_fulfillments`、`commerce_payments`、`commerce_payment_events`、`commerce_wallets`、`commerce_wallet_ledger`，仓库已有 `database/migrations/0900_commerce.sql` 物理迁移工件。
 
 **Gate / Evidence**
 

@@ -1,4 +1,4 @@
-# ZH-LAO V2 — IDN-20 Domain Final Audit
+# ZH-LAO  — IDN-20 Domain Final Audit
 
 ```text
 IDN-20 = COMPLETE

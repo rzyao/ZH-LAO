@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate canonical Feature Pages and emit their derived matrix index."""
+"""Validate canonical Feature Pages and emit their derived index."""
 from __future__ import annotations
 import argparse
 import json

@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { useAuth } from '../context/AuthContext'
 import { InlineLoading } from '@/components/feedback/loading'
+import { Navigate } from '@tanstack/react-router'
 
 export interface AuthGuardProps {
   children: React.ReactNode
@@ -13,9 +14,7 @@ export interface AuthGuardProps {
 /**
  * Guards a route/subtree for authenticated operators.
  *
- * The Foundation ships the mechanism only; the actual session check is wired
- * by the Identity/Operations phases. Fails closed by default (anonymous users
- * see `fallback`).
+ * Fails closed by default: anonymous users are redirected to the login page.
  */
 export function AuthGuard({
   children,
@@ -28,7 +27,7 @@ export function AuthGuard({
     return <>{loadingFallback ?? <InlineLoading label="正在检查登录状态…" />}</>
   }
   if (status !== 'authenticated') {
-    return <>{fallback ?? null}</>
+    return <>{fallback ?? <Navigate to="/login" replace />}</>
   }
   return <>{children}</>
 }

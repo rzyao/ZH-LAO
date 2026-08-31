@@ -37,7 +37,7 @@ Report、Case、Evidence、Decision 与 Appeal 均不是本 Feature 的替代数
 
 执行阶段与产物：仓库没有本 Feature 独立 Design Stage / Brief；设计输入已冻结在 [Trust & Safety](/domains/trust/)、[Moderation](/domains/trust/moderation)、[Contracts](/domains/trust/contracts) 与 [Trust 数据库](/domains/trust/database)。
 
-Gate / 完成证据：`database/v2/migrations/1100_trust.sql` 已创建 `trust.enforcement_actions` 并冻结 target、lifecycle 与 Decision/Appeal FK；数据库 baseline PASS。但没有本 Feature 的 Design Gate，故保持 `todo`。
+Gate / 完成证据：`database/migrations/1100_trust.sql` 已创建 `trust.enforcement_actions` 并冻结 target、lifecycle 与 Decision/Appeal FK；数据库 baseline PASS。但没有本 Feature 的 Design Gate，故保持 `todo`。
 
 下一步：建立 Enforcement Feature Design Stage，在不改 canonical 表模型的前提下冻结创建/应用/过期/撤销/失败的 Application Contract、Owner Domain 执行回执与错误处理。
 

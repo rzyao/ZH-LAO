@@ -1,4 +1,4 @@
-# ZH-LAO V2 — Mobile Reuse Matrix
+# ZH-LAO  — Mobile Reuse Matrix
 
 **文件：`MOBILE_REUSE_MATRIX.md`**
 **Phase：Mobile Foundation（MOB-F01）**
@@ -13,7 +13,7 @@
 | --- | --- | --- |
 | `REUSE` | 与最终产品一致、无旧 API / 旧 Backend Contract 强耦合、无明显架构问题 | 迁入 `apps/mobile`，仅做路径与命名适配 |
 | `REFACTOR` | UI / 语义基本可保留，但包含旧 API、旧 ID、旧 auth 假设、旧 storage 或架构耦合 | 保留外观与交互，重建数据与依赖 |
-| `REWRITE` | 旧结构严重阻碍 V2、旧契约不得作为 V2 Authority、或技术栈已冻结替换 | 丢弃旧实现，按 V2 规范新建 |
+| `REWRITE` | 旧结构严重阻碍 、旧契约不得作为  Authority、或技术栈已冻结替换 | 丢弃旧实现，按  规范新建 |
 | `DEFER` | 属于具体 Domain 业务，Foundation 阶段不迁移 | 等待对应 Domain API 冻结后进入 `features/<domain>` |
 
 ---
@@ -24,10 +24,10 @@
 | --- | --- | --- | --- |
 | `src/theme/presets.ts`（`THEME_PRESETS` / `AppTheme` / `AppThemeTokens`） | Theme | `REUSE` | 5 套主题预设与 Token 结构直接复用，无 API 依赖 |
 | `src/theme/typography.ts`（`FONT_FAMILIES` / `TYPOGRAPHY` / `TypographyVariant`） | Typography | `REUSE` | 老挝语 / 中文 / 数字三套字体族与排版 Token 直接复用 |
-| `src/theme/colors.ts`（静态导出 `THEME_PRESETS[0].tokens`） | Theme | `REWRITE` | 静态调色板绕过当前激活主题，V2 一律从 ThemeContext 取 Token |
+| `src/theme/colors.ts`（静态导出 `THEME_PRESETS[0].tokens`） | Theme | `REWRITE` | 静态调色板绕过当前激活主题， 一律从 ThemeContext 取 Token |
 | `src/theme/ThemeContext.tsx` | Theme | `REFACTOR` | 保留 `theme/colors/themeId/setThemeId` 契约；持久化从同步 storage 改为异步 Preferences Store（AsyncStorage），补齐 hydration 状态 |
 | `App.tsx` 内联 `new QueryClient(...)` | Server State | `REWRITE` | 迁移至 `src/api/query/queryClient.ts` 单例，统一 retry/staleTime/gcTime |
-| `App.tsx` 全局 `ScrollView/FlatList/SectionList.defaultProps` 变更 | UI 基础设施 | `REWRITE` | 计划 §58 禁止无评估直接复制全局 mutation；V2 封装为显式 `<AppScrollView>` 组件 |
+| `App.tsx` 全局 `ScrollView/FlatList/SectionList.defaultProps` 变更 | UI 基础设施 | `REWRITE` | 计划 §58 禁止无评估直接复制全局 mutation； 封装为显式 `<AppScrollView>` 组件 |
 | `App.tsx` Splash / 字体加载流程 | Bootstrap | `REFACTOR` | 保留 `expo-splash-screen` + `expo-font`，但失败必须 fail-open 且由统一 Bootstrap 编排 |
 
 ---
@@ -53,7 +53,7 @@
 | --- | --- | --- | --- |
 | `src/navigation/RootNavigator.tsx` | Navigation | `REFACTOR` | 保留 `NavigationContainer` + Native Stack 结构与 `slide_from_right` 转场；移除全部业务 Screen 导入，改为 typed route 与 UUID 参数 |
 | `src/navigation/TabNavigator.tsx` | Navigation | `REFACTOR` | 保留自定义 `BottomTabBar` 与底部 UX；Foundation 阶段只保留中性 Tab，业务 Tab 等 Domain 阶段接入 |
-| Route Param 契约 | Contract | `REWRITE` | 旧实现未定义类型化 Param；V2 强制 `RootStackParamList` / `TabParamList`，业务 ID 一律 `string` UUID，禁止 BIGINT |
+| Route Param 契约 | Contract | `REWRITE` | 旧实现未定义类型化 Param； 强制 `RootStackParamList` / `TabParamList`，业务 ID 一律 `string` UUID，禁止 BIGINT |
 
 ---
 
@@ -67,7 +67,7 @@
 | `src/components/AvatarCircle.tsx` | Component | `REUSE` | 圆形头像渲染（预设色块 / URL）保留，无 API 依赖 |
 | `src/components/Toast.tsx`（`ToastHost` + `toast` API） | Component | `REUSE` | 全局轻提示与 external store 模式保留 |
 | `src/components/Waveform.tsx` | Component | `REFACTOR` | 视觉保留；旧实现 import 静态 `colors` 而非 `useTheme()`，必须改为主题驱动 |
-| Error / Empty / Loading 状态组件 | Component | `REWRITE` | 旧 Mobile 无统一状态组件，V2 新建（`StateView` / `ErrorState` / `EmptyState`） |
+| Error / Empty / Loading 状态组件 | Component | `REWRITE` | 旧 Mobile 无统一状态组件， 新建（`StateView` / `ErrorState` / `EmptyState`） |
 
 ---
 
@@ -90,7 +90,7 @@ Foundation 只迁移低业务耦合的代表性页面用于验证复用链路（
 | Item | Type | Decision | Notes |
 | --- | --- | --- | --- |
 | `screens/settings/ThemeScreen.tsx` | Screen | `REUSE` | 代表性页面：纯 Theme UI + `setThemeId`，零 API 依赖 |
-| `screens/settings/LanguageSettingScreen.tsx` | Screen | `REFACTOR` | 代表性页面：UI 保留，语言偏好改由 V2 Preferences Store 承载（不再借用 `user_profile`） |
+| `screens/settings/LanguageSettingScreen.tsx` | Screen | `REFACTOR` | 代表性页面：UI 保留，语言偏好改由  Preferences Store 承载（不再借用 `user_profile`） |
 | `screens/settings/LanguageSelectScreen.tsx` | Screen | `REFACTOR` | 同上 |
 | `screens/settings/SettingsScreen.tsx` | Screen | `REFACTOR` | 只迁入「主题 / 语言 / 关于」等本地偏好分组；旧 `authApi.getProfile` 与交友开关属 Identity / Social，Foundation 不接入 |
 | `screens/auth/AuthScreen.tsx` | Screen | `DEFER` | Identity Domain（Login/OTP/Register），等 Identity API 冻结 |
@@ -124,7 +124,7 @@ Foundation 只迁移低业务耦合的代表性页面用于验证复用链路（
 
 | Item | Type | Decision | Notes |
 | --- | --- | --- | --- |
-| `src/api/client.ts`（Axios 实例 + 信封解包 + 401 刷新） | Infrastructure | `REWRITE` | 旧 `code === 1000` / `code === 9401` / `/api/app/auth/refresh` 与硬编码 `192.168.50.210:3030` 不得进入 V2；由 `V2HttpClient` 取代 |
+| `src/api/client.ts`（Axios 实例 + 信封解包 + 401 刷新） | Infrastructure | `REWRITE` | 旧 `code === 1000` / `code === 9401` / `/api/app/auth/refresh` 与硬编码 `192.168.50.210:3030` 不得进入 ；由 `HttpClient` 取代 |
 | `src/api/services/auth.ts` | API | `DEFER` | 仅作为 UI 集成参考；Identity API 冻结后重建 adapter |
 | `src/api/services/course.ts` | API | `DEFER` | Content API 冻结后重建 |
 | `src/api/services/scene.ts` | API | `DEFER` | Content API 冻结后重建 |
@@ -139,9 +139,9 @@ Foundation 只迁移低业务耦合的代表性页面用于验证复用链路（
 
 | Item | Type | Decision | Notes |
 | --- | --- | --- | --- |
-| `src/utils/storage.ts`（内存镜像 + AsyncStorage + `APP_TOKEN` / `APP_REFRESH_TOKEN`） | Infrastructure | `REWRITE` | Refresh Token 存 AsyncStorage 违反 V2 安全规则；由 Memory / SecureStore / AsyncStorage 三层取代 |
+| `src/utils/storage.ts`（内存镜像 + AsyncStorage + `APP_TOKEN` / `APP_REFRESH_TOKEN`） | Infrastructure | `REWRITE` | Refresh Token 存 AsyncStorage 违反  安全规则；由 Memory / SecureStore / AsyncStorage 三层取代 |
 | `src/utils/storage.ts` → `useAuthToken()` | Auth | `REWRITE` | 由 `AuthProvider` / `useAuth()` 取代，Foundation 阶段不接真实 Identity API |
-| `src/hooks/useLanguageProfile.ts` | Client State | `REFACTOR` | UI 与语言推导逻辑保留；底层从 `user_profile` 改为 V2 Preferences Store（AsyncStorage） |
+| `src/hooks/useLanguageProfile.ts` | Client State | `REFACTOR` | UI 与语言推导逻辑保留；底层从 `user_profile` 改为  Preferences Store（AsyncStorage） |
 
 ---
 
@@ -159,10 +159,10 @@ Foundation 只迁移低业务耦合的代表性页面用于验证复用链路（
 
 | Item | Type | Decision | Notes |
 | --- | --- | --- | --- |
-| 统一 Asset 层（`expo-image` + `expo-file-system`） | Infrastructure | `REWRITE` | 旧 Mobile 无统一 Asset 抽象（散落 `Image` + `getAssetUrl`），V2 新建 `AssetService` |
-| Realtime 基础设施 | Infrastructure | `REWRITE` | 旧 Mobile 只有轮询，无 Realtime；V2 新建 `RealtimeClient` Skeleton（不实现 Chat Protocol） |
-| Form 基础设施（React Hook Form + Zod） | Infrastructure | `REWRITE` | 旧 Mobile 无统一 Form 层，V2 新建 |
-| Testing 基础设施（Jest + RNTL + Maestro） | Infrastructure | `REWRITE` | 旧 Mobile 零测试，V2 新建 |
+| 统一 Asset 层（`expo-image` + `expo-file-system`） | Infrastructure | `REWRITE` | 旧 Mobile 无统一 Asset 抽象（散落 `Image` + `getAssetUrl`）， 新建 `AssetService` |
+| Realtime 基础设施 | Infrastructure | `REWRITE` | 旧 Mobile 只有轮询，无 Realtime； 新建 `RealtimeClient` Skeleton（不实现 Chat Protocol） |
+| Form 基础设施（React Hook Form + Zod） | Infrastructure | `REWRITE` | 旧 Mobile 无统一 Form 层， 新建 |
+| Testing 基础设施（Jest + RNTL + Maestro） | Infrastructure | `REWRITE` | 旧 Mobile 零测试， 新建 |
 
 ---
 
@@ -180,8 +180,8 @@ Foundation 只迁移低业务耦合的代表性页面用于验证复用链路（
 
 | Item | Type | Decision | Notes |
 | --- | --- | --- | --- |
-| `expo-av` | Dependency | `REWRITE` | 由 `expo-audio` 取代；V2 依赖与 import 计数必须为 0 |
-| `react-native-mmkv` | Dependency | `REWRITE` | 审计确认零引用，V2 不安装（计划 §37） |
+| `expo-av` | Dependency | `REWRITE` | 由 `expo-audio` 取代； 依赖与 import 计数必须为 0 |
+| `react-native-mmkv` | Dependency | `REWRITE` | 审计确认零引用， 不安装（计划 §37） |
 | `expo ~54` / `react-native 0.81` / `react 19.1` | Dependency | `REWRITE` | 升级为 Expo SDK 57 / RN 0.86 / React 19.2 |
 | `nativewind ^4.2` + `tailwindcss ^3.4` | Dependency | `REUSE` | 冻结组合，禁止升到 Tailwind 4 |
 | `react-native-reanimated ~4.1` | Dependency | `REUSE` | 随 SDK 57 对齐到 4.5.x |
@@ -189,7 +189,7 @@ Foundation 只迁移低业务耦合的代表性页面用于验证复用链路（
 | `@tanstack/react-query ^5` | Dependency | `REUSE` | Server State 方案保留，客户端配置重写 |
 | `@react-navigation/*` v7 | Dependency | `REUSE` | React Navigation 7 保留，禁止 Expo Router |
 | `axios` | Dependency | `REUSE` | Transport 保留，Client 重写 |
-| react-native-testing-library / jest / maestro | Dependency | `REWRITE` | 旧 Mobile 无测试依赖，V2 新建 |
+| react-native-testing-library / jest / maestro | Dependency | `REWRITE` | 旧 Mobile 无测试依赖， 新建 |
 
 ---
 

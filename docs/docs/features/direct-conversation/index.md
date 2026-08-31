@@ -49,7 +49,7 @@ Gate / 完成证据：canonical 已明确 `user_low_id = min(A,B)`、`user_high_
 
 范围：实现 Direct Conversation 的应用服务、Repository/API、外部 `canChat` 判定接入、事务创建和唯一冲突重查；不得开放破坏 Direct 两成员不变量的通用 `addMember/removeMember` 写入口。
 
-执行阶段与产物：尚未进入 Chat Backend Feature 实现 Stage。当前仓库已有数据库前置工件 `database/v2/migrations/0800_chat.sql`，其中包含 `chat_conversation`、`chat_direct_conversation`、`chat_conversation_member`、`chat_conversation_user_state` 及 Direct pair 唯一约束，但 `main` 未发现对应 Chat Backend Stage/Report 或应用模块实现。
+执行阶段与产物：尚未进入 Chat Backend Feature 实现 Stage。当前仓库已有数据库前置工件 `database/migrations/0800_chat.sql`，其中包含 `chat_conversation`、`chat_direct_conversation`、`chat_conversation_member`、`chat_conversation_user_state` 及 Direct pair 唯一约束，但 `main` 未发现对应 Chat Backend Stage/Report 或应用模块实现。
 
 Gate / 证据：当前只有冻结设计与数据库结构证据，没有 F13 Backend PASS、API/Service/Repository 实现证据，因此本 Lane 保持 `todo`。
 

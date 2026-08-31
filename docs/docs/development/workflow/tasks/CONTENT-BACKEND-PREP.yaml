@@ -3,14 +3,6 @@ version: 1
 role: design_worker
 domain: content
 track: backend
-matrix:
-  object_type: domain
-  object_id: content
-  lane: backend
-  sequence: 20
-  stage_id: CONTENT-BACKEND-PREP
-  label_zh: 后端实现准备
-  parent_object_id: null
 status: ready
 priority: primary
 parallel_safe: true
@@ -43,11 +35,10 @@ forbidden_paths:
   - apps/backend/**
   - apps/admin/**
   - apps/mobile/**
-  - database/v2/migrations/**
+  - database/migrations/**
 required_sources:
   - docs/docs/development/SPEC_SYSTEM.md
   - docs/docs/development/IMPLEMENTATION_BLUEPRINT_TEMPLATE.md
-  - docs/docs/development/workflow/AI_STAGE_MODEL.md
   - docs/docs/development/backend/content/CONTENT_BACKEND_PREP_BRIEF.md
   - docs/docs/development/05-content/CONTENT_DESIGN_AUDIT.md
   - docs/docs/development/05-content/CONTENT_EXECUTION_BRIEF.md

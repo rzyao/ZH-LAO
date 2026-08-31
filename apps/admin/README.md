@@ -23,7 +23,7 @@ Phase：**PHASE 1A — Admin Foundation** · 状态：**COMPLETE** · Gate：**P
 
 ```bash
 pnpm install          # 安装依赖
-pnpm dev              # 开发服务器（端口 5174）
+pnpm dev              # 开发服务器（端口 15173）
 pnpm typecheck        # TypeScript 检查
 pnpm lint             # ESLint
 pnpm test             # 单元 / 组件测试（Vitest）
@@ -47,7 +47,7 @@ apps/admin/
 │   │   ├── contracts/       # Error / UUID / Time / Pagination 全局契约
 │   │   ├── errors/          # ApiError 层级与映射
 │   │   └── query/           # QueryClient（唯一初始化）
-│   ├── auth/                # Auth/Permission Skeleton（Operator 占位）
+│   ├── auth/                # Admin 登录、Session 与 Permission
 │   ├── components/
 │   │   ├── ui/              # shadcn 风格基础组件（Base UI）
 │   │   ├── common/          # 跨域可复用技术组件（PageHeader/StatusBadge/Card）
@@ -121,6 +121,8 @@ VITE_API_BASE_URL=            # 后端 API base（默认 /api，dev 由 Vite pro
 VITE_APP_ENV=development      # development | test | production
 VITE_ENABLE_DESIGN_SYSTEM=true
 ```
+
+首次启动 Backend 后会自动创建默认超管账号：`admin` / `123456`。账号密码可通过 Backend 的 `ADMIN_USERNAME` 与 `ADMIN_PASSWORD` 环境变量覆盖。
 
 > 前端环境变量均为公开信息，禁止写入任何服务器秘密。
 

@@ -157,7 +157,7 @@ Pino Redaction 和 Request Context 属系统级基础设施，不由每个 Domai
 - 跨 Domain 无物理 FK；
 - Repository 只访问 Owner Schema；
 - HTTP 层禁止 SQL；
-- Migration 只能由 `database/v2` 明确执行；
+- Migration 只能由 `database` 明确执行；
 - Backend Readiness 不修改数据库。
 
 ## 并发安全

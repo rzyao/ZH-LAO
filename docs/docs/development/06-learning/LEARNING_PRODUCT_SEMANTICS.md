@@ -8,10 +8,10 @@ implementation_started: false
 last_updated: 2026-08-31
 repository_commit_audited: f5b3f3f41468036ecbd1544c6a9b3c5fbf9668db
 database_authority:
-  - database/v2/migrations/0500_learning.sql
+  - database/migrations/0500_learning.sql
 ---
 
-# ZH-LAO V2 — Learning Product Semantics
+# ZH-LAO  — Learning Product Semantics
 
 > Learning 只拥有“某个用户开始学习后产生的状态与事实”。Content 继续拥有课程、Lesson、知识、练习定义、答案真相与 Revision；Identity 继续拥有用户身份。本文适配 frozen `0500_learning.sql`，不新增表、不修改 migration。
 
@@ -22,7 +22,7 @@ database_authority:
 ```text
 entry main HEAD = f5b3f3f41468036ecbd1544c6a9b3c5fbf9668db
 SQL migrations = 18
-Learning authority = database/v2/migrations/0500_learning.sql
+Learning authority = database/migrations/0500_learning.sql
 Learning tables = 10
 ```
 

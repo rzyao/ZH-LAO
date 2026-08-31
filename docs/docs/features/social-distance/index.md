@@ -47,7 +47,7 @@ NEEDS_DECISION：`SOCIAL_LOCATION_SCOPE_DECISION`。本文档只记录这一阻�
 - [Social 资料与展示内容](/domains/social/profile)：冻结 `country_code / region / city` 为首期粗粒度位置，并明确“不引入经纬度/PostGIS”。
 - [Social 偏好、发现与关系](/domains/social/discovery-and-relationships)：V1 硬筛选仅包含性别、年龄、国家、目标；普通 Discovery 的实时候选语义已冻结。
 - [ADR-010](/adr/ADR-010-social-profile-discovery-and-relationships)：冻结当前 Profile / Preference / Discovery 基线。
-- `database/v2/migrations/0700_social.sql` 只落粗粒度 Profile location，没有 latitude / longitude / geography 字段。
+- `database/migrations/0700_social.sql` 只落粗粒度 Profile location，没有 latitude / longitude / geography 字段。
 
 Gate / 阻塞证据：本 Feature 当前 frontmatter 的 Portfolio 为 `pending_decision`，五个执行 Lane 均被 `SOCIAL_LOCATION_SCOPE_DECISION` 阻塞；当前 `main` 没有完成该裁决的 canonical 产物，也没有 Distance Design Gate PASS。
 

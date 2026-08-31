@@ -8,7 +8,7 @@ execution_started: false
 last_updated: 2026-08-31
 ---
 
-# ZH-LAO V2 — Operations Execution Brief
+# ZH-LAO  — Operations Execution Brief
 
 > 本文件是 **Operations Domain 执行开发会话的入口文档**。
 >
@@ -111,7 +111,7 @@ docs/docs/development/04-operations/OPERATIONS_DESIGN_AUDIT.md
 数据库权威：
 
 ```text
-database/v2/migrations/0200_operations.sql
+database/migrations/0200_operations.sql
 ```
 
 Operations frozen core tables = exactly 5：

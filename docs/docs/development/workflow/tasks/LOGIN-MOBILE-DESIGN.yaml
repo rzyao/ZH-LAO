@@ -3,14 +3,6 @@ version: 1
 role: design_worker
 domain: identity
 track: mobile
-matrix:
-  object_type: feature
-  object_id: login
-  lane: mobile
-  sequence: 20
-  stage_id: LOGIN-MOBILE-DESIGN
-  label_zh: Mobile 设计
-  parent_object_id: identity
 status: ready
 priority: parallel
 parallel_safe: true
@@ -39,9 +31,8 @@ forbidden_paths:
   - apps/mobile/**
   - apps/backend/**
   - apps/admin/**
-  - database/v2/migrations/**
+  - database/migrations/**
 required_sources:
-  - docs/docs/development/workflow/AI_STAGE_MODEL.md
   - docs/docs/development/mobile/auth/LOGIN_MOBILE_DESIGN_BRIEF.md
   - docs/docs/features/login/index.md
   - docs/docs/domains/identity/index.md

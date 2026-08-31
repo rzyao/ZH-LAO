@@ -30,7 +30,7 @@ Portfolio Status：`active`。
 
 `social-feed` 负责关注 Feed 与动态浏览的端到端交付跟踪。Social 的 Post、关系、Block 与展示资格事实以 [Social 动态](/domains/social/community-content) 和 [Social 数据库](/domains/social/database) 为准；举报事实不属于 Social，`trust.reports` 是全系统唯一 canonical user report fact。
 
-当前真实状态是：Social 内容设计已经冻结，`database/v2/migrations/0700_social.sql` 已包含 Post/Like/Comment 等 Social 数据结构；但 `apps/backend/src/main.ts` 尚未注册 Social Module/API，`apps/mobile/src/features` 也没有 Social Feature 实现。因此本页只将 Design Lane 标记为完成，其余实现 Lane 不提前升级。
+当前真实状态是：Social 内容设计已经冻结，`database/migrations/0700_social.sql` 已包含 Post/Like/Comment 等 Social 数据结构；但 `apps/backend/src/main.ts` 尚未注册 Social Module/API，`apps/mobile/src/features` 也没有 Social Feature 实现。因此本页只将 Design Lane 标记为完成，其余实现 Lane 不提前升级。
 
 ## 设计
 
@@ -40,7 +40,7 @@ Portfolio Status：`active`。
 
 Stage / 工件：当前有效 canonical 工件为 [Social 动态](/domains/social/community-content) 与 [Social 数据库](/domains/social/database)；[设计决策台账](/governance/design-register) 的 D-135～D-138 将 Social 内容四表、跨域 ID、约束与 application-level invariants 定稿为 `frozen`。
 
-Gate / 完成证据：仓库当前没有独立的 `SOCIAL_DESIGN_GATE` 文件，因此不虚构 Gate。Design 完成依据是上述 canonical 文档的 `status: frozen` 与 D-135～D-138 的 `frozen` 决策；`database/v2/migrations/0700_social.sql` 已机械落地 `social_posts`、`social_post_media`、`social_post_likes`、`social_post_comments`，且未创建 `social_reports`；`database/v2/migrations/1100_trust.sql` 实际创建 `trust.reports`，与 canonical fact 归属一致。
+Gate / 完成证据：仓库当前没有独立的 `SOCIAL_DESIGN_GATE` 文件，因此不虚构 Gate。Design 完成依据是上述 canonical 文档的 `status: frozen` 与 D-135～D-138 的 `frozen` 决策；`database/migrations/0700_social.sql` 已机械落地 `social_posts`、`social_post_media`、`social_post_likes`、`social_post_comments`，且未创建 `social_reports`；`database/migrations/1100_trust.sql` 实际创建 `trust.reports`，与 canonical fact 归属一致。
 
 下一步：进入正式 Social Backend Stage 后，以冻结的 Social canonical contract 为输入实现 Feed 查询 API / Service / Repository，并产出真实 Backend Stage、测试与 Gate；在该 Stage 出现前不把 Backend 标为 active 或 done。
 

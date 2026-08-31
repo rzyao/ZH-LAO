@@ -8,7 +8,7 @@ implementation_started: false
 last_updated: 2026-08-31
 ---
 
-# ZH-LAO V2 — Content Execution Brief
+# ZH-LAO  — Content Execution Brief
 
 > 本文件是 **Content Domain 正式执行开发会话入口**。
 >
@@ -126,8 +126,8 @@ docs/docs/development/05-content/CONTENT_DESIGN_AUDIT.md
 数据库 authority：
 
 ```text
-database/v2/migrations/0400_content.sql
-database/v2/migrations/1240_content_revision.sql
+database/migrations/0400_content.sql
+database/migrations/1240_content_revision.sql
 ```
 
 ## 4. Frozen Content Scope

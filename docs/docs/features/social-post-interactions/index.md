@@ -30,7 +30,7 @@ Portfolio Status：`active`。
 
 `social-post-interactions` 负责动态点赞 / 取消点赞、评论与回复的端到端交付跟踪。Like / Comment 的 canonical 事实来自 [Social 动态](/domains/social/community-content) 与 [Social 数据库](/domains/social/database)；举报仍只是 Social 的入口能力，举报事实唯一归 `trust.reports`。
 
-当前真实状态是：Like / Comment / Reply 数据与业务约束已经冻结，`database/v2/migrations/0700_social.sql` 已落地 Like / Comment 表；但 Backend runtime、Mobile 与联调均没有 F12 实现证据。因此只将 Design Lane 标记为完成。
+当前真实状态是：Like / Comment / Reply 数据与业务约束已经冻结，`database/migrations/0700_social.sql` 已落地 Like / Comment 表；但 Backend runtime、Mobile 与联调均没有 F12 实现证据。因此只将 Design Lane 标记为完成。
 
 ## 设计
 
@@ -40,7 +40,7 @@ Portfolio Status：`active`。
 
 Stage / 工件：当前有效 canonical 工件为 [Social 动态](/domains/social/community-content) 与 [Social 数据库](/domains/social/database)；[设计决策台账](/governance/design-register) D-135～D-138 已冻结 Like / Comment 字段、跨域 ID 与评论 parent 等 application-level invariant。
 
-Gate / 完成证据：仓库当前没有独立 `SOCIAL_DESIGN_GATE` 文件，因此不虚构 Gate。Design 完成依据为 canonical 文档 `status: frozen` 与 D-135～D-138 `frozen`；`database/v2/migrations/0700_social.sql` 实际创建 `social_post_likes` 与 `social_post_comments`，同时不存在 `social_reports`；`database/v2/migrations/1100_trust.sql` 实际创建 `trust.reports`，保持 canonical report fact 单一归属。
+Gate / 完成证据：仓库当前没有独立 `SOCIAL_DESIGN_GATE` 文件，因此不虚构 Gate。Design 完成依据为 canonical 文档 `status: frozen` 与 D-135～D-138 `frozen`；`database/migrations/0700_social.sql` 实际创建 `social_post_likes` 与 `social_post_comments`，同时不存在 `social_reports`；`database/migrations/1100_trust.sql` 实际创建 `trust.reports`，保持 canonical report fact 单一归属。
 
 下一步：正式 Social Backend Stage 启动后，实现 Like / Unlike、Comment / Reply 的 API、事务级可见性 / Block / parent invariant 与真实测试，再由 Backend Gate 判定状态。
 

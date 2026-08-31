@@ -11,9 +11,9 @@ last_updated: 2026-08-31
 
 | 问题 | 查看 |
 | --- | --- |
-| Domain / Feature 哪些 AI Stage 已完成、下一段 Prompt 是什么 | [AI 开发阶段矩阵](DOMAIN_LIFECYCLE_MATRIX.md) |
+| Domain / Feature 的交付状态与证据 | 各 Domain / Feature 文档、Task Manifest、Gate / Report |
 | 现在真正允许启动什么 | [当前下一动作](workflow/NEXT_ACTIONS.md) |
-| 一段 Prompt 为什么算一个 Stage | [AI 开发阶段模型](workflow/AI_STAGE_MODEL.md) |
+| 一段 Prompt 如何成为可执行 Stage | Task Manifest 与对应 Brief / Gate / Report |
 | 用户/运营功能是否真正交付 | [功能交付](/features/) |
 | Backend 任务如何组织 | [后端开发](backend/) |
 | Admin 页面如何组织 | [后台开发](admin/) |
@@ -22,7 +22,7 @@ last_updated: 2026-08-31
 | 新会话如何恢复角色、Task、Claim | [Workflow Control Plane](workflow/) |
 | Spec / Blueprint 规则 | [Executable Spec System](SPEC_SYSTEM.md) |
 
-动态调度只在 `workflow/NEXT_ACTIONS.md` 维护。AI Stage Matrix 是派生可视化，不成为第二份调度事实源。
+动态调度只在 `workflow/NEXT_ACTIONS.md` 维护。
 
 ## 二、Source of Truth
 
@@ -38,7 +38,7 @@ Frozen Physical Migration（涉及物理 DB 时）
 → Implementation Blueprint
 ```
 
-Feature Page 是端到端交付的人工维护事实源；它不取代 Domain / Contract authority，只维护 Feature Lane 状态、范围和交付关联。`FEATURE_PAGE_INDEX.json`、Matrix 与其它控制视图才是派生视图。
+Feature Page 是端到端交付的人工维护事实源；它不取代 Domain / Contract authority，只维护 Feature Lane 状态、范围和交付关联。`FEATURE_PAGE_INDEX.json` 是其派生索引。
 
 ### 完成状态
 
@@ -49,7 +49,7 @@ Final Gate / Final Audit
 → Task Manifest / Task Events / Claim
 → DEVELOPMENT_PROGRESS
 → AI_STAGE_REGISTRY
-→ Matrix / NEXT_ACTIONS / Control Center summary
+→ NEXT_ACTIONS / Control Center summary
 ```
 
 ## 三、开发轴
@@ -89,7 +89,7 @@ Feature       = cross-track delivery / E2E view
 
 ## 五、典型 Feature Stage 链
 
-Feature 在 AI Matrix 中显示在 `primary_domain` 下方：
+Feature 按 `primary_domain` 归属组织：
 
 ```text
 <FEATURE>-FEATURE-DESIGN
@@ -122,8 +122,8 @@ FEATURE_GATE PASS  ≠ Production Ready
 Implementation Worker 开始代码修改前至少确认：
 
 1. Task Manifest 存在；
-2. `matrix.stage_id` 与当前 Prompt 一致；
-3. Role / track / Matrix Lane 匹配；
+2. `stage_id` 与当前 Prompt 一致；
+3. Role / track / Lane 匹配；
 4. Entry Gate 满足；
 5. required sources 可读取；
 6. dependency snapshot 有效；
@@ -175,11 +175,10 @@ Dispatcher / Reconciliation 负责：
 ```text
 Task / Gate / Claim / Feature Page Frontmatter
 → workflow/FEATURE_PAGE_INDEX.json
-→ scripts/generate_ai_stage_matrix.py
-→ DOMAIN_LIFECYCLE_MATRIX.md
+→ Feature Page / Task Manifest / Gate / Report
 ```
 
-Feature 行状态不允许在 Matrix 手工维护；CI 使用 `generate_ai_stage_matrix.py --check` 同时防止数据漂移、Node 页面回归和冻结 UI 变化。System / Domain 汇总行仍读取 `AI_STAGE_REGISTRY.json`。
+Feature 状态不在派生索引中手工维护；CI 使用 `validate_feature_pages.py` 防止 Feature Page 与派生索引发生数据漂移。
 
 其它派生视图：
 

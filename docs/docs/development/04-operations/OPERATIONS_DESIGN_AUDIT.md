@@ -9,7 +9,7 @@ implementation_started: false
 repository_commit_audited: 000f4c4aafacf4938d74902eddc4d78323196a89
 ---
 
-# ZH-LAO V2 — Operations Design Audit
+# ZH-LAO  — Operations Design Audit
 
 ## 1. Audit Scope
 
@@ -126,7 +126,7 @@ No Redis / Kafka / permission microservice。
 
 PASS。
 
-`database/v2/migrations/0200_operations.sql` exactly：
+`database/migrations/0200_operations.sql` exactly：
 
 ```text
 operations.operators

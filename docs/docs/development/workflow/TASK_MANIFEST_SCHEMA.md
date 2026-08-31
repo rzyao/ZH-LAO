@@ -36,7 +36,7 @@ acceptance
 release
 ```
 
-一个 Manifest 默认只代表一段可独立执行、Push、结束后 STOP 的 Prompt Stage。详细阶段定义见 [AI 开发阶段模型](AI_STAGE_MODEL.md)。
+一个 Manifest 默认只代表一段可独立执行、Push、结束后 STOP 的 Prompt Stage。
 
 ## 二、推荐结构
 
@@ -47,15 +47,6 @@ version: 1
 role: backend_worker
 domain: content
 track: backend
-
-matrix:
-  object_type: domain
-  object_id: content
-  lane: backend
-  sequence: 30
-  stage_id: CONTENT-BACKEND
-  label_zh: 后端实现
-  parent_object_id: null
 
 status: ready
 priority: primary
@@ -106,8 +97,8 @@ allowed_paths:
   - docs/docs/development/workflow/**
 
 forbidden_paths:
-  - database/v2/migrations/0400_content.sql
-  - database/v2/migrations/1240_content_revision.sql
+  - database/migrations/0400_content.sql
+  - database/migrations/1240_content_revision.sql
   - apps/admin/**
   - apps/mobile/**
 
@@ -192,34 +183,7 @@ Manifest 缺 `executable_spec` 且 Task 属于新正式开发时：
 Task != READY
 ```
 
-## 四、`matrix`
-
-所有新 Task 必填：
-
-```yaml
-matrix:
-  object_type: domain | feature | system
-  object_id: content
-  lane: design | backend | admin | mobile | integration | acceptance
-  sequence: 20
-  stage_id: CONTENT-BACKEND-PREP
-  label_zh: 后端实现准备
-  parent_object_id: null
-```
-
-Task status → Matrix 概览：
-
-| Task Status | Matrix |
-| --- | --- |
-| `complete` | `done` / ✅ |
-| `ready` | `ready` / ▶ |
-| `active`、`validating`、`recovery_required` | `active` / ⏳ |
-| `planned` | `todo` / ○ |
-| `blocked` | `blocked` / ⛔ |
-
-Matrix 的状态是 Lane 级概览投影；READY / validating / recovery 等细节只在 Feature Page 对应 Lane 和 Task Manifest 中展示；禁止人工指定 Matrix 状态。
-
-## 五、Entry Gate
+## 四、Entry Gate
 
 `entry_gates` 是实施权限，不是提示信息。
 
@@ -287,7 +251,6 @@ mobile  → docs/docs/development/mobile/**
 - Execution Brief；
 - Implementation Blueprint（实现 Task）；
 - dependency Gate / Report；
-- `AI_STAGE_MODEL.md`。
 
 Feature Task 还必须读取对应 `/features/<feature>/` 与参与 Domain authority。
 
