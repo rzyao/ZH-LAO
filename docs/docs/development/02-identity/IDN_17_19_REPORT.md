@@ -62,16 +62,16 @@ Frozen migration changes                = 0
 
 ### 本批次新增/调整的文件（IDN-17 相关）
 
-- 新增 [routes.ts](file:///c:/project/ZH-LAO/apps/backend/src/modules/identity/http/routes.ts)：全部端点、schema 校验、响应 DTO、错误归一（SESSION_REVOKED/SESSION_EXPIRED → INVALID_CREDENTIAL presenter 映射）。
-- 新增 [composition.ts](file:///c:/project/ZH-LAO/apps/backend/src/modules/identity/http/composition.ts)：Identity HTTP 组合根，启动 fail-fast（JWT/OTP secret 缺失或过短即拒绝）。
-- [main.ts](file:///c:/project/ZH-LAO/apps/backend/src/main.ts)：接入组合根并注册路由。
-- [identity-state.ts](file:///c:/project/ZH-LAO/apps/backend/src/modules/identity/application/use-cases/identity-state.ts)：新增 `getIdentitySummary` 读模型（GetCurrentIdentity）。
-- 新增 [device-registration.ts](file:///c:/project/ZH-LAO/apps/backend/src/modules/identity/application/services/device-registration.ts)：phone/facebook 认证共用的 fresh-auth 设备注册（保持冻结语义）。
-- [authenticate-with-facebook.ts](file:///c:/project/ZH-LAO/apps/backend/src/modules/identity/application/use-cases/authenticate-with-facebook.ts)：按 API 契约补 optional device；已有用户路径加行锁（见 IDN-19）。
-- [session-device-lifecycle.ts](file:///c:/project/ZH-LAO/apps/backend/src/modules/identity/application/use-cases/session-device-lifecycle.ts)：Session 列表携带设备摘要。
-- 仓库层 [repositories.ts](file:///c:/project/ZH-LAO/apps/backend/src/modules/identity/infrastructure/repositories.ts) / ports：新增 `AuthIdentity.listByUserId`（GET /me 的 auth_providers）。
-- [otp-services.ts](file:///c:/project/ZH-LAO/apps/backend/src/modules/identity/application/services/otp-services.ts)：新增 `ConsoleOtpDeliveryProvider`（TECH_DEBT：真实 SMS 适配器待生产集成；绝不落 OTP）。
-- 测试支撑 [identity-app.ts](file:///c:/project/ZH-LAO/apps/backend/test/support/identity-app.ts)、[identity-http.test.ts](file:///c:/project/ZH-LAO/apps/backend/test/integration/identity-http.test.ts)。
+- 新增 [routes.ts](https://github.com/rzyao/ZH-LAO/blob/main/apps/backend/src/modules/identity/http/routes.ts)：全部端点、schema 校验、响应 DTO、错误归一（SESSION_REVOKED/SESSION_EXPIRED → INVALID_CREDENTIAL presenter 映射）。
+- 新增 [composition.ts](https://github.com/rzyao/ZH-LAO/blob/main/apps/backend/src/modules/identity/http/composition.ts)：Identity HTTP 组合根，启动 fail-fast（JWT/OTP secret 缺失或过短即拒绝）。
+- [main.ts](https://github.com/rzyao/ZH-LAO/blob/main/apps/backend/src/main.ts)：接入组合根并注册路由。
+- [identity-state.ts](https://github.com/rzyao/ZH-LAO/blob/main/apps/backend/src/modules/identity/application/use-cases/identity-state.ts)：新增 `getIdentitySummary` 读模型（GetCurrentIdentity）。
+- 新增 [device-registration.ts](https://github.com/rzyao/ZH-LAO/blob/main/apps/backend/src/modules/identity/application/services/device-registration.ts)：phone/facebook 认证共用的 fresh-auth 设备注册（保持冻结语义）。
+- [authenticate-with-facebook.ts](https://github.com/rzyao/ZH-LAO/blob/main/apps/backend/src/modules/identity/application/use-cases/authenticate-with-facebook.ts)：按 API 契约补 optional device；已有用户路径加行锁（见 IDN-19）。
+- [session-device-lifecycle.ts](https://github.com/rzyao/ZH-LAO/blob/main/apps/backend/src/modules/identity/application/use-cases/session-device-lifecycle.ts)：Session 列表携带设备摘要。
+- 仓库层 [repositories.ts](https://github.com/rzyao/ZH-LAO/blob/main/apps/backend/src/modules/identity/infrastructure/repositories.ts) / ports：新增 `AuthIdentity.listByUserId`（GET /me 的 auth_providers）。
+- [otp-services.ts](https://github.com/rzyao/ZH-LAO/blob/main/apps/backend/src/modules/identity/application/services/otp-services.ts)：新增 `ConsoleOtpDeliveryProvider`（TECH_DEBT：真实 SMS 适配器待生产集成；绝不落 OTP）。
+- 测试支撑 [identity-app.ts](https://github.com/rzyao/ZH-LAO/blob/main/apps/backend/test/support/identity-app.ts)、[identity-http.test.ts](https://github.com/rzyao/ZH-LAO/blob/main/apps/backend/test/integration/identity-http.test.ts)。
 
 ---
 
@@ -148,7 +148,7 @@ Outbox duplicate（并发首次注册 → 事件恰好 1）          = PASS
 
 1. **Close vs Login 竞态（新增行锁修复）**：原认证对已有用户仅普通读取，`close` 事务提交后可残留并发登录创建的 active session。修复：phone / facebook 认证的已有用户路径改为 `lockByInternalId`（用户行 `FOR UPDATE`），与 `close/disable` 的用户行锁完全串行。`test/integration/identity-race.test.ts > close vs login`、`disable vs refresh` 均以此验证。
 2. **既有 flaky：`identity-repositories.test.ts` 的 40ms 锁时序探测**（history 中 "advisory-lock timing assertion transient timeout" 同类）：改为确定性断言 —— "后获取者在先持有者释放后完成"，不再依赖固定毫秒探测。
-3. **并行负载下 5s 超时**：新增 [vitest.config.ts](file:///c:/project/ZH-LAO/apps/backend/vitest.config.ts) 将全局 `testTimeout` 提升至 20s（覆盖创建数据库 + 17 个 migration 的冷启动成本），`hookTimeout` 120s。未引入"无限调大"，仍能在秒级暴露挂起。
+3. **并行负载下 5s 超时**：新增 [vitest.config.ts](https://github.com/rzyao/ZH-LAO/blob/main/apps/backend/vitest.config.ts) 将全局 `testTimeout` 提升至 20s（覆盖创建数据库 + 17 个 migration 的冷启动成本），`hookTimeout` 120s。未引入"无限调大"，仍能在秒级暴露挂起。
 
 ### 锁顺序审计（实际代码路径）
 

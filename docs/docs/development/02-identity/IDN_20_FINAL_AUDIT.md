@@ -24,10 +24,10 @@ LOW     = 1（LOW-01，已修复）
 
 **修复**：
 
-- [composition.ts](file:///c:/project/ZH-LAO/apps/backend/src/modules/identity/http/composition.ts)：移除 Fake 默认，未装配时默认 `UnavailableFacebookCredentialVerifier`（服务正常启动，端点失败安全 503）。
-- [main.ts](file:///c:/project/ZH-LAO/apps/backend/src/main.ts)：显式装配 `UnavailableFacebookCredentialVerifier`（TECH_DEBT：真实 Meta/Facebook adapter 属后续生产集成）。
+- [composition.ts](https://github.com/rzyao/ZH-LAO/blob/main/apps/backend/src/modules/identity/http/composition.ts)：移除 Fake 默认，未装配时默认 `UnavailableFacebookCredentialVerifier`（服务正常启动，端点失败安全 503）。
+- [main.ts](https://github.com/rzyao/ZH-LAO/blob/main/apps/backend/src/main.ts)：显式装配 `UnavailableFacebookCredentialVerifier`（TECH_DEBT：真实 Meta/Facebook adapter 属后续生产集成）。
 - OTP 投递裁决：新增配置 `IDENTITY_OTP_PROVIDER`（`unavailable` 默认 / `console` 仅 development 显式启用，production 禁用）；normal runtime 未接真实 SMS 时使用 `UnavailableOtpDeliveryProvider`，`/phone-otp` 返回 503，且不会创建残留 pending challenge（挑战在投递失败时补偿标记 cancelled）。
-- 新增测试 [identity-provider.test.ts](file:///c:/project/ZH-LAO/apps/backend/test/integration/identity-provider.test.ts)（4 用例）：无 FB provider → 503 PROVIDER_UNAVAILABLE（非 INVALID_CREDENTIAL）；无 SMS provider → 503 且无 pending 挑战；显式 Fake 注入（tests）正常工作；production + console → 配置校验 fail-fast。
+- 新增测试 [identity-provider.test.ts](https://github.com/rzyao/ZH-LAO/blob/main/apps/backend/test/integration/identity-provider.test.ts)（4 用例）：无 FB provider → 503 PROVIDER_UNAVAILABLE（非 INVALID_CREDENTIAL）；无 SMS provider → 503 且无 pending 挑战；显式 Fake 注入（tests）正常工作；production + console → 配置校验 fail-fast。
 
 **Gate 结论**：
 
@@ -43,13 +43,13 @@ Console OTP development-only                     = YES（显式配置 + 非 prod
 
 **问题**：`identity/public` 仅有类型与 parse 原语，缺少设计要求的 `IsIdentityActive` / `GetIdentityAccountStatus` / `GetIdentitySummaryByPublicId` 应用层契约。
 
-**修复**：新增 [public/query.ts](file:///c:/project/ZH-LAO/apps/backend/src/modules/identity/public/query.ts) —— `IdentityPublicQuery`（`isIdentityActive` / `getIdentityAccountStatus` / `getIdentitySummary`），纯读、仅日志 public UUID、不导出 DB record / internal BIGINT / hash / token。新增 unit 测试 [identity-public-query.test.ts](file:///c:/project/ZH-LAO/apps/backend/test/unit/identity-public-query.test.ts)，并同步既有 public 导出清单断言。
+**修复**：新增 [public/query.ts](https://github.com/rzyao/ZH-LAO/blob/main/apps/backend/src/modules/identity/public/query.ts) —— `IdentityPublicQuery`（`isIdentityActive` / `getIdentityAccountStatus` / `getIdentitySummary`），纯读、仅日志 public UUID、不导出 DB record / internal BIGINT / hash / token。新增 unit 测试 [identity-public-query.test.ts](https://github.com/rzyao/ZH-LAO/blob/main/apps/backend/test/unit/identity-public-query.test.ts)，并同步既有 public 导出清单断言。
 
 ### LOW-01 — 报告链接缺失（已修复）
 
 **问题**：`DEVELOPMENT_PROGRESS.md` 的 Identity 报告清单缺 `IDN_11_16_REPORT.md`。
 
-**修复**：新建 [IDN_11_16_REPORT.md](file:///c:/project/ZH-LAO/docs/docs/development/02-identity/IDN_11_16_REPORT.md) 并补入进度表链接；报告链（IDN-01/02/03/04_08/09_10/11_16/17_19）全部存在且无断链。
+**修复**：新建 [IDN_11_16_REPORT.md](https://github.com/rzyao/ZH-LAO/blob/main/docs/docs/development/02-identity/IDN_11_16_REPORT.md) 并补入进度表链接；报告链（IDN-01/02/03/04_08/09_10/11_16/17_19）全部存在且无断链。
 
 ---
 
