@@ -5,7 +5,7 @@ last_updated: 2026-08-31
 
 # AI 开发阶段模型
 
-本协议定义 ZH-LAO 的 AI 开发原子单位、阶段矩阵与 Task Manifest 的映射关系。
+本协议定义 ZH-LAO 的 AI 开发原子单位、阶段矩阵、完整 Feature Inventory 与 Task Manifest 的映射关系。
 
 ## 1. 原子单位
 
@@ -22,15 +22,6 @@ last_updated: 2026-08-31
 
 如果两项工作需要分别开启两个 AI 会话，它们就是两个 Stage。不得因为都属于“设计”“后台”或“实现”就合并。
 
-例如：
-
-```text
-PLATFORM-ADMIN-STAGE-A
-PLATFORM-ADMIN-STAGE-B
-```
-
-是两个独立 Stage。
-
 ## 2. Matrix Lane
 
 AI 开发阶段矩阵固定使用：
@@ -44,12 +35,10 @@ integration
 acceptance
 ```
 
-含义：
-
 | Lane | 主要职责 |
 | --- | --- |
 | `design` | Domain / Feature 设计、Design Recovery、Spec Compiler 工作 |
-| `backend` | Backend 准备、实现、独立审计，以及 Feature 的 Backend 依赖 |
+| `backend` | Backend 准备、实现、独立审计，以及 Feature 所需 Backend capability/dependency |
 | `admin` | Admin 页面 / Workbench 设计与实现 |
 | `mobile` | Mobile Screen / Flow 设计与实现 |
 | `integration` | 跨层、跨 Domain、真实 API / Infrastructure 集成 |
@@ -57,67 +46,91 @@ acceptance
 
 Recovery 是异常 Stage，放回发生问题的 Lane，不增加永久 Recovery 列。
 
-## 3. Domain 与 Feature 行
+## 3. Domain、System 与 Feature 行
 
-Domain 行主要展示：
+Domain 行主要展示领域设计与 Backend 主链。System 行用于 Application/Admin/Mobile Foundation 以及没有单一业务 Domain owner 的产品级体验。
 
-```text
-领域设计 Stage
-Backend Prep Stage
-Backend Implementation Stage
-Backend Independent Audit Stage
-必要的历史 Admin / Recovery Stage
-```
-
-Feature 行展示在其 `primary_domain` 下方：
+Feature 行表示用户或运营人员可以感知的端到端能力，并在矩阵中只出现一次：
 
 ```text
-Feature Design
-Backend dependencies
-Admin stages
-Mobile stages
-Integration stages
-Acceptance stage
+Feature
+→ parent（用于矩阵分组）
+→ primary_domain（存在明确主要业务领域时）
+→ participating_domains
+→ Design / Backend / Admin / Mobile / Integration / Acceptance
 ```
 
-Feature 只出现一次，不因为有多个 participating Domain 而重复多行。
+`parent` 可以是 Domain 或 System；导航分组不改变 canonical ownership。
 
-## 4. 状态
+## 4. Feature Inventory
+
+矩阵同时承担完整 Feature Inventory。正式 Feature 文档与 Feature Inventory 是两件不同的事：
+
+```text
+Inventory row
+= 已识别的产品能力与开发状态
+
+/features/<feature>/
+= 当该 Feature 正式进入设计/交付后建立的 delivery authority
+```
+
+不得为了矩阵完整提前制造大量空白 Feature 文档。
+
+每个 Feature 必须声明：
+
+```text
+portfolio_status
+```
+
+允许值：
+
+```text
+active      已有正式交付工作/工件
+planned     已识别并属于当前产品能力，但尚未正式启动
+deferred    仓库明确延期，不进入当前主链
+unresolved  产品范围或 Domain 契约存在待裁决冲突
+```
+
+Inventory Bootstrap 必须覆盖：
+
+- 产品范围和用户旅程；
+- 11 个 Domain 的业务能力；
+- Admin 可执行运营能力；
+- Mobile 用户流程；
+- 已存在的真实实现功能；
+- 明确 deferred 能力；
+- 明确 designing / scope conflict 能力。
+
+明确排除的能力不因为“能想到”就重新加入当前产品范围；如需长期记录，应留在产品/治理文档的 excluded/deferred 事实中。
+
+## 5. 状态
 
 矩阵只使用以下视觉状态：
 
 ```text
-✅ done      已有足够完成证据
-▶ ready     Task Manifest READY，可直接启动对应 Prompt
-⏳ active    存在真实 active Claim
-○ todo      适用，但尚未进入 READY
-⛔ blocked   有明确 blocked_by
-🟣 recovery 当前合法下一步是 Recovery
-— na        不适用
+✅ done       已有足够完成证据
+▶ ready      Task Manifest READY，可直接启动对应 Prompt
+⏳ active     存在真实 active Claim
+○ todo       适用，但尚未进入 READY
+⛔ blocked    有明确 blocked_by，或需要先裁决范围
+🟣 recovery  当前合法下一步是 Recovery
+⏸ deferred  仓库明确延期，不属于当前主链
+— na         不适用
 ```
+
+页面显示 `— 不适用`，不能用裸横线让读者猜测含义。
 
 `ready` 不能根据人工感觉填写，必须满足 Task Manifest Entry Gate、Claim、依赖与 Blueprint 要求。
 
-## 5. 非追溯历史
+`deferred` 与 `todo` 不得互换；延期能力只有重新形成正式产品决定后才能进入 planned/ready。
 
-历史任务不伪造当时不存在的 Stage。
+`unresolved` Feature 必须至少暴露一个 `blocked` 决策 Stage，不能静默消失。
 
-例如某 Domain 在 Blueprint 协议采用前已经完成 Backend，可以记录：
+## 6. 非追溯历史
 
-```text
-✅ 后端实现（历史）
-✅ 后端验证
-```
+历史任务不伪造当时不存在的 Stage。已经有真实 Gate/Report 的旧实现可以记录为历史完成，但不能补写当时不存在的 Blueprint/Spec Stage。
 
-但不得补写：
-
-```text
-✅ Backend Blueprint
-```
-
-除非历史上真实存在该工件。
-
-## 6. Task Manifest 映射
+## 7. Task Manifest 映射
 
 所有新 Task 必须声明：
 
@@ -134,13 +147,15 @@ matrix:
 
 `stage_id` 是矩阵中的稳定原子编号，同时也是下一会话 Prompt 的身份。
 
-一个 Task Manifest 默认只能代表一个 Stage。若一个 Brief 内明确要求执行者完成多个必须独立 STOP 的会话步骤，应拆成多个 Task Manifest。
+一个 Task Manifest 默认只能代表一个 Stage。需要独立 STOP 的步骤必须拆成多个 Manifest。
 
-## 7. Stage Registry
+## 8. Stage Registry 与 Feature Inventory
 
-`AI_STAGE_REGISTRY.json` 是**派生控制快照**，不是新的完成事实源。
+`AI_STAGE_REGISTRY.json` 保存已经实际进入 Stage 调度的详细状态；`FEATURE_INVENTORY.json` 保存完整产品能力清单。
 
-其状态必须来源于：
+两者都是派生控制数据，不是新的产品/完成事实源。
+
+状态依据优先级：
 
 ```text
 Gate / Final Audit
@@ -150,44 +165,47 @@ Gate / Final Audit
 → Bootstrap/Reconciliation
 ```
 
-初次迁移时允许使用 `snapshot_status = bootstrap_seed` 保守映射已有历史证据；此时未建立 READY Manifest 的未来 Stage 必须保持 `todo` 或 `blocked`，不得冒充 `ready`。
+Feature 是否存在、是否 deferred/unresolved 必须 grounding 到 Product / Domain / Governance authority；Inventory 不能自行创造产品承诺。
 
-Workflow Bootstrap 完成后应将快照更新为 grounded registry。
+## 9. Matrix Renderer 与 CI
 
-## 8. Matrix 生成
+`DOMAIN_LIFECYCLE_MATRIX.md` 保留旧物理路径以避免历史死链，但页面语义是 **AI 开发阶段矩阵**。
 
-`DOMAIN_LIFECYCLE_MATRIX.md` 保留旧物理路径以避免历史死链，但页面语义正式改为 **AI 开发阶段矩阵**。
-
-它由：
+它运行时读取：
 
 ```text
-docs/docs/development/workflow/AI_STAGE_REGISTRY.json
-        ↓
-scripts/generate_ai_stage_matrix.py
-        ↓
-docs/docs/development/DOMAIN_LIFECYCLE_MATRIX.md
+AI_STAGE_REGISTRY.json
++
+FEATURE_INVENTORY.json
 ```
 
-生成。
-
-禁止手工修改生成后的 Matrix 状态。CI 必须执行：
+CI 必须执行：
 
 ```text
 python scripts/generate_ai_stage_matrix.py --check
 ```
 
-Registry 和 Matrix 不一致时 docs job FAIL。
+检查至少包括：
 
-## 9. 下一段提示词
+- Registry schema；
+- Feature `portfolio_status`；
+- parent / primary_domain / participating_domains 合法性；
+- blocked 必须存在 `blocked_by`；
+- deferred/unresolved 的状态表达；
+- Matrix renderer 标记；
+- grounded Registry 必须存在真实 READY Stage。
+
+## 10. 下一段提示词
 
 矩阵最后一列只表达下一原子 Stage：
 
 ```text
-▶ <STAGE_ID>     已 READY，可以直接启动
-○ <STAGE_ID>     已识别，但 Bootstrap/Entry Gate 尚未使其 READY
-⛔ <DEPENDENCY>   被明确依赖阻塞
-🟣 <RECOVERY>     应先执行 Recovery
-✅ 主链完成      当前对象没有未完成主链 Stage
+▶ <STAGE_ID>      已 READY，可以直接启动
+○ 待生成 Task     已识别，但尚未形成 READY Manifest
+⛔ <DEPENDENCY>    被依赖或待裁决事项阻塞
+🟣 <RECOVERY>      应先执行 Recovery
+⏸ 延期            当前不调度
+✅ 主链完成        当前对象没有未完成主链 Stage
 ```
 
 完整 Prompt 不复制进 Matrix。READY Task 的 Prompt 由 `NEXT_ACTIONS.md` / Task Manifest / New Session Prompt 机制提供。
