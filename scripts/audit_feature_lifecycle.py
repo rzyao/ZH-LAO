@@ -16,8 +16,8 @@ DECISION_ID_RE = re.compile(r"\b[A-Z][A-Z0-9_-]*_DECISION\b")
 
 SEMANTIC_MARKERS = {
     "scope": re.compile(r"(?:#{3,}\s*(?:Scope|范围)\s*$|\*\*(?:Scope|范围)\*\*\s*[：:]?|(?:Scope|范围)\s*[：:])", re.I | re.M),
-    "stage": re.compile(r"(?:#{3,}\s*(?:Stage|执行阶段)(?:\s*/\s*(?:Artifact|工件))?\s*$|\*\*Stage\s*/\s*(?:Artifact|工件)\*\*\s*[：:]?|Stage\s*/\s*(?:Artifact|工件)|执行阶段与产物)", re.I | re.M),
-    "gate": re.compile(r"(?:#{3,}\s*Gate(?:\s*/\s*(?:Evidence|完成证据))?\s*$|\*\*Gate\s*/\s*(?:Evidence|完成证据)\*\*\s*[：:]?|Gate\s*/\s*(?:Evidence|完成证据)|Gate\s*[：:])", re.I | re.M),
+    "stage": re.compile(r"(?:#{3,}\s*Stage\s*/\s*(?:Artifact|工件)(?:\s*/\s*Gate)?\s*$|#{3,}\s*(?:Stage|执行阶段)\s*$|\*\*Stage\s*/\s*(?:Artifact|工件)\*\*\s*[：:]?|Stage\s*/\s*(?:Artifact|工件)|执行阶段与产物)", re.I | re.M),
+    "gate": re.compile(r"(?:#{3,}\s*Stage\s*/\s*(?:Artifact|工件)\s*/\s*Gate\s*$|#{3,}\s*Gate(?:\s*/\s*(?:Evidence|完成证据))?\s*$|\*\*Gate\s*/\s*(?:Evidence|完成证据)\*\*\s*[：:]?|Gate\s*/\s*(?:Evidence|完成证据)|Gate\s*[：:])", re.I | re.M),
     "next": re.compile(r"(?:#{3,}\s*(?:Next Action|下一步)\s*$|\*\*(?:Next Action|下一步)\*\*\s*[：:]?|(?:Next Action|下一步)\s*[：:])", re.I | re.M),
 }
 
@@ -41,7 +41,7 @@ def has_template_placeholder(body: str) -> bool:
             continue
         if re.search(r"在此维护该?\s*Lane|相关工件、?Gate\s*与下一步|尚未回填|待补", stripped, re.I):
             return True
-        if re.search(r"\b(?:TODO|TBD)\b", stripped):  # uppercase template tokens only
+        if re.search(r"\b(?:TODO|TBD)\b", stripped):
             return True
         if re.search(r"\bplaceholder\b", stripped, re.I) and not re.search(r"不能|不得|禁止|不把|不以|并非|不是|not\b|without\b", stripped, re.I):
             return True
@@ -53,7 +53,6 @@ def semantic_missing(body: str) -> list[str]:
 
 
 def active_activity_present(body: str) -> bool:
-    """Active needs a repository-grounded current activity/stage, not fixed wording."""
     return bool(
         re.search(r"当前|进行中|正在|已进入|处于|\bactive\b|\bready\b|Stage|阶段", body, re.I)
         and re.search(r"Artifact|工件|Gate|Evidence|证据|Brief|Report|Stage|阶段", body, re.I)
@@ -68,7 +67,7 @@ def blocked_detail_missing(body: str) -> list[str]:
         missing.append("dependency")
     if not re.search(r"已完成|已有|现有|当前有效|Stage\s*/|工件|Evidence|canonical|设计|冻结", body, re.I):
         missing.append("completed_work")
-    if not re.search(r"等待条件|解除阻塞|后再|后进入|完成后|待.+后|再启动|再进入|PASS|决策|裁决|重新激活|Portfolio", body, re.I):
+    if not re.search(r"等待条件|解除阻塞|后再|后进入|完成后|待.+后|等待.+再|先.+随后|随后|再启动|再进入|PASS|决策|裁决|重新激活|Portfolio", body, re.I | re.S):
         missing.append("unblock_condition")
     return missing
 
