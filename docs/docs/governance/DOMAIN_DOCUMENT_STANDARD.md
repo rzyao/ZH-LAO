@@ -48,18 +48,7 @@ guide/         阅读与维护说明
 
 Feature 是**横向交付地图**，不是第二份产品、领域、API 或数据库事实源。它只引用 authoritative 文档并组织端到端验收。
 
-例如：
-
-```text
-登录
-完成一课
-音频生产
-发现用户
-发送消息
-购买礼物
-举报用户
-后台审核
-```
+例如：登录、完成一课、音频生产、发现用户、发送消息、购买礼物、举报用户、后台审核。
 
 ### 5. `development/`
 
@@ -74,7 +63,67 @@ development/mobile/    页面 / 用户流程驱动
 development/workflow/  Task / Claim / Gate / Handoff 控制面
 ```
 
-## 二、Backend / Admin / Mobile 的组织规则
+## 二、Domain Capability 与 Product Feature
+
+必须明确区分：
+
+```text
+Domain Capability
+= 某个领域稳定拥有的业务能力
+
+Product Feature
+= 用户或运营人员能够完成的端到端产品能力
+```
+
+它们是二维关系，不是目录父子关系。
+
+### Domain 应回答
+
+```text
+我拥有哪些稳定业务能力？
+我作为主要领域参与哪些 Feature？
+我作为参与领域服务哪些 Feature？
+```
+
+当正式 Feature 已存在时，Domain 概览应维护：
+
+```text
+领域能力地图
+参与的产品功能
+```
+
+### Feature 应回答
+
+每个正式 Feature 推荐声明：
+
+```yaml
+feature_id: <slug>
+feature_type: single-domain | cross-domain
+primary_domain: <domain>
+participating_domains: []
+```
+
+`primary_domain` 表示主要业务协调领域，不表示其它 Domain 从属于它，不改变 canonical ownership。
+
+### 物理目录规则
+
+Feature 始终保存在：
+
+```text
+docs/docs/features/<feature>/
+```
+
+不得复制到：
+
+```text
+domains/<domain>/features/
+```
+
+Domain 页面和侧边栏可以直接链接 `/features/<feature>/`，这只是导航别名，不是文件所有权。
+
+详细规则见 [领域能力与产品功能关系模型](/domains/FEATURE_RELATIONSHIP_MODEL) 与 [功能文档规范](/features/FEATURE_DOCUMENT_STANDARD)。
+
+## 三、Backend / Admin / Mobile 的组织规则
 
 ### Backend：领域驱动
 
@@ -115,14 +164,14 @@ development/mobile/chat/
 
 前端目录不得机械照抄 Domain、数据库表或后端 Repository 结构。
 
-## 三、Feature 的正确职责
+## 四、Feature 的正确职责
 
 Feature 负责把以下内容串成一个可交付能力：
 
 ```text
 用户 / 运营目标
 → 用户流程
-→ 涉及 Domain
+→ 主要领域 / 参与领域
 → Backend capability
 → Admin / Mobile experience
 → Cross-domain / Infrastructure
@@ -141,7 +190,7 @@ Feature 文档禁止复制：
 
 这些内容必须链接到原 authority。
 
-## 四、Authority 规则
+## 五、Authority 规则
 
 ```text
 产品事实       → product/ 或 authoritative Domain product semantics
@@ -156,7 +205,7 @@ Feature 文档禁止复制：
 
 Feature Gate 不能覆盖 Domain Gate；UI 页面文档不能修改 API/Public Contract；Backend 文档不能反向决定产品应该有什么功能。
 
-## 五、中文显示规则
+## 六、中文显示规则
 
 面向人的内容默认中文：
 
@@ -186,18 +235,19 @@ Feature Gate 不能覆盖 Domain Gate；UI 页面文档不能修改 API/Public C
 
 Domain 显示采用“中文优先 + 英文技术名”，例如“身份（Identity）”。
 
-## 六、导航层级
+## 七、导航层级
 
 1. 顶部导航按文档大类划分。
 2. 每个区域拥有独立 sidebar。
 3. 领域侧边栏按 11 个正式 Domain 折叠。
-4. Backend 按 Domain 分组。
-5. Admin / Mobile 按页面或工作流分组。
-6. Feature 按用户/运营能力分组。
-7. 左侧侧边栏原则上最多三级；页面内部章节交给右侧 outline。
-8. ADR 不逐条常驻侧边栏，只保留索引入口。
+4. Domain 可以显示“相关功能”链接，但链接目标仍位于 `/features/`。
+5. Backend 按 Domain 分组。
+6. Admin / Mobile 按页面或工作流分组。
+7. Feature 按用户/运营能力分组。
+8. 左侧侧边栏原则上最多三级；页面内部章节交给右侧 outline。
+9. ADR 不逐条常驻侧边栏，只保留索引入口。
 
-## 七、实施文档路径
+## 八、实施文档路径
 
 新任务从本规范启用后使用：
 
@@ -214,7 +264,7 @@ docs/docs/development/mobile/<flow-or-screen-group>/
 
 Task Manifest、Brief、Blueprint、Report 的 path 必须与 track 一致。
 
-## 八、非追溯迁移
+## 九、非追溯迁移
 
 历史 `development/01-foundation`～`development/07-audio` 与根目录 Foundation 文档已经形成 Gate/Report 引用链，因此不为了目录整齐批量搬迁。
 
