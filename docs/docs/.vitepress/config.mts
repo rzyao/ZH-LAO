@@ -47,6 +47,9 @@ export default defineConfig({
         items: [
           { text: '开发计划入口', link: '/development/v2/' },
           { text: '开发流程控制中心', link: '/development/v2/DEVELOPMENT_CONTROL_CENTER' },
+          { text: 'AI 多会话工作流', link: '/development/v2/workflow/' },
+          { text: '当前下一动作', link: '/development/v2/workflow/NEXT_ACTIONS' },
+          { text: 'Workflow Bootstrap', link: '/development/v2/workflow/WORKFLOW_BOOTSTRAP_BRIEF' },
           { text: 'Domain 全生命周期矩阵', link: '/development/v2/DOMAIN_LIFECYCLE_MATRIX' },
           { text: '全量开发总计划', link: '/development/v2/MASTER_DEVELOPMENT_PLAN' },
           { text: '开发进度记录表', link: '/development/v2/DEVELOPMENT_PROGRESS' }
