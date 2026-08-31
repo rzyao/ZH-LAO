@@ -29,6 +29,56 @@ jobs:
         with:
           python-version: '3.12'
       - run: python -m pip install pyyaml
+      - name: Sync integrated Feature metadata requirements
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          f06 = [
+              'course-catalog','guest-learning-browse','knowledge-learning',
+              'learning-progress','lesson-learning','practice-exercises'
+          ]
+          f10 = [
+              'social-discovery','social-discovery-preferences','social-profile',
+              'social-profile-media','social-profile-view'
+          ]
+
+          def append_frontmatter(feature_id, block):
+              path = Path('docs/docs/features') / feature_id / 'index.md'
+              text = path.read_text(encoding='utf-8')
+              end = text.find('\n---', 4)
+              fm = text[4:end]
+              text = text[:end] + '\n' + block.rstrip() + text[end:]
+              path.write_text(text, encoding='utf-8')
+
+          for feature_id in f06:
+              path = Path('docs/docs/features') / feature_id / 'index.md'
+              text = path.read_text(encoding='utf-8')
+              end = text.find('\n---', 4)
+              fm = text[4:end]
+              additions=[]
+              if '\nblocks:' not in fm:
+                  additions.append('blocks:\n  backend: "Content runtime read implementation and formal Content Backend Gate are not yet complete; Learning Backend execution remains blocked."')
+              if '\nevidence:' not in fm:
+                  additions.append('evidence:\n  design:\n    - /development/05-content/CONTENT_DESIGN_AUDIT\n    - /development/06-learning/LEARNING_DESIGN_AUDIT')
+              if additions:
+                  append_frontmatter(feature_id, '\n'.join(additions))
+
+          for feature_id in f10:
+              path = Path('docs/docs/features') / feature_id / 'index.md'
+              text = path.read_text(encoding='utf-8')
+              end = text.find('\n---', 4)
+              fm = text[4:end]
+              if '\nactive_notes:' not in fm:
+                  append_frontmatter(feature_id, 'active_notes:\n  design: "已冻结的数据模型与业务边界见本页设计 Lane；公共应用 Contract 与正式 Social Design Gate 仍在收口。"')
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/docs/features
+          if ! git diff --cached --quiet; then
+            git commit -m "docs(f21): sync integrated Feature metadata requirements"
+            git push origin HEAD:docs/f21-feature-docs-integration
+          fi
       - name: Diagnose Feature frontmatter requirements
         run: |
           python - <<'PY'
@@ -50,6 +100,8 @@ jobs:
           print(f'FRONTMATTER_REQUIREMENT_GAPS={len(missing)}')
           for item in missing:
               print('  '+item)
+          if missing:
+              raise SystemExit(1)
           PY
       - name: Generate canonical Feature index
         run: python scripts/validate_feature_pages.py --write
