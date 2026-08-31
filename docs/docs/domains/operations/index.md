@@ -29,6 +29,31 @@ Operations 不是业务状态聚合层。Identity、Platform、Content、Trust &
 | 后台成功操作审计 | 业务对象自身审计历史 |
 | 首个管理员受控 Bootstrap | Public Admin 注册 |
 
+## 领域能力地图
+
+Operations 当前提供的稳定业务能力包括：
+
+```text
+Operator 身份映射
+Role 管理
+Permission 授权
+Operator ↔ Role
+Role ↔ Permission
+后台请求授权判断
+成功管理动作审计
+首个管理员 Bootstrap
+```
+
+这些能力服务多个后台 Feature，但 Operations 不拥有被管理业务对象本身的状态机。
+
+## 参与的产品功能
+
+| 产品功能 | 关系 | Operations 职责 |
+| --- | --- | --- |
+| [音频生产](/features/audio-production/) | 参与领域 | 为后台音频生产提供 Operator、RBAC 与操作审计身份 |
+
+音频 Slot、Task、Review、Publish 等事实仍由 Audio Production 拥有。
+
 ## 核心数据模型
 
 ```text
@@ -104,3 +129,4 @@ Operations 证明“这个后台操作者有没有执行该管理能力的权限
 - [操作审计与 Bootstrap](audit.md)：成功操作审计语义、同域/跨域审计边界、首个管理员初始化。
 - [公共契约与集成](contracts.md)：Identity、Owner Domain、后台 HTTP / Public Contract 的稳定协作规则。
 - [数据设计](database.md)：5 张表的字段、约束、索引与物理关系。
+- [音频生产 Feature](/features/audio-production/)
