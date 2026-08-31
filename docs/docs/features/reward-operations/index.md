@@ -1,6 +1,7 @@
 ---
 feature_id: reward-operations
 title: 奖励计划 / 规则 / 发放监控后台
+portfolio_status: active
 domain:
   - rewards
   - commerce
@@ -19,6 +20,8 @@ admin_pages: []
 # 奖励计划 / 规则 / 发放监控后台
 
 ## 功能概览
+
+Portfolio Status：`active`。
 
 `reward-operations` 是当前正式 Feature 清单中的功能。其领域事实以 rewards、commerce、operations 文档为准。
 

@@ -1,6 +1,7 @@
 ---
 feature_id: chat-read-state
 title: 会话已读与未读
+portfolio_status: active
 domain:
   - chat
   - identity
@@ -19,6 +20,8 @@ admin_pages: []
 # 会话已读与未读
 
 ## 功能概览
+
+Portfolio Status：`active`。
 
 `chat-read-state` 是当前正式 Feature 清单中的功能。其领域事实以 chat、identity、social 文档为准。
 

@@ -1,6 +1,7 @@
 ---
 feature_id: automatic-coin-rewards
 title: 自动 Coin 奖励
+portfolio_status: active
 domain:
   - rewards
   - commerce
@@ -21,6 +22,8 @@ admin_pages: []
 # 自动 Coin 奖励
 
 ## 功能概览
+
+Portfolio Status：`active`。
 
 `automatic-coin-rewards` 是当前正式 Feature 清单中的功能。其领域事实以 rewards、commerce、learning、social、identity 文档为准。
 

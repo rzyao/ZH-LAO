@@ -1,6 +1,7 @@
 ---
 feature_id: login-devices
 title: 登录设备与会话管理
+portfolio_status: active
 domain:
   - identity
 status:
@@ -17,6 +18,8 @@ admin_pages: []
 # 登录设备与会话管理
 
 ## 功能概览
+
+Portfolio Status：`active`。
 
 `login-devices` 是当前正式 Feature 清单中的功能。其领域事实以 identity 文档为准。
 

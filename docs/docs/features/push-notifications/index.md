@@ -1,6 +1,7 @@
 ---
 feature_id: push-notifications
-title: 系统与互动推送通知（延期）
+title: 系统与互动推送通知
+portfolio_status: deferred
 domain: []
 status:
   design: todo
@@ -13,9 +14,11 @@ mobile_pages: []
 admin_pages: []
 ---
 
-# 系统与互动推送通知（延期）
+# 系统与互动推送通知
 
 ## 功能概览
+
+Portfolio Status：`deferred`。
 
 `push-notifications` 是当前正式 Feature 清单中的功能。其领域事实以 产品级设计 文档为准。
 

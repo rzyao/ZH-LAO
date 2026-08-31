@@ -117,7 +117,7 @@ def main() -> int:
     print(f"missing anchor: {len(missing_anchor)}")
     for x in missing_anchor:
         print("  ~", x)
-    return 1 if missing_file else 0
+    return 1 if missing_file or missing_anchor else 0
 
 
 if __name__ == "__main__":

@@ -5,14 +5,26 @@ import featureIndex from './FEATURE_PAGE_INDEX.json'
 export const lanes = ['design', 'backend', 'admin', 'mobile', 'integration', 'acceptance']
 export const phases = ['prep', 'design', 'execute', 'verify', 'gate']
 export const laneLabels = { design: '设计 AI', backend: 'Backend AI', admin: 'Admin AI', mobile: 'Mobile AI', integration: '集成 AI', acceptance: '验收 AI' }
-export const statusMeta = { done: ['✅', '完成'], active: ['▶', '进行中'], todo: ['○', '未启动'], blocked: ['!', '阻塞'], na: ['—', '不适用'] }
+export const statusMeta = {
+  todo: ['○', '未启动'],
+  ready: ['▶', '就绪'],
+  active: ['⏳', '进行中'],
+  blocked: ['⛔', '阻塞'],
+  done: ['✅', '完成'],
+  na: ['—', '不适用']
+}
+export const portfolioMeta = {
+  active: null,
+  deferred: '延期',
+  pending_decision: '待裁决'
+}
 
 // Stage execution has more detail than the global matrix needs. Keep that
 // detail in the registry and collapse it at the matrix boundary.
 export const matrixStatus = (status) => ({
   done: 'done',
   active: 'active',
-  ready: 'active',
+  ready: 'ready',
   validating: 'active',
   recovery: 'active',
   blocked: 'blocked',
@@ -47,6 +59,7 @@ function canonicalFeature(feature) {
     ...feature,
     kind: 'feature',
     label: feature.title,
+    portfolio_status: feature.portfolio_status ?? inventoryFeature.portfolio_status,
     ...Object.fromEntries(lanes.map((lane) => [lane, stage(feature, lane)]))
   }
 }

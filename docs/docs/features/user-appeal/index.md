@@ -1,6 +1,7 @@
 ---
 feature_id: user-appeal
 title: 用户申诉
+portfolio_status: active
 domain:
   - trust
   - identity
@@ -18,6 +19,8 @@ admin_pages: []
 # 用户申诉
 
 ## 功能概览
+
+Portfolio Status：`active`。
 
 `user-appeal` 是当前正式 Feature 清单中的功能。其领域事实以 trust、identity 文档为准。
 

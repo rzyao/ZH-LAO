@@ -7,6 +7,7 @@
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs",
     "docs:matrix-check": "python ../scripts/check_feature_navigation.py",
+    "docs:lifecycle-audit": "python ../scripts/audit_feature_lifecycle.py",
     "spec:check": "python ../scripts/check_executable_specs.py"
   },
   "devDependencies": {

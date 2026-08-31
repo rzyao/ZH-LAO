@@ -1,6 +1,7 @@
 ---
 feature_id: practice-content-management
 title: 练习与题库管理
+portfolio_status: active
 domain:
   - content
   - operations
@@ -18,6 +19,8 @@ admin_pages: []
 # 练习与题库管理
 
 ## 功能概览
+
+Portfolio Status：`active`。
 
 `practice-content-management` 是当前正式 Feature 清单中的功能。其领域事实以 content、operations 文档为准。
 

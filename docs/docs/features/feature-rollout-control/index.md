@@ -1,6 +1,7 @@
 ---
 feature_id: feature-rollout-control
 title: 功能开关与范围灰度管理
+portfolio_status: active
 domain:
   - platform
   - operations
@@ -18,6 +19,8 @@ admin_pages: []
 # 功能开关与范围灰度管理
 
 ## 功能概览
+
+Portfolio Status：`active`。
 
 `feature-rollout-control` 是当前正式 Feature 清单中的功能。其领域事实以 platform、operations 文档为准。
 

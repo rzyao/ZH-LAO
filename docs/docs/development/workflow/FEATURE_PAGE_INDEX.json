@@ -74,6 +74,7 @@
         "content",
         "operations"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "done",
         "backend": "blocked",
@@ -107,6 +108,7 @@
         "identity",
         "social"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -123,12 +125,13 @@
     },
     {
       "id": "chat-own-delete",
-      "title": "单条消息仅自己删除（延期）",
+      "title": "单条消息仅自己删除",
       "domain": [
         "chat",
         "identity",
         "social"
       ],
+      "portfolio_status": "deferred",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -151,6 +154,7 @@
         "identity",
         "social"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -173,6 +177,7 @@
         "identity",
         "social"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -195,6 +200,7 @@
         "identity",
         "social"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -217,6 +223,7 @@
         "identity",
         "social"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -233,12 +240,13 @@
     },
     {
       "id": "chat-reactions",
-      "title": "消息 Reaction（延期）",
+      "title": "消息 Reaction",
       "domain": [
         "chat",
         "identity",
         "social"
       ],
+      "portfolio_status": "deferred",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -261,6 +269,7 @@
         "identity",
         "social"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -283,6 +292,7 @@
         "identity",
         "social"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -299,12 +309,13 @@
     },
     {
       "id": "group-chat",
-      "title": "群聊（延期）",
+      "title": "群聊",
       "domain": [
         "chat",
         "identity",
         "social"
       ],
+      "portfolio_status": "deferred",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -327,6 +338,7 @@
         "identity",
         "social"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -343,13 +355,14 @@
     },
     {
       "id": "chat-translation",
-      "title": "聊天翻译（待裁决）",
+      "title": "聊天翻译",
       "domain": [
         "chat",
         "identity",
         "social",
         "learning"
       ],
+      "portfolio_status": "pending_decision",
       "status": {
         "design": "blocked",
         "backend": "blocked",
@@ -372,13 +385,14 @@
     },
     {
       "id": "chat-voice-message",
-      "title": "语音消息（待裁决）",
+      "title": "语音消息",
       "domain": [
         "chat",
         "identity",
         "social",
         "learning"
       ],
+      "portfolio_status": "pending_decision",
       "status": {
         "design": "blocked",
         "backend": "blocked",
@@ -401,13 +415,14 @@
     },
     {
       "id": "chat-speech-to-text",
-      "title": "语音转文字（待裁决）",
+      "title": "语音转文字",
       "domain": [
         "chat",
         "identity",
         "social",
         "learning"
       ],
+      "portfolio_status": "pending_decision",
       "status": {
         "design": "blocked",
         "backend": "blocked",
@@ -430,12 +445,13 @@
     },
     {
       "id": "chat-message-receipts",
-      "title": "逐消息送达 / 已读回执（延期）",
+      "title": "逐消息送达 / 已读回执",
       "domain": [
         "chat",
         "identity",
         "social"
       ],
+      "portfolio_status": "deferred",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -457,6 +473,7 @@
         "commerce",
         "identity"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -478,6 +495,7 @@
         "commerce",
         "identity"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -494,11 +512,12 @@
     },
     {
       "id": "promotions-coupons",
-      "title": "促销与优惠券（延期）",
+      "title": "促销与优惠券",
       "domain": [
         "commerce",
         "platform"
       ],
+      "portfolio_status": "deferred",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -522,6 +541,7 @@
         "social",
         "chat"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -543,6 +563,7 @@
         "commerce",
         "operations"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -564,6 +585,7 @@
         "commerce",
         "operations"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -580,11 +602,12 @@
     },
     {
       "id": "creator-earnings",
-      "title": "礼物收益、提现与结算（延期）",
+      "title": "礼物收益、提现与结算",
       "domain": [
         "commerce",
         "social"
       ],
+      "portfolio_status": "deferred",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -606,6 +629,7 @@
         "commerce",
         "identity"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -622,12 +646,13 @@
     },
     {
       "id": "social-membership-entitlements",
-      "title": "社交会员与高级权益（延期）",
+      "title": "社交会员与高级权益",
       "domain": [
         "commerce",
         "social",
         "platform"
       ],
+      "portfolio_status": "deferred",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -649,6 +674,7 @@
         "commerce",
         "operations"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -670,6 +696,7 @@
         "commerce",
         "identity"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -691,6 +718,7 @@
         "commerce",
         "identity"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -712,6 +740,7 @@
         "commerce",
         "operations"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -733,6 +762,7 @@
         "commerce",
         "operations"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -754,6 +784,7 @@
         "commerce",
         "identity"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -775,6 +806,7 @@
         "content",
         "operations"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -798,6 +830,7 @@
         "social",
         "platform"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -819,6 +852,7 @@
         "content",
         "operations"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -840,6 +874,7 @@
         "content",
         "operations"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -861,6 +896,7 @@
         "content",
         "operations"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -882,6 +918,7 @@
         "content",
         "operations"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -898,10 +935,11 @@
     },
     {
       "id": "guest-cloud-sync",
-      "title": "游客云同步与注册数据迁移（延期）",
+      "title": "游客云同步与注册数据迁移",
       "domain": [
         "identity"
       ],
+      "portfolio_status": "deferred",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -922,6 +960,7 @@
       "domain": [
         "identity"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "done",
         "backend": "done",
@@ -955,6 +994,7 @@
         "identity",
         "operations"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -975,6 +1015,7 @@
       "domain": [
         "identity"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -995,6 +1036,7 @@
       "domain": [
         "identity"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -1015,6 +1057,7 @@
       "domain": [
         "identity"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -1037,6 +1080,7 @@
         "content",
         "identity"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -1059,6 +1103,7 @@
         "content",
         "identity"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -1081,6 +1126,7 @@
         "content",
         "identity"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -1103,6 +1149,7 @@
         "content",
         "identity"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -1119,11 +1166,12 @@
     },
     {
       "id": "ads-monetization",
-      "title": "广告变现（延期）",
+      "title": "广告变现",
       "domain": [
         "learning",
         "platform"
       ],
+      "portfolio_status": "deferred",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -1146,6 +1194,7 @@
         "content",
         "identity"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -1169,6 +1218,7 @@
         "audio",
         "identity"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -1190,6 +1240,7 @@
         "learning",
         "content"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -1212,6 +1263,7 @@
         "content",
         "identity"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -1234,6 +1286,7 @@
         "content",
         "identity"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -1256,6 +1309,7 @@
         "content",
         "identity"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -1278,6 +1332,7 @@
         "content",
         "identity"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -1300,6 +1355,7 @@
         "content",
         "identity"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -1322,6 +1378,7 @@
         "content",
         "identity"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -1344,6 +1401,7 @@
         "content",
         "identity"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -1360,12 +1418,13 @@
     },
     {
       "id": "wrong-answer-notebook",
-      "title": "错题本（延期）",
+      "title": "错题本",
       "domain": [
         "learning",
         "content",
         "identity"
       ],
+      "portfolio_status": "deferred",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -1382,12 +1441,13 @@
     },
     {
       "id": "advanced-learning-entitlements",
-      "title": "高级学习权益（延期）",
+      "title": "高级学习权益",
       "domain": [
         "learning",
         "commerce",
         "platform"
       ],
+      "portfolio_status": "deferred",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -1404,11 +1464,12 @@
     },
     {
       "id": "admin-auth-hardening",
-      "title": "后台 MFA / 邀请 / 登录失败保护（延期）",
+      "title": "后台 MFA / 邀请 / 登录失败保护",
       "domain": [
         "operations",
         "identity"
       ],
+      "portfolio_status": "deferred",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -1429,6 +1490,7 @@
       "domain": [
         "operations"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -1450,6 +1512,7 @@
         "operations",
         "identity"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -1470,6 +1533,7 @@
       "domain": [
         "operations"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -1492,6 +1556,7 @@
       "domain": [
         "operations"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -1512,6 +1577,7 @@
       "domain": [
         "operations"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -1532,6 +1598,7 @@
       "domain": [
         "operations"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -1553,6 +1620,7 @@
         "platform",
         "operations"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -1574,6 +1642,7 @@
         "platform",
         "operations"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -1594,6 +1663,7 @@
       "domain": [
         "platform"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -1615,6 +1685,7 @@
         "platform",
         "operations"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -1636,6 +1707,7 @@
         "platform",
         "operations"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -1652,10 +1724,11 @@
     },
     {
       "id": "runtime-config-history",
-      "title": "运行配置版本与回滚（延期）",
+      "title": "运行配置版本与回滚",
       "domain": [
         "platform"
       ],
+      "portfolio_status": "deferred",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -1672,10 +1745,11 @@
     },
     {
       "id": "advanced-feature-rollout",
-      "title": "高级灰度发布（用户/百分比/版本/时间窗，延期）",
+      "title": "高级灰度发布",
       "domain": [
         "platform"
       ],
+      "portfolio_status": "deferred",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -1692,11 +1766,12 @@
     },
     {
       "id": "advanced-reward-types",
-      "title": "会员天数 / POINT / BADGE 等新奖励类型（延期）",
+      "title": "会员天数 / POINT / BADGE 等新奖励类型",
       "domain": [
         "rewards",
         "commerce"
       ],
+      "portfolio_status": "deferred",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -1719,6 +1794,7 @@
         "commerce",
         "operations"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -1743,6 +1819,7 @@
         "social",
         "identity"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -1765,6 +1842,7 @@
         "identity",
         "chat"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -1787,6 +1865,7 @@
         "identity",
         "trust"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -1809,6 +1888,7 @@
         "identity",
         "trust"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -1831,6 +1911,7 @@
         "identity",
         "trust"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -1852,6 +1933,7 @@
         "social",
         "identity"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -1874,6 +1956,7 @@
         "identity",
         "trust"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -1896,6 +1979,7 @@
         "identity",
         "trust"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -1919,6 +2003,7 @@
         "trust",
         "platform"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -1940,6 +2025,7 @@
         "social",
         "identity"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -1962,6 +2048,7 @@
         "identity",
         "trust"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -1985,6 +2072,7 @@
         "trust",
         "chat"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -2007,6 +2095,7 @@
         "identity",
         "trust"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -2029,6 +2118,7 @@
         "identity",
         "trust"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -2045,11 +2135,12 @@
     },
     {
       "id": "social-distance",
-      "title": "距离筛选与模糊距离展示（待裁决）",
+      "title": "距离筛选与模糊距离展示",
       "domain": [
         "social",
         "identity"
       ],
+      "portfolio_status": "pending_decision",
       "status": {
         "design": "blocked",
         "backend": "blocked",
@@ -2074,6 +2165,7 @@
       "id": "theme-settings",
       "title": "主题设置",
       "domain": [],
+      "portfolio_status": "active",
       "status": {
         "design": "done",
         "backend": "todo",
@@ -2100,8 +2192,9 @@
     },
     {
       "id": "admin-dashboard",
-      "title": "后台数据总览（延期）",
+      "title": "后台数据总览",
       "domain": [],
+      "portfolio_status": "deferred",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -2120,6 +2213,7 @@
       "id": "interface-language",
       "title": "界面语言切换",
       "domain": [],
+      "portfolio_status": "active",
       "status": {
         "design": "done",
         "backend": "todo",
@@ -2146,8 +2240,9 @@
     },
     {
       "id": "push-notifications",
-      "title": "系统与互动推送通知（延期）",
+      "title": "系统与互动推送通知",
       "domain": [],
+      "portfolio_status": "deferred",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -2169,6 +2264,7 @@
         "trust",
         "operations"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -2193,6 +2289,7 @@
         "social",
         "chat"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -2217,6 +2314,7 @@
         "chat",
         "commerce"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -2238,6 +2336,7 @@
         "trust",
         "identity"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -2259,6 +2358,7 @@
         "trust",
         "operations"
       ],
+      "portfolio_status": "active",
       "status": {
         "design": "todo",
         "backend": "todo",
@@ -2275,12 +2375,13 @@
     },
     {
       "id": "verification-review",
-      "title": "真人认证审核（待设计）",
+      "title": "真人认证审核",
       "domain": [
         "trust",
         "operations",
         "social"
       ],
+      "portfolio_status": "pending_decision",
       "status": {
         "design": "blocked",
         "backend": "blocked",
@@ -2303,12 +2404,13 @@
     },
     {
       "id": "real-person-verification",
-      "title": "真人认证提交（待设计）",
+      "title": "真人认证提交",
       "domain": [
         "trust",
         "identity",
         "social"
       ],
+      "portfolio_status": "pending_decision",
       "status": {
         "design": "blocked",
         "backend": "blocked",

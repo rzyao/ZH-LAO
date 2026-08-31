@@ -1,6 +1,7 @@
 ---
 feature_id: instant-translation
 title: 即时中老翻译
+portfolio_status: active
 domain:
   - learning
   - content
@@ -19,6 +20,8 @@ admin_pages: []
 # 即时中老翻译
 
 ## 功能概览
+
+Portfolio Status：`active`。
 
 `instant-translation` 是当前正式 Feature 清单中的功能。其领域事实以 learning、content、identity 文档为准。
 

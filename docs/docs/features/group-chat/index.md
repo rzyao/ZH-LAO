@@ -1,6 +1,7 @@
 ---
 feature_id: group-chat
-title: 群聊（延期）
+title: 群聊
+portfolio_status: deferred
 domain:
   - chat
   - identity
@@ -16,9 +17,11 @@ mobile_pages: []
 admin_pages: []
 ---
 
-# 群聊（延期）
+# 群聊
 
 ## 功能概览
+
+Portfolio Status：`deferred`。
 
 `group-chat` 是当前正式 Feature 清单中的功能。其领域事实以 chat、identity、social 文档为准。
 

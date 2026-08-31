@@ -1,6 +1,7 @@
 ---
 feature_id: advanced-learning-entitlements
-title: 高级学习权益（延期）
+title: 高级学习权益
+portfolio_status: deferred
 domain:
   - learning
   - commerce
@@ -16,9 +17,11 @@ mobile_pages: []
 admin_pages: []
 ---
 
-# 高级学习权益（延期）
+# 高级学习权益
 
 ## 功能概览
+
+Portfolio Status：`deferred`。
 
 `advanced-learning-entitlements` 是当前正式 Feature 清单中的功能。其领域事实以 learning、commerce、platform 文档为准。
 

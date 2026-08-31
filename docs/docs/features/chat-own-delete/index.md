@@ -1,6 +1,7 @@
 ---
 feature_id: chat-own-delete
-title: 单条消息仅自己删除（延期）
+title: 单条消息仅自己删除
+portfolio_status: deferred
 domain:
   - chat
   - identity
@@ -16,9 +17,11 @@ mobile_pages: []
 admin_pages: []
 ---
 
-# 单条消息仅自己删除（延期）
+# 单条消息仅自己删除
 
 ## 功能概览
+
+Portfolio Status：`deferred`。
 
 `chat-own-delete` 是当前正式 Feature 清单中的功能。其领域事实以 chat、identity、social 文档为准。
 

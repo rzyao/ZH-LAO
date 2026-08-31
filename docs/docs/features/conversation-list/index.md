@@ -1,6 +1,7 @@
 ---
 feature_id: conversation-list
 title: 聊天会话列表
+portfolio_status: active
 domain:
   - chat
   - identity
@@ -19,6 +20,8 @@ admin_pages: []
 # 聊天会话列表
 
 ## 功能概览
+
+Portfolio Status：`active`。
 
 `conversation-list` 是当前正式 Feature 清单中的功能。其领域事实以 chat、identity、social 文档为准。
 

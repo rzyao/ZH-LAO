@@ -1,6 +1,7 @@
 ---
 feature_id: admin-login
 title: 后台登录与操作员认证
+portfolio_status: active
 domain:
   - operations
   - identity
@@ -18,6 +19,8 @@ admin_pages: []
 # 后台登录与操作员认证
 
 ## 功能概览
+
+Portfolio Status：`active`。
 
 `admin-login` 是当前正式 Feature 清单中的功能。其领域事实以 operations、identity 文档为准。
 

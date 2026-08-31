@@ -1,6 +1,7 @@
 ---
 feature_id: send-gift
 title: 发送虚拟礼物
+portfolio_status: active
 domain:
   - commerce
   - identity
@@ -20,6 +21,8 @@ admin_pages: []
 # 发送虚拟礼物
 
 ## 功能概览
+
+Portfolio Status：`active`。
 
 `send-gift` 是当前正式 Feature 清单中的功能。其领域事实以 commerce、identity、social、chat 文档为准。
 

@@ -212,11 +212,12 @@ Task status → Matrix 概览：
 | Task Status | Matrix |
 | --- | --- |
 | `complete` | `done` / ✅ |
-| `ready`、`active`、`validating`、`recovery_required` | `active` / ▶ |
+| `ready` | `ready` / ▶ |
+| `active`、`validating`、`recovery_required` | `active` / ⏳ |
 | `planned` | `todo` / ○ |
-| `blocked` | `blocked` / ! |
+| `blocked` | `blocked` / ⛔ |
 
-Matrix 的 `▶` 是可执行 Stage 的概览投影，READY / validating / recovery 等细节只在 Feature Page 对应 Lane 和 Task Manifest 中展示；禁止人工指定 Matrix 状态。
+Matrix 的状态是 Lane 级概览投影；READY / validating / recovery 等细节只在 Feature Page 对应 Lane 和 Task Manifest 中展示；禁止人工指定 Matrix 状态。
 
 ## 五、Entry Gate
 

@@ -1,6 +1,7 @@
 ---
 feature_id: admin-auth-hardening
-title: 后台 MFA / 邀请 / 登录失败保护（延期）
+title: 后台 MFA / 邀请 / 登录失败保护
+portfolio_status: deferred
 domain:
   - operations
   - identity
@@ -15,9 +16,11 @@ mobile_pages: []
 admin_pages: []
 ---
 
-# 后台 MFA / 邀请 / 登录失败保护（延期）
+# 后台 MFA / 邀请 / 登录失败保护
 
 ## 功能概览
+
+Portfolio Status：`deferred`。
 
 `admin-auth-hardening` 是当前正式 Feature 清单中的功能。其领域事实以 operations、identity 文档为准。
 

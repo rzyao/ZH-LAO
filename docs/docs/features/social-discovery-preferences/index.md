@@ -1,6 +1,7 @@
 ---
 feature_id: social-discovery-preferences
 title: 发现偏好设置
+portfolio_status: active
 domain:
   - social
   - identity
@@ -18,6 +19,8 @@ admin_pages: []
 # 发现偏好设置
 
 ## 功能概览
+
+Portfolio Status：`active`。
 
 `social-discovery-preferences` 是当前正式 Feature 清单中的功能。其领域事实以 social、identity 文档为准。
 

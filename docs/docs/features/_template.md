@@ -13,6 +13,7 @@ status: template
 ```yaml
 feature_id: replace-me
 title: 功能名称
+portfolio_status: active
 domain: [domain-id]
 status:
   design: todo

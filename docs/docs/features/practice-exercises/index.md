@@ -1,6 +1,7 @@
 ---
 feature_id: practice-exercises
 title: 练习与作答
+portfolio_status: active
 domain:
   - learning
   - content
@@ -19,6 +20,8 @@ admin_pages: []
 # 练习与作答
 
 ## 功能概览
+
+Portfolio Status：`active`。
 
 `practice-exercises` 是当前正式 Feature 清单中的功能。其领域事实以 learning、content、identity 文档为准。
 

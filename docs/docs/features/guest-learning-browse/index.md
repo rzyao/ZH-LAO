@@ -1,6 +1,7 @@
 ---
 feature_id: guest-learning-browse
 title: 游客浏览学习内容
+portfolio_status: active
 domain:
   - learning
   - content
@@ -18,6 +19,8 @@ admin_pages: []
 # 游客浏览学习内容
 
 ## 功能概览
+
+Portfolio Status：`active`。
 
 `guest-learning-browse` 是当前正式 Feature 清单中的功能。其领域事实以 learning、content 文档为准。
 

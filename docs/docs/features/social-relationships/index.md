@@ -1,6 +1,7 @@
 ---
 feature_id: social-relationships
 title: 关注我的 / 我关注的 / 已匹配列表
+portfolio_status: active
 domain:
   - social
   - identity
@@ -18,6 +19,8 @@ admin_pages: []
 # 关注我的 / 我关注的 / 已匹配列表
 
 ## 功能概览
+
+Portfolio Status：`active`。
 
 `social-relationships` 是当前正式 Feature 清单中的功能。其领域事实以 social、identity 文档为准。
 

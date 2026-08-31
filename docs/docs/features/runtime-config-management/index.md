@@ -1,6 +1,7 @@
 ---
 feature_id: runtime-config-management
 title: 运行参数管理
+portfolio_status: active
 domain:
   - platform
   - operations
@@ -18,6 +19,8 @@ admin_pages: []
 # 运行参数管理
 
 ## 功能概览
+
+Portfolio Status：`active`。
 
 `runtime-config-management` 是当前正式 Feature 清单中的功能。其领域事实以 platform、operations 文档为准。
 

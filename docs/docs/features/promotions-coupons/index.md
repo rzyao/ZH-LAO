@@ -1,6 +1,7 @@
 ---
 feature_id: promotions-coupons
-title: 促销与优惠券（延期）
+title: 促销与优惠券
+portfolio_status: deferred
 domain:
   - commerce
   - platform
@@ -15,9 +16,11 @@ mobile_pages: []
 admin_pages: []
 ---
 
-# 促销与优惠券（延期）
+# 促销与优惠券
 
 ## 功能概览
+
+Portfolio Status：`deferred`。
 
 `promotions-coupons` 是当前正式 Feature 清单中的功能。其领域事实以 commerce、platform 文档为准。
 

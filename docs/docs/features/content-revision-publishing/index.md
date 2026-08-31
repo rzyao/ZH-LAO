@@ -1,6 +1,7 @@
 ---
 feature_id: content-revision-publishing
 title: 内容 Revision 与发布治理
+portfolio_status: active
 domain:
   - content
   - operations
@@ -18,6 +19,8 @@ admin_pages: []
 # 内容 Revision 与发布治理
 
 ## 功能概览
+
+Portfolio Status：`active`。
 
 `content-revision-publishing` 是当前正式 Feature 清单中的功能。其领域事实以 content、operations 文档为准。
 

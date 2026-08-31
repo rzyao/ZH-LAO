@@ -1,6 +1,7 @@
 ---
 feature_id: permission-assignment
 title: 角色权限分配
+portfolio_status: active
 domain:
   - operations
 status:
@@ -17,6 +18,8 @@ admin_pages: []
 # 角色权限分配
 
 ## 功能概览
+
+Portfolio Status：`active`。
 
 `permission-assignment` 是当前正式 Feature 清单中的功能。其领域事实以 operations 文档为准。
 

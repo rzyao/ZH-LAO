@@ -1,6 +1,7 @@
 ---
 feature_id: account-lifecycle
 title: 账户禁用 / 关闭与会话撤销
+portfolio_status: active
 domain:
   - identity
 status:
@@ -17,6 +18,8 @@ admin_pages: []
 # 账户禁用 / 关闭与会话撤销
 
 ## 功能概览
+
+Portfolio Status：`active`。
 
 `account-lifecycle` 是当前正式 Feature 清单中的功能。其领域事实以 identity 文档为准。
 

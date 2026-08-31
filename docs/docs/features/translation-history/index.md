@@ -1,6 +1,7 @@
 ---
 feature_id: translation-history
 title: 翻译历史
+portfolio_status: active
 domain:
   - learning
   - content
@@ -19,6 +20,8 @@ admin_pages: []
 # 翻译历史
 
 ## 功能概览
+
+Portfolio Status：`active`。
 
 `translation-history` 是当前正式 Feature 清单中的功能。其领域事实以 learning、content、identity 文档为准。
 

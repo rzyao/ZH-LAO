@@ -1,6 +1,7 @@
 ---
 feature_id: chat-recall
 title: 消息撤回
+portfolio_status: active
 domain:
   - chat
   - identity
@@ -19,6 +20,8 @@ admin_pages: []
 # 消息撤回
 
 ## 功能概览
+
+Portfolio Status：`active`。
 
 `chat-recall` 是当前正式 Feature 清单中的功能。其领域事实以 chat、identity、social 文档为准。
 

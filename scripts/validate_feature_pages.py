@@ -17,7 +17,9 @@ ADMIN_DIR = ROOT / 'docs/docs/admin'
 DOMAINS_DIR = ROOT / 'docs/docs/domains'
 LANES = ['design', 'backend', 'admin', 'mobile', 'integration', 'acceptance']
 HEADINGS = {'design': '设计', 'backend': 'Backend', 'admin': 'Admin', 'mobile': 'Mobile', 'integration': '集成', 'acceptance': '验收'}
-STATUSES = {'todo', 'active', 'blocked', 'done', 'na'}
+STATUSES = {'todo', 'ready', 'active', 'blocked', 'done', 'na'}
+PORTFOLIO_STATUSES = {'active', 'deferred', 'pending_decision'}
+PORTFOLIO_TITLE_MARKERS = re.compile(r'(?:（延期）|\(延期\)|（待裁决）|\(待裁决\)|（待设计）|\(待设计\))')
 
 def frontmatter(text, path):
     if not text.startswith('---\n'):
@@ -105,9 +107,19 @@ def scan():
             raise ValueError(f'{path}: feature_id is absent from FEATURE_INVENTORY: {feature_id}')
         if not isinstance(data.get('title'), str) or not data['title'].strip():
             raise ValueError(f'{path}: missing title')
+        if PORTFOLIO_TITLE_MARKERS.search(data['title']):
+            raise ValueError(f'{path}: portfolio status must not be embedded in title')
+        portfolio_status = data.get('portfolio_status')
+        if portfolio_status not in PORTFOLIO_STATUSES:
+            raise ValueError(f'{path}: invalid portfolio_status {portfolio_status!r}')
         if not isinstance(data.get('domain'), list):
             raise ValueError(f'{path}: domain must be a list')
         inventory_feature = inventory_by_id[feature_id]
+        if portfolio_status != inventory_feature.get('portfolio_status'):
+            raise ValueError(
+                f'{path}: portfolio_status does not match FEATURE_INVENTORY '
+                f'({portfolio_status!r} != {inventory_feature.get("portfolio_status")!r})'
+            )
         if not data['domain'] and inventory_feature['parent'] not in system_parents:
             raise ValueError(f'{path}: a Feature must reference at least one Domain unless it belongs to a System/Foundation parent')
         if data['domain'] and inventory_feature.get('primary_domain') and inventory_feature['primary_domain'] not in data['domain']:
@@ -139,6 +151,7 @@ def scan():
             raise ValueError(f'{path}: Feature Lane sections are out of order')
         records.append({
             'id': feature_id, 'title': data['title'], 'domain': data['domain'],
+            'portfolio_status': portfolio_status,
             'status': {lane: status[lane] for lane in LANES},
             'mobile_pages': data.get('mobile_pages', []), 'admin_pages': data.get('admin_pages', []),
             'blocks': blocks, 'evidence': data.get('evidence', {}), 'active_notes': data.get('active_notes', {})

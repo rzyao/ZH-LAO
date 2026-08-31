@@ -1,6 +1,7 @@
 ---
 feature_id: social-posting
 title: 发布 / 删除文字图片动态
+portfolio_status: active
 domain:
   - social
   - identity
@@ -19,6 +20,8 @@ admin_pages: []
 # 发布 / 删除文字图片动态
 
 ## 功能概览
+
+Portfolio Status：`active`。
 
 `social-posting` 是当前正式 Feature 清单中的功能。其领域事实以 social、identity、trust 文档为准。
 

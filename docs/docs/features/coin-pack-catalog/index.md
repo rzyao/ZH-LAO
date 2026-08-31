@@ -1,6 +1,7 @@
 ---
 feature_id: coin-pack-catalog
 title: Coin Pack 商品目录
+portfolio_status: active
 domain:
   - commerce
   - identity
@@ -18,6 +19,8 @@ admin_pages: []
 # Coin Pack 商品目录
 
 ## 功能概览
+
+Portfolio Status：`active`。
 
 `coin-pack-catalog` 是当前正式 Feature 清单中的功能。其领域事实以 commerce、identity 文档为准。
 

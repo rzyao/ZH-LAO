@@ -1,6 +1,7 @@
 ---
 feature_id: mobile-home
 title: 用户首页与双侧入口
+portfolio_status: active
 domain:
   - content
   - learning
@@ -20,6 +21,8 @@ admin_pages: []
 # 用户首页与双侧入口
 
 ## 功能概览
+
+Portfolio Status：`active`。
 
 `mobile-home` 是当前正式 Feature 清单中的功能。其领域事实以 content、learning、social、platform 文档为准。
 

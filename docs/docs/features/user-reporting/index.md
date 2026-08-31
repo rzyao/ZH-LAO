@@ -1,6 +1,7 @@
 ---
 feature_id: user-reporting
 title: 用户举报提交
+portfolio_status: active
 domain:
   - trust
   - identity
@@ -21,6 +22,8 @@ admin_pages: []
 # 用户举报提交
 
 ## 功能概览
+
+Portfolio Status：`active`。
 
 `user-reporting` 是当前正式 Feature 清单中的功能。其领域事实以 trust、identity、social、chat、commerce 文档为准。
 

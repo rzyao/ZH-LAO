@@ -54,7 +54,7 @@ def main() -> None:
     if missing_feature_links:
         raise ValueError(f"missing Feature/Lane links in built Matrix: {missing_feature_links[:12]}")
 
-    forbidden_overview_labels = (">▶ 就绪<", ">⏳ 进行中<", ">⛔ 阻塞<", ">⏸ 延期<", ">🟣 恢复<")
+    forbidden_overview_labels = (">⏸ 延期<", ">🟣 恢复<", ">! 阻塞<")
     leaked = [label for label in forbidden_overview_labels if label in built]
     if leaked:
         raise ValueError(f"Stage-level statuses leaked into Matrix overview: {leaked}")

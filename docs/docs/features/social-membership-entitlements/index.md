@@ -1,6 +1,7 @@
 ---
 feature_id: social-membership-entitlements
-title: 社交会员与高级权益（延期）
+title: 社交会员与高级权益
+portfolio_status: deferred
 domain:
   - commerce
   - social
@@ -16,9 +17,11 @@ mobile_pages: []
 admin_pages: []
 ---
 
-# 社交会员与高级权益（延期）
+# 社交会员与高级权益
 
 ## 功能概览
+
+Portfolio Status：`deferred`。
 
 `social-membership-entitlements` 是当前正式 Feature 清单中的功能。其领域事实以 commerce、social、platform 文档为准。
 

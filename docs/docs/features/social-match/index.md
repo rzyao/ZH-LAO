@@ -1,6 +1,7 @@
 ---
 feature_id: social-match
 title: 互关 Match 与聊天资格
+portfolio_status: active
 domain:
   - social
   - identity
@@ -19,6 +20,8 @@ admin_pages: []
 # 互关 Match 与聊天资格
 
 ## 功能概览
+
+Portfolio Status：`active`。
 
 `social-match` 是当前正式 Feature 清单中的功能。其领域事实以 social、identity、chat 文档为准。
 

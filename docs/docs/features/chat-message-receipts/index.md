@@ -1,6 +1,7 @@
 ---
 feature_id: chat-message-receipts
-title: 逐消息送达 / 已读回执（延期）
+title: 逐消息送达 / 已读回执
+portfolio_status: deferred
 domain:
   - chat
   - identity
@@ -16,9 +17,11 @@ mobile_pages: []
 admin_pages: []
 ---
 
-# 逐消息送达 / 已读回执（延期）
+# 逐消息送达 / 已读回执
 
 ## 功能概览
+
+Portfolio Status：`deferred`。
 
 `chat-message-receipts` 是当前正式 Feature 清单中的功能。其领域事实以 chat、identity、social 文档为准。
 

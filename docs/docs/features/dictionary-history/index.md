@@ -1,6 +1,7 @@
 ---
 feature_id: dictionary-history
 title: 词典搜索历史
+portfolio_status: active
 domain:
   - learning
   - content
@@ -19,6 +20,8 @@ admin_pages: []
 # 词典搜索历史
 
 ## 功能概览
+
+Portfolio Status：`active`。
 
 `dictionary-history` 是当前正式 Feature 清单中的功能。其领域事实以 learning、content、identity 文档为准。
 

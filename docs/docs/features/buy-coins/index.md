@@ -1,6 +1,7 @@
 ---
 feature_id: buy-coins
 title: 购买 Coins：下单、支付与履约
+portfolio_status: active
 domain:
   - commerce
   - identity
@@ -18,6 +19,8 @@ admin_pages: []
 # 购买 Coins：下单、支付与履约
 
 ## 功能概览
+
+Portfolio Status：`active`。
 
 `buy-coins` 是当前正式 Feature 清单中的功能。其领域事实以 commerce、identity 文档为准。
 

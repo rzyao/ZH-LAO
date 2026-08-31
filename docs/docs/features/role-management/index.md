@@ -1,6 +1,7 @@
 ---
 feature_id: role-management
 title: 角色管理
+portfolio_status: active
 domain:
   - operations
 status:
@@ -17,6 +18,8 @@ admin_pages: []
 # 角色管理
 
 ## 功能概览
+
+Portfolio Status：`active`。
 
 `role-management` 是当前正式 Feature 清单中的功能。其领域事实以 operations 文档为准。
 

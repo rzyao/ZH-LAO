@@ -1,6 +1,7 @@
 ---
 feature_id: advanced-feature-rollout
-title: 高级灰度发布（用户/百分比/版本/时间窗，延期）
+title: 高级灰度发布
+portfolio_status: deferred
 domain:
   - platform
 status:
@@ -14,9 +15,11 @@ mobile_pages: []
 admin_pages: []
 ---
 
-# 高级灰度发布（用户/百分比/版本/时间窗，延期）
+# 高级灰度发布
 
 ## 功能概览
+
+Portfolio Status：`deferred`。
 
 `advanced-feature-rollout` 是当前正式 Feature 清单中的功能。其领域事实以 platform 文档为准。
 

@@ -108,15 +108,14 @@ Mobile screen / user journey
 每个 Feature 必须声明：
 
 ```text
-portfolio_status = active | planned | deferred | unresolved
+portfolio_status = active | deferred | pending_decision
 ```
 
 规则：
 
-- `active`：已有正式设计/实施/交付工作；
-- `planned`：当前产品能力，但尚未形成 READY Task；
+- `active`：属于当前产品/项目开发组合；是否已有 READY Task 由各 Lane 状态单独表示；
 - `deferred`：仓库明确延期；Feature Page / Inventory 保留该组合语义，适用 Lane 在矩阵中显示 `○ 未启动`；
-- `unresolved`：产品范围与 Domain/Contract 需要裁决，Feature Page 的相关 Lane 使用 `blocked` 并记录明确 blocker，矩阵显示 `! 阻塞`。
+- `pending_decision`：产品范围与 Domain/Contract 需要裁决，Feature Page 的相关 Lane 使用 `blocked` 并记录明确 blocker，矩阵显示 `⛔ 阻塞`。
 
 禁止：
 
@@ -165,14 +164,15 @@ Feature 根据实际需要识别：
 Stage 事实仍可使用 `done`、`ready`、`active`、`validating`、`blocked`、`recovery` 等执行状态；但 Matrix 是全局扫描视图，只投影为：
 
 ```text
-✅ done       全部适用 Stage 有充分 Gate / Audit / Report / code+CI 证据
-▶ active     存在 ready、active、validating 或 recovery Stage
-○ todo       适用但尚未开始；明确 deferred 也在此概览为未启动
-! blocked    有明确 task/gate/contract/decision blocker
+✅ done       全部适用 Stage 都已完成并有 Gate / Audit / Report / code+CI 证据
+▶ ready      前置条件已满足，可开始执行，且没有 active/blocked Stage
+⏳ active     存在 active、validating 或 recovery Stage
+⛔ blocked    有明确 task/gate/contract/decision blocker
+○ todo       适用但尚未进入执行；明确 deferred 也在此概览为未启动
 — na         不适用
 ```
 
-READY 仍是 Stage 执行事实，不再成为 Matrix 的独立可视状态。
+Stage 仍可保留更细的 `validating` / `recovery` 事实，但它们只投影为 Matrix 的 `⏳ 进行中`；Matrix 不显示 Stage 名或内部状态。
 
 ## 8. Registry 与 Task Manifest
 
@@ -214,7 +214,7 @@ python scripts/generate_ai_stage_matrix.py --check
 pnpm --dir docs docs:build
 ```
 
-不得手工维护 Matrix 的 Feature 行状态；状态修改必须发生在 canonical Feature Page Frontmatter。System / Domain 汇总行继续读取 Stage Registry，并在矩阵边界投影为五种概览状态。生成器同时锁定 Domain → Feature 树状 UI，禁止生成 Node Detail 页面。
+不得手工维护 Matrix 的 Feature 行状态；状态修改必须发生在 canonical Feature Page Frontmatter。System / Domain 汇总行继续读取 Stage Registry，并在矩阵边界投影为六种概览状态：`○ 未启动`、`▶ 就绪`、`⏳ 进行中`、`⛔ 阻塞`、`✅ 完成`、`— 不适用`。生成器同时锁定 Domain → Feature 树状 UI，禁止生成 Node Detail 页面。
 
 ## 10. NEXT_ACTIONS
 

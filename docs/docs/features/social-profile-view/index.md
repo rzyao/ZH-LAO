@@ -1,6 +1,7 @@
 ---
 feature_id: social-profile-view
 title: 公开社交资料查看
+portfolio_status: active
 domain:
   - social
   - identity
@@ -19,6 +20,8 @@ admin_pages: []
 # 公开社交资料查看
 
 ## 功能概览
+
+Portfolio Status：`active`。
 
 `social-profile-view` 是当前正式 Feature 清单中的功能。其领域事实以 social、identity、trust 文档为准。
 

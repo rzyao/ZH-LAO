@@ -1,6 +1,7 @@
 ---
 feature_id: operator-audit-log
 title: 后台操作审计查询
+portfolio_status: active
 domain:
   - operations
 status:
@@ -17,6 +18,8 @@ admin_pages: []
 # 后台操作审计查询
 
 ## 功能概览
+
+Portfolio Status：`active`。
 
 `operator-audit-log` 是当前正式 Feature 清单中的功能。其领域事实以 operations 文档为准。
 

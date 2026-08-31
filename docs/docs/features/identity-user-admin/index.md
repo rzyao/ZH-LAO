@@ -1,6 +1,7 @@
 ---
 feature_id: identity-user-admin
 title: 用户账户查询与状态管理
+portfolio_status: active
 domain:
   - identity
   - operations
@@ -18,6 +19,8 @@ admin_pages: []
 # 用户账户查询与状态管理
 
 ## 功能概览
+
+Portfolio Status：`active`。
 
 `identity-user-admin` 是当前正式 Feature 清单中的功能。其领域事实以 identity、operations 文档为准。
 

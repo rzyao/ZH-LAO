@@ -1,6 +1,7 @@
 ---
 feature_id: admin-dashboard
-title: 后台数据总览（延期）
+title: 后台数据总览
+portfolio_status: deferred
 domain: []
 status:
   design: todo
@@ -13,9 +14,11 @@ mobile_pages: []
 admin_pages: []
 ---
 
-# 后台数据总览（延期）
+# 后台数据总览
 
 ## 功能概览
+
+Portfolio Status：`deferred`。
 
 `admin-dashboard` 是当前正式 Feature 清单中的功能。其领域事实以 产品级设计 文档为准。
 

@@ -1,6 +1,7 @@
 ---
 feature_id: creator-earnings
-title: 礼物收益、提现与结算（延期）
+title: 礼物收益、提现与结算
+portfolio_status: deferred
 domain:
   - commerce
   - social
@@ -15,9 +16,11 @@ mobile_pages: []
 admin_pages: []
 ---
 
-# 礼物收益、提现与结算（延期）
+# 礼物收益、提现与结算
 
 ## 功能概览
+
+Portfolio Status：`deferred`。
 
 `creator-earnings` 是当前正式 Feature 清单中的功能。其领域事实以 commerce、social 文档为准。
 

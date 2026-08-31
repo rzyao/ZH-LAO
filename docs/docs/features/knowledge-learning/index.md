@@ -1,6 +1,7 @@
 ---
 feature_id: knowledge-learning
 title: 词汇 / 句子 / 知识学习
+portfolio_status: active
 domain:
   - learning
   - content
@@ -19,6 +20,8 @@ admin_pages: []
 # 词汇 / 句子 / 知识学习
 
 ## 功能概览
+
+Portfolio Status：`active`。
 
 `knowledge-learning` 是当前正式 Feature 清单中的功能。其领域事实以 learning、content、identity 文档为准。
 

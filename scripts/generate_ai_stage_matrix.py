@@ -15,12 +15,14 @@ NODES_DIR = ROOT / 'docs/docs/development/nodes'
 UI_CONTRACT = [
     'ui_contract: domain-feature-lane-v2',
     '<thead><tr><th>开发对象</th>',
-    "object.kind === 'feature' ? 'Feature' : object.kind === 'domain' ? 'Domain' : 'System'",
+    'object-label',
     "['object-cell', object.kind]",
     "['node-status', `node-${display(object, lane).status}`]",
-    '.object-cell.feature{padding-left:26px;font-weight:600}',
+    "portfolioMeta[object.portfolio_status]",
+    '.object-cell.feature{padding-left:30px;font-weight:400}',
     '.object-cell.domain,.object-cell.system{font-weight:800',
     '.node-done{color:#166534',
+    '.node-ready{color:#0369a1',
     '.node-active{color:#6d28d9',
     '.node-todo{color:#4b5563',
     '.node-blocked{color:#b91c1c',
@@ -63,8 +65,8 @@ def main():
         raise ValueError(f'Feature Page link model changed: {missing_model_links}')
     if '/development/nodes/' in matrix or '/development/nodes/' in model:
         raise ValueError('Matrix still links to generated Node Detail pages')
-    if any(marker in matrix for marker in ('node-ready', 'node-deferred', '⏸ 延期', '▶ 就绪')):
-        raise ValueError('Matrix exposes Stage-level ready/deferred statuses')
+    if any(marker in matrix for marker in ('node-deferred', 'node-recovery', '⏸ 延期', '🟣 恢复')):
+        raise ValueError('Matrix exposes Stage-level deferred/recovery statuses')
     if NODES_DIR.exists():
         raise ValueError('generated Development Node pages still exist')
 

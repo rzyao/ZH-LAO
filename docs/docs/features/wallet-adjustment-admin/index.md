@@ -1,6 +1,7 @@
 ---
 feature_id: wallet-adjustment-admin
 title: 钱包 Adjustment / Reversal 后台
+portfolio_status: active
 domain:
   - commerce
   - operations
@@ -18,6 +19,8 @@ admin_pages: []
 # 钱包 Adjustment / Reversal 后台
 
 ## 功能概览
+
+Portfolio Status：`active`。
 
 `wallet-adjustment-admin` 是当前正式 Feature 清单中的功能。其领域事实以 commerce、operations 文档为准。
 

@@ -1,6 +1,7 @@
 ---
 feature_id: wrong-answer-notebook
-title: 错题本（延期）
+title: 错题本
+portfolio_status: deferred
 domain:
   - learning
   - content
@@ -16,9 +17,11 @@ mobile_pages: []
 admin_pages: []
 ---
 
-# 错题本（延期）
+# 错题本
 
 ## 功能概览
+
+Portfolio Status：`deferred`。
 
 `wrong-answer-notebook` 是当前正式 Feature 清单中的功能。其领域事实以 learning、content、identity 文档为准。
 

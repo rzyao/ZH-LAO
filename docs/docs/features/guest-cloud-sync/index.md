@@ -1,6 +1,7 @@
 ---
 feature_id: guest-cloud-sync
-title: 游客云同步与注册数据迁移（延期）
+title: 游客云同步与注册数据迁移
+portfolio_status: deferred
 domain:
   - identity
 status:
@@ -14,9 +15,11 @@ mobile_pages: []
 admin_pages: []
 ---
 
-# 游客云同步与注册数据迁移（延期）
+# 游客云同步与注册数据迁移
 
 ## 功能概览
+
+Portfolio Status：`deferred`。
 
 `guest-cloud-sync` 是当前正式 Feature 清单中的功能。其领域事实以 identity 文档为准。
 

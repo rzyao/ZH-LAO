@@ -21,11 +21,11 @@ stage_id: LOGIN-MOBILE-IMPLEMENT
 设计 → Backend → Admin → Mobile → 集成 → 验收
 ```
 
-各 Lane 的人工状态只允许 `todo`、`active`、`blocked`、`done`、`na`。`blocked` 必须记录原因；`done` 必须指向 Gate 或完成证据。
+各 Feature Lane 的机器状态只允许 `todo`、`ready`、`active`、`blocked`、`done`、`na`，展示统一为 `○ 未启动`、`▶ 就绪`、`⏳ 进行中`、`⛔ 阻塞`、`✅ 完成`、`— 不适用`。`blocked` 必须记录原因；`done` 必须指向 Gate 或完成证据。`portfolio_status` 独立表示 Feature 是否属于当前开发组合，只允许 `active`、`deferred`、`pending_decision`，不得写进 Feature title。
 
 `DOMAIN_LIFECYCLE_MATRIX.md` 是从 Feature Page Frontmatter 派生的全局导航视图，不保存第二套 Lane 状态。矩阵的 Feature 名跳转到 Feature Page 顶部，任一 Lane 跳转到该 Feature 的对应章节；Stage 名与细节只在 Feature Page 和开发工件中展示。
 
-矩阵固定为“开发对象 + 六条 Lane”UI：System / Foundation、Domain 是一级行，Feature 是其下的二级行。第一列不拆成 Domain / Feature 两列。矩阵只显示五种概览状态：`✅ 完成`、`▶ 进行中`、`! 阻塞`、`○ 未启动`、`— 不适用`；READY、Stage 名和细节不得泄漏到矩阵。
+矩阵固定为“开发对象 + 六条 Lane”UI：System / Foundation、Domain 是一级行，Feature 是其下的二级行。第一列不拆成 Domain / Feature 两列。矩阵只显示六种概览状态：`○ 未启动`、`▶ 就绪`、`⏳ 进行中`、`⛔ 阻塞`、`✅ 完成`、`— 不适用`；Stage 名和细节不得泄漏到矩阵。Feature 的延期/待裁决只作为独立 Badge 展示。
 
 ## Development Node
 

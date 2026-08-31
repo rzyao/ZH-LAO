@@ -1,6 +1,7 @@
 ---
 feature_id: social-post-interactions
 title: 动态点赞、评论与回复
+portfolio_status: active
 domain:
   - social
   - identity
@@ -19,6 +20,8 @@ admin_pages: []
 # 动态点赞、评论与回复
 
 ## 功能概览
+
+Portfolio Status：`active`。
 
 `social-post-interactions` 是当前正式 Feature 清单中的功能。其领域事实以 social、identity、trust 文档为准。
 

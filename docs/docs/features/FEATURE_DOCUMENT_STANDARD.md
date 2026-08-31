@@ -11,6 +11,7 @@ status: active
 ```yaml
 feature_id: login
 title: 用户登录与会话
+portfolio_status: active
 domain: [identity]
 status:
   design: done
@@ -23,7 +24,7 @@ mobile_pages: [mobile-login, mobile-otp]
 admin_pages: []
 ```
 
-状态只允许 `todo`、`active`、`blocked`、`done`、`na`。阻塞 Lane 必须使用 `blocks.<lane>` 记录原因。`portfolio_status`（例如 `planned`、`deferred`、`unresolved`）属于 Feature Inventory 的产品组合语义，不直接作为 Lane 状态写入矩阵。
+Lane 状态只允许 `todo`、`ready`、`active`、`blocked`、`done`、`na`。展示统一为 `○ 未启动`、`▶ 就绪`、`⏳ 进行中`、`⛔ 阻塞`、`✅ 完成`、`— 不适用`。阻塞 Lane 必须使用 `blocks.<lane>` 记录原因；完成 Lane 必须提供 `evidence.<lane>`。`portfolio_status` 只允许 `active`、`deferred`、`pending_decision`，表示 Feature 是否进入当前开发组合，必须与 Feature title 分离并与 Feature Inventory 一致。
 
 ## 固定章节
 
@@ -39,7 +40,7 @@ Mobile
 验收
 ```
 
-每个 Lane 至少说明当前状态、范围、关联 Stage / 工件 / Gate 与下一步；`na` 必须说明原因。已有的用户目标、用户流程、领域关系、Use Case、状态机、Contract 等内容必须归入 `设计`，已有 Backend/Admin/Mobile 工件同理归入对应模块，不得因模板迁移删除。
+每个 Lane 至少说明当前状态、范围、关联 Stage / 工件 / Gate 与下一步；`done`、`active`、`blocked` 不得保留模板占位。`active` 还必须说明已完成内容与当前进行内容；`blocked` 必须说明阻塞原因、对象、已完成内容、等待条件及解除后的下一步；`na` 必须说明原因。已有的用户目标、用户流程、领域关系、Use Case、状态机、Contract 等内容必须归入 `设计`，已有 Backend/Admin/Mobile 工件同理归入对应模块，不得因模板迁移删除。
 
 推荐的每个 Lane 内部结构：
 
@@ -67,4 +68,4 @@ Domain
   Feature
 ```
 
-列固定为：开发对象、设计 AI、Backend AI、Admin AI、Mobile AI、集成 AI、验收 AI。矩阵只显示 `✅ 完成`、`▶ 进行中`、`! 阻塞`、`○ 未启动`、`— 不适用` 五种概览状态；READY、validating、recovery、deferred 等 Stage 或产品组合细节必须留在 Feature Page、Stage、Gate 或 Inventory。
+列固定为：开发对象、设计 AI、Backend AI、Admin AI、Mobile AI、集成 AI、验收 AI。矩阵只显示六种 Lane 概览状态；READY、validating、recovery 等 Stage 细节必须留在 Feature Page、Stage、Gate 或 Registry，延期/待裁决只通过独立 Portfolio Badge 展示。

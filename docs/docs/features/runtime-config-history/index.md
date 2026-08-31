@@ -1,6 +1,7 @@
 ---
 feature_id: runtime-config-history
-title: 运行配置版本与回滚（延期）
+title: 运行配置版本与回滚
+portfolio_status: deferred
 domain:
   - platform
 status:
@@ -14,9 +15,11 @@ mobile_pages: []
 admin_pages: []
 ---
 
-# 运行配置版本与回滚（延期）
+# 运行配置版本与回滚
 
 ## 功能概览
+
+Portfolio Status：`deferred`。
 
 `runtime-config-history` 是当前正式 Feature 清单中的功能。其领域事实以 platform 文档为准。
 

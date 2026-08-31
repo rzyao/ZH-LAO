@@ -1,6 +1,7 @@
 ---
 feature_id: social-profile-media
 title: 社交照片 / 兴趣 / 语言 / Prompt
+portfolio_status: active
 domain:
   - social
   - identity
@@ -19,6 +20,8 @@ admin_pages: []
 # 社交照片 / 兴趣 / 语言 / Prompt
 
 ## 功能概览
+
+Portfolio Status：`active`。
 
 `social-profile-media` 是当前正式 Feature 清单中的功能。其领域事实以 social、identity、trust 文档为准。
 

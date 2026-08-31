@@ -1,6 +1,7 @@
 ---
 feature_id: app-version-governance
 title: 客户端版本检查与强制升级
+portfolio_status: active
 domain:
   - platform
 status:
@@ -17,6 +18,8 @@ admin_pages: []
 # 客户端版本检查与强制升级
 
 ## 功能概览
+
+Portfolio Status：`active`。
 
 `app-version-governance` 是当前正式 Feature 清单中的功能。其领域事实以 platform 文档为准。
 

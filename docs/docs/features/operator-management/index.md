@@ -1,6 +1,7 @@
 ---
 feature_id: operator-management
 title: 操作员管理
+portfolio_status: active
 domain:
   - operations
 status:
@@ -18,6 +19,8 @@ admin_pages:
 # 操作员管理
 
 ## 功能概览
+
+Portfolio Status：`active`。
 
 `operator-management` 是当前正式 Feature 清单中的功能。其领域事实以 operations 文档为准。
 

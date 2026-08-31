@@ -1,6 +1,7 @@
 ---
 feature_id: commerce-transaction-admin
 title: 订单 / 支付 / 履约后台监控
+portfolio_status: active
 domain:
   - commerce
   - operations
@@ -18,6 +19,8 @@ admin_pages: []
 # 订单 / 支付 / 履约后台监控
 
 ## 功能概览
+
+Portfolio Status：`active`。
 
 `commerce-transaction-admin` 是当前正式 Feature 清单中的功能。其领域事实以 commerce、operations 文档为准。
 

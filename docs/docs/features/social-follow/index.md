@@ -1,6 +1,7 @@
 ---
 feature_id: social-follow
 title: 关注与取消关注
+portfolio_status: active
 domain:
   - social
   - identity
@@ -19,6 +20,8 @@ admin_pages: []
 # 关注与取消关注
 
 ## 功能概览
+
+Portfolio Status：`active`。
 
 `social-follow` 是当前正式 Feature 清单中的功能。其领域事实以 social、identity、trust 文档为准。
 

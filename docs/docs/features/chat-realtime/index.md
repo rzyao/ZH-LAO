@@ -1,6 +1,7 @@
 ---
 feature_id: chat-realtime
 title: 实时消息传输与重连
+portfolio_status: active
 domain:
   - chat
   - identity
@@ -19,6 +20,8 @@ admin_pages: []
 # 实时消息传输与重连
 
 ## 功能概览
+
+Portfolio Status：`active`。
 
 `chat-realtime` 是当前正式 Feature 清单中的功能。其领域事实以 chat、identity、social 文档为准。
 

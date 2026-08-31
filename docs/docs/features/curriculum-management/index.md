@@ -1,6 +1,7 @@
 ---
 feature_id: curriculum-management
 title: 课程编排与发布
+portfolio_status: active
 domain:
   - content
   - operations
@@ -18,6 +19,8 @@ admin_pages: []
 # 课程编排与发布
 
 ## 功能概览
+
+Portfolio Status：`active`。
 
 `curriculum-management` 是当前正式 Feature 清单中的功能。其领域事实以 content、operations 文档为准。
 

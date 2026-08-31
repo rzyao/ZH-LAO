@@ -1,6 +1,7 @@
 ---
 feature_id: social-discovery
 title: 发现、筛选与推荐
+portfolio_status: active
 domain:
   - social
   - identity
@@ -20,6 +21,8 @@ admin_pages: []
 # 发现、筛选与推荐
 
 ## 功能概览
+
+Portfolio Status：`active`。
 
 `social-discovery` 是当前正式 Feature 清单中的功能。其领域事实以 social、identity、trust、platform 文档为准。
 

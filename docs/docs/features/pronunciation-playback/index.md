@@ -1,6 +1,7 @@
 ---
 feature_id: pronunciation-playback
 title: 标准发音与音频播放
+portfolio_status: active
 domain:
   - learning
   - content
@@ -20,6 +21,8 @@ admin_pages: []
 # 标准发音与音频播放
 
 ## 功能概览
+
+Portfolio Status：`active`。
 
 `pronunciation-playback` 是当前正式 Feature 清单中的功能。其领域事实以 learning、content、audio、identity 文档为准。
 

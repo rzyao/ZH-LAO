@@ -1,6 +1,7 @@
 ---
 feature_id: moderation-workbench
 title: 审核案件 / 证据 / 决定工作台
+portfolio_status: active
 domain:
   - trust
   - operations
@@ -18,6 +19,8 @@ admin_pages: []
 # 审核案件 / 证据 / 决定工作台
 
 ## 功能概览
+
+Portfolio Status：`active`。
 
 `moderation-workbench` 是当前正式 Feature 清单中的功能。其领域事实以 trust、operations 文档为准。
 

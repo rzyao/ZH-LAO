@@ -1,6 +1,7 @@
 ---
 feature_id: order-payment-history
 title: 订单与支付历史
+portfolio_status: active
 domain:
   - commerce
   - identity
@@ -18,6 +19,8 @@ admin_pages: []
 # 订单与支付历史
 
 ## 功能概览
+
+Portfolio Status：`active`。
 
 `order-payment-history` 是当前正式 Feature 清单中的功能。其领域事实以 commerce、identity 文档为准。
 

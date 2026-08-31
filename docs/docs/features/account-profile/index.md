@@ -1,6 +1,7 @@
 ---
 feature_id: account-profile
 title: 账户基础资料与学习方向
+portfolio_status: active
 domain:
   - identity
 status:
@@ -17,6 +18,8 @@ admin_pages: []
 # 账户基础资料与学习方向
 
 ## 功能概览
+
+Portfolio Status：`active`。
 
 `account-profile` 是当前正式 Feature 清单中的功能。其领域事实以 identity 文档为准。
 

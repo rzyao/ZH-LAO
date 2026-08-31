@@ -1,6 +1,7 @@
 ---
 feature_id: knowledge-content-management
 title: 知识内容管理
+portfolio_status: active
 domain:
   - content
   - operations
@@ -18,6 +19,8 @@ admin_pages: []
 # 知识内容管理
 
 ## 功能概览
+
+Portfolio Status：`active`。
 
 `knowledge-content-management` 是当前正式 Feature 清单中的功能。其领域事实以 content、operations 文档为准。
 

@@ -1,6 +1,7 @@
 ---
 feature_id: direct-conversation
 title: 发起 / 打开一对一会话
+portfolio_status: active
 domain:
   - chat
   - identity
@@ -19,6 +20,8 @@ admin_pages: []
 # 发起 / 打开一对一会话
 
 ## 功能概览
+
+Portfolio Status：`active`。
 
 `direct-conversation` 是当前正式 Feature 清单中的功能。其领域事实以 chat、identity、social 文档为准。
 

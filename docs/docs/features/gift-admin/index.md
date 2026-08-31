@@ -1,6 +1,7 @@
 ---
 feature_id: gift-admin
 title: 礼物后台管理
+portfolio_status: active
 domain:
   - commerce
   - operations
@@ -18,6 +19,8 @@ admin_pages: []
 # 礼物后台管理
 
 ## 功能概览
+
+Portfolio Status：`active`。
 
 `gift-admin` 是当前正式 Feature 清单中的功能。其领域事实以 commerce、operations 文档为准。
 

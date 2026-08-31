@@ -1,6 +1,7 @@
 ---
 feature_id: enforcement-management
 title: 平台处罚与能力限制
+portfolio_status: active
 domain:
   - trust
   - operations
@@ -21,6 +22,8 @@ admin_pages: []
 # 平台处罚与能力限制
 
 ## 功能概览
+
+Portfolio Status：`active`。
 
 `enforcement-management` 是当前正式 Feature 清单中的功能。其领域事实以 trust、operations、identity、social、chat 文档为准。
 

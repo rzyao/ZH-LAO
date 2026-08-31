@@ -1,6 +1,7 @@
 ---
 feature_id: conversation-settings
 title: 置顶 / 免打扰 / 隐藏 / 清空历史
+portfolio_status: active
 domain:
   - chat
   - identity
@@ -19,6 +20,8 @@ admin_pages: []
 # 置顶 / 免打扰 / 隐藏 / 清空历史
 
 ## 功能概览
+
+Portfolio Status：`active`。
 
 `conversation-settings` 是当前正式 Feature 清单中的功能。其领域事实以 chat、identity、social 文档为准。
 

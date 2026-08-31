@@ -1,6 +1,7 @@
 ---
 feature_id: social-feed
 title: 关注 Feed 与动态浏览
+portfolio_status: active
 domain:
   - social
   - identity
@@ -19,6 +20,8 @@ admin_pages: []
 # 关注 Feed 与动态浏览
 
 ## 功能概览
+
+Portfolio Status：`active`。
 
 `social-feed` 是当前正式 Feature 清单中的功能。其领域事实以 social、identity、trust 文档为准。
 

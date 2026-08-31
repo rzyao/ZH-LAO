@@ -1,6 +1,7 @@
 ---
 feature_id: social-block
 title: 用户 Block / Unblock
+portfolio_status: active
 domain:
   - social
   - identity
@@ -20,6 +21,8 @@ admin_pages: []
 # 用户 Block / Unblock
 
 ## 功能概览
+
+Portfolio Status：`active`。
 
 `social-block` 是当前正式 Feature 清单中的功能。其领域事实以 social、identity、trust、chat 文档为准。
 

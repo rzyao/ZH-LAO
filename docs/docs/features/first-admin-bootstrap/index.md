@@ -1,6 +1,7 @@
 ---
 feature_id: first-admin-bootstrap
 title: 首个管理员 Bootstrap
+portfolio_status: active
 domain:
   - operations
 status:
@@ -17,6 +18,8 @@ admin_pages: []
 # 首个管理员 Bootstrap
 
 ## 功能概览
+
+Portfolio Status：`active`。
 
 `first-admin-bootstrap` 是当前正式 Feature 清单中的功能。其领域事实以 operations 文档为准。
 

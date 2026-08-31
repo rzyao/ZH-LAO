@@ -1,6 +1,7 @@
 ---
 feature_id: advanced-reward-types
-title: 会员天数 / POINT / BADGE 等新奖励类型（延期）
+title: 会员天数 / POINT / BADGE 等新奖励类型
+portfolio_status: deferred
 domain:
   - rewards
   - commerce
@@ -15,9 +16,11 @@ mobile_pages: []
 admin_pages: []
 ---
 
-# 会员天数 / POINT / BADGE 等新奖励类型（延期）
+# 会员天数 / POINT / BADGE 等新奖励类型
 
 ## 功能概览
+
+Portfolio Status：`deferred`。
 
 `advanced-reward-types` 是当前正式 Feature 清单中的功能。其领域事实以 rewards、commerce 文档为准。
 
