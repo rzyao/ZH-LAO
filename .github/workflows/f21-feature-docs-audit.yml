@@ -29,6 +29,28 @@ jobs:
         with:
           python-version: '3.12'
       - run: python -m pip install pyyaml
+      - name: Diagnose Feature frontmatter requirements
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import yaml
+          missing=[]
+          for path in sorted(Path('docs/docs/features').glob('*/index.md')):
+              text=path.read_text(encoding='utf-8')
+              end=text.find('\n---',4)
+              data=yaml.safe_load(text[4:end])
+              fid=data.get('feature_id', path.parent.name)
+              for lane,status in (data.get('status') or {}).items():
+                  if status=='done' and not (data.get('evidence') or {}).get(lane):
+                      missing.append(f'{fid}.{lane}: done missing evidence.{lane}')
+                  if status=='active' and not (data.get('active_notes') or {}).get(lane):
+                      missing.append(f'{fid}.{lane}: active missing active_notes.{lane}')
+                  if status=='blocked' and not (data.get('blocks') or {}).get(lane):
+                      missing.append(f'{fid}.{lane}: blocked missing blocks.{lane}')
+          print(f'FRONTMATTER_REQUIREMENT_GAPS={len(missing)}')
+          for item in missing:
+              print('  '+item)
+          PY
       - name: Generate canonical Feature index
         run: python scripts/validate_feature_pages.py --write
       - name: Verify generator idempotency
