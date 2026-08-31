@@ -242,6 +242,14 @@ const domainsSidebar = [
     collapsed: true,
     items: [
       { text: '领域概览', link: '/domains/trust/' },
+      {
+        text: '业务设计',
+        collapsed: true,
+        items: [
+          { text: '治理流程', link: '/domains/trust/moderation' }
+        ]
+      },
+      { text: '契约与边界', link: '/domains/trust/contracts' },
       { text: '数据设计', link: '/domains/trust/database' }
     ]
   },
@@ -267,6 +275,15 @@ const domainsSidebar = [
     collapsed: true,
     items: [
       { text: '领域概览', link: '/domains/platform/' },
+      {
+        text: '业务设计',
+        collapsed: true,
+        items: [
+          { text: '运行时控制', link: '/domains/platform/runtime-control' },
+          { text: '客户端治理', link: '/domains/platform/client-governance' }
+        ]
+      },
+      { text: '边界与职责', link: '/domains/platform/boundaries' },
       { text: '数据设计', link: '/domains/platform/database' }
     ]
   }
