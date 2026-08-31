@@ -1,297 +1,276 @@
 ---
-dependencies:
-- content
-- operations
-- asset
+feature_id: audio-production
+title: 音频生产
+portfolio_status: active
+
 domain:
   primary: audio
-feature_id: audio-production
-portfolio_status: active
+
+dependencies:
+  - content
+  - operations
+  - asset
+
 status:
-  acceptance: todo
-  admin: active
-  backend: blocked
   design: done
-  integration: blocked
+  backend: blocked
+  admin: active
   mobile: na
-title: 音频生产
+  integration: blocked
+  acceptance: todo
 ---
 
 # 音频生产
 
 ## 1. 功能概览
 
-Audio Production 负责将 Content 的规范音频需求转换为可追溯的生产链：
+音频生产负责将 Content 的规范音频需求转换为可追溯的生产流程：
 
-    音频生产需求
-        ↓
-    Audio Slot
-        ↓
-    Production Task
-        ↓
-    TTS / 人工录音
-        ↓
-    Audio Version
-        ↓
-    Review
-        ↓
-    Published Audio
-
-本 Feature 负责： - 音频生产控制面 - 音频任务生命周期 - 音频版本管理 -
-审核与发布
-
-不负责： - Content canonical text - pronunciation fact - TTS Provider
-内部模型事实 - Asset Infrastructure 物理存储事实 - Learning / Mobile
-音频消费能力
-
-------------------------------------------------------------------------
-
-## 2. Lifecycle Status
-
-  生命周期                 状态      说明
-  ------------------------ --------- ------------------------
-  产品定义                 ✅        Feature 已定义
-  Canonical Design         ✅        AUDIO_DESIGN_GATE PASS
-  Database Contract        ✅        0600_audio.sql 冻结
-  Backend Implementation   BLOCKED   等待 CONTENT_GATE
-  Admin Design             ACTIVE    Admin Design Stage
-  Mobile                   N/A       不属于生产 Feature
-  Integration              BLOCKED   等待实现
-  Acceptance               TODO      等待验收证据
-
-------------------------------------------------------------------------
-
-## 3. Capability
-
--   音频需求管理
--   Audio Slot 管理
--   Production Task
--   TTS Generation Attempt
--   Human Recording Task
--   Audio Version 管理
--   Review
--   Publish
--   批量生产与运营管理
-
-------------------------------------------------------------------------
-
-## 4. Actors
-
-  Actor                  责任
-  ---------------------- ------------------
-  Content                提供规范内容需求
-  Audio Operator         执行生产和审核
-  Operations             权限和审计
-  TTS Provider           提供生成能力
-  Asset Infrastructure   提供资产能力
-  Worker                 执行异步任务
-
-------------------------------------------------------------------------
-
-## 5. Scope Boundary
-
-Audio Production Owns:
-
-    Audio Slot
-    Audio Task
-    TTS Generation Attempt
-    Human Recording Submission
-    Audio Version
-    Review
-    Publish Result
-
-不拥有：
-
-    Content canonical text
-    pronunciation
-
-    TTS provider/model/voice/preset
-
-    Asset bucket/object key
-
-    Learning playback
-
-------------------------------------------------------------------------
-
-## 6. Architecture
-
-    Content
-     |
-     v
-    Audio Production
-     |
-     +---- TTS Provider
-     |
-     +---- Human Recording
-     |
-     v
-    Asset Infrastructure
-     |
-     v
-    Audio Version
-     |
-     v
-    Review
-     |
-     v
-    Publish
-     |
-     v
-    Learning Consumption
-
-------------------------------------------------------------------------
-
-## 7. Lifecycle State Machine
-
-    Draft
-     ↓
-    Created
-     ↓
-    Assigned
-     ↓
-    Generating
-     ↓
-    Generated
-     ↓
-    Reviewing
-     ↓
-    Approved
-     ↓
-    Published
-
-失败流程：
-
-    Generating
-     ↓
-    Failed
-     ↓
-    Retry
-
-------------------------------------------------------------------------
-
-## 8. Implementation Status
-
-### Backend
-
-状态：
-
-    BLOCKED
-
-目标模块：
-
-    apps/backend/src/modules/audio/
-
-当前：
-
--   Design Complete
--   Implementation Not Started
--   等待 CONTENT_GATE
-
-------------------------------------------------------------------------
-
-### Admin
-
-状态：
-
-    ACTIVE
+```
+音频需求
+ ↓
+音频生产任务
+ ↓
+TTS生成 / 人工录音
+ ↓
+音频版本
+ ↓
+审核
+ ↓
+正式发布
+```
 
 负责：
 
--   任务队列
--   TTS入口
--   人工录音入口
--   审核
--   发布
+- 音频生产控制
+- 音频任务生命周期
+- 音频版本管理
+- 审核与发布
 
-当前阶段：
+不负责：
 
-    AUDIO-PRODUCTION-ADMIN-DESIGN
+- 内容规范文本事实
+- 发音规范事实
+- TTS供应商内部模型事实
+- 存储基础设施事实
+- 学习端音频消费能力
 
-尚未进入 Implementation。
+---
 
-------------------------------------------------------------------------
+## 2. 生命周期状态
 
-### Mobile
+|阶段|状态|说明|
+|-|-|-|
+|产品定义|完成|Feature 已定义|
+|领域设计|完成|AUDIO_DESIGN_GATE 已通过|
+|数据库契约|完成|0600_audio.sql 已冻结|
+|后端实现|阻塞|等待 CONTENT_GATE|
+|管理后台设计|进行中|设计阶段|
+|移动端|不适用|不属于生产能力|
+|系统集成|阻塞|等待实现证据|
+|验收|待开始|等待集成完成|
 
-状态：
+---
 
-    N/A
+## 3. 核心能力
 
-原因：
+- 音频需求管理
+- 音频生产任务管理
+- TTS生成任务管理
+- 人工录音流程管理
+- 音频版本管理
+- 音频审核
+- 音频发布
+- 批量生产运营
 
-Audio Production 不面向普通用户。
+---
 
-------------------------------------------------------------------------
+## 4. 参与角色
 
-### Integration
+|角色|职责|
+|-|-|
+|内容系统|提供音频需求|
+|音频运营人员|生产和审核音频|
+|运营系统|权限和审计|
+|TTS服务|提供生成能力|
+|资产服务|提供文件资产能力|
+|后台任务服务|执行异步任务|
 
-状态：
+---
 
-    BLOCKED
+## 5. 责任边界
 
-链路：
+音频生产拥有：
 
-    Content Requirement
-     ↓
-    Audio Task
-     ↓
-    TTS/Human Recording
-     ↓
-    Asset
-     ↓
-    Audio Version
-     ↓
-    Review
-     ↓
-    Publish
-     ↓
-    Admin
+```
+音频任务
+生成记录
+人工录音提交
+音频版本
+审核结果
+发布结果
+```
 
-------------------------------------------------------------------------
+不拥有：
 
-## 9. Evidence
+```
+内容规范文本
+发音规范
+TTS模型配置
+对象存储物理信息
+学习播放能力
+```
 
-Design:
+---
 
--   /domains/audio/production
--   /domains/audio/contracts
--   AUDIO_DESIGN_RECOVERY_BRIEF.md
--   AUDIO_DESIGN_AUDIT.md
+## 6. 架构关系
 
-Backend:
+```
+内容系统
+ ↓
+音频生产
+ ↓
+ ├── TTS生成
+ └── 人工录音
+ ↓
+资产服务
+ ↓
+音频版本
+ ↓
+审核
+ ↓
+发布
+```
 
--   AUDIO_IMPLEMENTATION_PLAN.md
--   AUDIO_PRODUCTION_CONTRACTS.md
+---
 
-Admin:
+## 7. 状态机
 
--   AUDIO_PRODUCTION_ADMIN_DESIGN_BRIEF.md
+### 生产任务状态
 
-------------------------------------------------------------------------
+```
+草稿
+ ↓
+创建
+ ↓
+分配
+ ↓
+生成中
+ ↓
+已生成
+ ↓
+审核中
+ ↓
+已通过
+ ↓
+已发布
+```
 
-## 10. Gate Summary
+失败流程：
 
-  Gate                        Status
-  --------------------------- ---------
-  AUDIO_DESIGN_GATE           PASS
-  AUDIO_IMPLEMENTATION_GATE   BLOCKED
-  AUDIO_ADMIN_DESIGN_GATE     ACTIVE
-  AUDIO_INTEGRATION_GATE      BLOCKED
-  AUDIO_ACCEPTANCE_GATE       TODO
+```
+生成中
+ ↓
+失败
+ ↓
+重试
+```
 
-------------------------------------------------------------------------
+---
 
-## 11. Next Action
+## 8. 实现状态
 
-1.  等待 CONTENT_GATE 完成；
-2.  执行 Audio Implementation Entry Audit；
-3.  实现 Backend；
-4.  完成 Admin Design Gate；
-5.  建立 Integration Evidence；
-6.  进入 Acceptance。
+### 后端
+
+状态：阻塞
+
+原因：等待 CONTENT_GATE。
+
+当前：
+
+- 设计完成
+- 实现未开始
+- 无后端完成证据
+
+### 管理后台
+
+状态：进行中
+
+范围：
+
+- 任务队列
+- 生成入口
+- 人工录音入口
+- 审核
+- 发布
+
+当前仍处于后台设计阶段，未进入实现。
+
+### 移动端
+
+状态：不适用。
+
+音频生产不面向普通用户。
+
+### 系统集成
+
+状态：阻塞。
+
+等待：
+
+```
+内容能力
+ ↓
+后端实现
+ ↓
+集成测试证据
+```
+
+---
+
+## 9. 证据
+
+设计：
+
+- /domains/audio/production
+- /domains/audio/contracts
+- AUDIO_DESIGN_RECOVERY_BRIEF.md
+- AUDIO_DESIGN_AUDIT.md
+
+后端：
+
+- AUDIO_IMPLEMENTATION_PLAN.md
+- AUDIO_PRODUCTION_CONTRACTS.md
+
+后台：
+
+- AUDIO_PRODUCTION_ADMIN_DESIGN_BRIEF.md
+
+---
+
+## 10. Gate 状态
+
+|Gate|状态|
+|-|-|
+|音频设计 Gate|通过|
+|音频实现 Gate|阻塞|
+|后台设计 Gate|进行中|
+|音频集成 Gate|阻塞|
+|音频验收 Gate|待开始|
+
+---
+
+## 11. 下一步
+
+1. 等待 CONTENT_GATE 完成；
+2. 执行音频实现入口审计；
+3. 开始后端实现；
+4. 完成后台设计 Gate；
+5. 建立系统集成证据；
+6. 进入验收阶段。
 
 禁止：
 
--   用 Design PASS 推导 Implementation 完成；
--   用 Migration 存在推导 Backend 完成；
--   用 Admin Design 推导 Admin Implementation 完成。
+- 用设计完成推导实现完成；
+- 用数据库迁移存在推导后端完成；
+- 用后台设计完成推导后台实现完成。
