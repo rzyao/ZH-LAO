@@ -55,7 +55,8 @@ const architectureSidebar = [
     text: '应用架构',
     items: [
       { text: '后端架构', link: '/architecture/applications/backend' },
-      { text: '客户端架构', link: '/architecture/applications/clients' }
+      { text: '客户端架构', link: '/architecture/applications/clients' },
+      { text: '全局 API 规范', link: '/architecture/applications/api-standard' }
     ]
   },
   {
@@ -394,7 +395,7 @@ export default defineConfig({
         { text: '认证', items: [{ text: '登录页', link: '/mobile/login' }, { text: 'OTP 验证页', link: '/mobile/otp' }] }
       ],
       '/admin/': [
-        { text: 'Admin', items: [{ text: '概览', link: '/admin/' }, { text: '导航结构', link: '/admin/navigation' }, { text: '页面清单', link: '/admin/pages' }, { text: '页面文档规范', link: '/admin/PAGE_STANDARD' }] },
+        { text: 'Admin', items: [{ text: '概览', link: '/admin/' }, { text: '设计系统与 UI 规范', link: '/admin/DESIGN_SYSTEM' }, { text: '导航结构', link: '/admin/navigation' }, { text: '页面清单', link: '/admin/pages' }, { text: '页面文档规范', link: '/admin/PAGE_STANDARD' }] },
         { text: '账号权限', items: [{ text: '操作员管理', link: '/admin/operators' }] },
         { text: '音频', items: [{ text: '音频生产工作台', link: '/admin/audio-production' }] }
       ],

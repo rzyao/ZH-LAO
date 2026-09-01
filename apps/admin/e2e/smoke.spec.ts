@@ -24,8 +24,8 @@ test.describe('Admin Foundation smoke', () => {
   test('all 11 domain entries are present in the sidebar', async ({ page }) => {
     await login(page)
     const labels = [
-      'Content', 'Learning', 'Audio Production', 'Identity', 'Social', 'Chat',
-      'Commerce', 'Rewards', 'Trust & Safety', 'Operations', 'Platform',
+      '内容管理', '学习系统', '音频生产', '身份认证', '社交关系', '实时聊天',
+      '交易商城', '奖励中心', '信任与风控', '运营权限', '平台控制台',
     ]
     for (const label of labels) {
       await expect(page.getByRole('link', { name: label })).toBeVisible()
@@ -34,27 +34,27 @@ test.describe('Admin Foundation smoke', () => {
 
   test('navigation works to a domain placeholder', async ({ page }) => {
     await login(page)
-    await page.getByRole('link', { name: 'Content' }).click()
-    await expect(page.getByText('Content — Coming Soon')).toBeVisible()
+    await page.getByRole('link', { name: '内容管理' }).click()
+    await expect(page.getByText('内容管理 — 即将上线')).toBeVisible()
     await expect(page).toHaveURL(/\/content$/)
   })
 
   test('Platform entry opens the real Stage A management landing', async ({ page }) => {
     await login(page)
     await page.goto('/platform')
-    await expect(page.getByRole('heading', { name: 'Platform' })).toBeVisible()
-    await expect(page.getByText('Platform Admin Stage A')).toBeVisible()
-    await expect(page.getByRole('link', { name: /Feature Flags/ })).toBeVisible()
-    await expect(page.getByRole('link', { name: /Runtime Configs/ })).toBeVisible()
-    await expect(page.getByRole('link', { name: /App Versions/ })).toBeVisible()
-    await expect(page.getByRole('link', { name: /Announcements/ })).toBeVisible()
-    await expect(page.getByRole('link', { name: /Regions/ })).toBeVisible()
+    await expect(page.getByRole('heading', { name: '平台控制台' })).toBeVisible()
+    await expect(page.getByText('平台控制台 Stage A')).toBeVisible()
+    await expect(page.getByRole('link', { name: /功能开关/ })).toBeVisible()
+    await expect(page.getByRole('link', { name: /运行时配置/ })).toBeVisible()
+    await expect(page.getByRole('link', { name: /客户端版本/ })).toBeVisible()
+    await expect(page.getByRole('link', { name: /全服与定向公告/ })).toBeVisible()
+    await expect(page.getByRole('link', { name: /支持地区/ })).toBeVisible()
   })
 
   test('navigation works for the design-system page', async ({ page }) => {
     await login(page)
     await page.goto('/system/design-system')
-    await expect(page.getByRole('heading', { name: 'Design System' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: '设计系统与组件规范' })).toBeVisible()
     await expect(page.getByRole('cell', { name: '示例记录 1', exact: true })).toBeVisible()
   })
 

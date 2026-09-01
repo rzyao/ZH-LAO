@@ -62,7 +62,7 @@ export function Sidebar() {
             <span className="flex size-6 shrink-0 items-center justify-center rounded bg-primary text-[10px] font-bold text-primary-foreground">
               ZL
             </span>
-            <span className="truncate text-sm font-semibold">ZH-LAO Admin</span>
+            <span className="truncate text-sm font-semibold">ZH-LAO 控制台</span>
           </div>
         ) : (
           <span className="flex size-6 items-center justify-center rounded bg-primary text-[10px] font-bold text-primary-foreground">
@@ -106,7 +106,7 @@ export function Sidebar() {
           <div>
             {!collapsed ? (
               <div className="px-2 pb-1 text-[11px] font-medium uppercase tracking-wide text-sidebar-foreground/50">
-                Development
+                开发辅助
               </div>
             ) : null}
             <div className="space-y-0.5">
@@ -121,7 +121,7 @@ export function Sidebar() {
       <div className="flex h-11 items-center gap-2 border-t border-sidebar-border px-3">
         <ChevronLeft aria-hidden className="size-4 text-sidebar-foreground/50" />
         <span className="truncate text-xs text-sidebar-foreground/70">
-          {collapsed ? '' : 'Admin Foundation'}
+          {collapsed ? '' : '管理后台基础框架'}
         </span>
       </div>
     </aside>

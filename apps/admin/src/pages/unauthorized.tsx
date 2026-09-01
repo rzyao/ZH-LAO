@@ -14,7 +14,7 @@ export function UnauthorizedPage() {
       </p>
       <Link to="/">
         <Button variant="outline" className="mt-2">
-          返回 Overview
+          返回总览首页
         </Button>
       </Link>
     </div>

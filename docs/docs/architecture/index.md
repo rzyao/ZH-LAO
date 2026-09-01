@@ -72,6 +72,7 @@ ZH-LAO 采用 **单仓库、多应用、模块化单体后端、单 PostgreSQL �
 
 - [后端架构](applications/backend.md)
 - [客户端架构](applications/clients.md)
+- [全局 API 接口规范](applications/api-standard.md)
 
 ## 数据架构
 

@@ -10,11 +10,11 @@ export function useBreadcrumb(): BreadcrumbItem[] {
   })
 
   if (pathname === '/') {
-    return [{ label: 'Overview' }]
+    return [{ label: '总览' }]
   }
 
   const item = findNavItemByHref(pathname)
-  const crumbs: BreadcrumbItem[] = [{ label: 'Overview', href: '/' }]
+  const crumbs: BreadcrumbItem[] = [{ label: '总览', href: '/' }]
   if (!item) {
     crumbs.push({ label: pathname })
     return crumbs

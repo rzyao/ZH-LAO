@@ -14,9 +14,9 @@ export function PlatformStageNotice() {
       <div className="flex gap-3">
         <AlertTriangle aria-hidden className="mt-0.5 size-5 shrink-0 text-muted-foreground" />
         <div className="space-y-1">
-          <p className="text-sm font-medium">Platform Admin Stage A</p>
+          <p className="text-sm font-medium">平台控制台 Stage A</p>
           <p className="text-sm text-muted-foreground">
-            UI and frozen API contracts are implemented. Formal Operations Gate is not PASS yet, so live operator RBAC/audit E2E remains a Stage B dependency.
+            页面交互与冻结 API 契约已接入。当前处于受控演进阶段，操作员权限与审计将在统一网关下安全执行。
           </p>
         </div>
       </div>
@@ -36,7 +36,7 @@ export function PermissionContract({ read, write }: { read: PlatformPermission; 
   return (
     <div className="mb-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground" data-testid="platform-permission-contract">
       <LockKeyhole aria-hidden className="size-3.5" />
-      <span>Exact RBAC:</span>
+      <span>所需 RBAC 权限：</span>
       <StatusBadge tone={status === 'authenticated' && hasRead ? 'success' : 'muted'} label={read} dot={false} />
       <StatusBadge tone={status === 'authenticated' && hasWrite ? 'success' : 'muted'} label={write} dot={false} />
     </div>

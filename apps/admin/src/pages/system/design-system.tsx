@@ -144,14 +144,14 @@ type DemoFormValues = z.infer<typeof demoFormSchema>
 
 function TypographySection() {
   return (
-    <Card title="Typography">
+    <Card title="排版规范 (Typography)">
       <div className="space-y-2">
-        <p className="text-lg font-semibold">Page Title — text-lg / semibold</p>
-        <p className="text-base font-semibold">Section Title — text-base / semibold</p>
-        <p className="text-sm font-medium">Body — text-sm / normal</p>
-        <p className="text-sm text-muted-foreground">Muted body — text-sm / muted</p>
-        <p className="text-xs text-muted-foreground">Caption — text-xs / muted</p>
-        <p className="font-mono text-xs text-muted-foreground">mono / code — 0a1b2c3d</p>
+        <p className="text-lg font-semibold">页面主标题 (Page Title) — text-lg / semibold</p>
+        <p className="text-base font-semibold">区块标题 (Section Title) — text-base / semibold</p>
+        <p className="text-sm font-medium">正文标签 (Label / Body) — text-sm / medium</p>
+        <p className="text-sm text-muted-foreground">弱化描述 (Muted Body) — text-sm / muted</p>
+        <p className="text-xs text-muted-foreground">辅助说明 (Caption) — text-xs / muted</p>
+        <p className="font-mono text-xs text-muted-foreground">等宽代码 / 标识符 (Mono / Code) — 0a1b2c3d</p>
       </div>
     </Card>
   )
@@ -159,20 +159,20 @@ function TypographySection() {
 
 function ButtonsSection() {
   return (
-    <Card title="Button">
+    <Card title="按钮组件 (Button)">
       <div className="flex flex-wrap items-center gap-2">
-        <Button>Default</Button>
-        <Button variant="secondary">Secondary</Button>
-        <Button variant="outline">Outline</Button>
-        <Button variant="ghost">Ghost</Button>
-        <Button variant="destructive">Destructive</Button>
-        <Button variant="link">Link</Button>
-        <Button loading>Loading</Button>
-        <Button size="sm">Small</Button>
-        <Button size="icon" aria-label="icon">
+        <Button>主按钮</Button>
+        <Button variant="secondary">次级按钮</Button>
+        <Button variant="outline">边框按钮</Button>
+        <Button variant="ghost">幽灵按钮</Button>
+        <Button variant="destructive">危险按钮</Button>
+        <Button variant="link">链接按钮</Button>
+        <Button loading>加载中</Button>
+        <Button size="sm">紧凑按钮</Button>
+        <Button size="icon" aria-label="添加">
           +
         </Button>
-        <Button disabled>Disabled</Button>
+        <Button disabled>禁用状态</Button>
       </div>
     </Card>
   )
@@ -180,20 +180,20 @@ function ButtonsSection() {
 
 function InputsSection() {
   return (
-    <Card title="Input / Textarea / Select / Checkbox / Switch">
+    <Card title="输入与表单控件 (Input / Select / Checkbox / Switch)">
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="space-y-1.5">
-          <Label htmlFor="demo-input">输入框</Label>
-          <Input id="demo-input" placeholder="输入内容" />
+          <Label htmlFor="demo-input">文本输入框</Label>
+          <Input id="demo-input" placeholder="请输入内容" />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="demo-invalid">校验错误</Label>
-          <Input id="demo-invalid" aria-invalid placeholder="必填" />
+          <Label htmlFor="demo-invalid">校验错误状态</Label>
+          <Input id="demo-invalid" aria-invalid placeholder="必填项" />
           <p className="text-xs font-medium text-destructive">该字段为必填项</p>
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="demo-textarea">多行文本</Label>
-          <Textarea id="demo-textarea" placeholder="描述…" />
+          <Textarea id="demo-textarea" placeholder="请输入详细描述…" />
         </div>
         <div className="space-y-1.5">
           <Label>下拉选择</Label>
@@ -202,9 +202,9 @@ function InputsSection() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="standard">标准</SelectItem>
-              <SelectItem value="premium">高级</SelectItem>
-              <SelectItem value="internal">内部</SelectItem>
+              <SelectItem value="standard">标准版本</SelectItem>
+              <SelectItem value="premium">高级版本</SelectItem>
+              <SelectItem value="internal">内部专享</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -215,7 +215,7 @@ function InputsSection() {
           </label>
           <label className="flex items-center gap-2 text-sm">
             <Switch defaultChecked />
-            开关
+            开关切换
           </label>
         </div>
       </div>
@@ -225,16 +225,16 @@ function InputsSection() {
 
 function BadgesSection() {
   return (
-    <Card title="Badge / StatusBadge">
+    <Card title="徽章与状态标签 (Badge / StatusBadge)">
       <div className="flex flex-wrap items-center gap-2">
-        <Badge>Default</Badge>
-        <Badge variant="secondary">Secondary</Badge>
-        <Badge variant="outline">Outline</Badge>
-        <StatusBadge tone="success" label="Published" />
-        <StatusBadge tone="warning" label="Pending" />
-        <StatusBadge tone="danger" label="Failed" />
-        <StatusBadge tone="info" label="Processing" />
-        <StatusBadge tone="muted" label="Archived" />
+        <Badge>默认徽章</Badge>
+        <Badge variant="secondary">次级徽章</Badge>
+        <Badge variant="outline">轮廓徽章</Badge>
+        <StatusBadge tone="success" label="已发布" />
+        <StatusBadge tone="warning" label="待审核" />
+        <StatusBadge tone="danger" label="执行失败" />
+        <StatusBadge tone="info" label="排队处理中" />
+        <StatusBadge tone="muted" label="已归档" />
       </div>
     </Card>
   )
@@ -529,9 +529,9 @@ export function DesignSystemPage({ section }: { section?: string }) {
   return (
     <div className="flex h-full flex-col">
       <PageHeader
-        title="Design System"
-        description="Admin Foundation 组件展示（不含业务数据）"
-        breadcrumb={[{ label: 'Overview', href: '/' }, { label: 'Development' }, { label: 'Design System' }]}
+        title="设计系统与组件规范"
+        description="Admin 基础组件与设计令牌展示演练场（不含真实业务数据）"
+        breadcrumb={[{ label: '总览', href: '/' }, { label: '开发辅助' }, { label: '设计系统规范' }]}
       />
       <div className="min-h-0 flex-1 space-y-4 overflow-auto p-4">
         <div className="rounded-md border bg-muted/30 px-3 py-2 text-xs text-muted-foreground">

@@ -104,15 +104,15 @@ export function OverviewPage() {
             </div>
           </Card>
 
-          <Card title="Foundation 状态">
+          <Card title="基础框架状态">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Admin Foundation</span>
-              <StatusBadge tone="success" label="PASS" />
+              <span className="text-sm text-muted-foreground">Admin 基础框架</span>
+              <StatusBadge tone="success" label="通过" />
             </div>
           </Card>
         </div>
 
-        <Card title="Foundation 能力">
+        <Card title="已就绪核心框架能力">
           <ul className="grid grid-cols-1 gap-x-6 gap-y-1.5 text-sm sm:grid-cols-2">
             {FOUNDATION_CAPABILITIES.map((capability) => (
               <li key={capability} className="flex items-start gap-2">
@@ -123,7 +123,7 @@ export function OverviewPage() {
           </ul>
         </Card>
 
-        <Card title="11 Domain 导航（Coming Soon）">
+        <Card title="11 业务领域导航（规划建设中）">
           <div className="flex flex-wrap gap-2">
             {NAV_GROUPS.flatMap((group) =>
               group.items.map((item) => (
@@ -132,13 +132,13 @@ export function OverviewPage() {
                   className="inline-flex items-center gap-2 rounded-md border bg-muted/30 px-2.5 py-1 text-sm"
                 >
                   {item.label}
-                  <StatusBadge tone="muted" label="Coming Soon" dot={false} />
+                  <StatusBadge tone="muted" label="开发中" dot={false} />
                 </span>
               )),
             )}
           </div>
           <p className="mt-3 text-xs text-muted-foreground">
-            各 Domain 页面将在对应 Domain Phase（Contract 冻结、后端可用）后实现。
+            各业务领域页面将在对应研发阶段（契约冻结、后端 API 就绪）后接入完整业务管理功能。
           </p>
         </Card>
       </div>

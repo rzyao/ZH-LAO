@@ -54,14 +54,14 @@ describe('Router', () => {
 
   it('renders a Domain placeholder route', async () => {
     renderAt('/content')
-    expect(await screen.findByText('Content — Coming Soon')).toBeInTheDocument()
+    expect(await screen.findByText('内容管理 — 即将上线')).toBeInTheDocument()
   })
 
   it('renders the real Platform Admin landing route', async () => {
     renderAt('/platform')
-    expect(await screen.findByRole('heading', { name: 'Platform' })).toBeInTheDocument()
-    expect(screen.getByText('Platform Admin Stage A')).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /Feature Flags/ })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: '平台控制台' })).toBeInTheDocument()
+    expect(screen.getByText('平台控制台 Stage A')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /功能开关/ })).toBeInTheDocument()
   })
 
   it('renders the 404 page for unknown routes', async () => {

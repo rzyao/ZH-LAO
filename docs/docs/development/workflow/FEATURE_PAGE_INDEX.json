@@ -70,9 +70,7 @@
       "id": "audio-production",
       "title": "音频生产",
       "domain": [
-        "audio",
-        "content",
-        "operations"
+        "audio"
       ],
       "portfolio_status": "active",
       "status": {
@@ -88,31 +86,19 @@
         "admin-audio-production"
       ],
       "blocks": {
-        "backend": "CONTENT_GATE",
-        "integration": "AUDIO_GATE + CONTENT_GATE"
+        "backend": "等待 CONTENT_GATE 完成",
+        "integration": "等待后端实现证据"
       },
       "evidence": {
         "design": [
           "/domains/audio/production",
           "/domains/audio/contracts",
-          "/development/07-audio/AUDIO_DESIGN_RECOVERY_BRIEF.md",
-          "/development/07-audio/AUDIO_DESIGN_AUDIT.md"
-        ],
-        "backend": [
-          "/development/07-audio/AUDIO_IMPLEMENTATION_PLAN.md",
-          "/development/07-audio/AUDIO_PRODUCTION_CONTRACTS.md"
-        ],
-        "admin": [
-          "/development/admin/audio-production/",
-          "/development/admin/audio-production/AUDIO_PRODUCTION_ADMIN_DESIGN_BRIEF.md"
-        ],
-        "integration": [
-          "/domains/audio/contracts",
-          "/development/07-audio/AUDIO_PRODUCTION_CONTRACTS.md"
+          "AUDIO_DESIGN_RECOVERY_BRIEF.md",
+          "AUDIO_DESIGN_AUDIT.md"
         ]
       },
       "active_notes": {
-        "admin": "AUDIO-PRODUCTION-ADMIN-DESIGN 仅进入 ready 的 Admin 设计 Stage；尚未形成 AUDIO_PRODUCTION_ADMIN_DESIGN_GATE PASS，也未开始 Admin Implementation。"
+        "admin": "处于管理后台设计与工作台规格制定阶段"
       }
     },
     {
@@ -1083,16 +1069,25 @@
       "admin_pages": [],
       "blocks": {},
       "evidence": {
-        "design": [
-          "/domains/identity/",
-          "/domains/identity/flows"
-        ],
-        "backend": [
-          "/development/backend/identity/",
-          "/development/02-identity/IDENTITY_API",
-          "/development/02-identity/IDENTITY_IMPLEMENTATION_REPORT",
-          "/development/02-identity/IDENTITY_REGRESSION_HOTFIX_REPORT"
-        ]
+        "design": {
+          "stage": [
+            "LOGIN-FEATURE-DESIGN"
+          ],
+          "artifacts": [
+            "/domains/identity/",
+            "/domains/identity/flows"
+          ]
+        },
+        "backend": {
+          "stage": [
+            "LOGIN-IDENTITY-DEPENDENCY"
+          ],
+          "artifacts": [
+            "/development/backend/identity/",
+            "/development/02-identity/IDENTITY_API",
+            "/development/02-identity/IDENTITY_IMPLEMENTATION_REPORT"
+          ]
+        }
       },
       "active_notes": {}
     },

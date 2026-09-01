@@ -47,40 +47,40 @@ export function FeatureFlagsPage() {
   const [createOpen, setCreateOpen] = React.useState(false)
 
   const columns = React.useMemo<ColumnDef<FeatureFlag>[]>(() => [
-    { accessorKey: 'key', header: 'Key', cell: ({ row }) => <code className="text-xs">{row.original.key}</code> },
-    { accessorKey: 'name', header: 'Name' },
-    { accessorKey: 'default_enabled', header: 'Default', cell: ({ row }) => row.original.default_enabled ? 'Enabled' : 'Disabled' },
-    { accessorKey: 'status', header: 'Status', cell: ({ row }) => <StatusBadge tone={statusTone(row.original.status)} label={row.original.status} /> },
+    { accessorKey: 'key', header: '键名 (Key)', cell: ({ row }) => <code className="text-xs">{row.original.key}</code> },
+    { accessorKey: 'name', header: '名称' },
+    { accessorKey: 'default_enabled', header: '默认状态', cell: ({ row }) => row.original.default_enabled ? '默认开启' : '默认关闭' },
+    { accessorKey: 'status', header: '状态', cell: ({ row }) => <StatusBadge tone={statusTone(row.original.status)} label={row.original.status} /> },
     {
-      id: 'overrides', header: 'Overrides', cell: ({ row }) => {
+      id: 'overrides', header: '覆盖规则数', cell: ({ row }) => {
         const overrides = row.original.overrides
-        if (!overrides) return <span className="text-xs text-muted-foreground">Inventory unavailable</span>
+        if (!overrides) return <span className="text-xs text-muted-foreground">暂无覆盖</span>
         return <span>{overrides.length}</span>
       },
     },
     {
-      id: 'actions', header: 'Actions', enableSorting: false, cell: ({ row }) => {
+      id: 'actions', header: '操作', enableSorting: false, cell: ({ row }) => {
         const flag = row.original
         const retired = flag.status === 'retired'
         return (
           <div className="flex flex-wrap gap-1">
-            <Button size="sm" variant="outline" disabled={!canWrite || retired} onClick={() => setEditing(flag)}>Edit</Button>
-            <Button size="sm" variant="outline" disabled={!canWrite || retired} onClick={() => setOverrideFlag(flag)}>Override</Button>
-            <Button size="sm" variant="destructive" disabled={!canWrite || retired} onClick={() => setRetiring(flag)}>Retire</Button>
+            <Button size="sm" variant="outline" disabled={!canWrite || retired} onClick={() => setEditing(flag)}>编辑</Button>
+            <Button size="sm" variant="outline" disabled={!canWrite || retired} onClick={() => setOverrideFlag(flag)}>灰度覆盖</Button>
+            <Button size="sm" variant="destructive" disabled={!canWrite || retired} onClick={() => setRetiring(flag)}>废弃</Button>
           </div>
         )
       },
     },
   ], [canWrite])
 
-  const fail = (error: unknown) => toast.error({ title: 'Feature Flag operation failed', description: mutationErrorMessage(error) })
+  const fail = (error: unknown) => toast.error({ title: '功能开关操作失败', description: mutationErrorMessage(error) })
 
   return (
     <ListPageLayout
-      title="Feature Flags"
-      description="Default state and scoped region/client overrides are separate. Keys are immutable and retired flags are terminal."
-      breadcrumb={[{ label: 'System' }, { label: 'Platform', href: '/platform' }, { label: 'Feature Flags' }]}
-      actions={<Button disabled={!canWrite} onClick={() => setCreateOpen(true)}>Create flag</Button>}
+      title="功能开关治理"
+      description="管理全局默认开关状态与按地区/客户端维度的灰度覆盖规则。开关 Key 唯一不可变，废弃后不可重新激活。"
+      breadcrumb={[{ label: '系统运维' }, { label: '平台控制台', href: '/platform' }, { label: '功能开关' }]}
+      actions={<Button disabled={!canWrite} onClick={() => setCreateOpen(true)}>新建开关</Button>}
     >
       <div className="p-4">
         <PermissionContract read={PLATFORM_PERMISSIONS.featureFlagsRead} write={PLATFORM_PERMISSIONS.featureFlagsWrite} />
@@ -91,11 +91,11 @@ export function FeatureFlagsPage() {
           error={query.error}
           onRetry={() => query.refetch()}
           getRowId={(row) => row.key}
-          emptyTitle="No feature flags"
-          emptyDescription="Create the first registered product flag when you have write permission."
+          emptyTitle="暂无功能开关"
+          emptyDescription="具备写入权限时可创建首个平台功能开关。"
         />
         <p className="mt-3 text-xs text-muted-foreground">
-          The current management list response may omit override inventory. Set/remove commands remain scoped to region_code and/or client_platform; global overrides are not supported.
+          覆盖规则仅支持按地区代码 (region_code) 和客户端平台 (client_platform) 进行限定，不支持无作用域的全局覆盖。
         </p>
       </div>
 
@@ -104,7 +104,7 @@ export function FeatureFlagsPage() {
         onOpenChange={setCreateOpen}
         pending={createMutation.isPending}
         onSubmit={(input) => createMutation.mutate(input, {
-          onSuccess: () => { setCreateOpen(false); toast.success({ title: 'Feature flag created' }) },
+          onSuccess: () => { setCreateOpen(false); toast.success({ title: '功能开关已创建' }) },
           onError: fail,
         })}
       />
@@ -113,7 +113,7 @@ export function FeatureFlagsPage() {
         onOpenChange={(open) => !open && setEditing(null)}
         pending={updateMutation.isPending}
         onSubmit={(input) => editing && updateMutation.mutate({ key: editing.key, input }, {
-          onSuccess: () => { setEditing(null); toast.success({ title: 'Feature flag updated' }) },
+          onSuccess: () => { setEditing(null); toast.success({ title: '功能开关已更新' }) },
           onError: fail,
         })}
       />
@@ -122,24 +122,24 @@ export function FeatureFlagsPage() {
         onOpenChange={(open) => !open && setOverrideFlag(null)}
         pending={setOverrideMutation.isPending || removeOverrideMutation.isPending}
         onSet={(input) => overrideFlag && setOverrideMutation.mutate({ key: overrideFlag.key, input }, {
-          onSuccess: () => { setOverrideFlag(null); toast.success({ title: 'Override saved' }) },
+          onSuccess: () => { setOverrideFlag(null); toast.success({ title: '覆盖规则已保存' }) },
           onError: fail,
         })}
         onRemove={(input) => overrideFlag && removeOverrideMutation.mutate({ key: overrideFlag.key, input }, {
-          onSuccess: () => { setOverrideFlag(null); toast.success({ title: 'Override removed' }) },
+          onSuccess: () => { setOverrideFlag(null); toast.success({ title: '覆盖规则已移除' }) },
           onError: fail,
         })}
       />
       <ConfirmDialog
         open={Boolean(retiring)}
         onOpenChange={(open) => !open && setRetiring(null)}
-        title="Retire feature flag?"
-        description="Retirement is terminal. The key remains historical and cannot be reactivated."
-        confirmLabel="Retire"
+        title="确认废弃此功能开关？"
+        description="废弃操作不可逆。该 Key 将作为历史归档保留，不能再次重新激活。"
+        confirmLabel="确认废弃"
         destructive
         loading={retireMutation.isPending}
         onConfirm={() => retiring && retireMutation.mutate(retiring.key, {
-          onSuccess: () => { setRetiring(null); toast.success({ title: 'Feature flag retired' }) },
+          onSuccess: () => { setRetiring(null); toast.success({ title: '功能开关已废弃' }) },
           onError: fail,
         })}
       />
@@ -153,14 +153,14 @@ function CreateFlagDialog({ open, onOpenChange, pending, onSubmit }: { open: boo
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
-        <DialogHeader><DialogTitle>Create feature flag</DialogTitle><DialogDescription>Initial status is active. Key cannot be changed later.</DialogDescription></DialogHeader>
+        <DialogHeader><DialogTitle>新建功能开关</DialogTitle><DialogDescription>初始状态为激活态。Key 创建后不可修改。</DialogDescription></DialogHeader>
         <form id="create-feature-flag" className="space-y-3" onSubmit={form.handleSubmit(onSubmit)}>
-          <FormField label="Key" htmlFor="ff-key" error={form.formState.errors.key?.message}><Input id="ff-key" {...form.register('key')} /></FormField>
-          <FormField label="Name" htmlFor="ff-name" error={form.formState.errors.name?.message}><Input id="ff-name" {...form.register('name')} /></FormField>
-          <FormField label="Description" htmlFor="ff-description" error={form.formState.errors.description?.message}><Textarea id="ff-description" {...form.register('description')} /></FormField>
-          <label className="flex items-center gap-2 text-sm"><input type="checkbox" {...form.register('default_enabled')} /> Default enabled</label>
+          <FormField label="键名 (Key)" htmlFor="ff-key" error={form.formState.errors.key?.message}><Input id="ff-key" {...form.register('key')} placeholder="例：learning.new_review_mode" /></FormField>
+          <FormField label="名称" htmlFor="ff-name" error={form.formState.errors.name?.message}><Input id="ff-name" {...form.register('name')} placeholder="开关显示名称" /></FormField>
+          <FormField label="说明" htmlFor="ff-description" error={form.formState.errors.description?.message}><Textarea id="ff-description" {...form.register('description')} placeholder="功能开关用途说明" /></FormField>
+          <label className="flex items-center gap-2 text-sm"><input type="checkbox" {...form.register('default_enabled')} /> 默认启用</label>
         </form>
-        <DialogFooter><Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button><Button type="submit" form="create-feature-flag" loading={pending}>Create</Button></DialogFooter>
+        <DialogFooter><Button variant="outline" onClick={() => onOpenChange(false)}>取消</Button><Button type="submit" form="create-feature-flag" loading={pending}>创建</Button></DialogFooter>
       </DialogContent>
     </Dialog>
   )
@@ -172,15 +172,15 @@ function EditFlagDialog({ flag, onOpenChange, pending, onSubmit }: { flag: Featu
   return (
     <Dialog open={Boolean(flag)} onOpenChange={onOpenChange}>
       <DialogContent>
-        <DialogHeader><DialogTitle>Edit feature flag</DialogTitle><DialogDescription>Key is immutable. Active/inactive is reversible; retirement uses the explicit command.</DialogDescription></DialogHeader>
+        <DialogHeader><DialogTitle>编辑功能开关</DialogTitle><DialogDescription>Key 保持只读。可自由切换 active/inactive 状态。</DialogDescription></DialogHeader>
         <form id="edit-feature-flag" className="space-y-3" onSubmit={form.handleSubmit(onSubmit)}>
-          <FormField label="Key" htmlFor="ff-edit-key"><Input id="ff-edit-key" value={flag?.key ?? ''} disabled /></FormField>
-          <FormField label="Name" htmlFor="ff-edit-name" error={form.formState.errors.name?.message}><Input id="ff-edit-name" {...form.register('name')} /></FormField>
-          <FormField label="Description" htmlFor="ff-edit-description"><Textarea id="ff-edit-description" {...form.register('description')} /></FormField>
-          <FormField label="Status" htmlFor="ff-edit-status"><NativeSelect id="ff-edit-status" {...form.register('status')}><option value="active">active</option><option value="inactive">inactive</option></NativeSelect></FormField>
-          <label className="flex items-center gap-2 text-sm"><input type="checkbox" {...form.register('default_enabled')} /> Default enabled</label>
+          <FormField label="键名 (Key)" htmlFor="ff-edit-key"><Input id="ff-edit-key" value={flag?.key ?? ''} disabled /></FormField>
+          <FormField label="名称" htmlFor="ff-edit-name" error={form.formState.errors.name?.message}><Input id="ff-edit-name" {...form.register('name')} /></FormField>
+          <FormField label="说明" htmlFor="ff-edit-description"><Textarea id="ff-edit-description" {...form.register('description')} /></FormField>
+          <FormField label="状态" htmlFor="ff-edit-status"><NativeSelect id="ff-edit-status" {...form.register('status')}><option value="active">active (启用)</option><option value="inactive">inactive (停用)</option></NativeSelect></FormField>
+          <label className="flex items-center gap-2 text-sm"><input type="checkbox" {...form.register('default_enabled')} /> 默认启用</label>
         </form>
-        <DialogFooter><Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button><Button type="submit" form="edit-feature-flag" loading={pending}>Save</Button></DialogFooter>
+        <DialogFooter><Button variant="outline" onClick={() => onOpenChange(false)}>取消</Button><Button type="submit" form="edit-feature-flag" loading={pending}>保存</Button></DialogFooter>
       </DialogContent>
     </Dialog>
   )
@@ -193,16 +193,16 @@ function OverrideDialog({ flag, onOpenChange, pending, onSet, onRemove }: { flag
   return (
     <Dialog open={Boolean(flag)} onOpenChange={onOpenChange}>
       <DialogContent>
-        <DialogHeader><DialogTitle>Scoped override</DialogTitle><DialogDescription>At least one scope is required. A global override is intentionally unsupported.</DialogDescription></DialogHeader>
+        <DialogHeader><DialogTitle>按范围灰度覆盖</DialogTitle><DialogDescription>必须至少指定一个作用域（地区或客户端平台）。</DialogDescription></DialogHeader>
         <form id="feature-override" className="space-y-3" onSubmit={form.handleSubmit(onSet)}>
-          <FormField label="Region code" htmlFor="ff-region" error={form.formState.errors.region_code?.message}><Input id="ff-region" placeholder="LA" {...form.register('region_code')} /></FormField>
-          <FormField label="Client platform" htmlFor="ff-client"><NativeSelect id="ff-client" {...form.register('client_platform')}><option value="">Any client</option><option value="android">android</option><option value="ios">ios</option></NativeSelect></FormField>
+          <FormField label="地区代码 (Region Code)" htmlFor="ff-region" error={form.formState.errors.region_code?.message}><Input id="ff-region" placeholder="例：LA" {...form.register('region_code')} /></FormField>
+          <FormField label="客户端平台" htmlFor="ff-client"><NativeSelect id="ff-client" {...form.register('client_platform')}><option value="">全部平台</option><option value="android">Android</option><option value="ios">iOS</option></NativeSelect></FormField>
           {form.formState.errors.root?.message ? <p className="text-xs text-destructive">{form.formState.errors.root.message}</p> : null}
-          <label className="flex items-center gap-2 text-sm"><input type="checkbox" {...form.register('enabled')} /> Enabled for this scope</label>
+          <label className="flex items-center gap-2 text-sm"><input type="checkbox" {...form.register('enabled')} /> 在此作用域内启用开关</label>
         </form>
         <DialogFooter>
-          <Button variant="outline" disabled={pending || (!values.region_code && !values.client_platform)} onClick={() => onRemove({ region_code: values.region_code, client_platform: values.client_platform })}>Remove scope</Button>
-          <Button type="submit" form="feature-override" loading={pending}>Set override</Button>
+          <Button variant="outline" disabled={pending || (!values.region_code && !values.client_platform)} onClick={() => onRemove({ region_code: values.region_code, client_platform: values.client_platform })}>移除该规则</Button>
+          <Button type="submit" form="feature-override" loading={pending}>保存覆盖规则</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

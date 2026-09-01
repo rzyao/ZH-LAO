@@ -1,255 +1,109 @@
 ---
 feature_id: login
 title: 用户登录与会话
-
 portfolio_status: active
-
 domain:
   - identity
-
 status:
   design: done
-  implementation: active
-  verification: todo
-
+  backend: done
+  admin: na
+  mobile: ready
+  integration: todo
+  acceptance: todo
+mobile_pages:
+  - mobile-login
+  - mobile-otp
+admin_pages: []
 contracts:
   owns:
     - 用户认证
     - 会话生命周期
     - Access Token / Refresh Token
     - 登录退出
-
-  consumes:
-    - OTP Provider Contract
-    - Facebook Provider Contract
-
-  forbidden:
-    - 用户资料管理
-    - 设备运营管理
-    - 登录风控运营配置
-
-dependencies:
-  upstream:
-    - otp-provider
-    - identity-domain
-
-  downstream:
-    - account-profile
-
-  external:
-    - facebook-provider
-
+  depends_on:
+    - OTP Provider
+    - Facebook Provider
 evidence:
-  artifacts:
-    - /domains/identity/
-    - /domains/identity/flows
-    - /development/02-identity/IDENTITY_API
-    - /development/02-identity/IDENTITY_IMPLEMENTATION_REPORT
-
-  tests:
-    - OTP authentication flow
-    - Refresh rotation flow
-    - Logout flow
-
-  gate:
-    - LOGIN-DESIGN-GATE
-    - LOGIN-BACKEND-GATE
+  design:
+    stage:
+      - LOGIN-FEATURE-DESIGN
+    artifacts:
+      - /domains/identity/
+      - /domains/identity/flows
+  backend:
+    stage:
+      - LOGIN-IDENTITY-DEPENDENCY
+    artifacts:
+      - /development/backend/identity/
+      - /development/02-identity/IDENTITY_API
+      - /development/02-identity/IDENTITY_IMPLEMENTATION_REPORT
 ---
 
 # 用户登录与会话
 
 ## 功能概览
 
-用户登录与会话负责 Identity 领域中的用户认证入口和会话生命周期管理。
+用户登录与会话负责 Identity 领域中的认证入口和会话生命周期。
 
-核心能力：
+包含：
 
-- Phone OTP 登录；
-- Phone / Facebook 登录；
-- 首次认证流程；
-- Session 创建与恢复；
-- Access Token / Refresh Token 生命周期；
-- Refresh rotation；
-- 单设备退出与全部会话退出；
-- 认证失败与账号状态处理。
+- Phone OTP 登录
+- Phone / Facebook 登录
+- 首次注册认证流程
+- Access Token / Refresh Token
+- Refresh rotation
+- 当前会话退出
+- 全部会话退出
+- 认证失败与账号状态错误处理
 
 不包含：
 
-- 用户资料管理；
-- 设备管理后台；
-- 登录风险运营系统；
-- 第三方 Provider 运营配置。
+- 用户资料管理
+- 设备管理后台
+- 登录风控运营后台
+- 第三方 Provider 运营配置
 
----
+这些能力由其它 Feature 或独立 Stage 管理。
 
-## 生命周期
+## 设计
 
-当前状态：
+- **Scope**：冻结用户认证入口、登录流程、Session 生命周期、Token 契约、退出语义、账号状态限制以及 Provider unavailable 错误边界。
+- **Stage / Artifact**：`LOGIN-FEATURE-DESIGN` 已完成；权威设计来源为 Identity Domain、Identity Flows 与 Identity API。
+- **Gate / Evidence**：设计 Stage 已通过，登录 API、状态码、deferred 边界均已冻结。
+- **Next Action**：保持 canonical contract 稳定；新增登录方式必须创建新的 Design Stage。
 
-```text
-active
-```
+## Backend
 
-当前阶段：
+- **Scope**：实现 OTP 请求与消费、Phone/Facebook 认证、Session 创建、Refresh rotation、Logout、Logout All、账号状态拒绝以及认证错误映射。
+- **Stage / Artifact**：`LOGIN-IDENTITY-DEPENDENCY` 已完成；实现位于 Identity Backend 模块。
+- **Gate / Evidence**：已有 Identity API、Implementation Report 以及登录相关测试覆盖 OTP、Refresh、Logout、Provider fail-closed 行为。
+- **Next Action**：保持 Backend 能力冻结；生产 SMS/Facebook Provider 接入属于 Integration 范围。
 
-```text
-Backend Capability 已完成
-Mobile Integration 尚未完成
-Feature Acceptance 尚未完成
-```
+## Admin
 
-状态成立依据：
+- **Scope**：登录 Feature 不负责 Operator/Admin 后台能力。
+- **Stage / Artifact**：无 Login Admin Stage。
+- **Gate / Evidence**：当前无 Admin surface，因此 Lane 为 `na`。
+- **Next Action**：未来如增加登录风控后台，应建立独立 Feature。
 
-- Identity Contract 已冻结；
-- Backend 登录能力已实现；
-- API 与实现报告已存在；
-- 完整端到端验收尚未完成。
+## Mobile
 
-下一阶段：
+- **Scope**：Mobile 登录入口、OTP 页面、API 调用、Token 保存恢复、错误状态以及设备信息提交。
+- **Stage / Artifact**：`LOGIN-MOBILE-DESIGN` 当前为 ready；输入为 LOGIN_MOBILE_DESIGN_BRIEF。
+- **Gate / Evidence**：尚无 Mobile Design Gate PASS，不代表 Mobile 已实现。
+- **Next Action**：完成 Mobile Execution Brief、Implementation Blueprint、Design Report 后进入实现阶段。
 
-完成 Mobile 接入、生产 Provider 集成和 Feature Acceptance。
+## 集成
 
----
+- **Scope**：Mobile、Identity API、生产 OTP Provider、Facebook Provider 与真实环境登录链路集成。
+- **Stage / Artifact**：`LOGIN-INTEGRATION` 当前 todo。
+- **Gate / Evidence**：测试 Provider 可验证 fail-closed 行为，但不代表生产 Provider 已接入。
+- **Next Action**：建立正式 Integration Stage，并完成真实环境验证。
 
-## Contract 边界
+## 验收
 
-### Owns
-
-本 Feature 负责：
-
-- 用户身份认证；
-- Session 生命周期；
-- Token 生命周期；
-- 登录与退出语义。
-
-### Consumes
-
-依赖：
-
-- OTP Provider Contract；
-- Facebook Provider Contract。
-
-### Forbidden
-
-禁止：
-
-- 修改用户资料领域；
-- 管理运营后台策略；
-- 承担第三方 Provider 配置管理。
-
----
-
-## Dependency
-
-### Upstream
-
-依赖前置能力：
-
-- OTP Provider；
-- Identity Domain。
-
-### Downstream
-
-影响后续能力：
-
-- Account Profile。
-
-### External
-
-外部系统：
-
-- Facebook Provider。
-
----
-
-## Evidence
-
-### Artifacts
-
-- Identity Domain 设计；
-- Identity Flow 定义；
-- Identity API；
-- Identity Implementation Report。
-
-### Tests
-
-已覆盖：
-
-- OTP 登录流程；
-- Refresh rotation；
-- Logout；
-- Provider fail-closed 行为。
-
-### Gate
-
-已通过：
-
-- LOGIN-DESIGN-GATE；
-- LOGIN-BACKEND-GATE。
-
-待完成：
-
-- LOGIN-INTEGRATION-GATE；
-- LOGIN-ACCEPTANCE-GATE。
-
----
-
-## Gate
-
-### LOGIN-DESIGN-GATE
-
-目标：
-
-冻结登录能力边界和认证契约。
-
-输入：
-
-- Identity Domain；
-- Identity Flow；
-- API Contract。
-
-检查项：
-
-- Contract 明确；
-- 边界明确；
-- 依赖明确。
-
-结果：
-
-PASS。
-
----
-
-### LOGIN-BACKEND-GATE
-
-目标：
-
-确认 Backend 登录能力可用。
-
-输入：
-
-- API 实现；
-- 测试结果；
-- Implementation Report。
-
-检查项：
-
-- Authentication Flow；
-- Session 创建；
-- Token 生命周期；
-- Logout 行为。
-
-结果：
-
-PASS。
-
----
-
-## 验证计划
-
-完成标准：
-
-- Mobile 登录流程完成；
-- Provider 真实环境接入完成；
-- 端到端测试通过；
-- Acceptance Evidence 完整。
+- **Scope**：验证完整登录链路，包括 Mobile、Backend、Provider、Token 生命周期、异常处理以及账号状态。
+- **Stage / Artifact**：`LOGIN-ACCEPTANCE` 当前 todo。
+- **Gate / Evidence**：当前只有 Backend 回归证据，没有完整 Feature Acceptance Gate。
+- **Next Action**：等待 Mobile 与 Integration 完成后建立 Feature Acceptance Report。
