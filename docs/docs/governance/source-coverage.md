@@ -1,6 +1,6 @@
 ---
 status: baseline
-last_updated: 2026-08-30
+last_updated: 2026-09-02
 ---
 
 # 会话覆盖清单
@@ -211,5 +211,7 @@ last_updated: 2026-08-30
 
 | 会话结论 | 状态 | 唯一事实源 |
 | --- | --- | --- |
-| Phase 0–17 的开发顺序、Application Foundation 为唯一下一阶段、逐 Phase 的计划/审核/实施/测试/报告/Gate 流程、Domain 与跨域规则、API-from-Use-Case 原则、测试与上线标准 | `frozen` | [ 全量开发总计划](../development/MASTER_DEVELOPMENT_PLAN.md) |
-| 当前执行状态与 Gate 证据记录 | `baseline` | [ 开发进度记录表](../development/DEVELOPMENT_PROGRESS.md) |
+| 旧 Phase 0–17 串行开发模型与当时的 Application Foundation 下一阶段结论 | `superseded`（历史来源） | [旧全量开发总计划兼容入口](../development/MASTER_DEVELOPMENT_PLAN.md)、[历史实施证据](../development/history.md) |
+| 当前流程、Gate 与工件职责 | `baseline` | [开发流程控制中心](../development/DEVELOPMENT_CONTROL_CENTER.md) |
+| 当前执行状态与 Gate 证据记录 | `baseline` | [开发进度记录表](../development/DEVELOPMENT_PROGRESS.md) |
+| 当前可启动任务与动态调度 | `baseline` | [当前下一动作](../development/workflow/NEXT_ACTIONS.md) |

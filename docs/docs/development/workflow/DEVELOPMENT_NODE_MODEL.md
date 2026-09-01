@@ -1,15 +1,22 @@
 ---
 status: active
+last_updated: 2026-09-02
 ---
 
-# Development Node 模型
+# Development Stage 模型
 
-Development Node 是逻辑开发单元，而非导航页面：
+开发执行的最小可领取单元是具有稳定 ID 的 Stage，而不是 Feature 与固定分类的笛卡尔积。
 
 ```text
-Development Node = feature_id × lane
+Development Stage = stage_id + object_id + phase + sequence
 ```
 
-例如 `login.mobile` 表示登录功能的 Mobile Lane。Node 的 Stage、工件、Gate 和下一步都展示在对应 [Feature Page](/features/login/) 的 `## Mobile` 模块中；Feature Page 按固定顺序保留设计、Backend、Admin、Mobile、集成、验收六个模块，不得生成 `/development/nodes/*` 详情页。
+- `stage_id`：全局稳定的执行标识。
+- `object_id`：System、Domain 或 Feature。
+- `phase`：`prep / design / execute / verify / gate`。
+- `sequence`：同一对象内有依赖关系的执行顺序。
+- `status`：由当前 Task、Claim、Gate 和仓库证据得出。
 
-Feature Page 是功能级唯一人工维护入口。其 Lane 状态仅允许 `todo`、`active`、`blocked`、`done`、`na`；`blocked` 必须在 Frontmatter 的 `blocks` 中说明原因。
+Feature Page 只保存能力范围、领域关系、页面关联和证据线索。Stage 细节进入 Task Manifest、Execution Brief、Blueprint、Registry 与 Gate / Report，不回写另一套固定状态矩阵，也不生成 `/development/nodes/*` 页面。
+
+`AI_STAGE_REGISTRY.json` 使用 `stage_id` 作为执行身份；需要区分 Backend、Admin、Mobile 或其它实施轨时，在 Task 的实际 scope、role 和 owned paths 中表达。

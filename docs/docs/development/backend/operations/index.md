@@ -1,3 +1,8 @@
+---
+status: active
+last_updated: 2026-09-02
+---
+
 # Operations Backend
 
 Backend 组织主线：**Operations Domain**。

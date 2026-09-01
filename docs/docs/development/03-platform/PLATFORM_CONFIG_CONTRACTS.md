@@ -3,13 +3,14 @@ status: audited
 phase: 3
 phase_name: Platform Domain
 document: PLATFORM_CONFIG_CONTRACTS
-last_updated: 2026-08-31
+last_updated: 2026-09-02
 depends_on:
   - PLATFORM_USE_CASES.md
 database_authority:
   - database/migrations/0300_platform.sql
   - docs/docs/domains/platform/database.md
 next_artifact: PLATFORM_API.md
+lifecycle: historical
 ---
 
 # ZH-LAO  — PLATFORM CONFIG CONTRACTS

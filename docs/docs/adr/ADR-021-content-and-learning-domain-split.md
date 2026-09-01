@@ -1,3 +1,8 @@
+---
+status: frozen
+last_updated: 2026-09-02
+---
+
 # ADR-021：Learning 域拆分为 Content + Learning
 
 **状态：** `已接受`

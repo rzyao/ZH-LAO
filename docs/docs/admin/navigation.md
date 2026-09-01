@@ -1,3 +1,8 @@
+---
+status: active
+last_updated: 2026-09-02
+---
+
 # Admin 导航结构
 
 当前代码中的后台页面结构为：

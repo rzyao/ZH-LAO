@@ -6,6 +6,7 @@ document: IDENTITY_DESIGN_AUDIT
 audited_at: 2026-08-30
 design_gate: PASS
 implementation_started: false
+lifecycle: historical
 ---
 
 # ZH-LAO  — Identity Design Audit

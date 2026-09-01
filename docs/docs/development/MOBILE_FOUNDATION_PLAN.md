@@ -1,3 +1,9 @@
+---
+status: superseded
+last_updated: 2026-09-02
+lifecycle: historical
+---
+
 # ZH-LAO  — Mobile Foundation Plan
 
 **文件名：`MOBILE_FOUNDATION_PLAN.md`**  

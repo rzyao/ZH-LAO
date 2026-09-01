@@ -1,8 +1,16 @@
 # ZH-LAO 项目知识入口
 
 **项目：** 中文–老挝语综合学习与跨语言社交应用  
-**整体阶段：** PostgreSQL  Baseline 与 Application Foundation 已 `COMPLETE / PASS`；Identity 详细设计为唯一 `NEXT` Phase
+**整体阶段：** PostgreSQL Baseline、Application Foundation、Admin Foundation、Mobile Foundation、Identity、Platform 与 Operations 已 `COMPLETE / PASS`；当前主任务为 `CONTENT-BACKEND-PREP`。
 **首期目标：** Android，中老用户同时上线，不以中国大陆应用商店为主要发行渠道；约 10,000 注册用户，核心指标为注册量和 DAU/MAU。
+
+## 当前执行入口
+
+- **主任务：** `CONTENT-BACKEND-PREP`。
+- **可并行任务：** `PLATFORM-ADMIN-STAGE-B`、`LOGIN-MOBILE-DESIGN`、`OPERATIONS-ADMIN-DESIGN`、`AUDIO-PRODUCTION-ADMIN-DESIGN`。
+- 流程、Gate 与工件职责以[开发流程控制中心](docs/development/DEVELOPMENT_CONTROL_CENTER.md)为准。
+- 完成状态与证据以[开发进度记录表](docs/development/DEVELOPMENT_PROGRESS.md)为准。
+- 动态调度以[当前下一动作](docs/development/workflow/NEXT_ACTIONS.md)为准；具体任务权限由 Task Manifest、Execution Brief、Implementation Blueprint、Gate / Report 确定。
 
 ## 当前设计基线
 
@@ -23,7 +31,8 @@
 ## 文档地图
 
 - [ 开发计划入口](docs/development/index.md)
-- [ 全量开发总计划](docs/development/MASTER_DEVELOPMENT_PLAN.md)
+- [开发流程控制中心](docs/development/DEVELOPMENT_CONTROL_CENTER.md)
+- [当前下一动作](docs/development/workflow/NEXT_ACTIONS.md)
 - [ 开发进度记录表](docs/development/DEVELOPMENT_PROGRESS.md)
 - [领域文档入口](docs/domains/index.md)
 - [Content 域](docs/domains/content/index.md)
@@ -35,6 +44,7 @@
 - [Audio 域](docs/domains/audio/index.md)
 - [产品定位与范围](docs/product/product-overview.md)
 - [业务与商业模型](docs/product/business-model.md)
+- [首发后 12 个月业务规划](docs/product/business-plan.md)
 - [功能开放与产品规则](docs/product/feature-rollout.md)
 - [总体架构](docs/architecture/overview.md)
 - [Domain Map](docs/architecture/domain-map.md)

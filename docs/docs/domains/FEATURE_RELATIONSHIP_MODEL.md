@@ -1,3 +1,8 @@
+---
+status: frozen
+last_updated: 2026-09-02
+---
+
 # 领域能力与产品功能关系模型
 
 本页定义领域能力（Domain Capability）与产品功能（Product Feature）的关系。

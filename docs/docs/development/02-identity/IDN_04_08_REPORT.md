@@ -2,6 +2,7 @@
 status: complete
 tasks: IDN-04..IDN-08
 completed_at: 2026-08-30
+lifecycle: historical
 ---
 
 # ZH-LAO  — IDN-04 至 IDN-08 执行报告

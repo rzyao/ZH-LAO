@@ -1,11 +1,11 @@
 ---
-status: planned
-last_updated: 2026-08-31
+status: completed
+last_updated: 2026-09-02
 ---
 
 # 权限与操作员
 
-这是 Admin 的页面/运营工作流入口，目标包括 Operator、Role、Permission 与 Audit 的管理体验。
+这是 Admin 的运营控制面管理体验，包含 Operator、Role、Permission Matrix 与 Audit Log 的完整功能。
 
 领域 authority：
 
@@ -15,4 +15,7 @@ last_updated: 2026-08-31
 
 Backend capability： [Operations Backend](/development/backend/operations/)。
 
-当前仓库已有 Operations Backend，但独立 Admin 实施轨尚未形成完整 Brief/Blueprint/Report。新任务应直接在本目录建立，不回写 `development/04-operations/`。
+实施与交付证据：
+
+- [Operations Admin 实施交付报告](./OPERATIONS_ADMIN_IMPLEMENTATION_REPORT.md)
+

@@ -1,3 +1,8 @@
+---
+status: active
+last_updated: 2026-09-02
+---
+
 # 内容管理
 
 本工作台按“运营人员管理教学内容”的页面与流程组织，不按 Content 表逐表生成 CRUD。

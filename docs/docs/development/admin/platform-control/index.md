@@ -1,3 +1,8 @@
+---
+status: active
+last_updated: 2026-09-02
+---
+
 # 平台控制
 
 本工作台面向平台运行控制与客户端治理页面，例如 Feature Flag、Runtime Config、App Version、Announcement、Region 等。

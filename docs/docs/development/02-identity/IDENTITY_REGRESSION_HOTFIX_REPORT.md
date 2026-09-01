@@ -1,3 +1,9 @@
+---
+status: complete
+last_updated: 2026-09-02
+lifecycle: historical
+---
+
 # Identity Regression Hotfix Report
 
 > Phase：Identity Regression Hotfix / Re-Audit

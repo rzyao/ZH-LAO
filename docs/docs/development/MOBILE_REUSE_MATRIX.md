@@ -1,9 +1,17 @@
+---
+status: complete
+last_updated: 2026-09-02
+lifecycle: historical
+---
+
 # ZH-LAO  — Mobile Reuse Matrix
 
 **文件：`MOBILE_REUSE_MATRIX.md`**
 **Phase：Mobile Foundation（MOB-F01）**
 **参考实现：`https://github.com/rzyao/LAO/tree/main/mobile`（本地镜像 `C:\project\LAO\mobile`）**
-**权威优先级：`MASTER_DEVELOPMENT_PLAN.md` → `MOBILE_TECH_STACK.md` → `MOBILE_FOUNDATION_PLAN.md` → 现有 ZH-LAO 架构 → 参考 Mobile**
+**历史参考优先级（仅记录 Mobile Foundation 当时的基线，不构成现行 authority）：`MASTER_DEVELOPMENT_PLAN.md` → `MOBILE_TECH_STACK.md` → `MOBILE_FOUNDATION_PLAN.md` → 现有 ZH-LAO 架构 → 参考 Mobile**
+
+> 现行流程、Gate、完成状态和动态调度分别以[开发流程控制中心](DEVELOPMENT_CONTROL_CENTER.md)、[开发进度记录表](DEVELOPMENT_PROGRESS.md)和[当前下一动作](workflow/NEXT_ACTIONS.md)为准。
 
 ---
 

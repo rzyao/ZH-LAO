@@ -3,13 +3,14 @@ status: frozen
 phase: 4
 phase_name: Operations Domain
 document: OPERATIONS_USE_CASES
-last_updated: 2026-08-31
+last_updated: 2026-09-02
 repository_commit_audited: 000f4c4aafacf4938d74902eddc4d78323196a89
 depends_on:
   - OPERATIONS_RBAC_CONTRACTS.md
 database_authority:
   - database/migrations/0200_operations.sql
 implementation_started: false
+lifecycle: historical
 ---
 
 # ZH-LAO  — Operations Use Cases

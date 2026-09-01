@@ -10,7 +10,6 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 FEATURES_DIR = ROOT / "docs/docs/features"
-ALLOWED_STATUSES = {"todo", "ready", "active", "blocked", "deferred", "done", "na"}
 PORTFOLIO_STATUSES = {"active", "deferred", "pending_decision"}
 DETAIL_HEADINGS = (
     "## 1. 功能概览",
@@ -35,11 +34,11 @@ AUDIO_REQUIRED_CONTENT = (
     "audio.rollback",
 )
 AUDIO_GATES = {
-    "音频设计 Gate": ("design", "通过"),
-    "音频实现 Gate": ("backend", "阻塞"),
-    "后台设计 Gate": ("admin", "进行中"),
-    "音频集成 Gate": ("integration", "阻塞"),
-    "音频验收 Gate": ("acceptance", "待开始"),
+    "音频设计 Gate": "通过",
+    "音频实现 Gate": "阻塞",
+    "后台设计 Gate": "进行中",
+    "音频集成 Gate": "阻塞",
+    "音频验收 Gate": "待开始",
 }
 
 
@@ -71,11 +70,13 @@ def check_common(path: Path, text: str, data: dict) -> list[str]:
     domain = data.get("domain")
     if not isinstance(domain, (list, dict)):
         issues.append("domain must be a list or mapping")
-    status = data.get("status")
-    if not isinstance(status, dict) or not status:
-        issues.append("status must be a non-empty mapping")
-    elif any(value not in ALLOWED_STATUSES for value in status.values()):
-        issues.append("status contains an unsupported value")
+    obsolete = {"status", "blocks", "active_notes", "evidence"} & set(data)
+    if obsolete:
+        issues.append(f"obsolete fixed delivery-matrix metadata present: {sorted(obsolete)}")
+    for key in ("delivery_evidence", "delivery_notes"):
+        value = data.get(key, [])
+        if not isinstance(value, list) or not all(isinstance(item, str) for item in value):
+            issues.append(f"{key} must be a list of strings")
     if not re.search(r"^#\s+.+$", text, re.M):
         issues.append("missing page title heading")
     if not heading_exists(text, "功能概览"):
@@ -97,19 +98,18 @@ def check_audio(path: Path, text: str, data: dict) -> list[str]:
         match = re.match(r"^\|\s*([^|]+?)\s*\|\s*([^|]+?)\s*\|\s*$", line)
         if match:
             gate_rows[match.group(1)] = match.group(2)
-    status = data.get("status") if isinstance(data.get("status"), dict) else {}
-    mapping = {"done": "通过", "blocked": "阻塞", "active": "进行中", "todo": "待开始"}
-    for label, (lane, expected) in AUDIO_GATES.items():
+    for label, expected in AUDIO_GATES.items():
         actual = gate_rows.get(label)
         if actual != expected:
             issues.append(f"{label} must be {expected!r}, got {actual!r}")
-        if mapping.get(status.get(lane)) != actual:
-            issues.append(f"{label} does not match status.{lane}: {status.get(lane)!r}")
     return issues
 
 
 def check_shape(path: Path, text: str, data: dict) -> tuple[str, list[str]]:
     issues: list[str] = []
+    if path.parent.name != "audio-production":
+        return ("canonical-feature" if not issues else "needs-refactor"), issues
+
     for heading in DETAIL_HEADINGS:
         if heading.endswith(" "):
             pattern = rf"^{re.escape(heading)}.+$"
@@ -124,8 +124,7 @@ def check_shape(path: Path, text: str, data: dict) -> tuple[str, list[str]]:
     ]
     if optional_state_machines and optional_state_machines != list(range(1, max(optional_state_machines) + 1)):
         issues.append("optional state machine subsections 7.1/7.2/7.3 must be sequential")
-    if path.parent.name == "audio-production":
-        issues.extend(check_audio(path, text, data))
+    issues.extend(check_audio(path, text, data))
     return ("audio-template" if not issues else "needs-refactor"), issues
 
 

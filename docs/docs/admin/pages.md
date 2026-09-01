@@ -1,3 +1,8 @@
+---
+status: active
+last_updated: 2026-09-02
+---
+
 # Admin 页面清单
 
 Admin 页面分为当前正式页面文档与已实现路由页面：
@@ -13,7 +18,11 @@ Admin 页面分为当前正式页面文档与已实现路由页面：
 | --- | --- | --- |
 | 登录 | `/login` | 未认证入口 |
 | 总览 | `/` | 后台运行环境与基础能力概览 |
-| Domain 占位页 | `/content`、`/learning`、`/audio`、`/identity`、`/social`、`/chat`、`/commerce`、`/rewards`、`/trust`、`/operations` | Domain 页面在对应 Feature 进入实施后补齐 |
+| Domain 占位页 | `/content`、`/learning`、`/audio`、`/identity`、`/social`、`/chat`、`/commerce`、`/rewards`、`/trust` | Domain 页面在对应 Feature 进入实施后补齐 |
+| Operations 总览 | `/operations` | 运营权限控制面入口 |
+| 操作员管理 | `/operations/operators` | Operations 页面（权限：`operations.operators.read`） |
+| 角色与权限矩阵 | `/operations/roles` | Operations 页面（权限：`operations.roles.read`） |
+| 操作审计日志 | `/operations/audit-logs` | Operations 页面（权限：`operations.audit_logs.read`） |
 | Platform 总览 | `/platform` | 平台控制面入口 |
 | Feature Flags | `/platform/feature-flags` | Platform 页面 |
 | Runtime Configs | `/platform/runtime-configs` | Platform 页面 |

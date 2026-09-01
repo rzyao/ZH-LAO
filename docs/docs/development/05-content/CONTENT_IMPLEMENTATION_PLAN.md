@@ -5,9 +5,10 @@ phase_name: Content Domain
 document: CONTENT_IMPLEMENTATION_PLAN
 design_only: true
 implementation_started: false
-last_updated: 2026-08-31
+last_updated: 2026-09-02
 repository_commit_audited: 007d6ad705a9afcc4fefb03442e371b4dec07fad
 implementation_dependency: OPERATIONS_GATE
+lifecycle: historical
 ---
 
 # ZH-LAO  — Content Implementation Plan

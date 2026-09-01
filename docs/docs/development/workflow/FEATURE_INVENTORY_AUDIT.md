@@ -1,6 +1,6 @@
 ---
 status: inventory-bootstrap
-last_updated: 2026-08-31
+last_updated: 2026-09-02
 repository_commit_audited: df1a21bfdf1d50372ff6bce7902b9757e478270d
 ---
 
@@ -88,9 +88,9 @@ FEATURE_INVENTORY.features = 102
 docs/docs/features/<feature_id>/index.md = 102
 ```
 
-Feature 尚未启动、延期或待裁决，都不能成为缺页理由。最小页面仍必须包含功能定位、六个固定 Lane、状态与不适用/阻塞原因；页面 Frontmatter 的 `portfolio_status` 必须与本 Inventory 一致，业务状态不得嵌入 `title`；只有进入正式清单才创建页面，数据库表、Repository、Worker 等内部实现不单独伪造成 Feature。
+Feature 尚未启动、延期或待裁决，都不能成为缺页理由。最小页面必须包含功能定位、Portfolio 状态、领域归属、真实证据与决策阻塞；页面 Frontmatter 的 `portfolio_status` 必须与本 Inventory 一致，业务状态不得嵌入 `title`。Feature Page 不维护固定交付状态矩阵；只有进入正式清单才创建页面，数据库表、Repository、Worker 等内部实现不单独伪造成 Feature。
 
-当前正式 Feature Page 覆盖率为 `102 / 102`。后续新增正式 Feature 时，必须在同一变更中补齐页面、Frontmatter、六个章节和派生索引。
+当前正式 Feature Page 覆盖率为 `102 / 102`。后续新增正式 Feature 时，必须在同一变更中补齐页面、Frontmatter、功能概览、领域/页面关联和派生索引。
 
 ## 后续维护
 

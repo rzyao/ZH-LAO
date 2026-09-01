@@ -1,3 +1,9 @@
+---
+status: complete
+last_updated: 2026-09-02
+lifecycle: historical
+---
+
 # ZH-LAO  — IDN-11 至 IDN-16 报告
 
 ```text

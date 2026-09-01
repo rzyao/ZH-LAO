@@ -5,7 +5,8 @@ phase_name: Learning Domain
 document: LEARNING_USE_CASES
 design_only: true
 implementation_started: false
-last_updated: 2026-08-31
+last_updated: 2026-09-02
+lifecycle: historical
 ---
 
 # ZH-LAO  — Learning Use Cases

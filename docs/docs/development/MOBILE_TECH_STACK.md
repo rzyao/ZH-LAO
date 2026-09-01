@@ -1,9 +1,14 @@
+---
+status: frozen
+last_updated: 2026-09-02
+---
+
 # ZH-LAO  — Mobile Technology Stack
 
 **文件：`MOBILE_TECH_STACK.md`**  
 **适用范围：ZH-LAO  Mobile Application**
 **状态：FROZEN**  
-**上级约束：`MASTER_DEVELOPMENT_PLAN.md`**
+**现行约束：** 流程、Gate 与工件职责以[开发流程控制中心](DEVELOPMENT_CONTROL_CENTER.md)为准；完成状态与证据以[开发进度记录表](DEVELOPMENT_PROGRESS.md)为准；动态调度以[当前下一动作](workflow/NEXT_ACTIONS.md)为准。
 
 ---
 

@@ -47,6 +47,19 @@ const RegionsPage = React.lazy(() =>
   import('@/features/platform/pages/regions').then((module) => ({ default: module.RegionsPage })),
 )
 
+const OperationsLandingPage = React.lazy(() =>
+  import('@/features/operations/pages/landing').then((module) => ({ default: module.OperationsLandingPage })),
+)
+const OperationsOperatorsPage = React.lazy(() =>
+  import('@/features/operations/pages/operators').then((module) => ({ default: module.OperatorsPage })),
+)
+const OperationsRolesPage = React.lazy(() =>
+  import('@/features/operations/pages/roles').then((module) => ({ default: module.RolesPage })),
+)
+const OperationsAuditLogsPage = React.lazy(() =>
+  import('@/features/operations/pages/audit-logs').then((module) => ({ default: module.AuditLogsPage })),
+)
+
 /* ---------- Root ---------- */
 
 function RootComponent() {
@@ -93,7 +106,11 @@ const chatRoute = makeDomainRoute('/chat', 'chat', '实时聊天', '会话与消
 const commerceRoute = makeDomainRoute('/commerce', 'commerce', '交易商城', '商品、订单、支付、钱包（Commerce Domain）')
 const rewardsRoute = makeDomainRoute('/rewards', 'rewards', '奖励中心', '奖励资格与发放（Rewards Domain）')
 const trustRoute = makeDomainRoute('/trust', 'trust', '信任与风控', '举报与治理（Trust & Safety Domain）')
-const operationsRoute = makeDomainRoute('/operations', 'operations', '运营权限', '运营人员与权限（Operations Domain）')
+
+const operationsRoute = createRoute({ getParentRoute: () => shellRoute, path: '/operations', component: OperationsLandingPage })
+const operationsOperatorsRoute = createRoute({ getParentRoute: () => shellRoute, path: '/operations/operators', component: OperationsOperatorsPage })
+const operationsRolesRoute = createRoute({ getParentRoute: () => shellRoute, path: '/operations/roles', component: OperationsRolesPage })
+const operationsAuditLogsRoute = createRoute({ getParentRoute: () => shellRoute, path: '/operations/audit-logs', component: OperationsAuditLogsPage })
 
 const platformRoute = createRoute({ getParentRoute: () => shellRoute, path: '/platform', component: PlatformLandingPage })
 const platformFeatureFlagsRoute = createRoute({ getParentRoute: () => shellRoute, path: '/platform/feature-flags', component: FeatureFlagsPage })
@@ -141,6 +158,9 @@ const routeTree = rootRoute.addChildren([
     rewardsRoute,
     trustRoute,
     operationsRoute,
+    operationsOperatorsRoute,
+    operationsRolesRoute,
+    operationsAuditLogsRoute,
     platformRoute,
     platformFeatureFlagsRoute,
     platformRuntimeConfigsRoute,

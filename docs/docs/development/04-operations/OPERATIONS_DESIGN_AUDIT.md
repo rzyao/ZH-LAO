@@ -7,6 +7,7 @@ audited_at: 2026-08-31
 design_gate: PASS
 implementation_started: false
 repository_commit_audited: 000f4c4aafacf4938d74902eddc4d78323196a89
+lifecycle: historical
 ---
 
 # ZH-LAO  — Operations Design Audit

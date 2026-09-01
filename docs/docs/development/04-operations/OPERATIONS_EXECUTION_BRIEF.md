@@ -5,7 +5,8 @@ phase_name: Operations Domain
 artifact: execution_brief
 entry_gate: OPERATIONS_DESIGN_GATE = PASS
 execution_started: false
-last_updated: 2026-08-31
+last_updated: 2026-09-02
+lifecycle: historical
 ---
 
 # ZH-LAO  — Operations Execution Brief

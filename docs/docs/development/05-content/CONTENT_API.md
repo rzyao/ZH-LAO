@@ -5,8 +5,9 @@ phase_name: Content Domain
 document: CONTENT_API
 design_only: true
 implementation_started: false
-last_updated: 2026-08-31
+last_updated: 2026-09-02
 repository_commit_audited: 007d6ad705a9afcc4fefb03442e371b4dec07fad
+lifecycle: historical
 ---
 
 # ZH-LAO  — Content HTTP/API Contract

@@ -1,3 +1,8 @@
+---
+status: active
+last_updated: 2026-09-02
+---
+
 # Admin Foundation
 
 当前 Foundation 历史证据保留原路径：

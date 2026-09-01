@@ -2,10 +2,11 @@
 status: blocked
 phase: 5A
 phase_name: Content Admin Integration
-last_updated: 2026-08-31
+last_updated: 2026-09-02
 repository_commit_audited: f98127c421067875f5ae2a0cf4f56703240a17d1
 implementation: NOT_STARTED
 gate: FAIL
+lifecycle: historical
 ---
 
 # ZH-LAO  — Content Admin Implementation Report

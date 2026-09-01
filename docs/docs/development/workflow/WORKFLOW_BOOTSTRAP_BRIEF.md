@@ -3,7 +3,7 @@ status: ready
 role: workflow_dispatcher
 bootstrap_only: true
 business_implementation: false
-last_updated: 2026-08-31
+last_updated: 2026-09-02
 ---
 
 # Workflow Control Plane Bootstrap Brief
@@ -112,14 +112,14 @@ portfolio_status = active | deferred | pending_decision
 
 规则：
 
-- `active`：属于当前产品/项目开发组合；是否已有 READY Task 由各 Lane 状态单独表示；
-- `deferred`：仓库明确延期；Feature Page / Inventory 保留该组合语义，适用 Lane 记录为未启动；
-- `pending_decision`：产品范围与 Domain/Contract 需要裁决，Feature Page 的相关 Lane 使用 `blocked` 并记录明确 blocker。
+- `active`：属于当前产品/项目开发组合；是否已有 READY Task 由真实 Stage 与 Entry Gate 表示；
+- `deferred`：仓库明确延期；Feature Page / Inventory 只保留该组合语义；
+- `pending_decision`：产品范围与 Domain/Contract 需要裁决，Inventory 记录明确 `decision_blocker`，不得伪造执行状态。
 
 禁止：
 
 - 只因为某个 Feature 尚未启动就忽略它；
-- 创建缺少功能定位、Domain、六个 Lane 和适用性说明的空白 Feature 文档；
+- 创建缺少功能定位、Domain、真实证据或决策阻塞说明的空白 Feature 文档；
 - 把数据库表、Repository、Worker、缓存/索引当成 Feature；
 - 把设计文档中的示例场景自动升级成产品承诺；
 - 把明确 excluded 的能力重新加入当前范围。

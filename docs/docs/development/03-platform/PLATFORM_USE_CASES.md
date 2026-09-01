@@ -3,7 +3,7 @@ status: audited
 phase: 3
 phase_name: Platform Domain
 document: PLATFORM_USE_CASES
-last_updated: 2026-08-31
+last_updated: 2026-09-02
 depends_on:
   - FOUNDATION_GATE = PASS
   - IDENTITY_GATE = PASS
@@ -11,6 +11,7 @@ database_authority:
   - database/migrations/0300_platform.sql
   - docs/docs/domains/platform/database.md
 next_artifact: PLATFORM_CONFIG_CONTRACTS.md
+lifecycle: historical
 ---
 
 # ZH-LAO  — PLATFORM USE CASES

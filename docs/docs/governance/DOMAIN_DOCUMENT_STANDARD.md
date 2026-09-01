@@ -1,3 +1,8 @@
+---
+status: active
+last_updated: 2026-09-02
+---
+
 # 文档系统与领域文档规范
 
 **状态：ACTIVE / 文档治理规范**
@@ -20,6 +25,8 @@ guide/         阅读与维护说明
 ### 1. `product/`
 
 回答：为什么做、给谁用、提供什么价值、产品范围是什么。
+
+其中 `business-plan.md` 负责经营目标、阶段节奏、KPI 与假设验证，不复制产品定位、商业机制、领域契约或实现计划。
 
 ### 2. `architecture/`
 
@@ -204,6 +211,14 @@ Feature 文档禁止复制：
 ```
 
 Feature Gate 不能覆盖 Domain Gate；UI 页面文档不能修改 API/Public Contract；Backend 文档不能反向决定产品应该有什么功能。
+
+## 五-A、文档元数据与历史生命周期
+
+- 首方 Markdown 必须包含 YAML front matter；模板除外时也必须声明 `status: template`。
+- `status` 表示文档内容当前的事实状态；领域状态和完成报告状态继续使用各自已定义的受控值。Feature Page 只使用 `portfolio_status`，不得维护固定交付状态矩阵。
+- `lifecycle: historical` 仅表示该文档是历史证据，不再授予当前执行权限；它不能替代 `status`。
+- `development/01-foundation/` 至 `development/07-audio/` 的 Markdown 必须声明 `lifecycle: historical`。
+- 当前入口、规范和指南修改时更新 `last_updated`；历史报告不得因补充元数据而改写正文中的原始日期与结论。
 
 ## 六、中文显示规则
 

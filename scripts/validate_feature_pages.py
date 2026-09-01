@@ -15,8 +15,6 @@ OUTPUT = ROOT / 'docs/docs/development/workflow/FEATURE_PAGE_INDEX.json'
 MOBILE_DIR = ROOT / 'docs/docs/mobile'
 ADMIN_DIR = ROOT / 'docs/docs/admin'
 DOMAINS_DIR = ROOT / 'docs/docs/domains'
-LANES = ['design', 'backend', 'admin', 'mobile', 'integration', 'acceptance']
-HEADINGS = {'design': '设计', 'backend': 'Backend', 'admin': 'Admin', 'mobile': 'Mobile', 'integration': '集成', 'acceptance': '验收'}
 STATUSES = {'todo', 'ready', 'active', 'blocked', 'done', 'na'}
 PORTFOLIO_STATUSES = {'active', 'deferred', 'pending_decision'}
 PORTFOLIO_TITLE_MARKERS = re.compile(r'(?:（延期）|\(延期\)|（待裁决）|\(待裁决\)|（待设计）|\(待设计\))')
@@ -128,33 +126,22 @@ def scan():
             if not isinstance(domain_id, str):
                 raise ValueError(f'{path}: domain IDs must be strings')
             domains.setdefault(domain_id, canonical_domain(domain_id))
-        status = data.get('status')
-        if not isinstance(status, dict) or list(status) != LANES:
-            raise ValueError(f'{path}: status must define exactly {LANES} in order')
-        invalid = {lane: value for lane, value in status.items() if value not in STATUSES}
-        if invalid:
-            raise ValueError(f'{path}: invalid lane status: {invalid}')
-        blocks = data.get('blocks', {})
-        if not isinstance(blocks, dict):
-            raise ValueError(f'{path}: blocks must be a mapping')
-        for lane, value in status.items():
-            if value == 'blocked' and not blocks.get(lane):
-                raise ValueError(f'{path}: blocked {lane} needs blocks.{lane}')
-            if value == 'done' and not data.get('evidence', {}).get(lane):
-                raise ValueError(f'{path}: done {lane} needs evidence.{lane}')
-            if value == 'active' and not data.get('active_notes', {}).get(lane):
-                raise ValueError(f'{path}: active {lane} needs active_notes.{lane}')
-            if f'## {HEADINGS[lane]}' not in text:
-                raise ValueError(f'{path}: missing section {HEADINGS[lane]}')
-        heading_offsets = [text.index(f'## {HEADINGS[lane]}') for lane in LANES]
-        if heading_offsets != sorted(heading_offsets):
-            raise ValueError(f'{path}: Feature Lane sections are out of order')
+        obsolete_keys = {'status', 'blocks', 'active_notes', 'evidence'} & set(data)
+        if obsolete_keys:
+            raise ValueError(f'{path}: obsolete fixed delivery-matrix metadata is forbidden: {sorted(obsolete_keys)}')
+        delivery_evidence = data.get('delivery_evidence', [])
+        delivery_notes = data.get('delivery_notes', [])
+        if not isinstance(delivery_evidence, list) or not all(isinstance(item, str) for item in delivery_evidence):
+            raise ValueError(f'{path}: delivery_evidence must be a list of strings')
+        if not isinstance(delivery_notes, list) or not all(isinstance(item, str) for item in delivery_notes):
+            raise ValueError(f'{path}: delivery_notes must be a list of strings')
         records.append({
             'id': feature_id, 'title': data['title'], 'domain': data['domain'],
             'portfolio_status': portfolio_status,
-            'status': {lane: status[lane] for lane in LANES},
             'mobile_pages': data.get('mobile_pages', []), 'admin_pages': data.get('admin_pages', []),
-            'blocks': blocks, 'evidence': data.get('evidence', {}), 'active_notes': data.get('active_notes', {})
+            'decision_blocker': inventory_feature.get('decision_blocker'),
+            'delivery_evidence': delivery_evidence,
+            'delivery_notes': delivery_notes,
         })
     if seen != expected:
         raise ValueError(f'Feature Page coverage mismatch; missing={sorted(expected-seen)}, extra={sorted(seen-expected)}')
@@ -172,8 +159,7 @@ def scan():
         if set(record['admin_pages']) != expected_admin:
             raise ValueError(f'{feature_id}: Admin page references are not bidirectional')
     return {
-        'version': 1,
-        'lanes': LANES,
+        'version': 2,
         'domains': sorted(domains.values(), key=lambda domain: domain['id']),
         'features': sorted(records, key=lambda record: (record['domain'][0] if record['domain'] else 'system', record['title']))
     }
@@ -188,7 +174,7 @@ def main():
         OUTPUT.write_text(rendered, encoding='utf-8')
     elif not OUTPUT.exists() or OUTPUT.read_text(encoding='utf-8') != rendered:
         raise ValueError('FEATURE_PAGE_INDEX is stale; run validate_feature_pages.py --write')
-    print(f"Feature Pages: PASS ({len(index['features'])} pages, six lanes each)")
+    print(f"Feature Pages: PASS ({len(index['features'])} pages, Stage/Gate evidence model)")
 
 if __name__ == '__main__':
     main()

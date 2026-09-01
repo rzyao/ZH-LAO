@@ -34,6 +34,7 @@ const productSidebar = [
     items: [
       { text: '产品定位与范围', link: '/product/product-overview' },
       { text: '业务与商业模型', link: '/product/business-model' },
+      { text: '首发后 12 个月业务规划', link: '/product/business-plan' },
       { text: '功能开放与规则', link: '/product/feature-rollout' }
     ]
   }
@@ -100,7 +101,9 @@ const developmentSidebar = [
     items: [
       { text: '开发入口', link: '/development/' },
       { text: '开发流程控制中心', link: '/development/DEVELOPMENT_CONTROL_CENTER' },
-      { text: '开发进度', link: '/development/DEVELOPMENT_PROGRESS' }
+      { text: '开发进度', link: '/development/DEVELOPMENT_PROGRESS' },
+      { text: '当前下一动作', link: '/development/workflow/NEXT_ACTIONS' },
+      { text: '历史实施证据', link: '/development/history' }
     ]
   },
   {
@@ -375,12 +378,12 @@ export default defineConfig({
     nav: [
       { text: '首页', link: '/' },
       { text: '产品', link: '/product/product-overview' },
-      { text: '功能', link: '/features/' },
-      { text: 'Mobile', link: '/mobile/' },
-      { text: 'Admin', link: '/admin/' },
-      { text: '领域', link: '/domains/' },
       { text: '架构', link: '/architecture/' },
+      { text: '领域', link: '/domains/' },
+      { text: '功能', link: '/features/' },
       { text: '开发', link: '/development/' },
+      { text: 'Admin', link: '/admin/' },
+      { text: 'Mobile', link: '/mobile/' },
       { text: '治理', link: '/governance/design-register' },
       { text: 'ADR', link: '/adr/' }
     ],
@@ -396,7 +399,7 @@ export default defineConfig({
       ],
       '/admin/': [
         { text: 'Admin', items: [{ text: '概览', link: '/admin/' }, { text: '设计系统与 UI 规范', link: '/admin/DESIGN_SYSTEM' }, { text: '导航结构', link: '/admin/navigation' }, { text: '页面清单', link: '/admin/pages' }, { text: '页面文档规范', link: '/admin/PAGE_STANDARD' }] },
-        { text: '账号权限', items: [{ text: '操作员管理', link: '/admin/operators' }] },
+        { text: '账号与运营权限', items: [{ text: '操作员与 RBAC 管理', link: '/admin/operators' }] },
         { text: '音频', items: [{ text: '音频生产工作台', link: '/admin/audio-production' }] }
       ],
       '/development/': developmentSidebar,

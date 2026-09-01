@@ -2,13 +2,14 @@
 status: audited
 phase: 2
 phase_name: Identity Domain
-last_updated: 2026-08-30
+last_updated: 2026-09-02
 depends_on: FOUNDATION_GATE = PASS
 database_authority:
   - database/migrations/0100_identity.sql
   - database/migrations/1220_identity_auth_runtime.sql
 exit_gate: IDENTITY_GATE
 authority: docs/docs/development/MASTER_DEVELOPMENT_PLAN.md
+lifecycle: historical
 ---
 
 # ZH-LAO  — IDENTITY IMPLEMENTATION PLAN

@@ -1,3 +1,9 @@
+---
+status: complete
+last_updated: 2026-09-02
+lifecycle: historical
+---
+
 # ZH-LAO  — IDN-09 至 IDN-10 报告
 
 ```text

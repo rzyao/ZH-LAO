@@ -6,7 +6,8 @@
     "docs:dev": "vitepress dev docs --host 127.0.0.1 --port 15172",
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs",
-    "docs:lifecycle-audit": "python ../scripts/audit_feature_lifecycle.py",
+    "docs:lifecycle-audit": "python ../scripts/audit_feature_detail_pages.py && python ../scripts/audit_feature_state_machine.py",
+    "docs:metadata-check": "python ../scripts/check_doc_metadata.py",
     "spec:check": "python ../scripts/check_executable_specs.py"
   },
   "devDependencies": {

@@ -5,7 +5,8 @@ phase_name: Content Domain
 artifact: execution_brief
 entry_gate: CONTENT_DESIGN_GATE = PASS
 implementation_started: false
-last_updated: 2026-08-31
+last_updated: 2026-09-02
+lifecycle: historical
 ---
 
 # ZH-LAO  — Content Execution Brief

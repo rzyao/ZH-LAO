@@ -1,3 +1,8 @@
+---
+status: frozen
+last_updated: 2026-09-02
+---
+
 # ADR-019：Operations 为后台控制平面（运营主体 + RBAC + 不可变操作审计）
 
 **状态：** `frozen`

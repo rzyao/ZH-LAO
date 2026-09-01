@@ -1,3 +1,8 @@
+---
+status: active
+last_updated: 2026-09-02
+---
+
 # 阅读与维护文档
 
 ## 阅读顺序

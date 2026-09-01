@@ -1,8 +1,13 @@
+---
+status: active
+last_updated: 2026-09-02
+---
+
 # ZH-LAO 文档中心
 
 `PROJECT.md` 是仓库级项目知识总入口；本站按文档职责进入。
 
-- [产品](product/product-overview.md)：产品定位、范围、业务模型与功能开放规则。
+- [产品](product/product-overview.md)：产品定位、范围、业务模型、首发后 12 个月业务规划与功能开放规则。
 - [架构](architecture/index.md)：长期系统结构、领域边界、应用架构、基础设施与数据架构。
 - [领域设计](domains/index.md)：十一个正式领域当前有效的业务模型、流程、状态机、契约与数据设计。
 - [功能](features/index.md)：把领域能力、后端、后台、移动端和跨域集成组合成可交付的用户/运营能力。
@@ -21,6 +26,8 @@ development/   各实施轨如何开发、开发到哪里
 governance/    如何治理设计事实与未决事项
 adr/           为什么作出重要架构决策
 ```
+
+产品层的阅读顺序为：[产品定位与范围](product/product-overview.md) → [业务与商业模型](product/business-model.md) → [首发后 12 个月业务规划](product/business-plan.md) → [功能开放与规则](product/feature-rollout.md)。
 
 其中：
 

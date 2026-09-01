@@ -1,6 +1,6 @@
 ---
 status: control-center
-last_updated: 2026-08-31
+last_updated: 2026-09-02
 ---
 
 # 开发流程控制中心
@@ -38,7 +38,7 @@ Frozen Physical Migration（涉及物理 DB 时）
 → Implementation Blueprint
 ```
 
-Feature Page 是端到端交付的人工维护事实源；它不取代 Domain / Contract authority，只维护 Feature Lane 状态、范围和交付关联。`FEATURE_PAGE_INDEX.json` 是其派生索引。
+Feature Page 是端到端能力的人工维护交付地图；它不取代 Domain / Contract authority，也不维护固定交付状态矩阵。`FEATURE_PAGE_INDEX.json` 只派生 Feature 清单、领域归属、页面关联和证据线索。
 
 ### 完成状态
 
@@ -123,7 +123,7 @@ Implementation Worker 开始代码修改前至少确认：
 
 1. Task Manifest 存在；
 2. `stage_id` 与当前 Prompt 一致；
-3. Role / track / Lane 匹配；
+3. Role / track / Stage 匹配；
 4. Entry Gate 满足；
 5. required sources 可读取；
 6. dependency snapshot 有效；
@@ -132,7 +132,7 @@ Implementation Worker 开始代码修改前至少确认：
 9. 没有 material repository drift；
 10. 输出文档路径符合 `backend | admin | mobile` track 规则。
 
-Feature 行显示 Feature Page 人工维护的 Lane 状态；READY 等 Stage 细节只在 Feature Page 对应模块和 Task Manifest 中展示。System / Domain 汇总行仍可显示 Registry 派生后投影的概览状态。
+Feature 行显示 Portfolio 状态、关联页面和真实证据；READY 等执行状态只来自 Task Manifest、Stage Registry 与 Gate / Report。System / Domain 汇总行可以显示 Registry 派生的概览状态。
 
 ## 七、并行规则
 
@@ -158,7 +158,7 @@ ANY STAGE
 → 重新运行原 Gate
 ```
 
-Recovery 显示在原来的 Lane，不创建永久 Recovery 列。
+Recovery 绑定原 Stage 或新建有明确 ID 的 Recovery Stage，不创建永久 Recovery 分类。
 
 ## 九、Grounding Gate
 

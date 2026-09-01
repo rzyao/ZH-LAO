@@ -5,7 +5,8 @@ phase_name: Content Domain
 artifact: design_brief
 design_only: true
 implementation_started: false
-last_updated: 2026-08-31
+last_updated: 2026-09-02
+lifecycle: historical
 ---
 
 # ZH-LAO  — Content Domain Design Brief

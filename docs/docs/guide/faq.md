@@ -1,3 +1,8 @@
+---
+status: active
+last_updated: 2026-09-02
+---
+
 # 常见问题
 
 ## `designing` 能直接用于开发吗？

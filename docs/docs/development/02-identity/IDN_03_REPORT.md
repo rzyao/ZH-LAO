@@ -4,6 +4,7 @@ phase: 2
 task: IDN-03
 task_name: Repository Layer
 completed_at: 2026-08-30
+lifecycle: historical
 ---
 
 # ZH-LAO  — IDN-03 Repository Layer Report

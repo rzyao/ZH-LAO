@@ -1,3 +1,9 @@
+---
+status: complete
+last_updated: 2026-09-02
+lifecycle: historical
+---
+
 # ZH-LAO  — Identity 实施最终报告
 
 ```text

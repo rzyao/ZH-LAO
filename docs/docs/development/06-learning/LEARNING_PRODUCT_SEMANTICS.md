@@ -5,10 +5,11 @@ phase_name: Learning Domain
 document: LEARNING_PRODUCT_SEMANTICS
 design_only: true
 implementation_started: false
-last_updated: 2026-08-31
+last_updated: 2026-09-02
 repository_commit_audited: f5b3f3f41468036ecbd1544c6a9b3c5fbf9668db
 database_authority:
   - database/migrations/0500_learning.sql
+lifecycle: historical
 ---
 
 # ZH-LAO  — Learning Product Semantics

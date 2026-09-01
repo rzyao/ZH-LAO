@@ -1,3 +1,8 @@
+---
+status: active
+last_updated: 2026-09-02
+---
+
 # Audio Production Backend
 
 Backend 组织主线：**Audio Production Domain**。

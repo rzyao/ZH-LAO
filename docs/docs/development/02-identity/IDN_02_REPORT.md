@@ -4,6 +4,7 @@ phase: 2
 task: IDN-02
 task_name: Core Types
 completed_at: 2026-08-30
+lifecycle: historical
 ---
 
 # ZH-LAO  — IDN-02 Core Types Report

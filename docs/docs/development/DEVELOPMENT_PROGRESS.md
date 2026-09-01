@@ -1,11 +1,11 @@
 ---
 status: baseline
-last_updated: 2026-08-31
+last_updated: 2026-09-02
 ---
 
 # ZH-LAO  开发进度记录表
 
-本页是  全量开发进度的唯一看板。阶段顺序、依赖和 Exit Gate 以 [全量开发总计划](MASTER_DEVELOPMENT_PLAN.md) 为准。
+本页是全量开发完成状态与证据的唯一看板。流程、Gate 与工件职责以[开发流程控制中心](DEVELOPMENT_CONTROL_CENTER.md)为准，当前可启动任务与动态调度以[当前下一动作](workflow/NEXT_ACTIONS.md)为准；具体任务权限由 Task Manifest、Execution Brief、Implementation Blueprint、Gate / Report 确定。
 
 ## 状态与更新规则
 

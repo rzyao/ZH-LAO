@@ -1,3 +1,8 @@
+---
+status: active
+last_updated: 2026-09-02
+---
+
 # Mobile 页面清单
 
 Mobile 页面文档按当前代码路由与正式页面契约分组：

@@ -1,6 +1,7 @@
 ---
 status: superseded
-last_updated: 2026-08-31
+last_updated: 2026-09-02
+lifecycle: historical
 ---
 
 # 旧全量开发总计划（兼容入口）

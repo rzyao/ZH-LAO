@@ -82,7 +82,7 @@ export const NAV_GROUPS: NavGroup[] = [
     key: 'system',
     label: '系统运维',
     items: [
-      { key: 'operations', label: '运营权限', href: '/operations', icon: Settings, domain: 'operations', placeholder: true },
+      { key: 'operations', label: '运营权限', href: '/operations', icon: Settings, domain: 'operations' },
       { key: 'platform', label: '平台控制台', href: '/platform', icon: Database, domain: 'platform' },
     ],
   },

@@ -1,6 +1,6 @@
 ---
 status: active
-last_updated: 2026-08-31
+last_updated: 2026-09-02
 ---
 
 # 开发执行入口
@@ -128,13 +128,16 @@ repository drift
 
 ## 七、控制面阅读顺序
 
-1. [当前下一动作](workflow/NEXT_ACTIONS.md)
-2. [AI 多会话 Workflow](workflow/index.md)
-3. [Task Manifest Schema](workflow/TASK_MANIFEST_SCHEMA.md)
-4. [可执行规格系统](SPEC_SYSTEM.md)
-5. [实现蓝图模板](IMPLEMENTATION_BLUEPRINT_TEMPLATE.md)
-6. [开发流程控制中心](DEVELOPMENT_CONTROL_CENTER.md)
-7. 当前 Stage Manifest 指向的 Brief / Blueprint / Gate / Report
+1. [开发流程控制中心](DEVELOPMENT_CONTROL_CENTER.md)
+2. [开发进度记录表](DEVELOPMENT_PROGRESS.md)
+3. [当前下一动作](workflow/NEXT_ACTIONS.md)
+4. [AI 多会话 Workflow](workflow/index.md)
+5. [Task Manifest Schema](workflow/TASK_MANIFEST_SCHEMA.md)
+6. [可执行规格系统](SPEC_SYSTEM.md)
+7. [实现蓝图模板](IMPLEMENTATION_BLUEPRINT_TEMPLATE.md)
+8. 当前 Stage Manifest 指向的 Brief / Blueprint / Gate / Report
+
+历史 Phase 计划与报告见[历史实施证据](history.md)。这些文件不再授予当前任务权限。
 
 ## 八、Authority
 
@@ -154,7 +157,7 @@ repository drift
 
 严格顺序约束的是同一依赖链的 Gate，不是整个项目只能串行推进一个 Phase。
 
-不同 Lane 的 READY Stage 在依赖、路径、Claim 和 contract snapshot 不冲突时可以并行。
+不同实施轨的 READY Stage 在依赖、路径、Claim 和 contract snapshot 不冲突时可以并行。
 
 ## 十、旧 Phase 目录
 

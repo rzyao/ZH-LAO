@@ -3,12 +3,13 @@ status: frozen
 phase: 4
 phase_name: Operations Domain
 document: OPERATIONS_API
-last_updated: 2026-08-31
+last_updated: 2026-09-02
 repository_commit_audited: 000f4c4aafacf4938d74902eddc4d78323196a89
 depends_on:
   - OPERATIONS_USE_CASES.md
   - OPERATIONS_RBAC_CONTRACTS.md
 implementation_started: false
+lifecycle: historical
 ---
 
 # ZH-LAO  — Operations API / Public Contract

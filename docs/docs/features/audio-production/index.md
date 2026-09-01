@@ -2,36 +2,24 @@
 feature_id: audio-production
 title: 音频生产
 portfolio_status: active
-
 domain:
-  - audio
-
+- audio
 dependencies:
-  - content
-  - operations
-  - asset
-
-status:
-  design: done
-  backend: blocked
-  admin: active
-  mobile: na
-  integration: blocked
-  acceptance: todo
-evidence:
-  design:
-    - /domains/audio/production
-    - /domains/audio/contracts
-    - AUDIO_DESIGN_RECOVERY_BRIEF.md
-    - AUDIO_DESIGN_AUDIT.md
-blocks:
-  backend: 等待 CONTENT_GATE 完成
-  integration: 等待后端实现证据
-active_notes:
-  admin: 处于管理后台设计与工作台规格制定阶段
+- content
+- operations
+- asset
 mobile_pages: []
 admin_pages:
-  - admin-audio-production
+- admin-audio-production
+delivery_evidence:
+- /domains/audio/production
+- /domains/audio/contracts
+- AUDIO_DESIGN_RECOVERY_BRIEF.md
+- AUDIO_DESIGN_AUDIT.md
+delivery_notes:
+- 等待 CONTENT_GATE 完成
+- 等待后端实现证据
+- 处于管理后台设计与工作台规格制定阶段
 ---
 
 # 音频生产
@@ -355,48 +343,6 @@ audio.create
 后台：
 
 - AUDIO_PRODUCTION_ADMIN_DESIGN_BRIEF.md
-
----
-
-## 设计
-
-状态：done
-
-- **Scope**：定义音频生产任务、TTS生成、人工录音、音频版本管理与审核发布契约。
-- **Stage / Artifact**：[AUDIO_DESIGN_RECOVERY_BRIEF.md](../../development/07-audio/AUDIO_DESIGN_RECOVERY_BRIEF.md)、[AUDIO_PRODUCTION_CONTRACTS.md](../../development/07-audio/AUDIO_PRODUCTION_CONTRACTS.md)。
-- **Gate / Evidence**：`AUDIO_DESIGN_GATE = PASS`。
-
-## Backend
-
-状态：blocked
-
-- **Scope**：音频生成与录音任务后端生命周期。
-- **Gate / Evidence**：等待 CONTENT_GATE 完成。
-
-## Admin
-
-状态：active
-
-- **Scope**：音频生产工作台 (`admin-audio-production`) 与质检裁决界面设计。
-- **Stage / Artifact**：[AUDIO_PRODUCTION_ADMIN_DESIGN_BRIEF.md](../../development/admin/audio-production/AUDIO_PRODUCTION_ADMIN_DESIGN_BRIEF.md)。
-
-## Mobile
-
-状态：na
-
-不适用：音频生产不面向普通移动端用户。
-
-## 集成
-
-状态：blocked
-
-等待后端实现与权限链路完成。
-
-## 验收
-
-状态：todo
-
-等待集成完成。
 
 ---
 

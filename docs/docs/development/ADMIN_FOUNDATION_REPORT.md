@@ -4,6 +4,7 @@ phase: 1A
 phase_name: Admin Foundation
 completed_at: 2026-08-31
 gate: PASS
+lifecycle: historical
 ---
 
 # ZH-LAO  — Admin Foundation Implementation Report

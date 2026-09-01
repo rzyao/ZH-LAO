@@ -1,6 +1,6 @@
 ---
 status: active
-last_updated: 2026-08-31
+last_updated: 2026-09-02
 ---
 
 # 功能交付
@@ -23,19 +23,19 @@ Feature E2E proves deliverable value
 
 完整 Feature Inventory 不再手工复制到本页，统一查看：
 
-完整功能状态以各 Feature Page 的六个 Lane 模块和 `FEATURE_PAGE_INDEX.json` 为准。
+完整 Feature 清单、领域归属、页面关联和证据线索以各 Feature Page 与 `FEATURE_PAGE_INDEX.json` 为准；真实执行状态读取 Task Manifest、Stage Registry 与 Gate / Report。
 
 这样功能数量增加后不会出现多个页面各维护一套状态的漂移。
 
 ## Canonical Feature Page
 
-正式 Feature 清单中的每个功能都已经建立独立页面（当前 `102 / 102`）。页面由人工维护 Frontmatter 和六个固定模块，Feature 索引只读取这些页面。
+正式 Feature 清单中的每个功能都已经建立独立页面（当前 `102 / 102`）。页面由人工维护 Portfolio 状态、领域归属、边界、页面关联和证据线索，Feature 索引只读取这些页面。
 
 - [用户登录与会话](login/index.md)
 - [音频生产](audio-production/index.md)
 - 其余功能通过左侧按 Domain 分组的“功能目录”进入。
 
-尚未启动的 Feature Page 也必须存在，但必须写明功能定位、所属 Domain、六个 Lane 状态及不适用原因，不能是真正的空白页。
+尚未启动的 Feature Page 也必须存在，但必须写明功能定位、所属 Domain、决策阻塞或真实证据，不能是真正的空白页，也不得生成固定状态占位结构。
 
 ## Domain ↔ Feature
 

@@ -1,3 +1,8 @@
+---
+status: active
+last_updated: 2026-09-02
+---
+
 # Mobile 导航结构
 
 当前代码中的导航主链为：

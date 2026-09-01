@@ -1,6 +1,7 @@
 ---
 status: blocked
-last_updated: 2026-08-31
+last_updated: 2026-09-02
+lifecycle: historical
 ---
 
 # Platform Admin Implementation Report

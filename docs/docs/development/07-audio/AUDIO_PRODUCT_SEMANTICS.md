@@ -5,8 +5,9 @@ phase_name: Audio Production Domain
 document: AUDIO_PRODUCT_SEMANTICS
 design_only: true
 implementation_started: false
-last_updated: 2026-08-31
+last_updated: 2026-09-02
 recovery_baseline: cc6b3d79f5224ef0ee4e2e3435a542ffae5edf6e
+lifecycle: historical
 ---
 
 # ZH-LAO  — Audio Production Product Semantics

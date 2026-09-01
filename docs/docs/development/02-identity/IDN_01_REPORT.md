@@ -4,6 +4,7 @@ phase: 2
 task: IDN-01
 task_name: Identity Module Skeleton
 completed_at: 2026-08-30
+lifecycle: historical
 ---
 
 # ZH-LAO  — IDN-01 Identity Module Skeleton Report

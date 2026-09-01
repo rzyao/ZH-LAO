@@ -3,7 +3,7 @@ status: frozen
 phase: 4
 phase_name: Operations Domain
 document: OPERATIONS_RBAC_CONTRACTS
-last_updated: 2026-08-31
+last_updated: 2026-09-02
 repository_commit_audited: 000f4c4aafacf4938d74902eddc4d78323196a89
 database_authority:
   - database/migrations/0200_operations.sql
@@ -11,6 +11,7 @@ depends_on:
   - ../02-identity/IDENTITY_IMPLEMENTATION_REPORT.md
   - ../03-platform/PLATFORM_IMPLEMENTATION_REPORT.md
 implementation_started: false
+lifecycle: historical
 ---
 
 # ZH-LAO  — Operations RBAC Contracts

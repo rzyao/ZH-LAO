@@ -1,3 +1,8 @@
+---
+status: active
+last_updated: 2026-09-02
+---
+
 # Executable Spec Registry
 
 本目录承载 [Executable Spec System](../SPEC_SYSTEM.md) 的 machine-readable 工件。

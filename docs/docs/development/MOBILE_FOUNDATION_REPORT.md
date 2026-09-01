@@ -1,3 +1,9 @@
+---
+status: complete
+last_updated: 2026-09-02
+lifecycle: historical
+---
+
 # ZH-LAO  — Mobile Foundation Report
 
 **文件：`MOBILE_FOUNDATION_REPORT.md`**

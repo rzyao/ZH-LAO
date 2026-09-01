@@ -4,6 +4,7 @@ phase: 1
 phase_name: Application Foundation
 completed_at: 2026-08-30
 gate: PASS
+lifecycle: historical
 ---
 
 # ZH-LAO  — Application Foundation Implementation Report

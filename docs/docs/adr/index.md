@@ -1,3 +1,8 @@
+---
+status: active
+last_updated: 2026-09-02
+---
+
 # Architecture Decision Records
 
 | ADR | 决策 | 状态 |

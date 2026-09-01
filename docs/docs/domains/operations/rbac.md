@@ -186,3 +186,20 @@ Business Mutation 必然 PASS
 ```
 
 前端 Permission Guard 也不能代替上述服务端链路。
+
+## 新增业务域权限注册与治理 SOP (Permission Governance SOP)
+
+当后续业务域（如 Content、Learning、Commerce、Audio、Trust 等）接入后台管理控制面时，新增权限必须遵守以下治理流程：
+
+1. **命名规范**：严格使用三段式 `<domain>.<resource>.<action>`，全小写蛇形命名（lower_snake_case）。
+2. **代码定义即注册**：在 `apps/backend/src/modules/operations/public/permissions.ts` 中的 `FROZEN_OPERATOR_PERMISSIONS` 数组中声明新的权限键。
+3. **超级管理员同步规则**：新增权限发布时，数据库启动脚本/引导流程应确保所有激活的 `super_admin` 角色自动补充新权限全量集合。
+4. **前端常量同步**：在 `apps/admin/src/auth/permissions.ts` 中同步声明对应的权限字面量类型，保持前后端完全对齐。
+
+## 前端 UI 安全交互规范 (UI Security Invariants)
+
+1. **当前操作员自身防呆**：操作员无法在前端界面禁用自身账号或移除自身的 `super_admin` 角色。
+2. **唯一超级管理员保护**：针对系统中唯一处于激活状态的 `super_admin` 操作员，前端操作栏中的“禁用”及“解绑 super_admin 角色”按钮强制置灰并展示保护提示。
+3. **敏感操作确认**：修改角色权限集合（`setRolePermissions`）、禁用操作员或角色时，弹出模态框展示变更 Diff 并进行二次确认。
+4. **403 实时恢复**：当前端请求因权限变更收到 `403 FORBIDDEN` 时，静默重新触发 `/api/v1/admin/operations/me` 刷新当前前端 `AuthContext` 权限池，避免界面状态滞后。
+

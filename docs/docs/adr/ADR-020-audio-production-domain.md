@@ -1,3 +1,8 @@
+---
+status: frozen
+last_updated: 2026-09-02
+---
+
 # ADR-020：Audio Production 独立成域与正式音频唯一事实源
 
 **状态：** `已接受`

@@ -3,7 +3,7 @@ status: audited
 phase: 2
 phase_name: Identity Domain
 document: IDENTITY_USE_CASES
-last_updated: 2026-08-30
+last_updated: 2026-09-02
 depends_on:
   - FOUNDATION_GATE = PASS
   - IDENTITY_IMPLEMENTATION_PLAN.md
@@ -11,6 +11,7 @@ database_authority:
   - database/migrations/0100_identity.sql
   - database/migrations/1220_identity_auth_runtime.sql
 next_artifact: IDENTITY_API.md
+lifecycle: historical
 ---
 
 # ZH-LAO  — IDENTITY USE CASES

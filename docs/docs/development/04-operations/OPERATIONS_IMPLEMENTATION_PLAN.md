@@ -3,7 +3,7 @@ status: complete
 phase: 4
 phase_name: Operations Domain
 document: OPERATIONS_IMPLEMENTATION_PLAN
-last_updated: 2026-08-31
+last_updated: 2026-09-02
 design_only: false
 implementation_started: true
 implementation_complete: true
@@ -14,6 +14,7 @@ depends_on:
   - OPERATIONS_RBAC_CONTRACTS.md
   - OPERATIONS_API.md
   - ../03-platform/PLATFORM_IMPLEMENTATION_REPORT.md
+lifecycle: historical
 ---
 
 # ZH-LAO  — Operations Implementation Plan

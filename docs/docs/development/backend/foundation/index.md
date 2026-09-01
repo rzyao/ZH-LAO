@@ -1,3 +1,8 @@
+---
+status: active
+last_updated: 2026-09-02
+---
+
 # 后端应用基础
 
 当前 Foundation 历史证据仍保留原路径：

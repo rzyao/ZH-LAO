@@ -1,3 +1,8 @@
+---
+status: active
+last_updated: 2026-09-02
+---
+
 # Content Backend
 
 Backend 组织主线：**Content Domain**。

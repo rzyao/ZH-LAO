@@ -5,7 +5,7 @@ phase_name: Content Domain
 document: CONTENT_PRODUCT_SEMANTICS
 design_only: true
 implementation_started: false
-last_updated: 2026-08-31
+last_updated: 2026-09-02
 repository_commit_audited: 007d6ad705a9afcc4fefb03442e371b4dec07fad
 database_authority:
   - database/migrations/0400_content.sql
@@ -13,6 +13,7 @@ database_authority:
 depends_on:
   - ../04-operations/OPERATIONS_DESIGN_AUDIT.md
   - ../03-platform/PLATFORM_IMPLEMENTATION_REPORT.md
+lifecycle: historical
 ---
 
 # ZH-LAO  — Content Product Semantics

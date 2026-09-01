@@ -1,3 +1,8 @@
+---
+status: active
+last_updated: 2026-09-02
+---
+
 # 领域设计入口
 
 ZH-LAO 当前有 **11 个正式业务领域**。

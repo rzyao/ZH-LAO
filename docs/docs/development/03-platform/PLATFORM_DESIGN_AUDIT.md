@@ -6,6 +6,7 @@ document: PLATFORM_DESIGN_AUDIT
 audited_at: 2026-08-31
 design_gate: PASS
 implementation_started: false
+lifecycle: historical
 ---
 
 # ZH-LAO  — Platform Design Audit
