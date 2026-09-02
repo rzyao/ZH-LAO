@@ -1,0 +1,27 @@
+# Test environment credentials (never commit)
+features/**/testing/env.md
+features/**/testing/playwright-results/
+
+# Playwright output
+test-results/
+playwright-report/
+
+# Node
+node_modules/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.idea/
+.vscode/
+*.swp
+
+# Local agent / tool runtime artifacts (not part of the plugin)
+.claude/
+.serena/
+.remember/
+agentdb.rvf
+agentdb.rvf.lock
+ruvector.db
