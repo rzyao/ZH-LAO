@@ -1,0 +1,44 @@
+---
+status: active
+last_updated: 2026-09-02
+source: scripts/build_developer_feature_catalog.py
+---
+
+# 平台（Platform）
+
+> 返回 [全量功能目录](../) ｜ 本领域共 **7** 个功能（Portfolio：`active` 5、`deferred` 2）。
+
+## 领域导航
+
+[音频（Audio）](../audio/) · [聊天（Chat）](../chat/) · [商业（Commerce）](../commerce/) · [内容（Content）](../content/) · [身份（Identity）](../identity/) · [学习（Learning）](../learning/) · [运营（Operations）](../operations/) · **平台（Platform）** · [奖励（Rewards）](../rewards/) · [社交（Social）](../social/) · [信任与安全（Trust & Safety）](../trust/) · [unassigned](../unassigned/)
+
+## 功能
+
+> 开发状态由[六层交付状态](../../DOCUMENT_CONTRACT)推导：`completed` 需 Integration 与 Acceptance 均 `verified`；任一层有证据为 `in_progress`；无证据为 `not_started`。
+
+| 功能 | 开发状态 | Portfolio | 分层状态摘要 | 证据条目 | 来源迁移 |
+| --- | --- | --- | --- | ---: | --- |
+| [产品支持地区管理](../region-management) | ⚪ not_started | `active` | — | 2 | `complete` |
+| [功能开关与范围灰度管理](../feature-rollout-control) | ⚪ not_started | `active` | — | 2 | `complete` |
+| [客户端版本检查与强制升级](../app-version-governance) | ⚪ not_started | `active` | — | 2 | `complete` |
+| [平台公告发布与展示](../platform-announcements) | ⚪ not_started | `active` | — | 2 | `complete` |
+| [运行参数管理](../runtime-config-management) | ⚪ not_started | `active` | — | 2 | `complete` |
+| [运行配置版本与回滚](../runtime-config-history) | ⚪ not_started | `deferred` | — | 0 | `complete` |
+| [高级灰度发布](../advanced-feature-rollout) | ⚪ not_started | `deferred` | — | 0 | `complete` |
+
+## 本领域分层状态计数（六层交付层）
+
+| 层 | 状态计数 |
+| --- | --- |
+| 数据库 | `not_evidenced` 7 |
+| Backend | `not_evidenced` 7 |
+| Admin | `not_evidenced` 7 |
+| Mobile | `not_evidenced` 7 |
+| Integration | `not_evidenced` 7 |
+| Acceptance | `not_evidenced` 7 |
+
+## 状态说明
+
+- `portfolio_status` 直接来自各页面 front matter；`active` 只表示进入产品组合，不代表实现完成。
+- 六层交付状态使用[文档契约](../../DOCUMENT_CONTRACT)定义的受控枚举，默认 `not_evidenced`。
+- 分层状态摘要只列出偏离默认值的层；显示 `—` 表示六层全部 `not_evidenced`，尚待独立核验。

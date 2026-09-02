@@ -14,6 +14,10 @@ delivery_evidence: []
 
 # 公开社交资料查看
 
+<!-- breadcrumb:start -->
+> **← 返回** [社交（Social）](social/) · [全量功能目录](index.md)
+<!-- breadcrumb:end -->
+
 > `portfolio_status` 只表示产品组合归属，不表示实现完成；分层状态词汇与证据补录要求见[文档契约](../DOCUMENT_CONTRACT)。
 
 ## 用户价值与功能说明

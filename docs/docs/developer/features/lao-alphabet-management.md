@@ -32,6 +32,10 @@ last_verified_at: 2026-09-02
 
 # 老挝语字母管理
 
+<!-- breadcrumb:start -->
+> **← 返回** [内容（Content）](content/) · [全量功能目录](index.md)
+<!-- breadcrumb:end -->
+
 ## 用户价值
 
 为教研人员建立可审核、可发布的老挝语基础字符内容，并让学习者在移动端按分类查看已发布字母及其发音投影。

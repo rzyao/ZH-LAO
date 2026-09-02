@@ -31,6 +31,10 @@ last_verified_at: 2026-09-02
 
 # 用户登录与会话
 
+<!-- breadcrumb:start -->
+> **← 返回** [身份（Identity）](identity/) · [全量功能目录](index.md)
+<!-- breadcrumb:end -->
+
 ## 用户价值
 
 让中文或老挝语学习者通过手机号验证码或 Facebook 认证建立正式身份，并在访问令牌过期、设备更换或主动退出时安全管理会话。

@@ -139,6 +139,10 @@
     "trust": 7,
     "unassigned": 4
   },
+  "dev_status_counts": {
+    "in_progress": 2,
+    "not_started": 101
+  },
   "layer_status_counts": {
     "数据库": {
       "evidenced": 1,
@@ -194,6 +198,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "account-lifecycle"
     },
@@ -214,6 +219,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "account-profile"
     },
@@ -235,6 +241,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "admin-auth-hardening"
     },
@@ -253,6 +260,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "admin-dashboard"
     },
@@ -274,6 +282,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "admin-login"
     },
@@ -295,6 +304,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "ads-monetization"
     },
@@ -315,6 +325,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "advanced-feature-rollout"
     },
@@ -337,6 +348,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "advanced-learning-entitlements"
     },
@@ -358,6 +370,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "advanced-reward-types"
     },
@@ -378,6 +391,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "app-version-governance"
     },
@@ -399,6 +413,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "appeal-review"
     },
@@ -419,6 +434,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "audio-production"
     },
@@ -443,6 +459,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "automatic-coin-rewards"
     },
@@ -464,6 +481,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "buy-coins"
     },
@@ -486,6 +504,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "chat-image"
     },
@@ -508,6 +527,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "chat-message-receipts"
     },
@@ -530,6 +550,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "chat-own-delete"
     },
@@ -552,6 +573,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "chat-reactions"
     },
@@ -574,6 +596,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "chat-read-state"
     },
@@ -596,6 +619,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "chat-realtime"
     },
@@ -618,6 +642,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "chat-recall"
     },
@@ -641,6 +666,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "chat-speech-to-text"
     },
@@ -663,6 +689,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "chat-text"
     },
@@ -686,6 +713,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "chat-translation"
     },
@@ -709,6 +737,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "chat-voice-message"
     },
@@ -730,6 +759,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "coin-pack-catalog"
     },
@@ -751,6 +781,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "commerce-catalog-admin"
     },
@@ -772,6 +803,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "commerce-refund-admin"
     },
@@ -793,6 +825,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "commerce-transaction-admin"
     },
@@ -814,6 +847,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "content-revision-publishing"
     },
@@ -836,6 +870,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "conversation-list"
     },
@@ -858,6 +893,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "conversation-settings"
     },
@@ -880,6 +916,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "course-catalog"
     },
@@ -901,6 +938,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "creator-earnings"
     },
@@ -922,6 +960,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "curriculum-management"
     },
@@ -943,6 +982,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "dictionary-content-management"
     },
@@ -965,6 +1005,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "dictionary-history"
     },
@@ -987,6 +1028,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "dictionary-search"
     },
@@ -1009,6 +1051,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "direct-conversation"
     },
@@ -1033,6 +1076,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "enforcement-management"
     },
@@ -1054,6 +1098,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "feature-rollout-control"
     },
@@ -1074,6 +1119,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "first-admin-bootstrap"
     },
@@ -1095,6 +1141,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "gift-admin"
     },
@@ -1116,6 +1163,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "gift-catalog"
     },
@@ -1138,6 +1186,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "group-chat"
     },
@@ -1158,6 +1207,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "guest-cloud-sync"
     },
@@ -1179,6 +1229,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "guest-learning-browse"
     },
@@ -1200,6 +1251,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "identity-user-admin"
     },
@@ -1222,6 +1274,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "instant-translation"
     },
@@ -1240,6 +1293,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "interface-language"
     },
@@ -1261,6 +1315,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "knowledge-content-management"
     },
@@ -1283,6 +1338,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "knowledge-learning"
     },
@@ -1303,6 +1359,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "in_progress",
       "source_migration": "manual",
       "path": "lao-alphabet-management"
     },
@@ -1325,6 +1382,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "learning-activity-history"
     },
@@ -1347,6 +1405,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "learning-bookmarks"
     },
@@ -1369,6 +1428,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "learning-progress"
     },
@@ -1391,6 +1451,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "lesson-learning"
     },
@@ -1411,6 +1472,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "login-devices"
     },
@@ -1431,6 +1493,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "in_progress",
       "source_migration": "manual",
       "path": "login"
     },
@@ -1453,6 +1516,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "mastery-review"
     },
@@ -1476,6 +1540,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "mobile-home"
     },
@@ -1497,6 +1562,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "moderation-workbench"
     },
@@ -1517,6 +1583,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "operator-audit-log"
     },
@@ -1537,6 +1604,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "operator-management"
     },
@@ -1558,6 +1626,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "order-payment-history"
     },
@@ -1578,6 +1647,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "permission-assignment"
     },
@@ -1599,6 +1669,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "platform-announcements"
     },
@@ -1620,6 +1691,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "practice-content-management"
     },
@@ -1642,6 +1714,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "practice-exercises"
     },
@@ -1663,6 +1736,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "promotions-coupons"
     },
@@ -1686,6 +1760,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "pronunciation-playback"
     },
@@ -1704,6 +1779,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "push-notifications"
     },
@@ -1726,6 +1802,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "real-person-verification"
     },
@@ -1747,6 +1824,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "region-management"
     },
@@ -1769,6 +1847,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "reward-operations"
     },
@@ -1789,6 +1868,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "role-management"
     },
@@ -1809,6 +1889,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "runtime-config-history"
     },
@@ -1830,6 +1911,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "runtime-config-management"
     },
@@ -1853,6 +1935,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "send-gift"
     },
@@ -1876,6 +1959,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "social-block"
     },
@@ -1897,6 +1981,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "social-discovery-preferences"
     },
@@ -1920,6 +2005,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "social-discovery"
     },
@@ -1941,6 +2027,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "social-distance"
     },
@@ -1963,6 +2050,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "social-feed"
     },
@@ -1985,6 +2073,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "social-follow"
     },
@@ -2007,6 +2096,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "social-lifecycle"
     },
@@ -2029,6 +2119,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "social-match"
     },
@@ -2051,6 +2142,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "social-membership-entitlements"
     },
@@ -2073,6 +2165,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "social-post-interactions"
     },
@@ -2095,6 +2188,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "social-posting"
     },
@@ -2117,6 +2211,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "social-profile-media"
     },
@@ -2139,6 +2234,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "social-profile-view"
     },
@@ -2161,6 +2257,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "social-profile"
     },
@@ -2182,6 +2279,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "social-relationships"
     },
@@ -2200,6 +2298,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "theme-settings"
     },
@@ -2222,6 +2321,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "translation-history"
     },
@@ -2243,6 +2343,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "user-appeal"
     },
@@ -2267,6 +2368,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "user-reporting"
     },
@@ -2289,6 +2391,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "verification-review"
     },
@@ -2310,6 +2413,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "wallet-adjustment-admin"
     },
@@ -2331,6 +2435,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "wallet-balance"
     },
@@ -2352,6 +2457,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "wallet-history"
     },
@@ -2374,6 +2480,7 @@
         "Integration": "not_evidenced",
         "Acceptance": "not_evidenced"
       },
+      "dev_status": "not_started",
       "source_migration": "complete",
       "path": "wrong-answer-notebook"
     }

@@ -3,5 +3,18 @@
     "allow": [
       "Bash(agent-browser *)"
     ]
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python scripts/check_feature_evidence_sync.py"
+          }
+        ]
+      }
+    ]
   }
 }

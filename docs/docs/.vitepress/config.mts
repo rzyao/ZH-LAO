@@ -25,8 +25,7 @@ const developerSidebar = [
     text: '功能目录',
     items: [
       { text: '全量功能目录', link: '/developer/features/' },
-      { text: '用户登录与会话', link: '/developer/features/login' },
-      { text: '老挝语字母管理', link: '/developer/features/lao-alphabet-management' }
+      { text: '功能页契约', link: '/developer/DOCUMENT_CONTRACT' }
     ]
   },
   {
@@ -101,8 +100,18 @@ const developerFeaturesSidebar = [
     text: '功能目录',
     items: [
       { text: '全量功能目录', link: '/developer/features/' },
-      { text: '用户登录与会话', link: '/developer/features/login' },
-      { text: '老挝语字母管理', link: '/developer/features/lao-alphabet-management' },
+      { text: '音频（Audio）', link: '/developer/features/audio/' },
+      { text: '聊天（Chat）', link: '/developer/features/chat/' },
+      { text: '商业（Commerce）', link: '/developer/features/commerce/' },
+      { text: '内容（Content）', link: '/developer/features/content/' },
+      { text: '身份（Identity）', link: '/developer/features/identity/' },
+      { text: '学习（Learning）', link: '/developer/features/learning/' },
+      { text: '运营（Operations）', link: '/developer/features/operations/' },
+      { text: '平台（Platform）', link: '/developer/features/platform/' },
+      { text: '奖励（Rewards）', link: '/developer/features/rewards/' },
+      { text: '社交（Social）', link: '/developer/features/social/' },
+      { text: '信任与安全（Trust & Safety）', link: '/developer/features/trust/' },
+      { text: 'unassigned', link: '/developer/features/unassigned/' },
       { text: '功能页契约', link: '/developer/DOCUMENT_CONTRACT' }
     ]
   }

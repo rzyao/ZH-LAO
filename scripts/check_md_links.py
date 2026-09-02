@@ -41,6 +41,10 @@ def strip_code(text: str) -> str:
     return INLINE_CODE_RE.sub("", text)
 
 
+# 显式 HTML 锚点：<a id="..."></a> 或 <a name="..."></a>
+HTML_ANCHOR_RE = re.compile(r'<a\s+id="([^"]+)"\s*>\s*</a>|<a\s+name="([^"]+)"\s*>\s*</a>')
+
+
 def collect() -> dict[str, set[str]]:
     """返回 {规范化md路径: {anchor,...}}"""
     anchors: dict[str, set[str]] = {}
@@ -54,6 +58,8 @@ def collect() -> dict[str, set[str]]:
             # 只剔除围栏代码块；行内代码要保留给 slugify 自行处理反引号
             heading_src = CODE_FENCE_RE.sub("", body)
             found = {slugify(m.group(2)) for m in HEADING_RE.finditer(heading_src)}
+            # 显式 HTML 锚点（<a id="..." ></a>）直接按原 id 收录，不经过 slugify
+            found.update(m.group(1) or m.group(2) for m in HTML_ANCHOR_RE.finditer(heading_src))
             anchors[full] = found
     return anchors
 
