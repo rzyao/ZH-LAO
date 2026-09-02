@@ -25,7 +25,7 @@ last_updated: 2026-09-02
 
 当前全景包含 **103 个 Feature detail 页面**：Portfolio 为 active 80、deferred 17、pending_decision 6。功能按能力和主领域分组，完整规模与各层状态计数见[功能目录](features/)；机器可读清单位于 `docs/docs/developer/feature-catalog.json`。
 
-目前只有两个页面完成了基于迁移时代码/测试基线的人工核验：[用户登录与会话](features/login)和[老挝语字母管理](features/lao-alphabet-management)。其余页面是迁移后的产品/范围记录，不能把页面存在、`active` 或 Spec Kit 状态当作实现或验收证据。
+目前只有两个页面完成了基于迁移时代码/测试基线的人工核验：[用户登录与会话](features/login)和[老挝语字母管理](features/lao-alphabet-management)。其余页面是迁移后的产品/范围记录，不能把页面存在、`active` 或 Spec Kit 状态当作实现或验收证据。分层数据维护遵循[文档契约](DOCUMENT_CONTRACT)：单层拿到新证据时增量更新 front matter `delivery_layers` 并重新生成目录，无需整页重写。
 
 ## 这份全景文档不是什么
 

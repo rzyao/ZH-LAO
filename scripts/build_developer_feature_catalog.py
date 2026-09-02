@@ -27,6 +27,8 @@ MANUAL_IDS = {"login", "lao-alphabet-management"}
 TODAY = "2026-09-02"
 PORTFOLIO_STATUSES = {"active", "deferred", "pending_decision"}
 LAYER_NAMES = ["产品", "数据库", "Backend", "Admin", "Mobile", "Integration", "Acceptance"]
+LAYER_STATUSES = {"not_evidenced", "evidenced", "evidenced_limited", "not_applicable", "verified"}
+DEFAULT_LAYER_STATUS = "not_evidenced"
 
 
 def parse_frontmatter(path: Path) -> tuple[dict[str, Any], str]:
@@ -135,12 +137,31 @@ def page_layer_statuses(body: str) -> dict[str, str]:
     return statuses
 
 
+def frontmatter_layer_statuses(meta: dict[str, Any]) -> dict[str, str]:
+    """Layer statuses from front matter ``delivery_layers`` (controlled enum).
+
+    Front matter is the human-maintained data source; the generated body table
+    and catalog derive from it. Missing layers fall back to ``not_evidenced``.
+    """
+    raw = meta.get("delivery_layers")
+    statuses: dict[str, str] = {}
+    if isinstance(raw, dict):
+        for layer, value in raw.items():
+            if layer not in LAYER_NAMES or not isinstance(value, dict):
+                continue
+            status = str(value.get("status", DEFAULT_LAYER_STATUS))
+            if status in LAYER_STATUSES:
+                statuses[layer] = status
+    return {layer: statuses.get(layer, DEFAULT_LAYER_STATUS) for layer in LAYER_NAMES}
+
+
 def catalog_records() -> list[dict[str, Any]]:
     records: list[dict[str, Any]] = []
     for path in sorted(NEW_FEATURES.glob("*.md")):
         if path.name == "index.md":
             continue
         meta, body = parse_frontmatter(path)
+        layer_statuses = frontmatter_layer_statuses(meta) or page_layer_statuses(body)
         records.append(
             {
                 "id": str(meta.get("feature_id") or path.stem),
@@ -148,12 +169,23 @@ def catalog_records() -> list[dict[str, Any]]:
                 "portfolio_status": str(meta.get("portfolio_status") or "unknown"),
                 "domains": as_list(meta.get("domain")),
                 "evidence_count": len(as_list(meta.get("delivery_evidence"))),
-                "layer_statuses": page_layer_statuses(body),
+                # 产品 layer mirrors portfolio_status; only the six delivery
+                # layers use the controlled evidence enum.
+                "layer_statuses": layer_statuses,
                 "source_migration": str(meta.get("source_migration") or "manual"),
                 "path": path.name.removesuffix(".md"),
             }
         )
     return records
+
+
+def notable_layers(record: dict[str, Any]) -> list[str]:
+    """Layers whose status differs from the default, for compact display."""
+    return [
+        f"{layer}: {record['layer_statuses'][layer]}"
+        for layer in LAYER_NAMES
+        if record["layer_statuses"].get(layer, DEFAULT_LAYER_STATUS) != DEFAULT_LAYER_STATUS
+    ]
 
 
 def build_catalog(records: list[dict[str, Any]]) -> dict[str, Any]:
@@ -162,8 +194,8 @@ def build_catalog(records: list[dict[str, Any]]) -> dict[str, Any]:
     primary_domains = Counter(record["domains"][0] if record["domains"] else "unassigned" for record in records)
     layers: dict[str, Counter[str]] = defaultdict(Counter)
     for record in records:
-        for layer in LAYER_NAMES:
-            layers[layer][record["layer_statuses"].get(layer, "not evidenced")] += 1
+        for layer in LAYER_NAMES[1:]:  # six delivery layers use the evidence enum
+            layers[layer][record["layer_statuses"].get(layer, DEFAULT_LAYER_STATUS)] += 1
     evidence = Counter("with_evidence" if record["evidence_count"] else "without_evidence" for record in records)
     migrations = Counter(record["source_migration"] for record in records)
     return {
@@ -174,7 +206,7 @@ def build_catalog(records: list[dict[str, Any]]) -> dict[str, Any]:
         "portfolio_status_counts": dict(sorted(portfolio.items())),
         "domain_counts": dict(sorted(domains.items())),
         "primary_domain_counts": dict(sorted(primary_domains.items())),
-        "layer_status_counts": {layer: dict(sorted(layers[layer].items())) for layer in LAYER_NAMES},
+        "layer_status_counts": {layer: dict(sorted(layers[layer].items())) for layer in LAYER_NAMES[1:]},
         "evidence_counts": {
             "with_evidence": evidence["with_evidence"],
             "without_evidence": evidence["without_evidence"],
@@ -195,7 +227,7 @@ def build_index(records: list[dict[str, Any]], catalog: dict[str, Any]) -> str:
             **record,
             "portfolio": record["portfolio_status"],
             "evidence": record["evidence_count"],
-            "layer": "; ".join(f"{layer}: {record['layer_statuses'].get(layer, 'not evidenced')}" for layer in LAYER_NAMES),
+            "layer": "; ".join(notable_layers(record)) if notable_layers(record) else "—",
             "migration": record["source_migration"],
         }
         for record in records
@@ -238,21 +270,23 @@ def build_index(records: list[dict[str, Any]], catalog: dict[str, Any]) -> str:
         f"- Portfolio：`active` {catalog['portfolio_status_counts'].get('active', 0)}、`deferred` {catalog['portfolio_status_counts'].get('deferred', 0)}、`pending_decision` {catalog['portfolio_status_counts'].get('pending_decision', 0)}。",
         f"- 证据条目：有 frontmatter evidence 的 {catalog['evidence_counts']['with_evidence']} 页、无 evidence 的 {catalog['evidence_counts']['without_evidence']} 页，共 {catalog['evidence_counts']['total_entries']} 条。",
         f"- 来源迁移：`complete` {catalog['source_migration_counts'].get('complete', 0)} 页、`manual` {catalog['source_migration_counts'].get('manual', 0)} 页；旧 102 页已按退役清单处理。",
+        f"- 人工分层核验：`manual` 页 {catalog['source_migration_counts'].get('manual', 0)} 页（[login](login)、[lao-alphabet-management](lao-alphabet-management)），其余 {catalog['source_migration_counts'].get('complete', 0)} 页六层交付状态默认 `not_evidenced`，待按[文档契约](../DOCUMENT_CONTRACT)增量补录。",
         "- 主领域规模：" + "、".join(f"{domain} {count}" for domain, count in catalog["primary_domain_counts"].items()) + "。",
         "",
-        "### 分层状态计数",
+        "### 分层状态计数（六层交付层）",
         "",
         "| 层 | 当前页面状态计数 |",
         "| --- | --- |",
         *[
             f"| {layer} | " + ", ".join(f"`{status}` {count}" for status, count in catalog["layer_status_counts"][layer].items()) + " |"
-            for layer in LAYER_NAMES
+            for layer in LAYER_NAMES[1:]
         ],
         "",
         "## 状态说明",
         "",
         "- `portfolio_status` 直接来自各页面 front matter；`active` 只表示进入产品组合，不代表实现完成。",
-        "- 分层状态默认是 `not evidenced`；P2 手工核验页在其页面内记录了代码/测试证据，其余页面仍需独立验证。",
+        "- 六层交付状态使用[文档契约](../DOCUMENT_CONTRACT)定义的受控枚举，默认 `not_evidenced`，来自各页 front matter `delivery_layers`。",
+        "- 分层状态摘要只列出偏离默认值的层；显示 `—` 表示六层全部 `not_evidenced`，尚待独立核验。",
         "- `evidence` 是页面声明的证据条目数量，不是 Gate 结论。",
         "",
     ]

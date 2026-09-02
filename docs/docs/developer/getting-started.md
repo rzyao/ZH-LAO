@@ -18,7 +18,7 @@ last_updated: 2026-09-02
 | Admin 实现 | 页面/工作台规范、[Operations API 契约](reference/contracts/operations/OPERATIONS_API.md)与代码/测试 |
 | Mobile 实现 | 用户流程、[迁移时基线](evidence/delivery-baseline)与代码/测试 |
 | Feature 端到端验收 | [功能文档](./features/)、Gate / Report 与真实测试证据 |
-| AI 执行规格 | [Spec Kit Constitution](https://github.com/rzyao/ZH-LAO/blob/main/.specify/memory/constitution.md) 与仓库根目录 `specs/` |
+| AI 执行规格 | 仓库根目录 `.specify/memory/constitution.md`（Spec Kit Constitution）与 `specs/` |
 | 本地运行 | 仓库根目录 `README.md` 与各应用 README |
 
 ## Spec Kit 规则

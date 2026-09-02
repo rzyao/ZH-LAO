@@ -10,7 +10,23 @@ delivery_evidence:
 - https://github.com/rzyao/ZH-LAO/blob/8f3237e/apps/backend/src/modules/content/domain/lao-character.ts
 - https://github.com/rzyao/ZH-LAO/blob/8f3237e/apps/admin/src/features/content/alphabet/pages/AlphabetPage.tsx
 - https://github.com/rzyao/ZH-LAO/blob/8f3237e/apps/mobile/src/features/alphabet/screens/AlphabetScreen.tsx
+delivery_layers:
+  数据库:
+    status: evidenced_limited
+    note: 基线表已存在；与 HEAD 实体逐字段对齐待 Feature Gate 前核验
+  Backend:
+    status: evidenced_limited
+    note: 实体/路由/用例齐备，测试 2 files、6 tests 未覆盖 HTTP/E2E
+  Admin:
+    status: evidenced
+  Mobile:
+    status: evidenced
+  Integration:
+    status: not_evidenced
+  Acceptance:
+    status: not_evidenced
 last_updated: 2026-09-02
+source_migrated_at: 2026-09-02
 last_verified_at: 2026-09-02
 ---
 

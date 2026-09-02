@@ -27,7 +27,7 @@ REQUIRED_FRONTMATTER = {
     "title",
     "portfolio_status",
     "source_migration",
-    "last_verified_at",
+    "source_migrated_at",
     "delivery_evidence",
 }
 REQUIRED_SECTIONS = {
@@ -92,6 +92,24 @@ def main() -> int:
                 fail(f"{path.name}: unsupported source_migration {meta['source_migration']!r}")
             if not isinstance(meta["delivery_evidence"], list):
                 fail(f"{path.name}: delivery_evidence must be a list")
+            # last_verified_at requires manual verification; migrated pages
+            # must only carry source_migrated_at.
+            if meta["source_migration"] == "complete" and "last_verified_at" in meta:
+                fail(f"{path.name}: migrated page must not claim last_verified_at")
+            if meta["source_migration"] == "manual" and "last_verified_at" not in meta:
+                fail(f"{path.name}: manually verified page must define last_verified_at")
+            # delivery_layers, when present, must use the controlled enum and
+            # only cover the six delivery layers (产品 mirrors portfolio_status).
+            layers_meta = meta.get("delivery_layers")
+            if layers_meta is not None:
+                if not isinstance(layers_meta, dict):
+                    fail(f"{path.name}: delivery_layers must be a mapping")
+                else:
+                    for layer, value in layers_meta.items():
+                        if layer not in builder.LAYER_NAMES[1:]:
+                            fail(f"{path.name}: unknown delivery layer {layer!r}")
+                        if not isinstance(value, dict) or value.get("status") not in builder.LAYER_STATUSES:
+                            fail(f"{path.name}: layer {layer!r} must have status in {sorted(builder.LAYER_STATUSES)}")
             for section, headings in REQUIRED_SECTIONS.items():
                 if not any(heading in body for heading in headings):
                     fail(f"{path.name}: missing required section {section}")
@@ -117,6 +135,25 @@ def main() -> int:
         )
         if expected_total not in overview or expected_portfolio not in overview:
             fail("developer/index.md overview statistics do not match feature-catalog.json")
+
+        # Delivery-status and current-focus quote hand-written counts; keep them
+        # anchored to the generated catalog so they cannot drift silently.
+        for summary_name, summary_path in (
+            ("delivery-status", builder.DOCS / "developer" / "delivery-status.md"),
+            ("current-focus", builder.DOCS / "developer" / "current-focus.md"),
+        ):
+            summary_text = summary_path.read_text(encoding="utf-8")
+            expected_count = f"{catalog['detail_total']} 个"
+            manual_count = catalog["source_migration_counts"].get("manual", 0)
+            verified_sentence = (
+                f"已完成人工分层核验：{manual_count} 页"
+                if summary_name == "delivery-status"
+                else f"除登录与字母管理两个试点外，还有 {catalog['detail_total'] - manual_count} 个尚未按统一契约完成人工分层核验"
+            )
+            if expected_count not in summary_text:
+                fail(f"{summary_name}.md detail count does not match feature-catalog.json")
+            if verified_sentence not in summary_text:
+                fail(f"{summary_name}.md manual-verification count does not match feature-catalog.json")
 
         print("PRODUCT_DEVELOPMENT_OVERVIEW_CHECK PASS")
         print(f"detail_total={catalog['detail_total']}")

@@ -10,7 +10,22 @@ delivery_evidence:
 - https://github.com/rzyao/ZH-LAO/tree/8f3237e/specs/001-user-login
 - https://github.com/rzyao/ZH-LAO/blob/8f3237e/apps/backend/src/modules/identity/http/routes.ts
 - https://github.com/rzyao/ZH-LAO/blob/8f3237e/apps/mobile/src/screens/auth/LoginScreen.tsx
+delivery_layers:
+  数据库:
+    status: evidenced
+  Backend:
+    status: evidenced
+  Admin:
+    status: not_applicable
+  Mobile:
+    status: evidenced_limited
+    note: 已对接 Identity API，未见专门登录 UI 验收测试
+  Integration:
+    status: not_evidenced
+  Acceptance:
+    status: not_evidenced
 last_updated: 2026-09-02
+source_migrated_at: 2026-09-02
 last_verified_at: 2026-09-02
 ---
 

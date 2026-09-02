@@ -13,7 +13,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 0,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "account-profile",
@@ -24,7 +24,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 0,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "admin-auth-hardening",
@@ -36,7 +36,7 @@
       "portfolio_status": "deferred",
       "source_migration": "complete",
       "delivery_evidence_count": 0,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "admin-dashboard",
@@ -45,7 +45,7 @@
       "portfolio_status": "deferred",
       "source_migration": "complete",
       "delivery_evidence_count": 0,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "admin-login",
@@ -57,7 +57,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 6,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "ads-monetization",
@@ -69,7 +69,7 @@
       "portfolio_status": "deferred",
       "source_migration": "complete",
       "delivery_evidence_count": 0,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "advanced-feature-rollout",
@@ -80,7 +80,7 @@
       "portfolio_status": "deferred",
       "source_migration": "complete",
       "delivery_evidence_count": 0,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "advanced-learning-entitlements",
@@ -93,7 +93,7 @@
       "portfolio_status": "deferred",
       "source_migration": "complete",
       "delivery_evidence_count": 0,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "advanced-reward-types",
@@ -105,7 +105,7 @@
       "portfolio_status": "deferred",
       "source_migration": "complete",
       "delivery_evidence_count": 0,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "app-version-governance",
@@ -116,7 +116,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 2,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "appeal-review",
@@ -128,7 +128,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 0,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "audio-production",
@@ -139,7 +139,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 4,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "automatic-coin-rewards",
@@ -154,7 +154,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 4,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "buy-coins",
@@ -166,7 +166,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 4,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "chat-image",
@@ -179,7 +179,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 0,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "chat-message-receipts",
@@ -192,7 +192,7 @@
       "portfolio_status": "deferred",
       "source_migration": "complete",
       "delivery_evidence_count": 0,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "chat-own-delete",
@@ -205,7 +205,7 @@
       "portfolio_status": "deferred",
       "source_migration": "complete",
       "delivery_evidence_count": 0,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "chat-reactions",
@@ -218,7 +218,7 @@
       "portfolio_status": "deferred",
       "source_migration": "complete",
       "delivery_evidence_count": 0,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "chat-read-state",
@@ -231,7 +231,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 2,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "chat-realtime",
@@ -244,7 +244,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 0,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "chat-recall",
@@ -257,7 +257,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 0,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "chat-speech-to-text",
@@ -271,7 +271,7 @@
       "portfolio_status": "pending_decision",
       "source_migration": "complete",
       "delivery_evidence_count": 0,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "chat-text",
@@ -284,7 +284,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 0,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "chat-translation",
@@ -298,7 +298,7 @@
       "portfolio_status": "pending_decision",
       "source_migration": "complete",
       "delivery_evidence_count": 0,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "chat-voice-message",
@@ -312,7 +312,7 @@
       "portfolio_status": "pending_decision",
       "source_migration": "complete",
       "delivery_evidence_count": 0,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "coin-pack-catalog",
@@ -324,7 +324,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 3,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "commerce-catalog-admin",
@@ -336,7 +336,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 0,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "commerce-refund-admin",
@@ -348,7 +348,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 0,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "commerce-transaction-admin",
@@ -360,7 +360,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 0,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "content-revision-publishing",
@@ -372,7 +372,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 1,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "conversation-list",
@@ -385,7 +385,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 3,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "conversation-settings",
@@ -398,7 +398,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 3,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "course-catalog",
@@ -411,7 +411,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 2,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "creator-earnings",
@@ -423,7 +423,7 @@
       "portfolio_status": "deferred",
       "source_migration": "complete",
       "delivery_evidence_count": 0,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "curriculum-management",
@@ -435,7 +435,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 1,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "dictionary-content-management",
@@ -447,7 +447,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 1,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "dictionary-history",
@@ -460,7 +460,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 3,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "dictionary-search",
@@ -473,7 +473,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 2,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "direct-conversation",
@@ -486,7 +486,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 2,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "enforcement-management",
@@ -501,7 +501,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 0,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "feature-rollout-control",
@@ -513,7 +513,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 2,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "first-admin-bootstrap",
@@ -524,7 +524,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 5,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "gift-admin",
@@ -536,7 +536,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 0,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "gift-catalog",
@@ -548,7 +548,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 2,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "group-chat",
@@ -561,7 +561,7 @@
       "portfolio_status": "deferred",
       "source_migration": "complete",
       "delivery_evidence_count": 0,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "guest-cloud-sync",
@@ -572,7 +572,7 @@
       "portfolio_status": "deferred",
       "source_migration": "complete",
       "delivery_evidence_count": 0,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "guest-learning-browse",
@@ -584,7 +584,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 2,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "identity-user-admin",
@@ -596,7 +596,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 0,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "instant-translation",
@@ -609,7 +609,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 3,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "interface-language",
@@ -618,7 +618,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 1,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "knowledge-content-management",
@@ -630,7 +630,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 1,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "knowledge-learning",
@@ -643,7 +643,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 2,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "lao-alphabet-management",
@@ -654,6 +654,7 @@
       "portfolio_status": "active",
       "source_migration": "manual",
       "delivery_evidence_count": 4,
+      "source_migrated_at": "2026-09-02",
       "last_verified_at": "2026-09-02"
     },
     {
@@ -667,7 +668,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 4,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "learning-bookmarks",
@@ -680,7 +681,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 4,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "learning-progress",
@@ -693,7 +694,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 2,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "lesson-learning",
@@ -706,7 +707,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 2,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "login-devices",
@@ -717,7 +718,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 0,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "login",
@@ -728,6 +729,7 @@
       "portfolio_status": "active",
       "source_migration": "manual",
       "delivery_evidence_count": 4,
+      "source_migrated_at": "2026-09-02",
       "last_verified_at": "2026-09-02"
     },
     {
@@ -741,7 +743,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 4,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "mobile-home",
@@ -755,7 +757,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 0,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "moderation-workbench",
@@ -767,7 +769,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 0,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "operator-audit-log",
@@ -778,7 +780,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 5,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "operator-management",
@@ -789,7 +791,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 5,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "order-payment-history",
@@ -801,7 +803,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 3,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "permission-assignment",
@@ -812,7 +814,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 5,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "platform-announcements",
@@ -824,7 +826,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 2,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "practice-content-management",
@@ -836,7 +838,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 1,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "practice-exercises",
@@ -849,7 +851,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 2,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "promotions-coupons",
@@ -861,7 +863,7 @@
       "portfolio_status": "deferred",
       "source_migration": "complete",
       "delivery_evidence_count": 0,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "pronunciation-playback",
@@ -875,7 +877,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 4,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "push-notifications",
@@ -884,7 +886,7 @@
       "portfolio_status": "deferred",
       "source_migration": "complete",
       "delivery_evidence_count": 0,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "real-person-verification",
@@ -897,7 +899,7 @@
       "portfolio_status": "pending_decision",
       "source_migration": "complete",
       "delivery_evidence_count": 0,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "region-management",
@@ -909,7 +911,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 2,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "reward-operations",
@@ -922,7 +924,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 4,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "role-management",
@@ -933,7 +935,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 5,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "runtime-config-history",
@@ -944,7 +946,7 @@
       "portfolio_status": "deferred",
       "source_migration": "complete",
       "delivery_evidence_count": 0,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "runtime-config-management",
@@ -956,7 +958,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 2,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "send-gift",
@@ -970,7 +972,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 3,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "social-block",
@@ -984,7 +986,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 2,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "social-discovery-preferences",
@@ -996,7 +998,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 0,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "social-discovery",
@@ -1010,7 +1012,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 0,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "social-distance",
@@ -1022,7 +1024,7 @@
       "portfolio_status": "pending_decision",
       "source_migration": "complete",
       "delivery_evidence_count": 0,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "social-feed",
@@ -1035,7 +1037,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 3,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "social-follow",
@@ -1048,7 +1050,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 2,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "social-lifecycle",
@@ -1061,7 +1063,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 2,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "social-match",
@@ -1074,7 +1076,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 2,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "social-membership-entitlements",
@@ -1087,7 +1089,7 @@
       "portfolio_status": "deferred",
       "source_migration": "complete",
       "delivery_evidence_count": 0,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "social-post-interactions",
@@ -1100,7 +1102,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 3,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "social-posting",
@@ -1113,7 +1115,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 3,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "social-profile-media",
@@ -1126,7 +1128,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 0,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "social-profile-view",
@@ -1139,7 +1141,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 0,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "social-profile",
@@ -1152,7 +1154,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 0,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "social-relationships",
@@ -1164,7 +1166,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 2,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "theme-settings",
@@ -1173,7 +1175,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 1,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "translation-history",
@@ -1186,7 +1188,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 0,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "user-appeal",
@@ -1198,7 +1200,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 0,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "user-reporting",
@@ -1213,7 +1215,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 0,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "verification-review",
@@ -1226,7 +1228,7 @@
       "portfolio_status": "pending_decision",
       "source_migration": "complete",
       "delivery_evidence_count": 0,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "wallet-adjustment-admin",
@@ -1238,7 +1240,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 0,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "wallet-balance",
@@ -1250,7 +1252,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 3,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "wallet-history",
@@ -1262,7 +1264,7 @@
       "portfolio_status": "active",
       "source_migration": "complete",
       "delivery_evidence_count": 3,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     },
     {
       "id": "wrong-answer-notebook",
@@ -1275,7 +1277,7 @@
       "portfolio_status": "deferred",
       "source_migration": "complete",
       "delivery_evidence_count": 0,
-      "last_verified_at": "2026-09-02"
+      "source_migrated_at": "2026-09-02"
     }
   ]
 }
