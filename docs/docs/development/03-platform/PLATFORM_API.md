@@ -11,9 +11,16 @@ database_authority:
   - database/migrations/0300_platform.sql
 next_step: Platform Design Audit
 lifecycle: historical
+derived_from: domains/platform/database.md
 ---
 
+
 # ZH-LAO  — PLATFORM API
+
+⚠️ **派生文档（DERIVED）** — 规范归属（canonical owner）：`domains/platform/database.md`。本文件为实现轨（implementation-track）文档，**不是产品/领域事实权威**（Constitution 原则 II）。产品/领域事实以规范归属文档为准，请勿在此重复或自行修改事实。
+
+
+
 
 > 目标路径：`docs/docs/development/03-platform/PLATFORM_API.md`
 >

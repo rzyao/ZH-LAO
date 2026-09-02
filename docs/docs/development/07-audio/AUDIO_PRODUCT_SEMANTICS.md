@@ -8,9 +8,16 @@ implementation_started: false
 last_updated: 2026-09-02
 recovery_baseline: cc6b3d79f5224ef0ee4e2e3435a542ffae5edf6e
 lifecycle: historical
+derived_from: domains/audio/index.md
 ---
 
+
 # ZH-LAO  — Audio Production Product Semantics
+
+⚠️ **派生文档（DERIVED）** — 规范归属（canonical owner）：`domains/audio/index.md`。本文件为实现轨（implementation-track）文档，**不是产品/领域事实权威**（Constitution 原则 II）。产品/领域事实以规范归属文档为准，请勿在此重复或自行修改事实。
+
+
+
 
 > 本文由 `AUDIO_DESIGN_RECOVERY_BRIEF.md` 恢复生成。数据库权威仍是 `database/migrations/0600_audio.sql`；本文不修改 migration、不增加 Audio 表、不开始实现。
 

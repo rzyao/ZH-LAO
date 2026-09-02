@@ -1,3 +1,4 @@
+-- Source: docs/docs/domains/platform/database.md
 -- V2 blocker resolution: one shared transactional outbox for all Domains.
 
 CREATE TABLE infrastructure.system_outbox_events (

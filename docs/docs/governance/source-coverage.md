@@ -16,9 +16,9 @@ last_updated: 2026-09-02
 | 产品战略问答 | 用户目标、规模、平台、市场、指标、运营约束 | [产品定位](../product/product-overview.md) |
 | 产品支柱收敛 | 学习范围、双边价值、商业模式、社交资格、聊天范围 | [产品定位](../product/product-overview.md)、[业务模型](../product/business-model.md) |
 | 社交与运营规则 | Follow/Match、Feed、礼物、奖励、推荐、功能开放 | [业务模型](../product/business-model.md)、[功能开放](../product/feature-rollout.md) |
-| 一级 Domain Map | 十个域、职责、非职责和依赖（历史快照；现行口径为 11 个业务 Domain，见 [Domain Map](../architecture/domain-map.md)） | [Domain Map](../architecture/domain-map.md) |
-| 三层实体地图 | Domain、Subdomain、Core Entity | [Domain Map](../architecture/domain-map.md)、[领域入口](../domains/index.md) |
-| PostgreSQL 总规范 | 十个 Schema、十二项规则、ID/Public ID（后经全局修订为 9 业务 Schema + Final 十二项，见 [ADR-018](../adr/ADR-018-global-database-design-principles-final.md)；现行口径为 **11 个业务 Schema**，经 D-139 新增 `audio`、D-147 新增 `content`） | [数据库规范](../architecture/database.md) |
+| 一级 Domain Map | 十个域、职责、非职责和依赖（历史快照；现行口径为 11 个业务 Domain，见 [Domain Map](../architecture/domains/)） | [Domain Map](../architecture/domains/) |
+| 三层实体地图 | Domain、Subdomain、Core Entity | [Domain Map](../architecture/domains/)、[领域入口](../domains/index.md) |
+| PostgreSQL 总规范 | 十个 Schema、十二项规则、ID/Public ID（后经全局修订为 9 业务 Schema + Final 十二项，见 [ADR-018](../adr/ADR-018-global-database-design-principles-final.md)；现行口径为 **11 个业务 Schema**，经 D-139 新增 `audio`、D-147 新增 `content`） | [数据库规范](../architecture/data/postgresql.md) |
 | Identity 核心 SQL | users、auth_identities、basic_profiles、learning_profiles | [Identity 数据库](../domains/identity/database.md) |
 | Identity 补全 | OTP、Session、状态、Device、游客转正式用户 | [Identity 模型](../domains/identity/model.md)、[流程](../domains/identity/flows.md) |
 | Learning 骨架 | Knowledge/Curriculum/Practice/Progress/Dictionary/Pronunciation | [Learning 模型](../domains/learning/model.md) |
@@ -43,12 +43,12 @@ last_updated: 2026-09-02
 
 | 会话阶段 | 已覆盖内容 | 文档 |
 | --- | --- | --- |
-| 最终 Domain Map | 9 业务域；Community 并入 Social；Notification 非独立域；`system_outbox_events` 属 Platform Infrastructure | [Domain Map](../architecture/domain-map.md)、[ADR-018](../adr/ADR-018-global-database-design-principles-final.md) |
-| 最终 ID 策略 | 混合主键（各域自定 BIGINT/UUID）；跨域引用的聚合根/业务实体须有 UUID logical/public ID；跨域永不引用内部 BIGINT PK | [数据库规范](../architecture/database.md)、[ADR-018](../adr/ADR-018-global-database-design-principles-final.md) |
-| 最终 FK 策略 | 域内真实 PostgreSQL FK；跨域只存 logical UUID 不建物理 FK | [数据库规范](../architecture/database.md)、[ADR-018](../adr/ADR-018-global-database-design-principles-final.md) |
-| Canonical Fact 单一归属 | 一个业务事实一个 authoritative owner；跨域经 logical UUID + Service/Event/Outbox；禁止跨域直接写库与复制事实 | [ADR-018](../adr/ADR-018-global-database-design-principles-final.md)、[Domain Map](../architecture/domain-map.md) |
+| 最终 Domain Map | 9 业务域；Community 并入 Social；Notification 非独立域；`system_outbox_events` 属 Platform Infrastructure | [Domain Map](../architecture/domains/)、[ADR-018](../adr/ADR-018-global-database-design-principles-final.md) |
+| 最终 ID 策略 | 混合主键（各域自定 BIGINT/UUID）；跨域引用的聚合根/业务实体须有 UUID logical/public ID；跨域永不引用内部 BIGINT PK | [数据库规范](../architecture/data/postgresql.md)、[ADR-018](../adr/ADR-018-global-database-design-principles-final.md) |
+| 最终 FK 策略 | 域内真实 PostgreSQL FK；跨域只存 logical UUID 不建物理 FK | [数据库规范](../architecture/data/postgresql.md)、[ADR-018](../adr/ADR-018-global-database-design-principles-final.md) |
+| Canonical Fact 单一归属 | 一个业务事实一个 authoritative owner；跨域经 logical UUID + Service/Event/Outbox；禁止跨域直接写库与复制事实 | [ADR-018](../adr/ADR-018-global-database-design-principles-final.md)、[Domain Map](../architecture/domains/) |
 | 统一删除策略 | 历史事实不物理删除；当前关系按业务语义删除；字典/配置优先 disabled/inactive/retired；临时高容量数据 retention 清理 | [ADR-018](../adr/ADR-018-global-database-design-principles-final.md) |
-| Infrastructure 边界 | Outbox 与统一 Asset/Media 基础设施属 Platform Infrastructure，不计入业务 Domain 与业务表数量；业务域只存 asset_id | [ADR-018](../adr/ADR-018-global-database-design-principles-final.md)、[Domain Map](../architecture/domain-map.md) |
+| Infrastructure 边界 | Outbox 与统一 Asset/Media 基础设施属 Platform Infrastructure，不计入业务 Domain 与业务表数量；业务域只存 asset_id | [ADR-018](../adr/ADR-018-global-database-design-principles-final.md)、[Domain Map](../architecture/domains/) |
 
 ## “设计聊天领域”会话
 
@@ -123,8 +123,8 @@ last_updated: 2026-09-02
 
 | 会话阶段 | 已覆盖内容 | 文档 |
 | --- | --- | --- |
-| 总体原则承袭 | 分域、跨域只引用不侵入、UUID+域内FK+跨域逻辑ID（原与旧全局规范冲突，已由 ADR-018 裁决为标准写法，D-092）、varchar+CHECK、timestamptz、核心事实不可变、无 Trigger | [数据库规范](../architecture/database.md)、[Trust 数据库](../domains/trust/database.md) |
-| Trust 域边界 | 只拥有举报→审核→证据→决定→处置→申诉链路；不拥有资料/动态/关注/会话/消息/订单/礼物/奖励；不直改他域（T&S-12） | [Domain Map](../architecture/domain-map.md)、[Trust 域](../domains/trust/index.md) |
+| 总体原则承袭 | 分域、跨域只引用不侵入、UUID+域内FK+跨域逻辑ID（原与旧全局规范冲突，已由 ADR-018 裁决为标准写法，D-092）、varchar+CHECK、timestamptz、核心事实不可变、无 Trigger | [数据库规范](../architecture/data/postgresql.md)、[Trust 数据库](../domains/trust/database.md) |
+| Trust 域边界 | 只拥有举报→审核→证据→决定→处置→申诉链路；不拥有资料/动态/关注/会话/消息/订单/礼物/奖励；不直改他域（T&S-12） | [Domain Map](../architecture/domains/)、[Trust 域](../domains/trust/index.md) |
 | 6 表逻辑模型 | reports/moderation_cases/moderation_evidence/moderation_decisions/enforcement_actions/appeals 字段、约束、索引、状态枚举 | [Trust 数据库](../domains/trust/database.md) |
 | 最终审计定稿 | 删/改 12 处（reports 不可变、evidence 类型/来源拆开、decision 去重复时间、enforcement active→applied、加 cancelled、细化社交/聊天限制、appeal_id 保留处罚修改史） | [Trust 数据库](../domains/trust/database.md)、[设计台账](design-register.md) D-090/D-091 |
 | 统一 subject 协议（**已升级**） | 由 `subject_type+subject_id` 升级为三元组 `subject_domain+subject_type+subject_id`（域白名单 identity/social/chat/commerce）；证据侧 `reference_domain+reference_type+reference_id`；enforcement 内容级目标加 `subject_domain`；索引前缀同步改写 | [Trust 数据库](../domains/trust/database.md)、[设计台账](design-register.md) D-113（取代 D-093） |
@@ -188,9 +188,9 @@ last_updated: 2026-09-02
 
 | 会话阶段 | 已覆盖内容 | 文档 |
 | --- | --- | --- |
-| 拆分裁决 | Learning 正式拆为 **Content Domain**（Canonical Learning Content：课程/单元/Lesson/词汇/句子/教学文本/内容组织/语言信息/标准答案/标准发音要求/内容版本/Content Revision/发布状态，「零用户时依然存在」）与 **Learning Domain**（User Learning State & Facts：课程/Lesson/Unit 进度、词汇/句子学习状态、完成记录、掌握状态、学习历史、复习状态、学习统计 facts，「用户开始学习后才产生」）；依赖 `Learning → Identity` 与 `Learning → Content`（Learning depends on Identity and Content；逻辑依赖）；Learning 可存 `content_id/course_id/lesson_id/unit_id/vocabulary_id/sentence_id` logical references；被跨域引用的 Content 实体须有稳定 UUID logical/public ID；Learning→Content、Learning→Identity 不建物理 FK；事实严格分离（Learning 不复制第二份 canonical 内容）；Content Revision 归 Content、Learning 只记录学习时对应的 revision；Schema 拆 `content.*`/`learning.*`；不因拆分重新设计已定稿表 | [Domain Map](../architecture/domain-map.md)、[Content 域](../domains/content/index.md)、[Content 数据库](../domains/content/database.md)、[Learning 数据库](../domains/learning/database.md)、[设计台账](design-register.md) D-147、[ADR-021](../adr/ADR-021-content-and-learning-domain-split.md) |
+| 拆分裁决 | Learning 正式拆为 **Content Domain**（Canonical Learning Content：课程/单元/Lesson/词汇/句子/教学文本/内容组织/语言信息/标准答案/标准发音要求/内容版本/Content Revision/发布状态，「零用户时依然存在」）与 **Learning Domain**（User Learning State & Facts：课程/Lesson/Unit 进度、词汇/句子学习状态、完成记录、掌握状态、学习历史、复习状态、学习统计 facts，「用户开始学习后才产生」）；依赖 `Learning → Identity` 与 `Learning → Content`（Learning depends on Identity and Content；逻辑依赖）；Learning 可存 `content_id/course_id/lesson_id/unit_id/vocabulary_id/sentence_id` logical references；被跨域引用的 Content 实体须有稳定 UUID logical/public ID；Learning→Content、Learning→Identity 不建物理 FK；事实严格分离（Learning 不复制第二份 canonical 内容）；Content Revision 归 Content、Learning 只记录学习时对应的 revision；Schema 拆 `content.*`/`learning.*`；不因拆分重新设计已定稿表 | [Domain Map](../architecture/domains/)、[Content 域](../domains/content/index.md)、[Content 数据库](../domains/content/database.md)、[Learning 数据库](../domains/learning/database.md)、[设计台账](design-register.md) D-147、[ADR-021](../adr/ADR-021-content-and-learning-domain-split.md) |
 | Audio Production 契约同步 | 文本/正确发音要求/Content Revision 由 Content 拥有；依赖 `Audio Production → Content`（而非 → Learning）；Content 提供 `content_entity_id/content_revision_id` 稳定 logical UUID；Audio 仍只负责生产 | [Audio 域](../domains/audio/index.md)、[设计台账](design-register.md) D-148、[ADR-020](../adr/ADR-020-audio-production-domain.md) |
-| 事件归属与跨域引用 | 内容事件归 Content（content_created/updated/published/revision_created、lesson_published）；学习行为事件归 Learning（learning_started/lesson_completed/vocabulary_learned/review_completed/progress_updated）；他域引用教学内容 → Content logical UUID、引用学习事实 → Learning logical UUID；`content_id` 与 `learning_record_id/progress_id` 不得混用 | [Content 域](../domains/content/index.md)、[Domain Map](../architecture/domain-map.md)、[设计台账](design-register.md) D-149 |
+| 事件归属与跨域引用 | 内容事件归 Content（content_created/updated/published/revision_created、lesson_published）；学习行为事件归 Learning（learning_started/lesson_completed/vocabulary_learned/review_completed/progress_updated）；他域引用教学内容 → Content logical UUID、引用学习事实 → Learning logical UUID；`content_id` 与 `learning_record_id/progress_id` 不得混用 | [Content 域](../domains/content/index.md)、[Domain Map](../architecture/domains/)、[设计台账](design-register.md) D-149 |
 | 显式保留 | 原有已定稿业务模型继续有效；除 Domain ownership / Schema 名 / 跨域 logical reference 调整外，不增加、删除或重新设计业务表；全域其他已定稿 Domain 保持不变 | [设计台账](design-register.md) D-147、[未决事项](open-questions.md) |
 
 ## "全局分区最终收口修订"文档维护会话
@@ -200,10 +200,10 @@ last_updated: 2026-09-02
 | 修订项 | 已覆盖内容 | 文档 |
 | --- | --- | --- |
 | Content/Learning 逐表归属（D-150） | 原 Learning 43 张必建表逐表裁决：`content.*` 31 张 / `learning.*` 10 张 / `pronunciation_audios`+`tts_jobs` 由 Audio Production 取代；两份权威清单冻结 | [Content 数据库](../domains/content/database.md)、[Learning 数据库](../domains/learning/database.md) |
-| Translation ownership（D-151） | canonical 教学翻译 → `content.translations`；用户即时翻译请求 → `learning.translation_requests` | [Content 数据库](../domains/content/database.md)、[Learning 数据库](../domains/learning/database.md)、[Domain Map](../architecture/domain-map.md) |
+| Translation ownership（D-151） | canonical 教学翻译 → `content.translations`；用户即时翻译请求 → `learning.translation_requests` | [Content 数据库](../domains/content/database.md)、[Learning 数据库](../domains/learning/database.md)、[Domain Map](../architecture/domains/) |
 | Audio Asset 边界（D-152） | 物理文件事实唯一 canonical owner 为 Media/Asset Infrastructure；`audio_asset_versions` 只存 `asset_id` logical UUID，不自持存储元数据（取代 D-146 待裁决状态） | [Audio 数据库](../domains/audio/database.md)、[ADR-020](../adr/ADR-020-audio-production-domain.md) |
 | Operations ID 统一（D-153） | Operator/Role/AuditLog `id` 统一 `uuid`；`auth_subject_id` 为 Identity UUID logical reference（UNIQUE、无跨域 FK）；Audio 等域 operator 引用类型一致；无 VARCHAR/UUID 双契约 | [Operations 数据库](../domains/operations/database.md)、[ADR-019](../adr/ADR-019-operations-backoffice-control-plane.md) |
-| 全站口径统一 | 11 个业务 Domain / 11 个 Schema；Community 并入 Social；Social 19 表；Chat 7 表；Platform 6 表；多态 logical reference 规范（域内禁滥用 `type+id`、跨域多态允许三元组且 ID 为 UUID）；依赖表达 `Learning → Identity`、`Learning → Content`；架构层/ADR/首页/导航/治理文档同步修订 | [Domain Map](../architecture/domain-map.md)、[数据库规范](../architecture/database.md)、[总体架构](../architecture/overview.md)、[ADR-001](../adr/ADR-001-modular-monolith-and-domain-schemas.md)、[ADR-021](../adr/ADR-021-content-and-learning-domain-split.md) |
+| 全站口径统一 | 11 个业务 Domain / 11 个 Schema；Community 并入 Social；Social 19 表；Chat 7 表；Platform 6 表；多态 logical reference 规范（域内禁滥用 `type+id`、跨域多态允许三元组且 ID 为 UUID）；依赖表达 `Learning → Identity`、`Learning → Content`；架构层/ADR/首页/导航/治理文档同步修订 | [Domain Map](../architecture/domains/)、[数据库规范](../architecture/data/postgresql.md)、[架构总览](../architecture/)、[ADR-001](../adr/ADR-001-modular-monolith-and-domain-schemas.md)、[ADR-021](../adr/ADR-021-content-and-learning-domain-split.md) |
 
 ## “审核分区问题”会话（ 全量开发总计划）
 

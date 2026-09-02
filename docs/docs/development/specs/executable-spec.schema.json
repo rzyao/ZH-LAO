@@ -1,4 +1,5 @@
 {
+  "$comment": "SUPERSEDED (Stage 6, 2026-09-02) by GitHub Spec Kit — see .specify/memory/constitution.md and docs/docs/domains/content/. This schema is archived historical; not a Source of Truth. Do NOT use it to validate new specs.",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "ZH-LAO Executable Spec artifacts",
   "description": "Scope-aware normative field contract. Deep structural and traceability validation is implemented by scripts/check_executable_specs.py.",

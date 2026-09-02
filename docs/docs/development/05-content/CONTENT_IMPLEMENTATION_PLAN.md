@@ -9,9 +9,16 @@ last_updated: 2026-09-02
 repository_commit_audited: 007d6ad705a9afcc4fefb03442e371b4dec07fad
 implementation_dependency: OPERATIONS_GATE
 lifecycle: historical
+derived_from: domains/content/database.md
 ---
 
+
 # ZH-LAO  — Content Implementation Plan
+
+⚠️ **派生文档（DERIVED）** — 规范归属（canonical owner）：`domains/content/database.md`。本文件为实现轨（implementation-track）文档，**不是产品/领域事实权威**（Constitution 原则 II）。产品/领域事实以规范归属文档为准，请勿在此重复或自行修改事实。
+
+
+
 
 > 本文件只冻结未来执行顺序。本次 Design 会话不得执行任何 CNT implementation task。
 

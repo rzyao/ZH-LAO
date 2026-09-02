@@ -8,9 +8,16 @@ implementation_started: false
 last_updated: 2026-09-02
 repository_commit_audited: 007d6ad705a9afcc4fefb03442e371b4dec07fad
 lifecycle: historical
+derived_from: domains/content/index.md
 ---
 
+
 # ZH-LAO  — Content Use Cases
+
+⚠️ **派生文档（DERIVED）** — 规范归属（canonical owner）：`domains/content/index.md`。本文件为实现轨（implementation-track）文档，**不是产品/领域事实权威**（Constitution 原则 II）。产品/领域事实以规范归属文档为准，请勿在此重复或自行修改事实。
+
+
+
 
 > Use Cases 从产品能力推导，不是一表一 CRUD。Runtime 与 Admin/Authoring 明确分离；用户学习事实全部留在 Learning。
 

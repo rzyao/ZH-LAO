@@ -1,9 +1,11 @@
 ---
-status: active
+status: superseded
 last_updated: 2026-08-31
 ---
 
 # Implementation Blueprint Template
+
+> ⚠️ **SUPERSEDED** — 本模板能力已由 Spec Kit 的 `plan-template.md`（含 `## Locked Decisions` 与 `## Authority Snapshot` 段）取代。仅保留为历史参考。
 
 Implementation Blueprint 是 **derived implementation guidance**：把已经通过 Design Gate 的产品/Domain/Contract 设计编译成接近伪代码的代码级实施说明。它帮助实现 Worker 降低重新做架构推理的需求，但永远不能覆盖 frozen migration、ADR、权威 Markdown、Public Contract 或 canonical spec。
 

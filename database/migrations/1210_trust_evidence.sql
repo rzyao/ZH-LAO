@@ -1,3 +1,4 @@
+-- Source: docs/docs/domains/trust/database.md
 -- V2 blocker resolution: Trust evidence uses an Asset logical UUID for files.
 -- storage_key and all other physical storage facts remain owned by
 -- infrastructure.assets.

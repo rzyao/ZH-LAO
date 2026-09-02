@@ -21,7 +21,7 @@ source_share_url: https://chatgpt.com/share/6a937088-e570-83e9-912e-11cc3de27eba
 
 判断标准：**零用户时依然存在的数据 → Content；用户开始学习后才产生的数据 → Learning。**
 
-## Content 最终表清单（31 张，frozen）
+## Content 最终表清单（32 张，frozen）
 
 ### Knowledge（17 张）
 
@@ -65,6 +65,26 @@ source_share_url: https://chatgpt.com/share/6a937088-e570-83e9-912e-11cc3de27eba
 | 24 | `lessons` | Lesson 定义与发布状态 |
 | 25 | `lesson_sections` | Lesson 分节 |
 | 26 | `lesson_items` | Lesson 内容项 |
+
+### Revision（1 张）
+
+`content_revisions` 为 Content 结构化版本历史（迁移 `1240_content_revision.sql` 冻结；多态 `entity_id` 为 Content logical/public UUID，无物理 FK）：
+
+| 字段 | 类型 | Null | 默认/约束 | 说明 |
+| --- | --- | --- | --- | --- |
+| `id` | `bigint generated always as identity` | 否 | PK | 版本 ID |
+| `revision_public_id` | `uuid` | 否 | UNIQUE | 版本对外 ID |
+| `entity_type` | `varchar(32)` | 否 | CHECK `content/course/lesson/exercise/question/translation` | 版本所属实体类型（多态） |
+| `entity_id` | `uuid` | 否 | — | 实体 Content logical/public UUID |
+| `revision_number` | `integer` | 否 | CHECK `> 0` | 版本号 |
+| `status` | `varchar(16)` | 否 | DEFAULT `draft`; CHECK `draft/published/superseded` | 版本状态 |
+| `snapshot` | `jsonb` | 否 | CHECK `jsonb_typeof=object` | 版本快照 |
+| `created_by_operator_id` | `uuid` | 是 | — | 创建操作人 |
+| `created_at` | `timestamptz` | 否 | DEFAULT `now()` | 创建时间 |
+| `published_at` | `timestamptz` | 是 | 与 `status='published'` 强一致 | 发布时间 |
+| `supersedes_revision_id` | `bigint` | 是 | FK → `content.content_revisions(id)` ON DELETE RESTRICT | 被本版本取代的上一版 |
+
+约束：`UNIQUE(entity_type, entity_id, revision_number)`；`(status='published' AND published_at IS NOT NULL) OR (status<>'published' AND published_at IS NULL)`。索引：`(entity_type,entity_id) WHERE status='published'`、`(entity_type,entity_id,revision_number DESC)`、`(status,published_at DESC)`。
 
 ### Practice 定义（5 张）
 

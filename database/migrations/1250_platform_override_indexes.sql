@@ -1,3 +1,4 @@
+-- Source: docs/docs/domains/platform/database.md
 -- V2 blocker resolution: Platform Feature Flag Overrides uniqueness and index correction.
 -- Corrects physical baseline to match frozen docs/docs/domains/platform/database.md.
 -- Enforces partial UNIQUE constraints on normalized scopes and a region lookup index.

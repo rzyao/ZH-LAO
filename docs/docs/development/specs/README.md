@@ -1,9 +1,19 @@
 ---
-status: active
+status: superseded
 last_updated: 2026-09-02
 ---
 
 # Executable Spec Registry
+
+> ⚠️ **SUPERSEDED** — 本 Registry 随 Executable Spec System 一起被 Spec Kit 取代（见 `.specify/memory/constitution.md`）。工件保留为历史参考，不再作为 Feature Spec 事实源。
+
+## Retirement（Stage 6 — 2026-09-02）
+
+- **Source of Truth = NO。** 本目录所有工件（`index.json`、`domains/content.spec.json`、`executable-spec.schema.json`）已标记 `_status: superseded` / `_source_of_truth: false`，仅作历史归档。
+- **Canonical authority**：`.specify/memory/constitution.md` + `docs/docs/domains/content/*`。未来真正执行 `/speckit.specify` 时，Spec Kit 的 `FR-/SC-/US-` 根据这些 canonical authority 生成；**不会**把旧 `CNT-*` ID 机械转换成 `FR-*`。
+- **55 个 CNT-\* Requirement 已全部分类**（见 `docs/audit/STAGE6_LEGACY_SPEC_RETIREMENT.md`）：产品事实已覆盖于 canonical（仅作 historical ID），纯实现约束单列，1 个 `AUTHORITY_GAP`（Content 8 个精确 permission keys），0 个 `SPEC_CONFLICT` / `OBSOLETE`。
+- **Checker 已下线**：`scripts/check_executable_specs.py` 已从 CI（`foundation.yml`）与 `docs/package.json` 的 `spec:check` 移除；脚本文件保留但不作为当前 Spec Gate。仓库当前 **NO_ACTIVE_SPEC_ANALYZE_CI**。
+- 历史文档引用（audit 报告等）保留为 evidence，但均明确标记 `superseded`。
 
 本目录承载 [Executable Spec System](../SPEC_SYSTEM.md) 的 machine-readable 工件。
 

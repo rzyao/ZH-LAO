@@ -1,3 +1,4 @@
+-- Source: docs/docs/domains/platform/database.md
 -- V2 blocker resolution: Media/Asset Infrastructure.
 -- This is infrastructure, not a business Domain. Business schemas keep only
 -- asset_id UUID logical references and never reference this table physically.

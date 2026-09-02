@@ -10,9 +10,16 @@ repository_commit_audited: f5b3f3f41468036ecbd1544c6a9b3c5fbf9668db
 database_authority:
   - database/migrations/0500_learning.sql
 lifecycle: historical
+derived_from: domains/learning/index.md
 ---
 
+
 # ZH-LAO  — Learning Product Semantics
+
+⚠️ **派生文档（DERIVED）** — 规范归属（canonical owner）：`domains/learning/index.md`。本文件为实现轨（implementation-track）文档，**不是产品/领域事实权威**（Constitution 原则 II）。产品/领域事实以规范归属文档为准，请勿在此重复或自行修改事实。
+
+
+
 
 > Learning 只拥有“某个用户开始学习后产生的状态与事实”。Content 继续拥有课程、Lesson、知识、练习定义、答案真相与 Revision；Identity 继续拥有用户身份。本文适配 frozen `0500_learning.sql`，不新增表、不修改 migration。
 

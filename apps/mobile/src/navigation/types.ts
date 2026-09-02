@@ -19,6 +19,8 @@ export type RootStackParamList = {
   Theme: undefined;
   LanguageSetting: undefined;
   LanguageSelect: { returnTo?: 'settings' | 'home' };
+  Login: { returnTo?: string } | undefined;
+  Otp: { phone: string; purpose: 'login' | 'bind_phone' | 'change_phone' };
 
   /**
    * Neutral Foundation route demonstrating the UUID route contract.

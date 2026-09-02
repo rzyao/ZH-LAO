@@ -7,9 +7,16 @@ entry_gate: OPERATIONS_DESIGN_GATE = PASS
 execution_started: false
 last_updated: 2026-09-02
 lifecycle: historical
+derived_from: domains/operations/index.md
 ---
 
+
 # ZH-LAO  — Operations Execution Brief
+
+⚠️ **派生文档（DERIVED）** — 规范归属（canonical owner）：`domains/operations/index.md`。本文件为实现轨（implementation-track）文档，**不是产品/领域事实权威**（Constitution 原则 II）。产品/领域事实以规范归属文档为准，请勿在此重复或自行修改事实。
+
+
+
 
 > 本文件是 **Operations Domain 执行开发会话的入口文档**。
 >

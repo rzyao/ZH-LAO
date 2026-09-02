@@ -1,3 +1,4 @@
+-- Source: docs/docs/domains/content/database.md
 -- V2 blocker resolution: one structured Content revision history model.
 -- entity_id is a Content logical/public UUID; it is intentionally polymorphic
 -- and therefore has no physical FK.

@@ -2,7 +2,7 @@
   "postgresMajor": 18,
   "extensions": ["pg_trgm"],
   "schemas": {
-    "identity": ["auth_identities", "basic_profiles", "devices", "learning_profiles", "otp_challenges", "sessions", "users"],
+    "identity": ["admin_credentials", "auth_identities", "basic_profiles", "devices", "learning_profiles", "otp_challenges", "sessions", "users"],
     "content": [
       "answer_rules", "content_equivalents", "content_relations", "content_tags", "contents",
       "courses", "examples", "exercises", "lesson_items", "lesson_sections", "lessons",

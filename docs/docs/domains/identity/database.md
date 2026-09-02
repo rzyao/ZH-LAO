@@ -1,24 +1,24 @@
 ---
 status: frozen
-last_updated: 2026-08-30
+last_updated: 2026-09-02
 schema: identity
 ---
 
 # Identity 字段级数据库规格
 
-状态说明：核心四表在会话中已给出 SQL 级定义；辅助三表已确认字段，但没有决定的类型、默认值和数据库约束逐项标为 `designing`。
+状态说明：核心四表（`users`/`auth_identities`/`basic_profiles`/`learning_profiles`）的 SQL 级定义已冻结于迁移 `0100_identity.sql`；辅助四表（`otp_challenges`/`sessions`/`devices`/`admin_credentials`）的物理契约已冻结于迁移 `1220_identity_auth_runtime.sql` 与 `1260_admin_credentials.sql`。本页所有字段类型、默认值与约束以冻结迁移为准（Constitution 物理事实优先级链；`admin_credentials` 此前缺失，Stage 5 三方漂移修复补齐）。
 
 ## users — frozen
 
 | 字段 | 类型 | Null | 默认/约束 | 说明 |
 | --- | --- | --- | --- | --- |
 | `id` | `bigint generated always as identity` | 否 | PK | 内部 User ID |
-| `public_id` | `varchar(32)` | 否 | UNIQUE | 对外 User ID；生成格式待定 |
+| `public_id` | `uuid` | 否 | UNIQUE | 对外 User ID（应用层生成、不可变）；类型已冻结于 `0100_identity.sql` |
 | `status` | `varchar(32)` | 否 | DEFAULT `active`; CHECK `active/disabled/closed` | 只表达账户状态 |
 | `registered_at` | `timestamptz` | 否 | DEFAULT `now()` | 注册时间 |
 | `last_active_at` | `timestamptz` | 是 | — | 最近活跃时间 |
 | `created_at` | `timestamptz` | 否 | DEFAULT `now()` | 创建时间 |
-| `updated_at` | `timestamptz` | 否 | DEFAULT `now()` | 更新时间；自动更新机制待实现阶段决定 |
+| `updated_at` | `timestamptz` | 否 | DEFAULT `now()` | 更新时间；列已冻结，维护机制（trigger/应用层）由实现阶段决定 |
 
 唯一索引由 `public_id UNIQUE` 产生。早期的 `suspended` 状态已被后续 restriction 设计取代。
 
@@ -35,7 +35,7 @@ schema: identity
 | `created_at` | `timestamptz` | 否 | DEFAULT `now()` | 创建时间 |
 | `updated_at` | `timestamptz` | 否 | DEFAULT `now()` | 更新时间 |
 
-约束：`UNIQUE(provider, provider_subject)`。是否额外索引 `user_id` 由 migration 设计阶段决定。
+约束：`UNIQUE(provider, provider_subject)`。迁移 `0100_identity.sql` 已建立 `idx_auth_identities_user_id` 索引。
 
 ## basic_profiles — frozen
 
@@ -47,7 +47,7 @@ schema: identity
 | `birth_date` | `date` | 是 | — | 出生日期 |
 | `country_code` | `char(2)` | 是 | — | 国家代码 |
 | `region_code` | `varchar(32)` | 是 | — | 地区代码 |
-| `avatar_media_id` | `bigint` | 是 | FK 目标尚未冻结 | 基础头像媒体 |
+| `avatar_media_id` | `uuid` | 是 | Media/Asset logical UUID 引用（无跨域物理 FK，D-152）；类型已冻结于 `0100_identity.sql` | 基础头像媒体 |
 | `created_at` | `timestamptz` | 否 | DEFAULT `now()` | 创建时间 |
 | `updated_at` | `timestamptz` | 否 | DEFAULT `now()` | 更新时间 |
 
@@ -64,52 +64,76 @@ schema: identity
 
 CHECK 只允许 `(native_language='lo' AND learning_language='zh')` 或 `(native_language='zh' AND learning_language='lo')`。当前不提供切换操作。
 
-## otp_challenges — frozen table / designing types
+## otp_challenges — frozen（迁移 `1220_identity_auth_runtime.sql`）
 
-| 字段 | 已确认语义 | 类型与约束状态 |
-| --- | --- | --- |
-| `id` | Challenge ID | `bigint identity PK`，由全局规范确定 |
-| `phone_number` | E.164 手机号 | 类型、长度、索引 `designing` |
-| `purpose` | `login/bind_phone/change_phone` | 候选值已确认；类型与 CHECK `designing` |
-| `code_hash` | 验证码 hash，禁止明文 | 类型 `designing` |
-| `expires_at` | 到期时间 | `timestamptz` 由全局时间规范确定 |
-| `attempt_count` | 已尝试次数 | 类型、默认值、上限 `designing` |
-| `consumed_at` | 成功消费时间 | 可空 `timestamptz` |
-| `created_at` | 创建时间 | `timestamptz`；默认值尚未在该表 SQL 中冻结 |
+| 字段 | 类型 | Null | 默认/约束 | 说明 |
+| --- | --- | --- | --- | --- |
+| `id` | `bigint generated always as identity` | 否 | PK | Challenge ID |
+| `user_id` | `bigint` | 是 | FK → `identity.users(id)` ON DELETE RESTRICT | 关联用户（可空） |
+| `phone_number` | `varchar(32)` | 否 | — | E.164 手机号 |
+| `purpose` | `varchar(32)` | 否 | CHECK `login/bind_phone/change_phone` | 用途 |
+| `code_hash` | `varchar(255)` | 否 | — | 验证码 hash，禁止明文 |
+| `status` | `varchar(16)` | 否 | DEFAULT `pending`; CHECK `pending/verified/expired/cancelled/locked` | 状态；`verified` 与 `verified_at` 强一致（见时间约束） |
+| `attempt_count` | `integer` | 否 | DEFAULT `0`; CHECK `>= 0` | 已尝试次数 |
+| `max_attempts` | `smallint` | 否 | DEFAULT `5`; CHECK `> 0` | 最大尝试数 |
+| `expires_at` | `timestamptz` | 否 | — | 到期时间 |
+| `verified_at` | `timestamptz` | 是 | — | 验证成功时间；替代旧 `consumed_at` 列 |
+| `created_at` | `timestamptz` | 否 | DEFAULT `now()` | 创建时间 |
 
-发送频率、最大尝试数、锁定策略、清理周期和索引尚未决定。
+约束：`CHECK (attempt_count <= max_attempts)`；时间约束 `(status='verified' AND verified_at IS NOT NULL) OR (status<>'verified' AND verified_at IS NULL)`。索引：`(phone_number,purpose,created_at DESC)`、`(expires_at) WHERE status='pending'`、`(status,created_at DESC)`。
 
-## sessions — frozen table / designing types
+发送频率、锁定策略、清理周期由实现阶段决定（列与约束已冻结）。
 
-| 字段 | 已确认语义 | 类型与约束状态 |
-| --- | --- | --- |
-| `id` | Session ID | `bigint identity PK` |
-| `user_id` | 所属 User | `bigint FK → users` |
-| `device_id` | 关联 Device | `bigint FK → devices`；是否可空尚未明确 |
-| `refresh_token_hash` | 可撤销 Refresh Token hash | 类型、唯一性、轮换规则 `designing` |
-| `status` | Session 状态 | 值域、类型、默认值 `designing` |
-| `expires_at` | 到期时间 | `timestamptz` |
-| `last_active_at` | 最近活跃 | 可空 `timestamptz` |
-| `created_at` | 创建时间 | `timestamptz` |
-| `revoked_at` | 撤销时间 | 可空 `timestamptz` |
+## sessions — frozen（迁移 `1220_identity_auth_runtime.sql`）
 
-本表必须支持单设备退出、全部设备退出、账户停用后强制失效、设备查询和 Refresh Token 撤销。
+| 字段 | 类型 | Null | 默认/约束 | 说明 |
+| --- | --- | --- | --- | --- |
+| `id` | `bigint generated always as identity` | 否 | PK | Session ID |
+| `user_id` | `bigint` | 否 | FK → `identity.users(id)` ON DELETE RESTRICT | 所属 User |
+| `device_id` | `bigint` | 是 | FK → `identity.devices(id)` ON DELETE RESTRICT | 关联 Device（可空） |
+| `refresh_token_hash` | `varchar(255)` | 否 | UNIQUE | 可撤销 Refresh Token hash |
+| `status` | `varchar(16)` | 否 | DEFAULT `active`; CHECK `active/revoked/expired` | Session 状态 |
+| `expires_at` | `timestamptz` | 否 | — | 到期时间 |
+| `last_active_at` | `timestamptz` | 是 | — | 最近活跃 |
+| `created_at` | `timestamptz` | 否 | DEFAULT `now()` | 创建时间 |
+| `revoked_at` | `timestamptz` | 是 | — | 撤销时间 |
+| `revocation_reason` | `varchar(64)` | 是 | 与 `status='revoked'` 强一致 | 撤销原因 |
 
-## devices — frozen table / designing types
+约束：`(status='revoked' AND revoked_at IS NOT NULL AND revocation_reason IS NOT NULL) OR (status<>'revoked' AND revoked_at IS NULL AND revocation_reason IS NULL)`。索引：`(user_id,status,created_at DESC)`、`(device_id,created_at DESC) WHERE device_id IS NOT NULL`、`(expires_at) WHERE status='active'`。
 
-| 字段 | 已确认语义 | 类型与约束状态 |
-| --- | --- | --- |
-| `id` | Device ID | `bigint identity PK` |
-| `user_id` | 所属 User | `bigint FK → users` |
-| `installation_id` | 客户端安装标识 | 类型、唯一范围 `designing` |
-| `platform` | 客户端平台；首期 Android | 类型、CHECK `designing` |
-| `device_name` | 设备显示名 | 类型与长度 `designing` |
-| `app_version` | App 版本 | 类型与长度 `designing` |
-| `push_token` | 推送 Token | 类型、唯一性、轮换 `designing` |
-| `last_seen_at` | 最近出现时间 | 可空 `timestamptz` |
-| `created_at` | 创建时间 | `timestamptz` |
+本表支持单设备退出、全部设备退出、账户停用后强制失效、设备查询和 Refresh Token 撤销（列与约束已冻结）。
 
-用途包括推送、登录安全、Session 关联、多设备管理、风控和版本统计。
+## devices — frozen（迁移 `1220_identity_auth_runtime.sql`）
+
+| 字段 | 类型 | Null | 默认/约束 | 说明 |
+| --- | --- | --- | --- | --- |
+| `id` | `bigint generated always as identity` | 否 | PK | Device ID |
+| `user_id` | `bigint` | 否 | FK → `identity.users(id)` ON DELETE RESTRICT | 所属 User |
+| `installation_id` | `uuid` | 否 | UNIQUE | 客户端安装标识 |
+| `platform` | `varchar(16)` | 否 | CHECK `android/ios` | 客户端平台（首期 Android） |
+| `device_name` | `varchar(128)` | 是 | — | 设备显示名 |
+| `app_version` | `varchar(32)` | 是 | — | App 版本 |
+| `push_token` | `text` | 是 | UNIQUE WHERE `push_token IS NOT NULL AND revoked_at IS NULL` | 推送 Token |
+| `first_seen_at` | `timestamptz` | 否 | DEFAULT `now()` | 首次出现时间 |
+| `last_seen_at` | `timestamptz` | 是 | — | 最近出现时间 |
+| `revoked_at` | `timestamptz` | 是 | — | 撤销时间 |
+| `created_at` | `timestamptz` | 否 | DEFAULT `now()` | 创建时间 |
+| `updated_at` | `timestamptz` | 否 | DEFAULT `now()` | 更新时间 |
+
+索引：`(user_id, last_seen_at DESC)`、`(push_token) WHERE push_token IS NOT NULL AND revoked_at IS NULL`。用途包括推送、登录安全、Session 关联、多设备管理、风控和版本统计（列与约束已冻结）。
+
+## admin_credentials — frozen（迁移 `1260_admin_credentials.sql`）
+
+后台登录凭据表；密码以 scrypt hash 存储，明文密码永不落库（Stage 1/5 三方漂移修复补齐，此前 `domains/` 未收录）。
+
+| 字段 | 类型 | Null | 默认/约束 | 说明 |
+| --- | --- | --- | --- | --- |
+| `id` | `bigint generated always as identity` | 否 | PK | 内部 ID |
+| `user_id` | `bigint` | 否 | UNIQUE; FK → `identity.users(id)` ON DELETE RESTRICT | 关联后台用户 |
+| `username` | `varchar(100)` | 否 | UNIQUE; CHECK `btrim(username) <> ''` | 登录用户名 |
+| `password_hash` | `varchar(255)` | 否 | CHECK `btrim(password_hash) <> ''` | scrypt 密码 hash |
+| `created_at` | `timestamptz` | 否 | DEFAULT `now()` | 创建时间 |
+| `updated_at` | `timestamptz` | 否 | DEFAULT `now()` | 更新时间 |
 
 ## 关系总览
 
@@ -117,7 +141,8 @@ CHECK 只允许 `(native_language='lo' AND learning_language='zh')` 或 `(native
 users 1 ─ * auth_identities
 users 1 ─ 1 basic_profiles
 users 1 ─ 1 learning_profiles
+users 1 ─ 1 admin_credentials
 users 1 ─ * devices
 users 1 ─ * sessions
-devices 1 ─ * sessions（device_id 可空性 designing）
+devices 1 ─ * sessions（device_id 可空，已冻结）
 ```

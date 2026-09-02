@@ -10,9 +10,11 @@ database_authority:
 exit_gate: IDENTITY_GATE
 authority: docs/docs/development/MASTER_DEVELOPMENT_PLAN.md
 lifecycle: historical
+derived_from: domains/identity/database.md
 ---
-
 # ZH-LAO  — IDENTITY IMPLEMENTATION PLAN
+
+⚠️ **派生文档（DERIVED）** — 规范归属（canonical owner）：`domains/identity/database.md`。本文件为实现轨（implementation-track）文档，**不是产品/领域事实权威**（Constitution 原则 II）。产品/领域事实以规范归属文档为准，请勿在此重复或自行修改事实。
 
 > 目标路径：`docs/docs/development/02-identity/IDENTITY_IMPLEMENTATION_PLAN.md`
 >

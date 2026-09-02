@@ -6,6 +6,8 @@ import { NotFoundScreen } from '../screens/NotFoundScreen';
 import { ThemeScreen } from '../screens/settings/ThemeScreen';
 import { LanguageSettingScreen } from '../screens/settings/LanguageSettingScreen';
 import { LanguageSelectScreen } from '../screens/settings/LanguageSelectScreen';
+import { LoginScreen } from '../screens/auth/LoginScreen';
+import { OtpScreen } from '../screens/auth/OtpScreen';
 import { useTheme } from '../theme/ThemeProvider';
 
 import { linking } from './linking';
@@ -38,6 +40,8 @@ export function RootNavigator({ onReady }: RootNavigatorProps) {
         }}
       >
         <Stack.Screen name="MainTabs" component={TabNavigator} />
+        <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen name="Otp" component={OtpScreen} />
         <Stack.Screen name="Theme" component={ThemeScreen} />
         <Stack.Screen name="LanguageSetting" component={LanguageSettingScreen} />
         <Stack.Screen

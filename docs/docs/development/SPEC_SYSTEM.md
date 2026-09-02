@@ -1,9 +1,11 @@
 ---
-status: active
+status: superseded
 last_updated: 2026-08-31
 ---
 
 # ZH-LAO Executable Spec System
+
+> ⚠️ **SUPERSEDED** — 本自建规范已被 **GitHub Spec Kit** 取代（项目唯一 Feature Spec 工作流，见 `.specify/memory/constitution.md` 与 `docs/AGENTS.md`）。本文件仅保留为历史参考，**不再作为 Feature Spec 工作流**。新特性请使用 `/speckit.specify`。
 
 本规范定义 ZH-LAO 的 **Spec-Driven AI Development** 协议。目标不是增加一层“说明文档”，而是把已经裁决的产品 / Domain / Feature / System 事实编译成稳定、可检查、可追踪的 machine-readable specification，再由 Implementation Blueprint 把实现自由度压缩到局部编码层。
 

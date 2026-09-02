@@ -1,5 +1,8 @@
 {
   "$schema": "./executable-spec.schema.json",
+  "_status": "superseded",
+  "_source_of_truth": false,
+  "_note": "ZH-LAO Executable Spec System retired (Stage 6). Not a Source of Truth. Canonical = .specify/memory/constitution.md + docs/docs/domains/content/.",
   "schema_version": "1.0",
   "adopted_domains": []
 }

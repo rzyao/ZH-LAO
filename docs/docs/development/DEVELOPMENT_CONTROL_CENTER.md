@@ -20,7 +20,7 @@ last_updated: 2026-09-02
 | Mobile 页面如何组织 | [移动端开发](mobile/) |
 | 详细证据和历史 | [开发进度记录](DEVELOPMENT_PROGRESS.md) |
 | 新会话如何恢复角色、Task、Claim | [Workflow Control Plane](workflow/) |
-| Spec / Blueprint 规则 | [Executable Spec System](SPEC_SYSTEM.md) |
+| Spec 规则 | [Spec Kit（GitHub Spec Kit，唯一 Feature Spec 工作流）](../../../.specify/memory/constitution.md) |
 
 动态调度只在 `workflow/NEXT_ACTIONS.md` 维护。
 
@@ -29,13 +29,12 @@ last_updated: 2026-09-02
 ### 产品 / 架构 / 领域事实
 
 ```text
-Frozen Physical Migration（涉及物理 DB 时）
+Constitution（本文件，非协商，见 .specify/memory/constitution.md）
+→ Frozen Physical Migration（涉及物理 DB 时）
 → Accepted ADR / Frozen Architecture Contract
 → Canonical Product / Domain Docs
 → Upstream Frozen Public Contracts
-→ Canonical Executable Spec（已采用时）
-→ Execution Brief
-→ Implementation Blueprint
+→ Spec Kit spec.md / plan.md / tasks.md（constitutional 工作流产物，权威低于其输入 authority）
 ```
 
 Feature Page 是端到端能力的人工维护交付地图；它不取代 Domain / Contract authority，也不维护固定交付状态矩阵。`FEATURE_PAGE_INDEX.json` 只派生 Feature 清单、领域归属、页面关联和证据线索。

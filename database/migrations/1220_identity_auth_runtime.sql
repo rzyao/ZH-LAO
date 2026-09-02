@@ -1,3 +1,4 @@
+-- Source: docs/docs/domains/identity/database.md
 -- V2 blocker resolution: Identity OTP, revocable refresh sessions, and devices.
 -- Raw OTPs and raw tokens are never stored; only a hash is persisted.
 

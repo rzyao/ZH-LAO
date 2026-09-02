@@ -6,9 +6,16 @@ artifact: execution_brief
 entry_gate: CONTENT_GATE = PASS
 last_updated: 2026-09-02
 lifecycle: historical
+derived_from: domains/content/index.md
 ---
 
+
 # ZH-LAO  — Content Admin Execution Brief
+
+⚠️ **派生文档（DERIVED）** — 规范归属（canonical owner）：`domains/content/index.md`。本文件为实现轨（implementation-track）文档，**不是产品/领域事实权威**（Constitution 原则 II）。产品/领域事实以规范归属文档为准，请勿在此重复或自行修改事实。
+
+
+
 
 > 本文件是 Content Admin 集成执行会话入口。执行 AI 必须先使用 GitHub 连接器读取远程 `main` 的真实 Gate、API、权限与 Admin 代码，再开始工作。
 >

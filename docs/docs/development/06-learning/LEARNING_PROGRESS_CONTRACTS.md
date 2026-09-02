@@ -7,9 +7,16 @@ design_only: true
 implementation_started: false
 last_updated: 2026-09-02
 lifecycle: historical
+derived_from: domains/learning/progress.md
 ---
 
+
 # ZH-LAO  — Learning Progress / Mastery / Review / Practice Contracts
+
+⚠️ **派生文档（DERIVED）** — 规范归属（canonical owner）：`domains/learning/progress.md`。本文件为实现轨（implementation-track）文档，**不是产品/领域事实权威**（Constitution 原则 II）。产品/领域事实以规范归属文档为准，请勿在此重复或自行修改事实。
+
+
+
 
 > Canonical current-state、attempt/scoring、transaction/concurrency contract。所有规则适配 frozen `0500_learning.sql`；不得用 generic JSON/hidden metadata伪造缺失字段。
 

@@ -60,3 +60,14 @@
 5. 检查相对链接、front matter、占位符、状态一致性、重复事实和来源覆盖。
 
 文档维护会话不得自行补造主会话没有决定的字段或重大业务规则；应精确标到字段级 `designing`。
+
+## Spec Kit 操作规程（Feature Spec 唯一工作流）
+
+ZH-LAO 的 Feature Spec 工作流**唯一**采用 GitHub **Spec Kit**（见 `.specify/memory/constitution.md`）。
+自建 Executable Spec System（`SPEC_SYSTEM.md`）已 `superseded`，仅作历史参考。
+
+1. **`/speckit.specify` 前必须读取相关权威文档**：先定位与本特性相关的 `docs/domains/<domain>/`、`docs/adr/`、`docs/architecture/`、frozen Public Contract，作为 spec 的事实输入；不得从空上下文生成需求。
+2. **`/speckit.plan` 前必须检查现有代码 / schema / API / contracts / architecture**：先扫描 `apps/**` 现有实现、`database/migrations/`、`OpenAPI`/`Zod`、frozen contract，识别已有行为与契约；plan 只描述差异与新增，不重复已知事实。
+3. **现有代码是工程现实，不是产品权威**（Constitution 原则 II）：代码与权威文档一致时照文档写；代码与文档冲突时按原则 VIII STOP，不得用「代码更合理」覆盖 authority。
+4. **产品需求冲突必须 STOP**（Constitution 原则 VIII）：出现 `SPEC_CONFLICT` / `IMPLEMENTATION_BLOCKER` / `REPOSITORY_DRIFT` 时停止并报告 exact sources + IDs，等待设计侧补齐；不得自行猜测或反向创造需求。
+5. **禁止 AI 猜测产品需求**：需求缺口由设计侧补齐，AI 不得替用户补造 Requirement 或改写 frozen migration / Public Contract 来消冲突。

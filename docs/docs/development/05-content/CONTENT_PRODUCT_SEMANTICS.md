@@ -14,9 +14,16 @@ depends_on:
   - ../04-operations/OPERATIONS_DESIGN_AUDIT.md
   - ../03-platform/PLATFORM_IMPLEMENTATION_REPORT.md
 lifecycle: historical
+derived_from: domains/content/index.md
 ---
 
+
 # ZH-LAO  — Content Product Semantics
+
+⚠️ **派生文档（DERIVED）** — 规范归属（canonical owner）：`domains/content/index.md`。本文件为实现轨（implementation-track）文档，**不是产品/领域事实权威**（Constitution 原则 II）。产品/领域事实以规范归属文档为准，请勿在此重复或自行修改事实。
+
+
+
 
 > 本文冻结 Content Domain V1 产品语义。设计必须适配 frozen database contract；不得从 31 张表机械生成 CRUD，不得修改 `0400_content.sql`，不得把 Learning / Audio / Asset / Operations 的 canonical state 搬进 Content。
 

@@ -7,9 +7,16 @@ design_only: true
 implementation_started: false
 last_updated: 2026-09-02
 lifecycle: historical
+derived_from: domains/learning/model.md
 ---
 
+
 # ZH-LAO  — Learning Use Cases
+
+⚠️ **派生文档（DERIVED）** — 规范归属（canonical owner）：`domains/learning/model.md`。本文件为实现轨（implementation-track）文档，**不是产品/领域事实权威**（Constitution 原则 II）。产品/领域事实以规范归属文档为准，请勿在此重复或自行修改事实。
+
+
+
 
 > Use Cases 从 learner journey 与用户事实推导，不是一表一 CRUD。Runtime全部 authenticated + user-owned；客户端不提交 `userId`。
 

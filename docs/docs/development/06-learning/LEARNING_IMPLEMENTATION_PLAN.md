@@ -7,9 +7,16 @@ design_only: true
 implementation_started: false
 last_updated: 2026-09-02
 lifecycle: historical
+derived_from: domains/learning/index.md
 ---
 
+
 # ZH-LAO  — Learning Implementation Plan
+
+⚠️ **派生文档（DERIVED）** — 规范归属（canonical owner）：`domains/learning/index.md`。本文件为实现轨（implementation-track）文档，**不是产品/领域事实权威**（Constitution 原则 II）。产品/领域事实以规范归属文档为准，请勿在此重复或自行修改事实。
+
+
+
 
 > 本计划只冻结未来 Learning Implementation 的执行顺序、依赖、文件边界与 Gate。**本设计任务不得执行以下 implementation tasks。**
 

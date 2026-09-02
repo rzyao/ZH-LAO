@@ -6,9 +6,16 @@ artifact: execution_brief
 entry_gate: PLATFORM_GATE = PASS
 last_updated: 2026-09-02
 lifecycle: historical
+derived_from: domains/platform/database.md
 ---
 
+
 # ZH-LAO  — Platform Admin Execution Brief
+
+⚠️ **派生文档（DERIVED）** — 规范归属（canonical owner）：`domains/platform/database.md`。本文件为实现轨（implementation-track）文档，**不是产品/领域事实权威**（Constitution 原则 II）。产品/领域事实以规范归属文档为准，请勿在此重复或自行修改事实。
+
+
+
 
 > 本文件是 Platform Admin 集成执行会话的入口文档。执行 AI 必须先使用 GitHub 连接器读取远程 `main` 的真实代码、API 和 Gate 状态，再开始工作。
 >

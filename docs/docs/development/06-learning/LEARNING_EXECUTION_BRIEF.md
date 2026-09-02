@@ -7,9 +7,16 @@ entry_gate: LEARNING_DESIGN_GATE = PASS
 implementation_started: false
 last_updated: 2026-09-02
 lifecycle: historical
+derived_from: domains/learning/index.md
 ---
 
+
 # ZH-LAO  — Learning Execution Brief
+
+⚠️ **派生文档（DERIVED）** — 规范归属（canonical owner）：`domains/learning/index.md`。本文件为实现轨（implementation-track）文档，**不是产品/领域事实权威**（Constitution 原则 II）。产品/领域事实以规范归属文档为准，请勿在此重复或自行修改事实。
+
+
+
 
 > 本文件是 Learning Domain 正式执行开发会话入口。
 >
