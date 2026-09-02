@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Audit the structure and metadata of all canonical Feature detail pages."""
+"""Audit the structure and metadata of canonical developer Feature pages."""
 from __future__ import annotations
 
 import re
@@ -9,18 +9,16 @@ import yaml
 
 
 ROOT = Path(__file__).resolve().parents[1]
-FEATURES_DIR = ROOT / "docs/docs/features"
+FEATURES_DIR = ROOT / "docs/docs/developer/features"
 PORTFOLIO_STATUSES = {"active", "deferred", "pending_decision"}
 DETAIL_HEADINGS = (
-    "## 1. 功能概览",
-    "## 2. 生命周期状态",
-    "## 3. 核心能力",
-    "## 4. 参与角色",
-    "## 5. 责任边界",
-    "## 6. 架构关系",
-    "# 7. 生命周期状态机（带权限约束）",
-    "## 8. 证据",
-    "## 9. Gate 状态",
+    ("用户价值与功能说明", "用户价值"),
+    ("使用者或受益者", "使用者与可观察流程"),
+    ("范围与边界", "范围与非范围"),
+    ("参与系统",),
+    ("分层交付状态",),
+    ("证据",),
+    ("限制、阻塞与下一步", "来源冲突、限制与下一步"),
 )
 AUDIO_FORBIDDEN = ("## 10.", "## 11.", "实现状态", "下一步")
 AUDIO_REQUIRED_CONTENT = (
@@ -60,9 +58,9 @@ def heading_exists(text: str, heading: str) -> bool:
 
 def check_common(path: Path, text: str, data: dict) -> list[str]:
     issues: list[str] = []
-    feature_id = path.parent.name
+    feature_id = path.stem
     if data.get("feature_id") != feature_id:
-        issues.append(f"feature_id must match directory name ({feature_id})")
+        issues.append(f"feature_id must match file name ({feature_id})")
     if not isinstance(data.get("title"), str) or not data["title"].strip():
         issues.append("title is required")
     if data.get("portfolio_status") not in PORTFOLIO_STATUSES:
@@ -79,8 +77,9 @@ def check_common(path: Path, text: str, data: dict) -> list[str]:
             issues.append(f"{key} must be a list of strings")
     if not re.search(r"^#\s+.+$", text, re.M):
         issues.append("missing page title heading")
-    if not heading_exists(text, "功能概览"):
-        issues.append("missing 功能概览 section")
+    for alternatives in DETAIL_HEADINGS:
+        if not any(heading_exists(text, heading) for heading in alternatives):
+            issues.append(f"missing one of {alternatives} sections")
     return issues
 
 
@@ -107,25 +106,7 @@ def check_audio(path: Path, text: str, data: dict) -> list[str]:
 
 def check_shape(path: Path, text: str, data: dict) -> tuple[str, list[str]]:
     issues: list[str] = []
-    if path.parent.name != "audio-production":
-        return ("canonical-feature" if not issues else "needs-refactor"), issues
-
-    for heading in DETAIL_HEADINGS:
-        if heading.endswith(" "):
-            pattern = rf"^{re.escape(heading)}.+$"
-            present = re.search(pattern, text, re.M) is not None
-        else:
-            present = re.search(rf"^{re.escape(heading)}$", text, re.M) is not None
-        if not present:
-            issues.append(f"missing audio-based template heading: {heading.rstrip()}")
-    optional_state_machines = [
-        int(match.group(1))
-        for match in re.finditer(r"^## 7\.(1|2|3|4)(?:\.|\s)", text, re.M)
-    ]
-    if optional_state_machines and optional_state_machines != list(range(1, max(optional_state_machines) + 1)):
-        issues.append("optional state machine subsections 7.1/7.2/7.3 must be sequential")
-    issues.extend(check_audio(path, text, data))
-    return ("audio-template" if not issues else "needs-refactor"), issues
+    return ("canonical-feature" if not issues else "needs-refactor"), issues
 
 
 def audit_page(path: Path) -> tuple[str, list[str]]:
@@ -139,7 +120,7 @@ def audit_page(path: Path) -> tuple[str, list[str]]:
 
 
 def main() -> int:
-    pages = sorted(FEATURES_DIR.glob("*/index.md"))
+    pages = sorted(path for path in FEATURES_DIR.glob("*.md") if path.name != "index.md")
     failures: list[str] = []
     shapes: dict[str, int] = {}
     for page in pages:

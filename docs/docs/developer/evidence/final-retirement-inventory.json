@@ -1,0 +1,22 @@
+{
+  "inventory_version": 1,
+  "generated_at": "2026-09-02",
+  "workspace_root": "C:\\project\\ZH-LAO",
+  "entries": [
+    {"path": "C:\\project\\ZH-LAO\\docs\\docs\\guide", "relative_path": "docs/docs/guide", "file_count": 3, "tracked": true, "action": "absorbed_then_deleted", "git_recoverable": true},
+    {"path": "C:\\project\\ZH-LAO\\docs\\audit", "relative_path": "docs/audit", "file_count": 6, "tracked": true, "action": "history_only_then_deleted", "git_recoverable": true},
+    {"path": "C:\\project\\ZH-LAO\\docs\\sources", "relative_path": "docs/sources", "file_count": 12, "tracked": true, "action": "history_only_then_deleted", "git_recoverable": true},
+    {"path": "C:\\project\\ZH-LAO\\docs\\_exports", "relative_path": "docs/_exports", "file_count": 4, "tracked": false, "action": "verified_transcript_exports_then_deleted", "git_recoverable": false, "content_check": "transcript JSON/Markdown only; no application code or credentials found"},
+    {"path": "C:\\project\\ZH-LAO\\docs\\PROJECT.md", "relative_path": "docs/PROJECT.md", "file_count": 1, "tracked": true, "action": "absorbed_then_deleted", "git_recoverable": true},
+    {"path": "C:\\project\\ZH-LAO\\docs\\CHANGELOG.md", "relative_path": "docs/CHANGELOG.md", "file_count": 1, "tracked": true, "action": "obsolete_release_notes_deleted", "git_recoverable": true},
+    {"path": "C:\\project\\ZH-LAO\\docs-inventory.csv", "relative_path": "docs-inventory.csv", "file_count": 1, "tracked": true, "action": "obsolete_inventory_deleted", "git_recoverable": true},
+    {"path": "C:\\project\\ZH-LAO\\docs-tree.txt", "relative_path": "docs-tree.txt", "file_count": 1, "tracked": true, "action": "obsolete_inventory_deleted", "git_recoverable": true},
+    {"path": "C:\\project\\ZH-LAO\\scripts\\build_development_retirement_inventory.py", "relative_path": "scripts/build_development_retirement_inventory.py", "file_count": 1, "tracked": false, "action": "one_time_builder_consolidated_then_deleted", "git_recoverable": false},
+    {"path": "C:\\project\\ZH-LAO\\docs\\docs\\developer\\development-retirement.md", "relative_path": "docs/docs/developer/development-retirement.md", "file_count": 1, "tracked": false, "action": "consolidated_into_document_migration_then_deleted", "git_recoverable": false},
+    {"path": "C:\\project\\ZH-LAO\\docs\\docs\\developer\\development-retirement-inventory.json", "relative_path": "docs/docs/developer/development-retirement-inventory.json", "file_count": 1, "tracked": false, "action": "consolidated_into_final_inventory_then_deleted", "git_recoverable": false},
+    {"path": "C:\\project\\ZH-LAO\\docs\\docs\\developer\\feature-retirement.md", "relative_path": "docs/docs/developer/feature-retirement.md", "file_count": 1, "tracked": false, "action": "consolidated_into_document_migration_then_deleted", "git_recoverable": false},
+    {"path": "C:\\project\\ZH-LAO\\docs\\docs\\developer\\feature-retirement-inventory.json", "relative_path": "docs/docs/developer/feature-retirement-inventory.json", "file_count": 1, "tracked": false, "action": "consolidated_into_final_inventory_then_deleted", "git_recoverable": false}
+  ],
+  "totals": {"directory_files": 25, "standalone_files": 9, "all_files": 34, "untracked_nonrecoverable_files": 9},
+  "boundary": "Only listed legacy human-document and one-time migration artifacts are in scope; .specify, specs, apps, database, docs/AGENTS.md, docs/README.md, docs/package.json and VitePress config remain."
+}

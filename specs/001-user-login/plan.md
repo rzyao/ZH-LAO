@@ -81,12 +81,12 @@
 - **Base Commit**: `379f79f936eb752a0937d6330cddf8eb3c678880`
 - **Scope Type / ID**: `feature:login` / `domain:identity`
 - **Referenced Authority Docs**:
-  - `docs/docs/domains/identity/model.md`
-  - `docs/docs/domains/identity/flows.md`
-  - `docs/docs/domains/identity/database.md`
-  - `docs/docs/development/02-identity/IDENTITY_USE_CASES.md`
-  - `docs/docs/development/02-identity/IDENTITY_API.md`
-  - `docs/docs/mobile/login.md` & `docs/docs/mobile/otp.md`
+  - `docs/docs/developer/reference/domains/identity/model.md`
+  - `docs/docs/developer/reference/domains/identity/flows.md`
+  - `docs/docs/developer/reference/domains/identity/database.md`
+  - `docs/docs/developer/reference/contracts/identity/IDENTITY_USE_CASES.md`
+  - `docs/docs/developer/reference/contracts/identity/IDENTITY_API.md`
+  - `docs/docs/developer/reference/mobile/login.md` & `docs/docs/developer/reference/mobile/otp.md`
   - `database/migrations/0100_identity.sql`
   - `database/migrations/1220_identity_auth_runtime.sql`
 - **Existing Code / Schema / API / Contracts Checked**:

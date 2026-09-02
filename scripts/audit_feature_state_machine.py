@@ -6,7 +6,7 @@ import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-FEATURES = ROOT / "docs/docs/features"
+FEATURES = ROOT / "docs/docs/developer/features"
 
 SECTION_RE = re.compile(r"^##\s+(?:状态机|State Machine)\s*$", re.M | re.I)
 ENTITY_RE = re.compile(r"(?:实体|Entity)\s*[:：]", re.I)
@@ -38,12 +38,12 @@ def audit(path: Path) -> list[str]:
 
 def main() -> int:
     failures = []
-    for page in sorted(FEATURES.glob("*/index.md")):
+    for page in sorted(path for path in FEATURES.glob("*.md") if path.name != "index.md"):
         for item in audit(page):
             failures.append(f"{page.parent.name}: {item}")
 
     print("STATE_MACHINE_AUDIT")
-    print(f"features_checked={len(list(FEATURES.glob('*/index.md')))}")
+    print(f"features_checked={len([path for path in FEATURES.glob('*.md') if path.name != 'index.md'])}")
     print(f"issues={len(failures)}")
     for failure in failures:
         print("  " + failure)

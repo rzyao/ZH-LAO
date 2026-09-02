@@ -1,0 +1,2387 @@
+{
+  "generated_by": "scripts/build_developer_feature_catalog.py",
+  "generated_at": "2026-09-02",
+  "detail_total": 103,
+  "feature_ids": [
+    "account-lifecycle",
+    "account-profile",
+    "admin-auth-hardening",
+    "admin-dashboard",
+    "admin-login",
+    "ads-monetization",
+    "advanced-feature-rollout",
+    "advanced-learning-entitlements",
+    "advanced-reward-types",
+    "app-version-governance",
+    "appeal-review",
+    "audio-production",
+    "automatic-coin-rewards",
+    "buy-coins",
+    "chat-image",
+    "chat-message-receipts",
+    "chat-own-delete",
+    "chat-reactions",
+    "chat-read-state",
+    "chat-realtime",
+    "chat-recall",
+    "chat-speech-to-text",
+    "chat-text",
+    "chat-translation",
+    "chat-voice-message",
+    "coin-pack-catalog",
+    "commerce-catalog-admin",
+    "commerce-refund-admin",
+    "commerce-transaction-admin",
+    "content-revision-publishing",
+    "conversation-list",
+    "conversation-settings",
+    "course-catalog",
+    "creator-earnings",
+    "curriculum-management",
+    "dictionary-content-management",
+    "dictionary-history",
+    "dictionary-search",
+    "direct-conversation",
+    "enforcement-management",
+    "feature-rollout-control",
+    "first-admin-bootstrap",
+    "gift-admin",
+    "gift-catalog",
+    "group-chat",
+    "guest-cloud-sync",
+    "guest-learning-browse",
+    "identity-user-admin",
+    "instant-translation",
+    "interface-language",
+    "knowledge-content-management",
+    "knowledge-learning",
+    "lao-alphabet-management",
+    "learning-activity-history",
+    "learning-bookmarks",
+    "learning-progress",
+    "lesson-learning",
+    "login-devices",
+    "login",
+    "mastery-review",
+    "mobile-home",
+    "moderation-workbench",
+    "operator-audit-log",
+    "operator-management",
+    "order-payment-history",
+    "permission-assignment",
+    "platform-announcements",
+    "practice-content-management",
+    "practice-exercises",
+    "promotions-coupons",
+    "pronunciation-playback",
+    "push-notifications",
+    "real-person-verification",
+    "region-management",
+    "reward-operations",
+    "role-management",
+    "runtime-config-history",
+    "runtime-config-management",
+    "send-gift",
+    "social-block",
+    "social-discovery-preferences",
+    "social-discovery",
+    "social-distance",
+    "social-feed",
+    "social-follow",
+    "social-lifecycle",
+    "social-match",
+    "social-membership-entitlements",
+    "social-post-interactions",
+    "social-posting",
+    "social-profile-media",
+    "social-profile-view",
+    "social-profile",
+    "social-relationships",
+    "theme-settings",
+    "translation-history",
+    "user-appeal",
+    "user-reporting",
+    "verification-review",
+    "wallet-adjustment-admin",
+    "wallet-balance",
+    "wallet-history",
+    "wrong-answer-notebook"
+  ],
+  "portfolio_status_counts": {
+    "active": 80,
+    "deferred": 17,
+    "pending_decision": 6
+  },
+  "domain_counts": {
+    "audio": 2,
+    "chat": 20,
+    "commerce": 20,
+    "content": 22,
+    "identity": 63,
+    "learning": 22,
+    "operations": 27,
+    "platform": 13,
+    "rewards": 3,
+    "social": 38,
+    "trust": 17
+  },
+  "primary_domain_counts": {
+    "audio": 1,
+    "chat": 15,
+    "commerce": 15,
+    "content": 7,
+    "identity": 6,
+    "learning": 17,
+    "operations": 7,
+    "platform": 7,
+    "rewards": 3,
+    "social": 14,
+    "trust": 7,
+    "unassigned": 4
+  },
+  "layer_status_counts": {
+    "产品": {
+      "active": 78,
+      "deferred": 17,
+      "defined / spec draft": 2,
+      "pending_decision": 6
+    },
+    "数据库": {
+      "baseline present": 1,
+      "baseline present; alignment pending": 1,
+      "not evidenced": 101
+    },
+    "Backend": {
+      "implemented at migration baseline": 1,
+      "implemented at migration baseline; targeted tests limited": 1,
+      "not evidenced": 101
+    },
+    "Admin": {
+      "implemented at migration baseline; acceptance pending": 1,
+      "not applicable": 1,
+      "not evidenced": 101
+    },
+    "Mobile": {
+      "implemented at migration baseline; acceptance pending": 1,
+      "implemented in code; UI acceptance pending": 1,
+      "not evidenced": 101
+    },
+    "Integration": {
+      "not evidenced": 103
+    },
+    "Acceptance": {
+      "not evidenced": 103
+    }
+  },
+  "evidence_counts": {
+    "with_evidence": 55,
+    "without_evidence": 48,
+    "total_entries": 154
+  },
+  "source_migration_counts": {
+    "complete": 101,
+    "manual": 2
+  },
+  "features": [
+    {
+      "id": "account-lifecycle",
+      "title": "账户禁用 / 关闭与会话撤销",
+      "portfolio_status": "active",
+      "domains": [
+        "identity"
+      ],
+      "evidence_count": 0,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "account-lifecycle"
+    },
+    {
+      "id": "account-profile",
+      "title": "账户基础资料与学习方向",
+      "portfolio_status": "active",
+      "domains": [
+        "identity"
+      ],
+      "evidence_count": 0,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "account-profile"
+    },
+    {
+      "id": "admin-auth-hardening",
+      "title": "后台 MFA / 邀请 / 登录失败保护",
+      "portfolio_status": "deferred",
+      "domains": [
+        "operations",
+        "identity"
+      ],
+      "evidence_count": 0,
+      "layer_statuses": {
+        "产品": "deferred",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "admin-auth-hardening"
+    },
+    {
+      "id": "admin-dashboard",
+      "title": "后台数据总览",
+      "portfolio_status": "deferred",
+      "domains": [],
+      "evidence_count": 0,
+      "layer_statuses": {
+        "产品": "deferred",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "admin-dashboard"
+    },
+    {
+      "id": "admin-login",
+      "title": "后台登录与操作员认证",
+      "portfolio_status": "active",
+      "domains": [
+        "operations",
+        "identity"
+      ],
+      "evidence_count": 6,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "admin-login"
+    },
+    {
+      "id": "ads-monetization",
+      "title": "广告变现",
+      "portfolio_status": "deferred",
+      "domains": [
+        "learning",
+        "platform"
+      ],
+      "evidence_count": 0,
+      "layer_statuses": {
+        "产品": "deferred",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "ads-monetization"
+    },
+    {
+      "id": "advanced-feature-rollout",
+      "title": "高级灰度发布",
+      "portfolio_status": "deferred",
+      "domains": [
+        "platform"
+      ],
+      "evidence_count": 0,
+      "layer_statuses": {
+        "产品": "deferred",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "advanced-feature-rollout"
+    },
+    {
+      "id": "advanced-learning-entitlements",
+      "title": "高级学习权益",
+      "portfolio_status": "deferred",
+      "domains": [
+        "learning",
+        "commerce",
+        "platform"
+      ],
+      "evidence_count": 0,
+      "layer_statuses": {
+        "产品": "deferred",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "advanced-learning-entitlements"
+    },
+    {
+      "id": "advanced-reward-types",
+      "title": "会员天数 / POINT / BADGE 等新奖励类型",
+      "portfolio_status": "deferred",
+      "domains": [
+        "rewards",
+        "commerce"
+      ],
+      "evidence_count": 0,
+      "layer_statuses": {
+        "产品": "deferred",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "advanced-reward-types"
+    },
+    {
+      "id": "app-version-governance",
+      "title": "客户端版本检查与强制升级",
+      "portfolio_status": "active",
+      "domains": [
+        "platform"
+      ],
+      "evidence_count": 2,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "app-version-governance"
+    },
+    {
+      "id": "appeal-review",
+      "title": "申诉复核后台",
+      "portfolio_status": "active",
+      "domains": [
+        "trust",
+        "operations"
+      ],
+      "evidence_count": 0,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "appeal-review"
+    },
+    {
+      "id": "audio-production",
+      "title": "音频生产",
+      "portfolio_status": "active",
+      "domains": [
+        "audio"
+      ],
+      "evidence_count": 4,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "audio-production"
+    },
+    {
+      "id": "automatic-coin-rewards",
+      "title": "自动 Coin 奖励",
+      "portfolio_status": "active",
+      "domains": [
+        "rewards",
+        "commerce",
+        "learning",
+        "social",
+        "identity"
+      ],
+      "evidence_count": 4,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "automatic-coin-rewards"
+    },
+    {
+      "id": "buy-coins",
+      "title": "购买 Coins：下单、支付与履约",
+      "portfolio_status": "active",
+      "domains": [
+        "commerce",
+        "identity"
+      ],
+      "evidence_count": 4,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "buy-coins"
+    },
+    {
+      "id": "chat-image",
+      "title": "图片消息",
+      "portfolio_status": "active",
+      "domains": [
+        "chat",
+        "identity",
+        "social"
+      ],
+      "evidence_count": 0,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "chat-image"
+    },
+    {
+      "id": "chat-message-receipts",
+      "title": "逐消息送达 / 已读回执",
+      "portfolio_status": "deferred",
+      "domains": [
+        "chat",
+        "identity",
+        "social"
+      ],
+      "evidence_count": 0,
+      "layer_statuses": {
+        "产品": "deferred",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "chat-message-receipts"
+    },
+    {
+      "id": "chat-own-delete",
+      "title": "单条消息仅自己删除",
+      "portfolio_status": "deferred",
+      "domains": [
+        "chat",
+        "identity",
+        "social"
+      ],
+      "evidence_count": 0,
+      "layer_statuses": {
+        "产品": "deferred",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "chat-own-delete"
+    },
+    {
+      "id": "chat-reactions",
+      "title": "消息 Reaction",
+      "portfolio_status": "deferred",
+      "domains": [
+        "chat",
+        "identity",
+        "social"
+      ],
+      "evidence_count": 0,
+      "layer_statuses": {
+        "产品": "deferred",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "chat-reactions"
+    },
+    {
+      "id": "chat-read-state",
+      "title": "会话已读与未读",
+      "portfolio_status": "active",
+      "domains": [
+        "chat",
+        "identity",
+        "social"
+      ],
+      "evidence_count": 2,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "chat-read-state"
+    },
+    {
+      "id": "chat-realtime",
+      "title": "实时消息传输与重连",
+      "portfolio_status": "active",
+      "domains": [
+        "chat",
+        "identity",
+        "social"
+      ],
+      "evidence_count": 0,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "chat-realtime"
+    },
+    {
+      "id": "chat-recall",
+      "title": "消息撤回",
+      "portfolio_status": "active",
+      "domains": [
+        "chat",
+        "identity",
+        "social"
+      ],
+      "evidence_count": 0,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "chat-recall"
+    },
+    {
+      "id": "chat-speech-to-text",
+      "title": "语音转文字",
+      "portfolio_status": "pending_decision",
+      "domains": [
+        "chat",
+        "identity",
+        "social",
+        "learning"
+      ],
+      "evidence_count": 0,
+      "layer_statuses": {
+        "产品": "pending_decision",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "chat-speech-to-text"
+    },
+    {
+      "id": "chat-text",
+      "title": "文字与 Emoji 消息",
+      "portfolio_status": "active",
+      "domains": [
+        "chat",
+        "identity",
+        "social"
+      ],
+      "evidence_count": 0,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "chat-text"
+    },
+    {
+      "id": "chat-translation",
+      "title": "聊天翻译",
+      "portfolio_status": "pending_decision",
+      "domains": [
+        "chat",
+        "identity",
+        "social",
+        "learning"
+      ],
+      "evidence_count": 0,
+      "layer_statuses": {
+        "产品": "pending_decision",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "chat-translation"
+    },
+    {
+      "id": "chat-voice-message",
+      "title": "语音消息",
+      "portfolio_status": "pending_decision",
+      "domains": [
+        "chat",
+        "identity",
+        "social",
+        "learning"
+      ],
+      "evidence_count": 0,
+      "layer_statuses": {
+        "产品": "pending_decision",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "chat-voice-message"
+    },
+    {
+      "id": "coin-pack-catalog",
+      "title": "Coin Pack 商品目录",
+      "portfolio_status": "active",
+      "domains": [
+        "commerce",
+        "identity"
+      ],
+      "evidence_count": 3,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "coin-pack-catalog"
+    },
+    {
+      "id": "commerce-catalog-admin",
+      "title": "商品与价格后台管理",
+      "portfolio_status": "active",
+      "domains": [
+        "commerce",
+        "operations"
+      ],
+      "evidence_count": 0,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "commerce-catalog-admin"
+    },
+    {
+      "id": "commerce-refund-admin",
+      "title": "退款与资产回收后台",
+      "portfolio_status": "active",
+      "domains": [
+        "commerce",
+        "operations"
+      ],
+      "evidence_count": 0,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "commerce-refund-admin"
+    },
+    {
+      "id": "commerce-transaction-admin",
+      "title": "订单 / 支付 / 履约后台监控",
+      "portfolio_status": "active",
+      "domains": [
+        "commerce",
+        "operations"
+      ],
+      "evidence_count": 0,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "commerce-transaction-admin"
+    },
+    {
+      "id": "content-revision-publishing",
+      "title": "内容 Revision 与发布治理",
+      "portfolio_status": "active",
+      "domains": [
+        "content",
+        "operations"
+      ],
+      "evidence_count": 1,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "content-revision-publishing"
+    },
+    {
+      "id": "conversation-list",
+      "title": "聊天会话列表",
+      "portfolio_status": "active",
+      "domains": [
+        "chat",
+        "identity",
+        "social"
+      ],
+      "evidence_count": 3,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "conversation-list"
+    },
+    {
+      "id": "conversation-settings",
+      "title": "置顶 / 免打扰 / 隐藏 / 清空历史",
+      "portfolio_status": "active",
+      "domains": [
+        "chat",
+        "identity",
+        "social"
+      ],
+      "evidence_count": 3,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "conversation-settings"
+    },
+    {
+      "id": "course-catalog",
+      "title": "课程列表与课程详情",
+      "portfolio_status": "active",
+      "domains": [
+        "learning",
+        "content",
+        "identity"
+      ],
+      "evidence_count": 2,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "course-catalog"
+    },
+    {
+      "id": "creator-earnings",
+      "title": "礼物收益、提现与结算",
+      "portfolio_status": "deferred",
+      "domains": [
+        "commerce",
+        "social"
+      ],
+      "evidence_count": 0,
+      "layer_statuses": {
+        "产品": "deferred",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "creator-earnings"
+    },
+    {
+      "id": "curriculum-management",
+      "title": "课程编排与发布",
+      "portfolio_status": "active",
+      "domains": [
+        "content",
+        "operations"
+      ],
+      "evidence_count": 1,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "curriculum-management"
+    },
+    {
+      "id": "dictionary-content-management",
+      "title": "词典内容管理",
+      "portfolio_status": "active",
+      "domains": [
+        "content",
+        "operations"
+      ],
+      "evidence_count": 1,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "dictionary-content-management"
+    },
+    {
+      "id": "dictionary-history",
+      "title": "词典搜索历史",
+      "portfolio_status": "active",
+      "domains": [
+        "learning",
+        "content",
+        "identity"
+      ],
+      "evidence_count": 3,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "dictionary-history"
+    },
+    {
+      "id": "dictionary-search",
+      "title": "词典搜索",
+      "portfolio_status": "active",
+      "domains": [
+        "learning",
+        "content",
+        "identity"
+      ],
+      "evidence_count": 2,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "dictionary-search"
+    },
+    {
+      "id": "direct-conversation",
+      "title": "发起 / 打开一对一会话",
+      "portfolio_status": "active",
+      "domains": [
+        "chat",
+        "identity",
+        "social"
+      ],
+      "evidence_count": 2,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "direct-conversation"
+    },
+    {
+      "id": "enforcement-management",
+      "title": "平台处罚与能力限制",
+      "portfolio_status": "active",
+      "domains": [
+        "trust",
+        "operations",
+        "identity",
+        "social",
+        "chat"
+      ],
+      "evidence_count": 0,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "enforcement-management"
+    },
+    {
+      "id": "feature-rollout-control",
+      "title": "功能开关与范围灰度管理",
+      "portfolio_status": "active",
+      "domains": [
+        "platform",
+        "operations"
+      ],
+      "evidence_count": 2,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "feature-rollout-control"
+    },
+    {
+      "id": "first-admin-bootstrap",
+      "title": "首个管理员 Bootstrap",
+      "portfolio_status": "active",
+      "domains": [
+        "operations"
+      ],
+      "evidence_count": 5,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "first-admin-bootstrap"
+    },
+    {
+      "id": "gift-admin",
+      "title": "礼物后台管理",
+      "portfolio_status": "active",
+      "domains": [
+        "commerce",
+        "operations"
+      ],
+      "evidence_count": 0,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "gift-admin"
+    },
+    {
+      "id": "gift-catalog",
+      "title": "礼物目录",
+      "portfolio_status": "active",
+      "domains": [
+        "commerce",
+        "identity"
+      ],
+      "evidence_count": 2,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "gift-catalog"
+    },
+    {
+      "id": "group-chat",
+      "title": "群聊",
+      "portfolio_status": "deferred",
+      "domains": [
+        "chat",
+        "identity",
+        "social"
+      ],
+      "evidence_count": 0,
+      "layer_statuses": {
+        "产品": "deferred",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "group-chat"
+    },
+    {
+      "id": "guest-cloud-sync",
+      "title": "游客云同步与注册数据迁移",
+      "portfolio_status": "deferred",
+      "domains": [
+        "identity"
+      ],
+      "evidence_count": 0,
+      "layer_statuses": {
+        "产品": "deferred",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "guest-cloud-sync"
+    },
+    {
+      "id": "guest-learning-browse",
+      "title": "游客浏览学习内容",
+      "portfolio_status": "active",
+      "domains": [
+        "learning",
+        "content"
+      ],
+      "evidence_count": 2,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "guest-learning-browse"
+    },
+    {
+      "id": "identity-user-admin",
+      "title": "用户账户查询与状态管理",
+      "portfolio_status": "active",
+      "domains": [
+        "identity",
+        "operations"
+      ],
+      "evidence_count": 0,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "identity-user-admin"
+    },
+    {
+      "id": "instant-translation",
+      "title": "即时中老翻译",
+      "portfolio_status": "active",
+      "domains": [
+        "learning",
+        "content",
+        "identity"
+      ],
+      "evidence_count": 3,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "instant-translation"
+    },
+    {
+      "id": "interface-language",
+      "title": "界面语言切换",
+      "portfolio_status": "active",
+      "domains": [],
+      "evidence_count": 1,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "interface-language"
+    },
+    {
+      "id": "knowledge-content-management",
+      "title": "知识内容管理",
+      "portfolio_status": "active",
+      "domains": [
+        "content",
+        "operations"
+      ],
+      "evidence_count": 1,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "knowledge-content-management"
+    },
+    {
+      "id": "knowledge-learning",
+      "title": "词汇 / 句子 / 知识学习",
+      "portfolio_status": "active",
+      "domains": [
+        "learning",
+        "content",
+        "identity"
+      ],
+      "evidence_count": 2,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "knowledge-learning"
+    },
+    {
+      "id": "lao-alphabet-management",
+      "title": "老挝语字母管理",
+      "portfolio_status": "active",
+      "domains": [
+        "content"
+      ],
+      "evidence_count": 4,
+      "layer_statuses": {
+        "产品": "defined / spec draft",
+        "数据库": "baseline present; alignment pending",
+        "Backend": "implemented at migration baseline; targeted tests limited",
+        "Admin": "implemented at migration baseline; acceptance pending",
+        "Mobile": "implemented at migration baseline; acceptance pending",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "manual",
+      "path": "lao-alphabet-management"
+    },
+    {
+      "id": "learning-activity-history",
+      "title": "学习活动历史",
+      "portfolio_status": "active",
+      "domains": [
+        "learning",
+        "content",
+        "identity"
+      ],
+      "evidence_count": 4,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "learning-activity-history"
+    },
+    {
+      "id": "learning-bookmarks",
+      "title": "学习内容收藏",
+      "portfolio_status": "active",
+      "domains": [
+        "learning",
+        "content",
+        "identity"
+      ],
+      "evidence_count": 4,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "learning-bookmarks"
+    },
+    {
+      "id": "learning-progress",
+      "title": "课程与 Lesson 进度",
+      "portfolio_status": "active",
+      "domains": [
+        "learning",
+        "content",
+        "identity"
+      ],
+      "evidence_count": 2,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "learning-progress"
+    },
+    {
+      "id": "lesson-learning",
+      "title": "Lesson 学习流程",
+      "portfolio_status": "active",
+      "domains": [
+        "learning",
+        "content",
+        "identity"
+      ],
+      "evidence_count": 2,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "lesson-learning"
+    },
+    {
+      "id": "login-devices",
+      "title": "登录设备与会话管理",
+      "portfolio_status": "active",
+      "domains": [
+        "identity"
+      ],
+      "evidence_count": 0,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "login-devices"
+    },
+    {
+      "id": "login",
+      "title": "用户登录与会话",
+      "portfolio_status": "active",
+      "domains": [
+        "identity"
+      ],
+      "evidence_count": 4,
+      "layer_statuses": {
+        "产品": "defined / spec draft",
+        "数据库": "baseline present",
+        "Backend": "implemented at migration baseline",
+        "Admin": "not applicable",
+        "Mobile": "implemented in code; UI acceptance pending",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "manual",
+      "path": "login"
+    },
+    {
+      "id": "mastery-review",
+      "title": "掌握度与复习",
+      "portfolio_status": "active",
+      "domains": [
+        "learning",
+        "content",
+        "identity"
+      ],
+      "evidence_count": 4,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "mastery-review"
+    },
+    {
+      "id": "mobile-home",
+      "title": "用户首页与双侧入口",
+      "portfolio_status": "active",
+      "domains": [
+        "content",
+        "learning",
+        "social",
+        "platform"
+      ],
+      "evidence_count": 0,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "mobile-home"
+    },
+    {
+      "id": "moderation-workbench",
+      "title": "审核案件 / 证据 / 决定工作台",
+      "portfolio_status": "active",
+      "domains": [
+        "trust",
+        "operations"
+      ],
+      "evidence_count": 0,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "moderation-workbench"
+    },
+    {
+      "id": "operator-audit-log",
+      "title": "后台操作审计查询",
+      "portfolio_status": "active",
+      "domains": [
+        "operations"
+      ],
+      "evidence_count": 5,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "operator-audit-log"
+    },
+    {
+      "id": "operator-management",
+      "title": "操作员管理",
+      "portfolio_status": "active",
+      "domains": [
+        "operations"
+      ],
+      "evidence_count": 5,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "operator-management"
+    },
+    {
+      "id": "order-payment-history",
+      "title": "订单与支付历史",
+      "portfolio_status": "active",
+      "domains": [
+        "commerce",
+        "identity"
+      ],
+      "evidence_count": 3,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "order-payment-history"
+    },
+    {
+      "id": "permission-assignment",
+      "title": "角色权限分配",
+      "portfolio_status": "active",
+      "domains": [
+        "operations"
+      ],
+      "evidence_count": 5,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "permission-assignment"
+    },
+    {
+      "id": "platform-announcements",
+      "title": "平台公告发布与展示",
+      "portfolio_status": "active",
+      "domains": [
+        "platform",
+        "operations"
+      ],
+      "evidence_count": 2,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "platform-announcements"
+    },
+    {
+      "id": "practice-content-management",
+      "title": "练习与题库管理",
+      "portfolio_status": "active",
+      "domains": [
+        "content",
+        "operations"
+      ],
+      "evidence_count": 1,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "practice-content-management"
+    },
+    {
+      "id": "practice-exercises",
+      "title": "练习与作答",
+      "portfolio_status": "active",
+      "domains": [
+        "learning",
+        "content",
+        "identity"
+      ],
+      "evidence_count": 2,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "practice-exercises"
+    },
+    {
+      "id": "promotions-coupons",
+      "title": "促销与优惠券",
+      "portfolio_status": "deferred",
+      "domains": [
+        "commerce",
+        "platform"
+      ],
+      "evidence_count": 0,
+      "layer_statuses": {
+        "产品": "deferred",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "promotions-coupons"
+    },
+    {
+      "id": "pronunciation-playback",
+      "title": "标准发音与音频播放",
+      "portfolio_status": "active",
+      "domains": [
+        "learning",
+        "content",
+        "audio",
+        "identity"
+      ],
+      "evidence_count": 4,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "pronunciation-playback"
+    },
+    {
+      "id": "push-notifications",
+      "title": "系统与互动推送通知",
+      "portfolio_status": "deferred",
+      "domains": [],
+      "evidence_count": 0,
+      "layer_statuses": {
+        "产品": "deferred",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "push-notifications"
+    },
+    {
+      "id": "real-person-verification",
+      "title": "真人认证提交",
+      "portfolio_status": "pending_decision",
+      "domains": [
+        "trust",
+        "identity",
+        "social"
+      ],
+      "evidence_count": 0,
+      "layer_statuses": {
+        "产品": "pending_decision",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "real-person-verification"
+    },
+    {
+      "id": "region-management",
+      "title": "产品支持地区管理",
+      "portfolio_status": "active",
+      "domains": [
+        "platform",
+        "operations"
+      ],
+      "evidence_count": 2,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "region-management"
+    },
+    {
+      "id": "reward-operations",
+      "title": "奖励计划 / 规则 / 发放监控后台",
+      "portfolio_status": "active",
+      "domains": [
+        "rewards",
+        "commerce",
+        "operations"
+      ],
+      "evidence_count": 4,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "reward-operations"
+    },
+    {
+      "id": "role-management",
+      "title": "角色管理",
+      "portfolio_status": "active",
+      "domains": [
+        "operations"
+      ],
+      "evidence_count": 5,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "role-management"
+    },
+    {
+      "id": "runtime-config-history",
+      "title": "运行配置版本与回滚",
+      "portfolio_status": "deferred",
+      "domains": [
+        "platform"
+      ],
+      "evidence_count": 0,
+      "layer_statuses": {
+        "产品": "deferred",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "runtime-config-history"
+    },
+    {
+      "id": "runtime-config-management",
+      "title": "运行参数管理",
+      "portfolio_status": "active",
+      "domains": [
+        "platform",
+        "operations"
+      ],
+      "evidence_count": 2,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "runtime-config-management"
+    },
+    {
+      "id": "send-gift",
+      "title": "发送虚拟礼物",
+      "portfolio_status": "active",
+      "domains": [
+        "commerce",
+        "identity",
+        "social",
+        "chat"
+      ],
+      "evidence_count": 3,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "send-gift"
+    },
+    {
+      "id": "social-block",
+      "title": "用户 Block / Unblock",
+      "portfolio_status": "active",
+      "domains": [
+        "social",
+        "identity",
+        "trust",
+        "chat"
+      ],
+      "evidence_count": 2,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "social-block"
+    },
+    {
+      "id": "social-discovery-preferences",
+      "title": "发现偏好设置",
+      "portfolio_status": "active",
+      "domains": [
+        "social",
+        "identity"
+      ],
+      "evidence_count": 0,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "social-discovery-preferences"
+    },
+    {
+      "id": "social-discovery",
+      "title": "发现、筛选与推荐",
+      "portfolio_status": "active",
+      "domains": [
+        "social",
+        "identity",
+        "trust",
+        "platform"
+      ],
+      "evidence_count": 0,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "social-discovery"
+    },
+    {
+      "id": "social-distance",
+      "title": "距离筛选与模糊距离展示",
+      "portfolio_status": "pending_decision",
+      "domains": [
+        "social",
+        "identity"
+      ],
+      "evidence_count": 0,
+      "layer_statuses": {
+        "产品": "pending_decision",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "social-distance"
+    },
+    {
+      "id": "social-feed",
+      "title": "关注 Feed 与动态浏览",
+      "portfolio_status": "active",
+      "domains": [
+        "social",
+        "identity",
+        "trust"
+      ],
+      "evidence_count": 3,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "social-feed"
+    },
+    {
+      "id": "social-follow",
+      "title": "关注与取消关注",
+      "portfolio_status": "active",
+      "domains": [
+        "social",
+        "identity",
+        "trust"
+      ],
+      "evidence_count": 2,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "social-follow"
+    },
+    {
+      "id": "social-lifecycle",
+      "title": "暂停 / 关闭社交资料",
+      "portfolio_status": "active",
+      "domains": [
+        "social",
+        "identity",
+        "trust"
+      ],
+      "evidence_count": 2,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "social-lifecycle"
+    },
+    {
+      "id": "social-match",
+      "title": "互关 Match 与聊天资格",
+      "portfolio_status": "active",
+      "domains": [
+        "social",
+        "identity",
+        "chat"
+      ],
+      "evidence_count": 2,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "social-match"
+    },
+    {
+      "id": "social-membership-entitlements",
+      "title": "社交会员与高级权益",
+      "portfolio_status": "deferred",
+      "domains": [
+        "commerce",
+        "social",
+        "platform"
+      ],
+      "evidence_count": 0,
+      "layer_statuses": {
+        "产品": "deferred",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "social-membership-entitlements"
+    },
+    {
+      "id": "social-post-interactions",
+      "title": "动态点赞、评论与回复",
+      "portfolio_status": "active",
+      "domains": [
+        "social",
+        "identity",
+        "trust"
+      ],
+      "evidence_count": 3,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "social-post-interactions"
+    },
+    {
+      "id": "social-posting",
+      "title": "发布 / 删除文字图片动态",
+      "portfolio_status": "active",
+      "domains": [
+        "social",
+        "identity",
+        "trust"
+      ],
+      "evidence_count": 3,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "social-posting"
+    },
+    {
+      "id": "social-profile-media",
+      "title": "社交照片 / 兴趣 / 语言 / Prompt",
+      "portfolio_status": "active",
+      "domains": [
+        "social",
+        "identity",
+        "trust"
+      ],
+      "evidence_count": 0,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "social-profile-media"
+    },
+    {
+      "id": "social-profile-view",
+      "title": "公开社交资料查看",
+      "portfolio_status": "active",
+      "domains": [
+        "social",
+        "identity",
+        "trust"
+      ],
+      "evidence_count": 0,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "social-profile-view"
+    },
+    {
+      "id": "social-profile",
+      "title": "社交资料创建与编辑",
+      "portfolio_status": "active",
+      "domains": [
+        "social",
+        "identity",
+        "trust"
+      ],
+      "evidence_count": 0,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "social-profile"
+    },
+    {
+      "id": "social-relationships",
+      "title": "关注我的 / 我关注的 / 已匹配列表",
+      "portfolio_status": "active",
+      "domains": [
+        "social",
+        "identity"
+      ],
+      "evidence_count": 2,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "social-relationships"
+    },
+    {
+      "id": "theme-settings",
+      "title": "主题设置",
+      "portfolio_status": "active",
+      "domains": [],
+      "evidence_count": 1,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "theme-settings"
+    },
+    {
+      "id": "translation-history",
+      "title": "翻译历史",
+      "portfolio_status": "active",
+      "domains": [
+        "learning",
+        "content",
+        "identity"
+      ],
+      "evidence_count": 0,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "translation-history"
+    },
+    {
+      "id": "user-appeal",
+      "title": "用户申诉",
+      "portfolio_status": "active",
+      "domains": [
+        "trust",
+        "identity"
+      ],
+      "evidence_count": 0,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "user-appeal"
+    },
+    {
+      "id": "user-reporting",
+      "title": "用户举报提交",
+      "portfolio_status": "active",
+      "domains": [
+        "trust",
+        "identity",
+        "social",
+        "chat",
+        "commerce"
+      ],
+      "evidence_count": 0,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "user-reporting"
+    },
+    {
+      "id": "verification-review",
+      "title": "真人认证审核",
+      "portfolio_status": "pending_decision",
+      "domains": [
+        "trust",
+        "operations",
+        "social"
+      ],
+      "evidence_count": 0,
+      "layer_statuses": {
+        "产品": "pending_decision",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "verification-review"
+    },
+    {
+      "id": "wallet-adjustment-admin",
+      "title": "钱包 Adjustment / Reversal 后台",
+      "portfolio_status": "active",
+      "domains": [
+        "commerce",
+        "operations"
+      ],
+      "evidence_count": 0,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "wallet-adjustment-admin"
+    },
+    {
+      "id": "wallet-balance",
+      "title": "Coin 钱包余额",
+      "portfolio_status": "active",
+      "domains": [
+        "commerce",
+        "identity"
+      ],
+      "evidence_count": 3,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "wallet-balance"
+    },
+    {
+      "id": "wallet-history",
+      "title": "钱包账本 / 资产变动历史",
+      "portfolio_status": "active",
+      "domains": [
+        "commerce",
+        "identity"
+      ],
+      "evidence_count": 3,
+      "layer_statuses": {
+        "产品": "active",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "wallet-history"
+    },
+    {
+      "id": "wrong-answer-notebook",
+      "title": "错题本",
+      "portfolio_status": "deferred",
+      "domains": [
+        "learning",
+        "content",
+        "identity"
+      ],
+      "evidence_count": 0,
+      "layer_statuses": {
+        "产品": "deferred",
+        "数据库": "not evidenced",
+        "Backend": "not evidenced",
+        "Admin": "not evidenced",
+        "Mobile": "not evidenced",
+        "Integration": "not evidenced",
+        "Acceptance": "not evidenced"
+      },
+      "source_migration": "complete",
+      "path": "wrong-answer-notebook"
+    }
+  ]
+}

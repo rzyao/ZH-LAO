@@ -137,25 +137,25 @@
 ## 4. Contract References
 
 ### Contract: Alphabet Domain Model & Principles
-- **Path**: `docs/docs/domains/content/alphabet.md`
+- **Path**: `docs/docs/developer/reference/domains/content/alphabet.md`
 - **Kind**: `markdown`
 - **Symbol**: `LaoCharacter`, `cons_*`, `vowel_*`, `symbol_*`, `Rule 4404`
 - **Notes**: 约束字符原子性、三大分类与细分子分类语义、IPA 音标标准及 Unicode 精确比较规则。
 
 ### Contract: Alphabet Inventory & Learning Sequence Decisions
-- **Path**: `docs/docs/domains/content/decisions/alphabet-decisions.md`
+- **Path**: `docs/docs/developer/reference/domains/content/decisions/alphabet-decisions.md`
 - **Kind**: `markdown`
 - **Symbol**: `Decision A1`, `Decision A2`, `RULE-ALPHA-01` ~ `RULE-ALPHA-04`
 - **Notes**: 约束 68 项字符纳管范围、符号类 `no_audio = true` 强制策略及 `sort_order` 解耦规则。
 
 ### Contract: Content Versioning & Review State Machine
-- **Path**: `docs/docs/domains/content/versioning-review.md`
+- **Path**: `docs/docs/developer/reference/domains/content/versioning-review.md`
 - **Kind**: `markdown`
 - **Symbol**: `Immutable Content Revision`, `Active Work Guard`, `Published Pointer`, `Visibility Guard`
 - **Notes**: 约束不可变修订版本流转、正式指针原子切换、乐观锁及 C 端可见性守卫。
 
 ### Contract: Audio Binding & Input Hash Policy
-- **Path**: `docs/docs/domains/content/audio-binding.md`
+- **Path**: `docs/docs/developer/reference/domains/content/audio-binding.md`
 - **Kind**: `markdown`
 - **Symbol**: `Audio Slot Policy`, `audio_input_hash`, `lo/pronunciation`, `Stale Invalidation`
 - **Notes**: 约束 6 类白名单建槽策略、输入哈希联动失效机制及 C 端音频播放投影规则。

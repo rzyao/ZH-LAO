@@ -71,4 +71,4 @@
 ### 决策 4: 冲突与风险分析 (Conflict & Drift Verification)
 - **Conflict Status**: **NO CONFLICT (无冲突)**。
 - **审查确认**:
-  - `spec.md` 中的所有需求（FR-001 ~ FR-009, SC-001 ~ SC-006）与 `docs/docs/domains/content/alphabet.md`、`alphabet-decisions.md` 及物理迁移完全吻合，无需变更已冻结 schema。
+  - `spec.md` 中的所有需求（FR-001 ~ FR-009, SC-001 ~ SC-006）与 `docs/docs/developer/reference/domains/content/alphabet.md`、`alphabet-decisions.md` 及物理迁移完全吻合，无需变更已冻结 schema。

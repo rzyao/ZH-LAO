@@ -171,25 +171,25 @@
 - **Notes**: 物理数据库事实。约束验证码状态迁移强一致性、`attempt_count <= max_attempts`、Refresh Token Hash 唯一约束、会话撤销状态与原因非空约束。
 
 ### Contract: Identity Canonical Flows & Domain Model
-- **Path**: `docs/docs/domains/identity/flows.md` & `docs/docs/domains/identity/model.md`
+- **Path**: `docs/docs/developer/reference/domains/identity/flows.md` & `docs/docs/developer/reference/domains/identity/model.md`
 - **Kind**: markdown
 - **Symbol**: 认证流程与业务模型
 - **Notes**: 冻结了游客无本地服务单、手机号 E.164、学习方向终身固定、Access Token 15 分钟 + Refresh Token 30 天滑动、强制 Rotation 等核心领域事实。
 
 ### Contract: Identity Use Cases Behavioral Contract
-- **Path**: `docs/docs/development/02-identity/IDENTITY_USE_CASES.md`
+- **Path**: `docs/docs/developer/reference/contracts/identity/IDENTITY_USE_CASES.md`
 - **Kind**: markdown
 - **Symbol**: `UC-ID-001` (RequestPhoneOtp), `UC-ID-002` (AuthenticateWithPhoneOtp), `UC-ID-003` (AuthenticateWithFacebook), `UC-ID-004` (RefreshSession), `UC-ID-005` (LogoutCurrentSession), `UC-ID-006` (LogoutAllSessions)
 - **Notes**: 规定了事务边界、并发控制锁机制、防枚举要求、Outbox 写入时机以及测试场景要求。
 
 ### Contract: Identity HTTP API Specification
-- **Path**: `docs/docs/development/02-identity/IDENTITY_API.md`
+- **Path**: `docs/docs/developer/reference/contracts/identity/IDENTITY_API.md`
 - **Kind**: markdown
 - **Symbol**: `POST /api/v1/identity/phone-otp`, `POST /api/v1/identity/auth/phone`, `POST /api/v1/identity/auth/facebook`, `POST /api/v1/identity/sessions/refresh`, `POST /api/v1/identity/sessions/logout`, `POST /api/v1/identity/sessions/logout-all`
 - **Notes**: 规定了统一 Base Prefix、请求与响应体格式、错误码映射规范、防枚举响应及 HTTP 状态码标准。
 
 ### Contract: Mobile Screen Pages Contract
-- **Path**: `docs/docs/mobile/login.md` & `docs/docs/mobile/otp.md`
+- **Path**: `docs/docs/developer/reference/mobile/login.md` & `docs/docs/developer/reference/mobile/otp.md`
 - **Kind**: markdown
 - **Symbol**: `mobile-login` (/login), `mobile-otp` (/otp)
 - **Notes**: 移动端用户交互路径规范，包含从手机号登录页提交凭据到 OTP 验证页输入 6 位数字码的导航流程。

@@ -82,13 +82,13 @@
 - **Base Commit**: `4d87b56`
 - **Scope Type / ID**: `feature:alphabet` / `domain:content`
 - **Referenced Authority Docs**:
-  - `docs/docs/domains/content/alphabet.md`
-  - `docs/docs/domains/content/decisions/alphabet-decisions.md`
-  - `docs/docs/domains/content/versioning-review.md`
-  - `docs/docs/domains/content/audio-binding.md`
-  - `docs/docs/adr/ADR-004-learning-content-registry.md`
-  - `docs/docs/adr/ADR-006-learning-content-lifecycle.md`
-  - `docs/docs/adr/ADR-020-audio-production-domain.md`
+  - `docs/docs/developer/reference/domains/content/alphabet.md`
+  - `docs/docs/developer/reference/domains/content/decisions/alphabet-decisions.md`
+  - `docs/docs/developer/reference/domains/content/versioning-review.md`
+  - `docs/docs/developer/reference/domains/content/audio-binding.md`
+  - `docs/docs/developer/reference/adr/ADR-004-learning-content-registry.md`
+  - `docs/docs/developer/reference/adr/ADR-006-learning-content-lifecycle.md`
+  - `docs/docs/developer/reference/adr/ADR-020-audio-production-domain.md`
   - `database/migrations/0400_content.sql`
   - `database/migrations/0600_audio.sql`
   - `database/migrations/1240_content_revision.sql`

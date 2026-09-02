@@ -5,7 +5,7 @@
 
 检查项：
 1. 相对链接（`./x.md`、`../y/z.md`、`x`）目标文件是否存在；
-2. 站内绝对链接（`/domains/trust/`）是否能解析到 md；
+2. 站内绝对链接（`/developer/reference/domains/trust/`）是否能解析到 md；
 3. 同页锚点（`#xxx`）与跨页锚点是否存在对应标题。
 """
 

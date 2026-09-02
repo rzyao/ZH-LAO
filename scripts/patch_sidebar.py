@@ -16,24 +16,24 @@ CONFIG = os.path.join("docs", "docs", ".vitepress", "config.mts")
 # (anchor_link, new_entry_line)  新条目插到 anchor 所在行之后
 INSERTS = [
     (
-        "/domains/identity/database",
-        "          { text: 'Identity 业务模型', link: '/domains/identity/model' },",
+        "/developer/reference/domains/identity/database",
+        "          { text: 'Identity 业务模型', link: '/developer/reference/domains/identity/model' },",
     ),
     (
-        "/domains/learning/database",
-        "          { text: 'Learning 业务模型', link: '/domains/learning/model' },",
+        "/developer/reference/domains/learning/database",
+        "          { text: 'Learning 业务模型', link: '/developer/reference/domains/learning/model' },",
     ),
     (
-        "/domains/community/",
-        "          { text: 'Community · 数据库待设计', link: '/domains/community/database' },",
+        "/developer/reference/domains/community/",
+        "          { text: 'Community · 数据库待设计', link: '/developer/reference/domains/community/database' },",
     ),
     (
-        "/domains/trust/",
-        "          { text: 'Trust & Safety · 数据库总览', link: '/domains/trust/database' },",
+        "/developer/reference/domains/trust/",
+        "          { text: 'Trust & Safety · 数据库总览', link: '/developer/reference/domains/trust/database' },",
     ),
     (
-        "/adr/ADR-018-global-database-design-principles-final",
-        "          { text: 'ADR-019 运营后台控制面', link: '/adr/ADR-019-operations-backoffice-control-plane' }",
+        "/developer/reference/adr/ADR-018-global-database-design-principles-final",
+        "          { text: 'ADR-019 运营后台控制面', link: '/developer/reference/adr/ADR-019-operations-backoffice-control-plane' }",
     ),
 ]
 

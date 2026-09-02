@@ -1,6 +1,6 @@
 # Interface Contract: 用户登录与会话 HTTP API
 
-**Feature Branch**: `001-user-login` | **Date**: 2026-09-02 | **Authority**: `docs/docs/development/02-identity/IDENTITY_API.md`
+**Feature Branch**: `001-user-login` | **Date**: 2026-09-02 | **Authority**: `docs/docs/developer/reference/contracts/identity/IDENTITY_API.md`
 
 所有端点均挂载在统一前缀 `/api/v1/identity` 下，请求与响应采用 `application/json`，键命名采用 `snake_case`，时间字段采用 ISO 8601 UTC 字符串格式。
 

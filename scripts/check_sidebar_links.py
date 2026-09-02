@@ -10,16 +10,16 @@ import re
 
 ROOT = os.path.join("docs", "docs")
 CONFIG = os.path.join(ROOT, ".vitepress", "config.mts")
-FEATURE_INDEX = os.path.join(ROOT, "development", "workflow", "FEATURE_PAGE_INDEX.json")
+FEATURE_MANIFEST = os.path.join(ROOT, "developer", "feature-manifest.json")
 
 
 def main() -> None:
     cfg = io.open(CONFIG, encoding="utf-8").read()
     links = re.findall(r"link:\s*'([^']+)'", cfg)
-    # The feature sidebar is generated from the canonical Feature Page index,
-    # so include those links in the navigation audit as well.
-    feature_index = json.load(io.open(FEATURE_INDEX, encoding="utf-8"))
-    links.extend(f"/features/{feature['id']}/" for feature in feature_index["features"])
+    # Include every canonical detail route in the audit even though the
+    # sidebar intentionally exposes only the index and hand-verified pilots.
+    feature_manifest = json.load(io.open(FEATURE_MANIFEST, encoding="utf-8"))
+    links.extend(f"/developer/features/{feature['id']}" for feature in feature_manifest["features"])
 
     broken = []
     resolved = set()

@@ -114,10 +114,10 @@ history only. The canonical chain is:
 
 Enforced through `docs/AGENTS.md` + the spec/plan templates (the permitted
 fallback for the extension-hook mechanism, since no invocable grounding command
-ships with this install — see `docs/audit/STAGE3_SPEC_ACTIVATION.md` §X).
+ships with this install — see the Spec Kit activation rules in this constitution and the current product panorama.)
 
 1. `/speckit.specify` MUST first read the related authoritative docs
-   (`docs/domains/<domain>/`, `docs/adr/`, `docs/architecture/`, frozen Public
+   (`docs/docs/developer/reference/domains/<domain>/`, `docs/docs/developer/reference/adr/`, `docs/docs/developer/reference/architecture/`, frozen Public
    Contract) as spec facts. Do not generate requirements from empty context.
 2. `/speckit.plan` MUST first check existing code / schema / API / contracts /
    architecture; the plan describes only deltas + additions, never re-states

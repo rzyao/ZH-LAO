@@ -63,8 +63,8 @@
 - **Base Commit**: [current main commit at plan time]
 - **Scope Type / ID**: [domain:content | feature:login | ...]
 - **Referenced Authority Docs**:
-  - [docs/domains/<domain>/...]
-  - [docs/adr/ADR-0xx-...]
+  - [docs/docs/developer/reference/domains/<domain>/...]
+  - [docs/docs/developer/reference/adr/ADR-0xx-...]
   - [database/migrations/....sql]
 - **Existing Code / Schema / API / Contracts checked**: [summary of pre-plan scan; deltas only]
 
