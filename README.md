@@ -8,6 +8,7 @@ PostgreSQL Baseline、Application Foundation、Admin Foundation、Mobile Foundat
 
 ## 快速入口
 
+- [给人看的项目说明书](docs/docs/guide/project-guide.md)
 - [项目状态与文档地图](docs/PROJECT.md)
 - [文档中心](docs/docs/index.md)
 - [首发后 12 个月业务规划](docs/docs/product/business-plan.md)

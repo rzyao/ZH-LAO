@@ -72,15 +72,15 @@
 **Independent Test**: 使用有效 Refresh Token 请求 `POST /api/v1/identity/sessions/refresh`，成功返回新 Access Token 与全新 Refresh Token；重复使用已消费的旧 Refresh Token 必返回 401 `INVALID_CREDENTIAL`；账户停用时刷新必被拒绝。
 
 ### Tests for User Story 2 🧪
-- [ ] T020 [P] [US2] 编写会话刷新与单次强制轮换契约与并发重放测试 `apps/backend/test/modules/identity/refresh-session.contract.test.ts`
-- [ ] T021 [P] [US2] 编写移动端 Session Bootstrap 与 Token 刷新单元测试 `apps/mobile/src/auth/session/__tests__/sessionBootstrap.test.ts`
+- [x] T020 [P] [US2] 编写会话刷新与单次强制轮换契约与并发重放测试 `apps/backend/test/modules/identity/refresh-session.contract.test.ts`
+- [x] T021 [P] [US2] 编写移动端 Session Bootstrap 与 Token 刷新单元测试 `apps/mobile/src/auth/session/__tests__/sessionBootstrap.test.ts`
 
 ### Implementation for User Story 2
-- [ ] T022 [P] [US2] 实现 Session 仓储中的行级锁查询与 Hash 轮换更新 `apps/backend/src/modules/identity/infrastructure/session-repository.ts`
-- [ ] T023 [US2] 实现会话刷新应用用例逻辑（校验有效性、检查用户状态、生成新 Token 对、顺延 30 天过期时间）`apps/backend/src/modules/identity/application/use-cases/session-device-lifecycle.ts`
-- [ ] T024 [US2] 挂载并校验 Fastify 路由 `POST /api/v1/identity/sessions/refresh` 于 `apps/backend/src/modules/identity/http/routes.ts`
-- [ ] T025 [P] [US2] 移动端实现 `IdentitySessionAdapter` 并在应用启动时注册 `apps/mobile/src/auth/session/identityAdapter.ts`
-- [ ] T026 [US2] 移动端配置 Axios 响应拦截器：捕获 401 自动触发静默续签或降级登出 `apps/mobile/src/api/client/httpClient.ts`
+- [x] T022 [P] [US2] 实现 Session 仓储中的行级锁查询与 Hash 轮换更新 `apps/backend/src/modules/identity/infrastructure/session-repository.ts`
+- [x] T023 [US2] 实现会话刷新应用用例逻辑（校验有效性、检查用户状态、生成新 Token 对、顺延 30 天过期时间）`apps/backend/src/modules/identity/application/use-cases/session-device-lifecycle.ts`
+- [x] T024 [US2] 挂载并校验 Fastify 路由 `POST /api/v1/identity/sessions/refresh` 于 `apps/backend/src/modules/identity/http/routes.ts`
+- [x] T025 [P] [US2] 移动端实现 `IdentitySessionAdapter` 并在应用启动时注册 `apps/mobile/src/auth/session/identityAdapter.ts`
+- [x] T026 [US2] 移动端配置 Axios 响应拦截器：捕获 401 自动触发静默续签或降级登出 `apps/mobile/src/api/client/httpClient.ts`
 
 **Checkpoint**: 访问令牌过期后的自动续签与凭证轮换已完整实现，移动端具备平滑无感的安全保持能力。
 
@@ -93,15 +93,15 @@
 **Independent Test**: 调用 `POST /api/v1/identity/sessions/logout` 返回 204，原 Token 立即无法用于刷新；多设备登录状态下调用 `POST /api/v1/identity/sessions/logout-all` 返回 204，数据库中该用户的所有 sessions 均更新为 `revoked`。
 
 ### Tests for User Story 3 🧪
-- [ ] T027 [P] [US3] 编写单设备退出与全端登出契约测试 `apps/backend/test/modules/identity/logout.contract.test.ts`
-- [ ] T028 [P] [US3] 编写移动端主动登出状态清理测试 `apps/mobile/src/auth/context/__tests__/AuthProvider.test.tsx`
+- [x] T027 [P] [US3] 编写单设备退出与全端登出契约测试 `apps/backend/test/modules/identity/logout.contract.test.ts`
+- [x] T028 [P] [US3] 编写移动端主动登出状态清理测试 `apps/mobile/src/auth/context/__tests__/AuthProvider.test.tsx`
 
 ### Implementation for User Story 3
-- [ ] T029 [P] [US3] 在仓储层实现单个会话撤销与基于 `user_id` 的批量会话撤销 `apps/backend/src/modules/identity/infrastructure/session-repository.ts`
-- [ ] T030 [US3] 完善单设备退出用例与全端登出用例 `apps/backend/src/modules/identity/application/use-cases/session-device-lifecycle.ts`
-- [ ] T031 [US3] 挂载并校验 Fastify 路由 `POST /api/v1/identity/sessions/logout` 与 `POST /api/v1/identity/sessions/logout-all` 于 `apps/backend/src/modules/identity/http/routes.ts`
-- [ ] T032 [US3] 移动端 `AuthProvider` 对接触发 `signOut` 逻辑，清理内存 Access Token 与安全存储 Refresh Token `apps/mobile/src/auth/context/AuthProvider.tsx`
-- [ ] T033 [US3] 移动端设置页添加“退出登录”与“退出所有设备”交互按钮及调用绑定 `apps/mobile/src/screens/settings/SettingsScreen.tsx`
+- [x] T029 [P] [US3] 在仓储层实现单个会话撤销与基于 `user_id` 的批量会话撤销 `apps/backend/src/modules/identity/infrastructure/session-repository.ts`
+- [x] T030 [US3] 完善单设备退出用例与全端登出用例 `apps/backend/src/modules/identity/application/use-cases/session-device-lifecycle.ts`
+- [x] T031 [US3] 挂载并校验 Fastify 路由 `POST /api/v1/identity/sessions/logout` 与 `POST /api/v1/identity/sessions/logout-all` 于 `apps/backend/src/modules/identity/http/routes.ts`
+- [x] T032 [US3] 移动端 `AuthProvider` 对接触发 `signOut` 逻辑，清理内存 Access Token 与安全存储 Refresh Token `apps/mobile/src/auth/context/AuthProvider.tsx`
+- [x] T033 [US3] 移动端设置页添加“退出登录”与“退出所有设备”交互按钮及调用绑定 `apps/mobile/src/screens/settings/SettingsScreen.tsx`
 
 **Checkpoint**: 单端安全退出与全端紧急注销功能完备，会话生命周期闭环受控。
 
@@ -114,13 +114,13 @@
 **Independent Test**: 提交有效 Facebook Credential 请求 `POST /api/v1/identity/auth/facebook`，新老用户均正确签发令牌并建立会话；未配置真实凭证且非测试模式时返回 503 `PROVIDER_UNAVAILABLE`；伪造 subject 必被拒绝。
 
 ### Tests for User Story 4 🧪
-- [ ] T034 [P] [US4] 编写 Facebook 认证契约与降级处理测试 `apps/backend/test/modules/identity/authenticate-facebook.contract.test.ts`
+- [x] T034 [P] [US4] 编写 Facebook 认证契约与降级处理测试 `apps/backend/test/modules/identity/authenticate-facebook.contract.test.ts`
 
 ### Implementation for User Story 4
-- [ ] T035 [P] [US4] 完善 Facebook 凭证服务端校验适配器与 Fake 契约驱动 `apps/backend/src/modules/identity/application/services/facebook-verifier.ts`
-- [ ] T036 [US4] 完善 Facebook 认证与新用户建档应用用例 `apps/backend/src/modules/identity/application/use-cases/authenticate-with-facebook.ts`
-- [ ] T037 [US4] 挂载并校验 Fastify 路由 `POST /api/v1/identity/auth/facebook` 于 `apps/backend/src/modules/identity/http/routes.ts`
-- [ ] T038 [US4] 移动端登录页增加 Facebook 登录按钮交互与事件占位 `apps/mobile/src/screens/auth/LoginScreen.tsx`
+- [x] T035 [P] [US4] 完善 Facebook 凭证服务端校验适配器与 Fake 契约驱动 `apps/backend/src/modules/identity/application/services/facebook-verifier.ts`
+- [x] T036 [US4] 完善 Facebook 认证与新用户建档应用用例 `apps/backend/src/modules/identity/application/use-cases/authenticate-with-facebook.ts`
+- [x] T037 [US4] 挂载并校验 Fastify 路由 `POST /api/v1/identity/auth/facebook` 于 `apps/backend/src/modules/identity/http/routes.ts`
+- [x] T038 [US4] 移动端登录页增加 Facebook 登录按钮交互与事件占位 `apps/mobile/src/screens/auth/LoginScreen.tsx`
 
 **Checkpoint**: 国际化第三方社交登录途径就绪，老用户直接登录，新用户安全初始化。
 
@@ -130,10 +130,10 @@
 
 **Purpose**: 安全加固、日志脱敏、端到端自动化验收与架构对齐审计
 
-- [ ] T039 [P] 全局审计确保 Raw OTP 与 Raw Refresh Token 绝无明文落库、不入日志、不入 Outbox `apps/backend/src/modules/identity/`
-- [ ] T040 [P] 执行 quickstart.md 中的端到端全链路验证场景脚本 `specs/001-user-login/quickstart.md`
-- [ ] T041 运行后端 Identity 模块测试套件确保 100% 通过 `pnpm --filter @zhlao/backend test`
-- [ ] T042 运行移动端 Auth 模块测试套件确保 100% 通过 `pnpm --filter @zhlao/mobile test`
+- [x] T039 [P] 全局审计确保 Raw OTP 与 Raw Refresh Token 绝无明文落库、不入日志、不入 Outbox `apps/backend/src/modules/identity/`
+- [x] T040 [P] 执行 quickstart.md 中的端到端全链路验证场景脚本 `specs/001-user-login/quickstart.md`
+- [x] T041 运行后端 Identity 模块测试套件确保 100% 通过 `pnpm --filter @zhlao/backend test`
+- [x] T042 运行移动端 Auth 模块测试套件确保 100% 通过 `pnpm --filter @zhlao/mobile test`
 
 ---
 

@@ -20,8 +20,9 @@ const featureGroups = [...new Set(featurePageIndex.features.map((feature) => fea
 
 const guideSidebar = [
   {
-    text: '使用指南',
+    text: '开始了解项目',
     items: [
+      { text: '项目说明书', link: '/guide/project-guide' },
       { text: '阅读与维护文档', link: '/guide/getting-started' },
       { text: '常见问题', link: '/guide/faq' }
     ]
@@ -377,6 +378,7 @@ export default defineConfig({
   themeConfig: {
     nav: [
       { text: '首页', link: '/' },
+      { text: '项目说明', link: '/guide/project-guide' },
       { text: '产品', link: '/product/product-overview' },
       { text: '架构', link: '/architecture/' },
       { text: '领域', link: '/domains/' },

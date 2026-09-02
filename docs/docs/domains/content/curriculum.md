@@ -1,38 +1,82 @@
+# Curriculum Domain（课程编排与学习大纲）
+
+> 状态：Domain Framework Draft  
+> 领域：Content Domain  
+> 职责：定义课程组织层级、场景化对话编排、内容挂载契约、VIP 权限门控、每日学习排期与学习流消费模型。
+
 ---
-status: frozen
-last_updated: 2026-08-30
-schema: content
----
 
-# Curriculum 规格
+## 1. 领域范围与层级模型
 
-所有表位于 `content` Schema；`course_id` / `unit_id` / `lesson_id` / `section_id` 均为域内真实 FK。
+### 1.1 课程体系层次结构 [PA]
+课程体系负责将离散的字母、音节、单词、句子组织为结构化的教学路径。
 
+新系统统一规范为标准 5 级学习大纲体系：
 ```text
-Course → Unit → Lesson → LessonSection → LessonItem
+Course（课程）
+   └── Unit（单元）
+         └── Lesson（课时/对话组）
+               └── LessonSection（课时小节）
+                     └── LessonItem（课时项/挂载实体）
 ```
 
-Course 和 Lesson 管理发布状态；Unit、Section、Item 跟随上级生命周期，不各自维护 status。
+### 1.2 挂载实体引用契约（Mounting Contract）[PA]
+- 课时项（LessonItem）通过受控的逻辑内容标识（`content_entity_type` + `content_entity_id`）关联具体词条。
+- **只存引用，不复制本体**：课程结构只维护编排与排序元数据，不冗余复制词条文本或释义。
+- **生命周期解耦**：课程编排调整不产生新的词条版本；词条版本升级发布也不自动重排课程顺序。
 
-| 表 | 冻结字段与约束 |
-| --- | --- |
-| `courses` | `id bigint identity PK`、`public_id uuid not null unique`（应用层生成、不可变）、`learning_language varchar(8) not null check zh/lo`、`title varchar(128) not null`、`subtitle varchar(256)`、`description text`、`cover_media_id uuid`（Media/Asset logical UUID，无跨域 FK）、`status varchar(16) not null default draft check draft/published/archived`、`sort_order integer not null default 0`、审计时间。 |
-| `units` | `id bigint identity PK`、`course_id bigint not null FK → courses`、`title varchar(128) not null`、`description text`、`sort_order integer not null`、审计时间；UNIQUE `(course_id,sort_order)`。 |
-| `lessons` | `id bigint identity PK`、`public_id uuid not null unique`（应用层生成、不可变）、`unit_id bigint not null FK → units`、`title varchar(128) not null`、`description text`、`sort_order integer not null`、`estimated_minutes smallint check null or >0`、`status varchar(16) not null default draft check draft/published/archived`、`published_at timestamptz`、审计时间；UNIQUE `(unit_id,sort_order)`。 |
-| `lesson_sections` | `id bigint identity PK`、`public_id uuid not null unique`（应用层生成、不可变；供 `learning.lesson_progress.last_section_id` 跨域引用）、`lesson_id bigint not null FK → lessons`、`section_type varchar(32) not null check introduction/knowledge/example/practice/summary/custom`、`title varchar(128)`、`description text`、`sort_order integer not null`、审计时间；UNIQUE `(lesson_id,sort_order)`。 |
-| `lesson_items` | `id bigint identity PK`、`section_id bigint not null FK → lesson_sections`、`item_type varchar(32) not null check text/knowledge/image/audio/exercise/tip/dialogue`、`content_id bigint FK → contents`、`exercise_id bigint FK → exercises`、`media_id uuid`（Media/Asset logical UUID，无跨域 FK）、`title varchar(256)`、`body text`、`sort_order integer not null`、`metadata jsonb not null default '{}'::jsonb`、`is_required boolean not null default true`、审计时间；UNIQUE `(section_id,sort_order)`。 |
+---
 
-## LessonItem 规则
+## 2. 情景对话与场景编排 [PA]
 
-- `knowledge` 至少需要 `content_id`；`exercise` 至少需要 `exercise_id`；`image/audio` 至少需要 `media_id`；`text/tip/dialogue` 至少需要 `body`。
-- 数据库 CHECK 只验证类型的必需字段存在，不强制其他字段为 NULL；Knowledge Item 可以同时拥有专属图片等辅助内容。
-- `metadata` 只保存展示参数，如布局、拼音/翻译显示和音频重复次数；核心内容保持字段/FK 结构化。
-- `content_id → content.contents`、`exercise_id → content.exercises` 均为**域内真实 FK**（同属 `content` Schema）；`media_id` 为 Media/Asset Infrastructure 的 logical UUID 引用（无跨域物理 FK，D-152）。
+### 2.1 场景化教学组织
+- **情景分类/场景（Scene / Category）**：承载主题分类（如日常问候、餐饮就餐、交通出行），支持图标（Icon）、介绍与 VIP 访问级别。
+- **对话课（Dialogue Lesson）**：归属于特定场景的会话教学课时，包含角色定义（如角色 A/B）与会话句子流。
 
-## 发布与版本规则
+### 2.2 编排完整性校验规则
+- 页面挂载保存时，系统需进行全量引用有效性校验（内容存在、已上线）；
+- 严禁静默丢弃错误挂载，保存失败需精准反馈具体非法项及位置。
 
-课程发布由 Application Service 校验其 Unit、Lesson、Section、Item、Knowledge、Exercise、Media 和排序完整性，不使用 Trigger。
+---
 
-已产生用户学习记录的 Published Learning Content 不可做破坏性修改；重大修改创建新版本或新 Question。完整内容版本系统属于后续 Operations/Content Publishing 设计。
+## 3. 访问控制与 VIP 门控体系 [PA]
 
-Lesson 完成条件由 Application Service / Platform Config 决定，例如 required LessonItem 完成比例；数据库只保存最终状态（用户侧完成事实归 `learning.lesson_progress`）。
+### 3.1 权限梯队与门控语义
+- 内容与课程节点均支持 VIP 门槛配置：`free`（免费）$\to$ `bronze`（青铜）$\to$ `silver`（白银）$\to$ `gold`（黄金）。
+- **核心定义**：*VIP 等级是商业化访问控制门禁，并非语言学学习难度等级。*
+
+### 3.2 访问鉴权规则
+- 未登录用户：默认按 `free` 权限解析。
+- 已登录用户：若 `vip_expire_at` 超期失效，自动降级为 `free`。
+- 权限判定：用户当前有效等级 $\ge$ 节点要求的 VIP 等级方可访问，否则在 C 端隐藏或展示升级锁定提示。
+
+---
+
+## 4. 学习流程与消费模型 [PA]
+
+### 4.1 每日学习与自动轮换回退机制（Daily Content Schedule）
+- 每日内容通过排期表指定特定日期的内容条目（`sentence_id` + `word_ids`）。
+- **无排期回退机制**：
+  - 当日未配置运营排期时，C 端服务根据日期哈希对已上线的推荐内容池（`recommend_daily = true` 且 VIP 可见的正式词条）进行自动取模轮换。
+  - 保障任何日期学习者均有合规的每日新词与每日一句展示。
+
+### 4.2 课程学习进度记录
+- 学习进度以「用户 × 课时/页面」为基本追踪单元。
+- 记录学习状态（学习中 / 已完成）、累计学习时长（秒）、首次学习时间与最近活跃时间。
+
+---
+
+## 5. Engineering Reality 历史映射 [ER]
+
+> 仅记录旧系统事实备查，不作为新系统架构依赖：
+- 旧系统老挝语未落地 Level/Course/Chapter 体系，实际物理结构为 `app_menu`（菜单）$\to$ `app_menu_tree`（挂载树）$\to$ `app_category`（场景）$\to$ `app_page`（页面/对话）$\to$ `app_page_unit`（页面单元）。
+- 旧表 `lao_course` / `lao_course_revision` 虽已在数据库建立但应用层零读写。
+- 树结构变更在旧系统中曾采用存储过程 `update_app_menu_tree` 全量原子重建。
+
+---
+
+## 6. 未决事项 [UNKNOWN]
+
+1. **[UNKNOWN] 老挝语方向官方学习等级大纲（Proficiency Stages）**：旧系统仅中文方向拥有 HSK 1~6 课程树；老挝语方向缺乏官方认定的等级划分（如初级/中级/高级标准），新系统需产品明确规划。
+2. **[UNKNOWN] 练习与测试在课程中的节点形式**：旧系统 Lao 方向未设计课后练习或阶段性单元测试，新系统需决策 Lesson 内练习环节的挂载方式。
+3. **[UNKNOWN] 离线课程包下载与同步策略**：移动端离线学习的数据同步契约与缓存失效机制待定义。

@@ -1,16 +1,6 @@
 import type { PublicId } from '../../api/contracts/uuid';
 import type { IsoDateTimeString } from '../../api/contracts/time';
-
-/**
- * Future Identity adapter — INTERFACE ONLY.
- *
- * The Mobile Foundation deliberately does NOT implement this and does NOT
- * invent endpoints such as `/api/auth/refresh`. The adapter is registered by
- * the Identity phase once the Identity API contract is frozen.
- *
- * Until an adapter is registered, `sessionBootstrap` resolves the session to
- * `anonymous` with `reason: 'identity_adapter_pending'`.
- */
+import { httpClient } from '../../api/client/httpClient';
 
 export interface IdentitySession {
   readonly accessToken: string;
@@ -26,9 +16,33 @@ export interface RestoreSessionInput {
 export interface IdentitySessionAdapter {
   /**
    * Exchanges a stored refresh token for a fresh session.
-   * Implemented by the Identity domain; never called by the Foundation.
    */
   restoreSession(input: RestoreSessionInput): Promise<IdentitySession>;
+}
+
+export class HttpIdentitySessionAdapter implements IdentitySessionAdapter {
+  async restoreSession(input: RestoreSessionInput): Promise<IdentitySession> {
+    const response = await httpClient.post<{
+      access_token: string;
+      refresh_token: string;
+      session_expires_at: string;
+      token_type: string;
+      expires_in: number;
+    }>('/api/v1/identity/sessions/refresh', {
+      refresh_token: input.refreshToken,
+    });
+
+    if (!response.data) {
+      throw new Error('No session data received from server');
+    }
+
+    return {
+      accessToken: response.data.access_token,
+      refreshToken: response.data.refresh_token,
+      subjectId: '' as PublicId, // Retained from session metadata if needed
+      expiresAt: (response.data.session_expires_at as IsoDateTimeString) ?? null,
+    };
+  }
 }
 
 let adapter: IdentitySessionAdapter | null = null;

@@ -3,6 +3,7 @@
 本目录维护当前项目的正式设计文档。
 
 - 项目总入口：[PROJECT.md](PROJECT.md)
+- 给人看的项目说明：[docs/guide/project-guide.md](docs/guide/project-guide.md)
 - 人类阅读入口：[docs/index.md](docs/index.md)
 - 文档协作与维护规则：[AGENTS.md](AGENTS.md)
 

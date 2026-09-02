@@ -28,6 +28,13 @@ const DesignSystemPage = React.lazy(() =>
   import('@/pages/system/design-system').then((module) => ({ default: module.DesignSystemPage })),
 )
 
+const ContentLandingPage = React.lazy(() =>
+  import('@/features/content/pages/landing').then((module) => ({ default: module.ContentLandingPage })),
+)
+const AlphabetPage = React.lazy(() =>
+  import('@/features/content/alphabet/pages/AlphabetPage').then((module) => ({ default: module.AlphabetPage })),
+)
+
 const PlatformLandingPage = React.lazy(() =>
   import('@/features/platform/pages/landing').then((module) => ({ default: module.PlatformLandingPage })),
 )
@@ -97,7 +104,9 @@ function makeDomainRoute(path: string, domain: string, title: string, descriptio
   })
 }
 
-const contentRoute = makeDomainRoute('/content', 'content', '内容管理', '学习内容定义（Content Domain）')
+const contentRoute = createRoute({ getParentRoute: () => shellRoute, path: '/content', component: ContentLandingPage })
+const contentLettersRoute = createRoute({ getParentRoute: () => shellRoute, path: '/content/letters', component: AlphabetPage })
+
 const learningRoute = makeDomainRoute('/learning', 'learning', '学习系统', '用户学习状态（Learning Domain）')
 const audioRoute = makeDomainRoute('/audio', 'audio', '音频生产', '音频生产流程（Audio Production Domain）')
 const identityRoute = makeDomainRoute('/identity', 'identity', '身份认证', '用户身份（Identity Domain）')
@@ -149,6 +158,7 @@ const routeTree = rootRoute.addChildren([
   shellRoute.addChildren([
     indexRoute,
     contentRoute,
+    contentLettersRoute,
     learningRoute,
     audioRoute,
     identityRoute,

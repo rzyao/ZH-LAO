@@ -137,7 +137,7 @@ export const audioService = {
     let released = false;
 
     return {
-      id: player.id,
+      id: String(player.id),
       play: () => {
         guardNotReleased(released);
         player.play();

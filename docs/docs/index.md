@@ -5,7 +5,9 @@ last_updated: 2026-09-02
 
 # ZH-LAO 文档中心
 
-`PROJECT.md` 是仓库级项目知识总入口；本站按文档职责进入。
+如果你是第一次接触项目，请先阅读 **[ZH-LAO 项目说明书](guide/project-guide.md)**。它用非技术语言介绍项目是什么、目前做到哪里以及怎样在本机查看。
+
+`PROJECT.md` 是面向研发流程和 AI 的仓库级知识入口；下面的分类用于查找更详细的专业文档。
 
 - [产品](product/product-overview.md)：产品定位、范围、业务模型、首发后 12 个月业务规划与功能开放规则。
 - [架构](architecture/index.md)：长期系统结构、领域边界、应用架构、基础设施与数据架构。
@@ -14,6 +16,8 @@ last_updated: 2026-09-02
 - [开发](development/index.md)：Backend、Admin、Mobile 三条实施轨及 Workflow、Spec、Blueprint、Gate、Report 与进度证据。
 - [治理](governance/design-register.md)：设计决策台账、未决事项、文档规范与来源覆盖。
 - [ADR](adr/index.md)：架构决策的历史背景、取舍与长期裁决记录。
+
+> 想判断某项功能现在是否真的可用，请查看[开发进度](development/DEVELOPMENT_PROGRESS.md)，不要仅根据产品规划或 Spec Kit 作出判断。
 
 ## 文档职责
 

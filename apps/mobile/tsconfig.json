@@ -9,18 +9,27 @@
     "exactOptionalPropertyTypes": false,
     "moduleResolution": "bundler",
     "jsx": "react-jsx",
-    "types": ["nativewind/types", "jest"],
+    "types": [
+      "nativewind/types",
+      "jest"
+    ],
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": [
+        "src/*"
+      ]
     }
   },
   "include": [
     "**/*.ts",
     "**/*.tsx",
-    "nativewind-env.d.ts",
-    ".expo/types/**/*.ts",
-    "expo-env.d.ts"
+    "nativewind-env.d.ts"
   ],
-  "exclude": ["node_modules", "dist-web", "dist-android", "android", "ios"]
+  "exclude": [
+    "node_modules",
+    "dist-web",
+    "dist-android",
+    "android",
+    "ios"
+  ]
 }

@@ -49,7 +49,7 @@ export const NAV_GROUPS: NavGroup[] = [
     key: 'learning-content',
     label: '学习与内容',
     items: [
-      { key: 'content', label: '内容管理', href: '/content', icon: BookOpen, domain: 'content', placeholder: true },
+      { key: 'content', label: '内容管理', href: '/content', icon: BookOpen, domain: 'content' },
       { key: 'learning', label: '学习系统', href: '/learning', icon: GraduationCap, domain: 'learning', placeholder: true },
       { key: 'audio', label: '音频生产', href: '/audio', icon: AudioLines, domain: 'audio', placeholder: true },
     ],

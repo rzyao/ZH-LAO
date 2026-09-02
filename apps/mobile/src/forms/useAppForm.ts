@@ -30,12 +30,15 @@ export function appZodResolver<TValues extends FieldValues>(schema: z.ZodType): 
 }
 
 export interface UseAppFormOptions<TValues extends FieldValues> {
-  readonly resolver: Resolver<TValues>;
+  readonly resolver?: Resolver<TValues>;
+  readonly schema?: z.ZodType;
   readonly defaultValues: DefaultValues<TValues>;
 }
 
 export interface UseAppFormResult<TValues extends FieldValues> {
   readonly form: UseFormReturn<TValues>;
+  readonly control: UseFormReturn<TValues>['control'];
+  readonly handleSubmit: UseFormReturn<TValues>['handleSubmit'];
   readonly isSubmitting: boolean;
   readonly submitError: string | null;
   /** Wraps a submit handler with loading + error normalisation. */
@@ -48,8 +51,9 @@ export interface UseAppFormResult<TValues extends FieldValues> {
 export function useAppForm<TValues extends FieldValues>(
   options: UseAppFormOptions<TValues>,
 ): UseAppFormResult<TValues> {
+  const resolver = options.resolver ?? (options.schema ? appZodResolver<TValues>(options.schema) : undefined);
   const form = useForm<TValues>({
-    resolver: options.resolver,
+    resolver,
     defaultValues: options.defaultValues,
     mode: 'onBlur',
     reValidateMode: 'onChange',
@@ -81,6 +85,8 @@ export function useAppForm<TValues extends FieldValues>(
 
   return {
     form,
+    control: form.control,
+    handleSubmit: form.handleSubmit,
     isSubmitting,
     submitError,
     submitWith,

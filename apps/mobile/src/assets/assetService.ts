@@ -13,7 +13,6 @@
  */
 
 import { Directory, File, Paths } from 'expo-file-system';
-import type { PickSingleFileOptions } from 'expo-file-system';
 
 import type { PublicId } from '../api/contracts/uuid';
 import { createLogger } from '../utils/logger';
@@ -163,22 +162,23 @@ export const assetService = {
 
   /** Opens the system file picker. Returns `null` when the user cancels. */
   async pickFile(
-    options: PickSingleFileOptions = {},
+    options: { initialUri?: string; mimeType?: string } = {},
   ): Promise<FileSource | null> {
     try {
-      const result = await File.pickFileAsync(options);
-      if (result.canceled) {
+      const result = await File.pickFileAsync(options.initialUri, options.mimeType);
+      if (!result) {
         return null;
       }
-      const file = result.result;
+      const file = Array.isArray(result) ? result[0] : result;
       if (!file) {
         return null;
       }
       const info = await assetService.readLocalFileInfo(file.uri);
+      const fileName = file.uri.split(/[/\\]/).pop() ?? null;
       return {
         uri: file.uri,
-        name: file.name ?? null,
-        mimeType: guessMimeType(file.name ?? file.uri),
+        name: fileName,
+        mimeType: guessMimeType(fileName ?? file.uri),
         sizeBytes: info.sizeBytes,
       };
     } catch (error) {

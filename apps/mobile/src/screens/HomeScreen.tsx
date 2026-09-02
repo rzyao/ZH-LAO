@@ -21,7 +21,7 @@ const DEMO_RESOURCE_ID = '3f2f8c1e-5b7a-4a1d-9c6e-8d0b2f4a7e11';
 
 export function HomeScreen({ navigation }: HomeScreenProps) {
   const { colors, theme, themeId } = useTheme();
-  const { session, isSecureStorageAvailable } = useAuth();
+  const { session, isSecureStorageAvailable, signOut } = useAuth();
   const { lang, learningLanguage } = useI18n();
 
   const config = readAppConfig();
@@ -31,10 +31,10 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
     <ScreenContainer testID="home-screen">
       <AppScrollView contentContainerStyle={styles.content}>
         <AppText variant="h2" colorVariant="primary" bold testID="home-title">
-          ZH-LAO V2 Mobile Foundation
+          ZH-LAO V2 Mobile
         </AppText>
         <AppText variant="bodySmall" colorVariant="secondary">
-          Infrastructure ready. No domain API is integrated in this phase.
+          中老双语互助学习平台移动端
         </AppText>
 
         <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.borderSoft }]}>
@@ -47,6 +47,42 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
             label="Secure storage"
             value={isSecureStorageAvailable ? 'available' : 'unsupported on this platform'}
             testID="home-secure-storage"
+          />
+        </View>
+
+        <View style={styles.actions}>
+          {session.status !== 'authenticated' ? (
+            <AppButton
+              title="手机号登录 / 注册"
+              onPress={() => navigation.navigate('Login')}
+              testID="home-open-login"
+            />
+          ) : (
+            <AppButton
+              title="退出登录"
+              variant="danger"
+              onPress={() => void signOut()}
+              testID="home-sign-out"
+            />
+          )}
+
+          <AppButton
+            title="主题外观"
+            variant="secondary"
+            onPress={() => navigation.navigate('Theme')}
+            testID="home-open-theme"
+          />
+          <AppButton
+            title="语言设置"
+            variant="secondary"
+            onPress={() => navigation.navigate('LanguageSetting')}
+            testID="home-open-language"
+          />
+          <AppButton
+            title="UUID 路由示例"
+            variant="ghost"
+            onPress={() => navigation.navigate('ResourceDetail', { resourceId: DEMO_RESOURCE_ID })}
+            testID="home-open-resource"
           />
         </View>
 
@@ -67,26 +103,6 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
             testID="home-config-status"
           />
           <Row label="Started at" value={formatDateTimeWithSeconds(STARTED_AT, { timeZone: 'utc' })} />
-        </View>
-
-        <View style={styles.actions}>
-          <AppButton
-            title="主题外观"
-            onPress={() => navigation.navigate('Theme')}
-            testID="home-open-theme"
-          />
-          <AppButton
-            title="语言设置"
-            variant="secondary"
-            onPress={() => navigation.navigate('LanguageSetting')}
-            testID="home-open-language"
-          />
-          <AppButton
-            title="UUID 路由示例"
-            variant="ghost"
-            onPress={() => navigation.navigate('ResourceDetail', { resourceId: DEMO_RESOURCE_ID })}
-            testID="home-open-resource"
-          />
         </View>
       </AppScrollView>
     </ScreenContainer>
