@@ -24,6 +24,9 @@ for (const file of await walk(root)) {
         : specifier;
       const domainMatch = resolvedSpecifier?.match(/(?:^|\/)modules\/([^/]+)\/(.+)/);
       if (domainMatch && domainMatch[1] !== owner && !domainMatch[2]?.startsWith('public/')) errors.push(`${relative}: cross-domain import must target public/: ${specifier}`);
+      // WP-04：业务模块只允许依赖 capability ports；禁止 import Provider Adapter / 容器 /
+      // External Provider / index 聚合（Business Domain → Capability Port → Provider Adapter）。
+      if (/(?:^|\/)capabilities\//.test(resolvedSpecifier ?? '') && !/(?:^|\/)capabilities\/ports\//.test(resolvedSpecifier ?? '')) errors.push(`${relative}: business modules must depend on capability ports only (no provider adapters/container): ${specifier}`);
     }
     if (/\bnew\s+Pool\s*\(/.test(source) || /from\s+['"]pg['"]/.test(source)) errors.push(`${relative}: business modules must not construct or import pg Pool`);
     if (relative.includes('/http/') && /\.query\s*\(/.test(source)) errors.push(`${relative}: HTTP adapters must not execute SQL`);

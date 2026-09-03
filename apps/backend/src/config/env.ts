@@ -8,6 +8,13 @@ export type AppConfig = Readonly<{
   logLevel: Environment['LOG_LEVEL'];
   outbox: Readonly<{ pollIntervalMs: number; batchSize: number; leaseMs: number }>;
   identity: Readonly<{ otpHmacSecret: string | undefined; jwtHmacSecret: string | undefined; jwtIssuer: string; jwtAudience: string; otpProvider: 'console' | 'unavailable'; adminUsername: string; adminPassword: string }>;
+  capabilities: Readonly<{
+    objectStorage: 'unavailable' | 'memory';
+    translation: 'unavailable' | 'fake';
+    tts: 'unavailable' | 'fake';
+    media: 'unavailable' | 'fake';
+    cache: 'none' | 'memory';
+  }>;
   shutdownTimeoutMs: number;
 }>;
 
@@ -27,6 +34,13 @@ export function loadConfig(source: NodeJS.ProcessEnv = process.env): AppConfig {
     logLevel: env.LOG_LEVEL,
     outbox: Object.freeze({ pollIntervalMs: env.OUTBOX_POLL_INTERVAL_MS, batchSize: env.OUTBOX_BATCH_SIZE, leaseMs: env.OUTBOX_LEASE_MS }),
     identity: Object.freeze({ otpHmacSecret: env.OTP_HMAC_SECRET, jwtHmacSecret: env.JWT_HMAC_SECRET, jwtIssuer: env.JWT_ISSUER, jwtAudience: env.JWT_AUDIENCE, otpProvider: env.IDENTITY_OTP_PROVIDER, adminUsername: env.ADMIN_USERNAME, adminPassword: env.ADMIN_PASSWORD }),
+    capabilities: Object.freeze({
+      objectStorage: env.OBJECT_STORAGE_PROVIDER,
+      translation: env.TRANSLATION_PROVIDER,
+      tts: env.TTS_PROVIDER,
+      media: env.MEDIA_PROCESSING_PROVIDER,
+      cache: env.CACHE_PROVIDER ?? (env.APP_ENV === 'production' ? 'none' : 'memory')
+    }),
     shutdownTimeoutMs: env.SHUTDOWN_TIMEOUT_MS
   });
 }

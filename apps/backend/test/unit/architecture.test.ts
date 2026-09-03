@@ -36,4 +36,14 @@ describe('architecture audit', () => {
     const root = await fixture('modules/learning/infrastructure/repository.ts', `import { Pool } from 'pg'; import { x } from '../../content/infrastructure/repository.js'; export const value = new Pool();`);
     await expect(exec(process.execPath, [path.resolve('scripts/check-architecture.mjs'), root])).rejects.toMatchObject({ stderr: expect.stringContaining('cross-domain import'), code: 1 });
   });
+  it('allows capability port imports but rejects provider adapters/container in business modules (WP-04)', async () => {
+    const legal = await fixture('modules/audio/infrastructure/repository.ts', `import type { TtsPort } from '../../../capabilities/ports/tts.js'; export type X = TtsPort;`);
+    await expect(exec(process.execPath, [path.resolve('scripts/check-architecture.mjs'), legal])).resolves.toMatchObject({ stdout: expect.stringContaining('PASS') });
+
+    const illegalAdapter = await fixture('modules/audio/infrastructure/repository.ts', `import { FakeTtsProvider } from '../../../capabilities/adapters/tts/fake-tts.js'; export const x = new FakeTtsProvider();`);
+    await expect(exec(process.execPath, [path.resolve('scripts/check-architecture.mjs'), illegalAdapter])).rejects.toMatchObject({ stderr: expect.stringContaining('capability ports only'), code: 1 });
+
+    const illegalContainer = await fixture('modules/audio/infrastructure/repository.ts', `import { buildCapabilities } from '../../../capabilities/container.js'; export const x = buildCapabilities;`);
+    await expect(exec(process.execPath, [path.resolve('scripts/check-architecture.mjs'), illegalContainer])).rejects.toMatchObject({ stderr: expect.stringContaining('capability ports only'), code: 1 });
+  });
 });
