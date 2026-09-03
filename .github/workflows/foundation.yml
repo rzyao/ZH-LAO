@@ -23,13 +23,13 @@ jobs:
         with: { version: 10.20.0 }
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: pnpm, cache-dependency-path: "**/pnpm-lock.yaml" }
-      - run: pnpm --dir database/v2 install --frozen-lockfile
+      - run: pnpm --dir database install --frozen-lockfile
       - run: pnpm --dir apps/backend install --frozen-lockfile
       - run: pnpm --dir apps/backend verify
       - run: pnpm --dir apps/backend build
       - run: pnpm --dir apps/backend test:integration
-      - run: pnpm --dir database/v2 test
-      - run: pnpm --dir database/v2 validate
+      - run: pnpm --dir database test
+      - run: pnpm --dir database validate
   admin:
     runs-on: ubuntu-latest
     steps:
