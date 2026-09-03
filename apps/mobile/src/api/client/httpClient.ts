@@ -165,9 +165,15 @@ async function send<T>(options: RequestOptions): Promise<HttpResponse<T>> {
   }
 
   const responseHeaders = normalizeHeaders(response.headers);
-  const responseRequestId = responseHeaders[REQUEST_ID_HEADER.toLowerCase()] ?? requestId;
+  let responseRequestId = responseHeaders[REQUEST_ID_HEADER.toLowerCase()] ?? requestId;
 
-  if (response.status >= 400) {
+  // ADR-023: Check if body is unified envelope
+  const rawBody = response.data;
+  const isEnvelope = typeof rawBody === 'object' && rawBody !== null && typeof (rawBody as Record<string, unknown>).code === 'string';
+  const isBusinessFailure = isEnvelope && (rawBody as Record<string, unknown>).code !== 'OK';
+  const isTransportFailure = response.status >= 400;
+
+  if (isBusinessFailure || isTransportFailure) {
     const normalized = normalizeHttpError(
       {
         response: {
@@ -175,7 +181,7 @@ async function send<T>(options: RequestOptions): Promise<HttpResponse<T>> {
           data: response.data,
           headers: response.headers,
         },
-        code: `HTTP_${response.status}`,
+        code: isEnvelope ? String((rawBody as Record<string, unknown>).code) : `HTTP_${response.status}`,
       },
       requestId,
     );
@@ -190,23 +196,38 @@ async function send<T>(options: RequestOptions): Promise<HttpResponse<T>> {
       requestId,
       status: response.status,
       kind: normalized.kind,
+      businessCode: isEnvelope ? (rawBody as Record<string, unknown>).code : undefined,
     });
 
     throw normalized;
   }
 
-  if (options.validate && !options.validate(response.data)) {
+  // Success path: unwrap data if unified envelope
+  let responseData: unknown = response.data;
+  if (isEnvelope) {
+    const record = rawBody as Record<string, unknown>;
+    if ('data' in record) {
+      responseData = record.data;
+    }
+    if (typeof record.request_id === 'string') {
+      responseRequestId = record.request_id;
+    } else if (typeof record.requestId === 'string') {
+      responseRequestId = record.requestId;
+    }
+  }
+
+  if (options.validate && !options.validate(responseData)) {
     throw new UnknownError('服务端返回的数据格式不正确。', {
-      requestId,
+      requestId: responseRequestId,
       status: response.status,
       code: 'INVALID_RESPONSE_SHAPE',
     });
   }
 
-  log.debug('response', { method, path: options.path, requestId, status: response.status });
+  log.debug('response', { method, path: options.path, requestId: responseRequestId, status: response.status });
 
   return {
-    data: response.data as T,
+    data: responseData as T,
     status: response.status,
     requestId: responseRequestId,
     headers: responseHeaders,

@@ -49,7 +49,9 @@ describe('US3 Logout and LogoutAll Contract', () => {
       }
     });
 
-    expect(response.statusCode).toBe(204);
+    expect(response.statusCode).toBe(200);
+    expect(response.json().code).toBe('OK');
+    expect(response.json().data).toBeNull();
     expect(capturedPhoneOrToken(capturedToken)).toBe('token-to-revoke');
     await app.close();
   });
@@ -87,7 +89,9 @@ describe('US3 Logout and LogoutAll Contract', () => {
       }
     });
 
-    expect(response.statusCode).toBe(204);
+    expect(response.statusCode).toBe(200);
+    expect(response.json().code).toBe('OK');
+    expect(response.json().data).toBeNull();
     expect(capturedSubject).toBe(subjectId);
     await app.close();
   });

@@ -51,10 +51,13 @@ describe('US1 RequestPhoneOtp Contract', () => {
     });
 
     expect(response.statusCode).toBe(200);
-    expect(response.json()).toEqual({
+    const body = response.json();
+    expect(body.code).toBe('OK');
+    expect(body.data).toEqual({
       status: 'accepted',
       retry_after_seconds: 60
     });
+    expect(body.request_id).toBeDefined();
     expect(capturedPhone).toBe('+8562012345678');
     await app.close();
   });
@@ -89,8 +92,8 @@ describe('US1 RequestPhoneOtp Contract', () => {
       }
     });
 
-    expect(response.statusCode).toBe(400);
-    expect(response.json().error.code).toBe('INVALID_PHONE');
+    expect(response.statusCode).toBe(200);
+    expect(response.json().code).toBe('INVALID_PHONE');
     await app.close();
   });
 });

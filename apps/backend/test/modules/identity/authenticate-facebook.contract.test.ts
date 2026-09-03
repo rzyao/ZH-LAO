@@ -64,7 +64,9 @@ describe('US4 Facebook Auth Contract', () => {
     });
 
     expect(response.statusCode).toBe(200);
-    expect(response.json()).toEqual({
+    const body = response.json();
+    expect(body.code).toBe('OK');
+    expect(body.data).toEqual({
       user_id: userPublicId,
       account_status: 'active',
       is_new_user: false,
@@ -74,6 +76,7 @@ describe('US4 Facebook Auth Contract', () => {
       refresh_token: 'fb-refresh-token',
       session_expires_at: sessionExpiresAt.toISOString()
     });
+    expect(body.request_id).toBeDefined();
     expect(capturedCredential).toBe('valid-fb-token-12345');
     await app.close();
   });

@@ -1,7 +1,12 @@
 ---
 status: active
-last_updated: 2026-08-31
+last_updated: 2026-09-03
 ---
+
+> **契约修订 (ADR-023)**: 2026-09-03 起,统一响应信封为「HTTP 一律 200 +
+> 顶层 `code` 信封 + 业务状态码权威」。修订依据 [ADR-023](/developer/reference/adr/ADR-023-unified-api-contract.md)
+> (`frozen`) 与设计台账 [D-156](/developer/reference/governance/design-register.md)。
+> 业务状态码词汇表见 [business-status-codes.md](./business-status-codes.md)。
 
 # 全局 API 接口设计与通信规范 (API Standard & Protocols)
 
@@ -42,9 +47,9 @@ ZH-LAO 系统采用 **模块化单体 (Modular Monolith)** 架构，各业务域
 
 ---
 
-## 3. 标准 HTTP 动词与状态码映射 (HTTP Methods & Status Codes)
+## 3. 标准 HTTP 动词与状态码 (HTTP Methods & Status Codes)
 
-严格根据操作语义使用标准 HTTP 动词与状态码：
+严格根据操作语义使用标准 HTTP 动词；**业务成败由响应体顶层 `code`（业务状态码）权威表达**，HTTP 状态码一律为 **200**（ADR-023）。
 
 ```
 ┌──────────────┬────────────────────────────────────────────────────────────────────────┐
@@ -58,33 +63,59 @@ ZH-LAO 系统采用 **模块化单体 (Modular Monolith)** 架构，各业务域
 └──────────────┴────────────────────────────────────────────────────────────────────────┘
 ```
 
-### 状态码映射表
+### 业务状态码权威 + HTTP 一律 200
 
-| 状态码 | 含义 (Status) | 适用业务场景 |
-| :--- | :--- | :--- |
-| **200 OK** | 请求成功 | `GET`, `PATCH`, `PUT` 以及同步返回数据的 `POST` 操作 |
-| **201 Created** | 资源创建成功 | `POST` 新建资源，并在响应体中返回新建实体的完整或核心数据 |
-| **202 Accepted** | 异步任务已接受 | 耗时任务（如 TTS 批量合成、全服配置同步、大规模导出）排队中 |
-| **204 No Content**| 成功但无返回体 | 资源的硬删除/注销操作 |
-| **400 Bad Request**| 请求参数校验失败 | 请求体字段类型错误、缺失必填项、Zod Schema 校验未通过 |
-| **401 Unauthorized**| 身份未认证 | Token 缺失、格式无效、已过期或已被主动注销 |
-| **403 Forbidden** | 权限不足 | 已通过身份认证，但角色缺少当前操作所需的 RBAC 权限点 |
-| **404 Not Found** | 资源不存在 | 请求的实体 ID 在数据库中不存在或对当前主体逻辑不可见 |
-| **409 Conflict**  | 状态或版本冲突 | 乐观锁版本号不一致（Stale Config）、唯一键重复（手机号已注册） |
-| **422 Unprocessable**| 语义或业务规则受阻 | 业务状态机禁止流转（如对“已驳回”的音频直接发起“发布”） |
-| **429 Too Many Requests**| 频控限流 | 短信 OTP 发送频率超限、恶意接口请求拦截 |
-| **500 Internal Error**| 服务端异常 | 未捕获的代码运行时异常（隐藏堆栈，返回统一 requestId） |
-| **503 Unavailable** | 上游依赖不可用 | 短信通道挂起、第三方支付网关故障（Fail-Closed 原则） |
+**所有到达业务层的响应 HTTP 状态码固定为 200**，请求成败由响应体顶层 `code` 判断：
+
+| 场景 | HTTP | 响应体 `code` | 说明 |
+| :--- | :--- | :--- | :--- |
+| 请求成功（含创建/无返回体操作） | **200** | `OK` | `data` 承载载荷；无返回体 → `data: null` |
+| 字段校验失败 | **200** | `VALIDATION_ERROR` | `error.details` 为字段级错误数组 |
+| 身份未认证 | **200** | `UNAUTHENTICATED` | 前端触发登录失效处理 |
+| 权限不足 | **200** | `FORBIDDEN` | 不触发登录失效 |
+| 资源不存在 | **200** | `NOT_FOUND` | — |
+| 乐观锁/版本冲突 | **200** | `STALE_VERSION_CONFLICT` | `error.details` 含版本元数据 |
+| 频控限流 | **200** | `RATE_LIMITED` / `LOGIN_RATE_LIMITED` | `error.details.retry_after_seconds` |
+| 服务端异常 | **200** | `INTERNAL_ERROR` | `message` 隐藏内部细节，`request_id` 追踪 |
+
+> 完整词汇表与每码含义/前端处理动作见 [business-status-codes.md](./business-status-codes.md)。
+> 历史 HTTP 状态码（201/204/400/401/403/404/409/422/429/500/503）仅作为**日志/监控/兼容参考语义**，
+> 不再决定响应状态码。原 201/202/204 不再通过 HTTP 码区分，必要时由 `data` 内容表达。
+
+### 传输层非 200 兜底
+
+统一信封只保证「到达业务层的响应一律 200」。网关/代理/负载均衡层可能仍产生非 200
+（如反代 502、网关 429），前端保留对传输层非 200 的兜底映射（`network`/`server`/`rate_limit`
+前端类型）。`AppError.httpStatus` 保留用于日志/监控/兼容说明，不决定响应码。
+
+### 健康检查豁免
+
+`/health/live`、`/health/ready` 为**基础设施探针**（L7 探针而非业务客户端），**豁免**于统一信封，
+保持 `status: 'ok'` / 503 语义（负载均衡摘流依赖）。
 
 ---
 
-## 4. 统一响应格式与错误包体 (Response Envelope & Error Model)
+## 4. 统一请求格式与响应信封 (Request Format & Response Envelope)
+
+### 4.0 统一信封 (Response Envelope)
+
+所有业务 API 响应统一为单一信封（ADR-023）：
+
+```text
+{ "code": <业务状态码>, "data"?: <成功载荷>, "error"?: <失败详情>, "request_id": <追踪ID> }
+```
+
+- **`code`**：业务状态码（`UPPER_SNAKE_CASE`），**成败判断的唯一权威**。成功恒为 `OK`，失败为对应业务码。
+- **`data`**：成功载荷（成功时存在；无返回体操作为 `null`）。
+- **`error`**：失败详情对象（失败时存在；成功时不存在）。
+- **`request_id`**：追踪 ID，**始终存在（含认证前失败）**，由 Fastify 请求入口分配，用于线上排查。
 
 ### 4.1 成功响应格式
 
 #### 单实体返回
 ```json
 {
+  "code": "OK",
   "data": {
     "account_id": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d",
     "username": "operator_alice",
@@ -93,13 +124,15 @@ ZH-LAO 系统采用 **模块化单体 (Modular Monolith)** 架构，各业务域
     "status": "active",
     "created_at": "2026-08-31T10:00:00.000Z",
     "updated_at": "2026-08-31T10:00:00.000Z"
-  }
+  },
+  "request_id": "req-9f3a8b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c"
 }
 ```
 
 #### 分页列表返回（Offset 模式）
 ```json
 {
+  "code": "OK",
   "data": {
     "items": [
       {
@@ -114,13 +147,15 @@ ZH-LAO 系统采用 **模块化单体 (Modular Monolith)** 架构，各业务域
       "total": 128,
       "total_pages": 7
     }
-  }
+  },
+  "request_id": "req-9f3a8b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c"
 }
 ```
 
 #### 游标流式分页返回（Cursor 模式）
 ```json
 {
+  "code": "OK",
   "data": {
     "items": [
       {
@@ -135,20 +170,29 @@ ZH-LAO 系统采用 **模块化单体 (Modular Monolith)** 架构，各业务域
       "has_more": true,
       "next_cursor": "eyJzZXEiOjEwNTIsImlkIjoiMDE5MTc1..."
     }
-  }
+  },
+  "request_id": "req-9f3a8b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c"
+}
+```
+
+#### 无返回体操作（原 204）
+```json
+{
+  "code": "OK",
+  "data": null,
+  "request_id": "req-9f3a8b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c"
 }
 ```
 
 ### 4.2 统一错误包体 (Error Envelope)
 
-后端所有异常响应统一遵循 `AppError` 结构，严禁直接向客户端抛出原生数据库错误或未处理的异常堆栈：
+后端所有异常响应统一遵循 `AppError` 结构（HTTP 一律 200），严禁直接向客户端抛出原生数据库错误或未处理的异常堆栈：
 
 ```json
 {
+  "code": "VALIDATION_ERROR",
   "error": {
-    "code": "OPERATOR_ALREADY_EXISTS",
     "message": "The username 'operator_alice' is already assigned to another active account.",
-    "request_id": "req-9f3a8b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c",
     "details": [
       {
         "field": "username",
@@ -156,14 +200,15 @@ ZH-LAO 系统采用 **模块化单体 (Modular Monolith)** 架构，各业务域
         "message": "Username is already in use"
       }
     ]
-  }
+  },
+  "request_id": "req-9f3a8b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c"
 }
 ```
 
-* **`code`**：业务错误枚举字面量（大写下划线 `UPPER_SNAKE_CASE`），前端据此进行本地化文案或分支流转。
-* **`message`**：安全的可读错误描述（禁止包含 SQL 语句或内部机密路径）。
-* **`request_id`**：由网关或 Fastify 生成的追踪 ID，用于线上排查链路。
-* **`details`**：字段级校验异常细节数组（多用于 400 表单校验错误）。
+* **`code`**：业务状态码（`UPPER_SNAKE_CASE`），前端据此进行本地化文案或分支流转；完整词汇表见 [business-status-codes.md](./business-status-codes.md)。
+* **`error.message`**：安全的可读错误描述（禁止包含 SQL 语句或内部机密路径）。
+* **`error.details`**：结构化错误数据（字段级校验错误数组、冲突元数据、重试秒数等）。
+* **`request_id`**：顶层追踪 ID（**不在 `error` 内层**），由 Fastify 生成，用于线上排查链路；**始终存在（含认证前失败）**。
 
 ---
 
@@ -206,18 +251,17 @@ ZH-LAO 系统采用 **模块化单体 (Modular Monolith)** 架构，各业务域
 Client A (ver=3) ──── GET /config ─────────► [Server ver=3]
 Client B (ver=3) ──── GET /config ─────────► [Server ver=3]
 
-Client A (ver=3) ──── PATCH (ver=3) ───────► [Server ver=3 -> 4] (200 OK)
-Client B (ver=3) ──── PATCH (ver=3) ───────► [Server ver=4] (409 Conflict!)
+Client A (ver=3) ──── PATCH (ver=3) ───────► [Server ver=3 -> 4] (HTTP 200, code=OK)
+Client B (ver=3) ──── PATCH (ver=3) ───────► [Server ver=4] (HTTP 200, code=STALE_VERSION_CONFLICT)
                                               ↳ 返回最新版本元数据，提示覆盖冲突
 ```
 
-### 冲突响应示例 (409 Conflict)
+### 冲突响应示例 (HTTP 200 + code=STALE_VERSION_CONFLICT)
 ```json
 {
+  "code": "STALE_VERSION_CONFLICT",
   "error": {
-    "code": "STALE_VERSION_CONFLICT",
     "message": "The configuration has been modified by another operator. Please refresh and review latest changes.",
-    "request_id": "req-11223344",
     "details": [
       {
         "field": "version",
@@ -225,7 +269,8 @@ Client B (ver=3) ──── PATCH (ver=3) ───────► [Server ver
         "provided_version": 3
       }
     ]
-  }
+  },
+  "request_id": "req-11223344"
 }
 ```
 
@@ -244,5 +289,5 @@ Client B (ver=3) ──── PATCH (ver=3) ───────► [Server ver
   * 自动注入 `Authorization: Bearer <token>`
   * 自动生成并下发 `X-Request-Id`
   * 超时控制（`timeoutMs`）与 `AbortSignal` 取消支持
-  * 统一将非 2xx HTTP 状态映射为强类型的 `ApiError`, `UnauthorizedError`, `ConflictError`
+  * **以响应体顶层 `code` 判定成败**（`code === "OK"` 成功解包 `data`；否则按业务状态码映射为强类型 `ApiError`），不依赖 HTTP 状态码；传输层非 200 保留兜底映射
 * **状态缓存与失效**：结合 `@tanstack/react-query` 统一管理请求缓存、防重复请求与前台重试。

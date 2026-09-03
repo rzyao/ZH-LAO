@@ -76,6 +76,23 @@ function serializeQuery(
   return str ? `?${str}` : ''
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null
+}
+
+interface EnvelopeCandidate {
+  code?: unknown
+  data?: unknown
+  error?: unknown
+  request_id?: unknown
+  requestId?: unknown
+}
+
+function isUnifiedEnvelope(value: unknown): value is EnvelopeCandidate {
+  if (!isRecord(value)) return false
+  return typeof value.code === 'string'
+}
+
 /**
  * The single V2 API client for the whole Admin.
  *
@@ -209,59 +226,91 @@ export class ApiClient {
     try {
       let response = await this.performFetch(method, url, fetchOptions, buildHeaders, buildBody, controller.signal)
 
-      // US-002: on 401, give the app one chance to refresh the access token and
-      // retry the exact same request once. The refresh itself (skipAuth) never
-      // retries, preventing a refresh loop. onUnauthorized (which clears the
-      // session) fires only when the retry is unavailable or refresh fails.
-      if (!response.ok && !skipAuth && this.onUnauthorizedRetry) {
-        const bodyText = await response.text().catch(() => '')
-        const error = await mapHttpErrorFrom(response, bodyText)
-        if (error instanceof UnauthorizedError) {
-          const refreshed = await this.onUnauthorizedRetry()
-          if (refreshed && !externalSignal?.aborted) {
-            response = await this.performFetch(method, url, fetchOptions, buildHeaders, buildBody, controller.signal)
-          } else {
-            this.onUnauthorized?.(error)
-            throw error
-          }
-        }
-      } else if (!response.ok) {
-        const error = await mapHttpError(response)
-        if (error instanceof UnauthorizedError) {
-          this.onUnauthorized?.(error)
-        } else if (error.kind === 'forbidden') {
-          this.onForbidden?.(error)
-        }
-        throw error
-      }
-
-      if (!response.ok) {
-        const error = await mapHttpError(response)
-        if (error.kind === 'forbidden') {
-          this.onForbidden?.(error)
-        }
-        throw error
-      }
-
+      // US-002 / US-001: Inspect responses (both transport non-200 and HTTP 200 envelopes)
       const status = response.status
-      let data: unknown = null
+      let rawPayload: unknown = null
       if (status === 204) {
-        data = null
+        rawPayload = null
       } else {
         const text = await response.text()
         if (text) {
           try {
-            data = JSON.parse(text)
+            rawPayload = JSON.parse(text)
           } catch {
-            data = text
+            rawPayload = text
           }
         }
       }
 
+      // 1. Check if payload is a business error (code !== 'OK') or transport error (!response.ok)
+      const isEnvelope = isUnifiedEnvelope(rawPayload)
+      const isBusinessFailure = isEnvelope && rawPayload.code !== 'OK'
+      const isTransportFailure = !response.ok
+
+      if (isBusinessFailure || isTransportFailure) {
+        const error = await mapHttpError(response, isEnvelope ? (rawPayload as unknown as import('../contracts/error').ApiErrorBody) : undefined)
+
+        // Retry hook on unauthorized
+        if (error instanceof UnauthorizedError && !skipAuth && this.onUnauthorizedRetry) {
+          const refreshed = await this.onUnauthorizedRetry()
+          if (refreshed && !externalSignal?.aborted) {
+            response = await this.performFetch(method, url, fetchOptions, buildHeaders, buildBody, controller.signal)
+            // Re-evaluate retried response
+            const retryStatus = response.status
+            let retryPayload: unknown = null
+            if (retryStatus !== 204) {
+              const retryText = await response.text()
+              if (retryText) {
+                try {
+                  retryPayload = JSON.parse(retryText)
+                } catch {
+                  retryPayload = retryText
+                }
+              }
+            }
+            const retryEnvelope = isUnifiedEnvelope(retryPayload)
+            if (!response.ok || (retryEnvelope && retryPayload.code !== 'OK')) {
+              const retryError = await mapHttpError(
+                response,
+                retryEnvelope ? (retryPayload as unknown as import('../contracts/error').ApiErrorBody) : undefined,
+              )
+              if (retryError instanceof UnauthorizedError) this.onUnauthorized?.(retryError)
+              else if (retryError.kind === 'forbidden') this.onForbidden?.(retryError)
+              throw retryError
+            }
+            rawPayload = retryPayload
+          } else {
+            this.onUnauthorized?.(error)
+            throw error
+          }
+        } else {
+          if (error instanceof UnauthorizedError) {
+            this.onUnauthorized?.(error)
+          } else if (error.kind === 'forbidden') {
+            this.onForbidden?.(error)
+          }
+          throw error
+        }
+      }
+
+      // 2. Success: unwrap data if unified envelope, or use raw payload directly
+      let unwrappedData: unknown = rawPayload
+      let resolvedRequestId = requestId
+      if (isUnifiedEnvelope(rawPayload)) {
+        if ('data' in rawPayload) {
+          unwrappedData = rawPayload.data
+        }
+        if (typeof rawPayload.request_id === 'string') {
+          resolvedRequestId = rawPayload.request_id
+        } else if (typeof rawPayload.requestId === 'string') {
+          resolvedRequestId = rawPayload.requestId
+        }
+      }
+
       return {
-        data: data as T,
+        data: unwrappedData as T,
         status,
-        requestId,
+        requestId: resolvedRequestId,
       }
     } catch (error) {
       if (error instanceof ApiError) throw error
@@ -278,24 +327,4 @@ export class ApiClient {
       externalSignal?.removeEventListener('abort', onExternalAbort)
     }
   }
-}
-
-/** Map an HTTP error from a response that has already been consumed. */
-async function mapHttpErrorFrom(response: Response, bodyText: string): Promise<ApiError> {
-  let body: unknown = null
-  try {
-    body = bodyText ? JSON.parse(bodyText) : null
-  } catch {
-    body = bodyText
-  }
-  const consumed = {
-    status: response.status,
-    statusText: response.statusText,
-    ok: response.ok,
-    headers: response.headers,
-    url: response.url,
-    json: async () => body,
-    text: async () => bodyText,
-  } as unknown as Response
-  return mapHttpError(consumed)
 }

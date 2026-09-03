@@ -184,4 +184,83 @@ describe('ApiClient', () => {
     expect(url).not.toContain('empty')
     expect(init.body).toBe(JSON.stringify({ name: 'x' }))
   })
+
+  it('unwraps data from unified success envelope { code: "OK", data, request_id }', async () => {
+    const fetchImpl = vi.fn().mockResolvedValue(
+      jsonResponse(200, {
+        code: 'OK',
+        data: { id: 'item-1', name: 'Test' },
+        request_id: 'req-unified-123',
+      }),
+    )
+    const client = makeClient(fetchImpl)
+    const result = await client.get<{ id: string; name: string }>('/things/1')
+    expect(result.data).toEqual({ id: 'item-1', name: 'Test' })
+    expect(result.requestId).toBe('req-unified-123')
+    expect(result.status).toBe(200)
+  })
+
+  it('handles empty success envelope data: null (204 equivalent) without error', async () => {
+    const fetchImpl = vi.fn().mockResolvedValue(
+      jsonResponse(200, {
+        code: 'OK',
+        data: null,
+        request_id: 'req-empty-456',
+      }),
+    )
+    const client = makeClient(fetchImpl)
+    const result = await client.delete('/things/1')
+    expect(result.data).toBeNull()
+    expect(result.requestId).toBe('req-empty-456')
+    expect(result.status).toBe(200)
+  })
+
+  it('rejects HTTP 200 failure envelope with code !== "OK" and throws corresponding ApiError', async () => {
+    const fetchImpl = vi.fn().mockResolvedValue(
+      jsonResponse(200, {
+        code: 'FORBIDDEN',
+        error: { message: '没有权限' },
+        request_id: 'req-fail-789',
+      }),
+    )
+    const client = makeClient(fetchImpl)
+    const errorPromise = client.get('/forbidden-resource')
+    await expect(errorPromise).rejects.toBeInstanceOf(ForbiddenError)
+    await errorPromise.catch((err) => {
+      expect(err.code).toBe('FORBIDDEN')
+      expect(err.requestId).toBe('req-fail-789')
+      expect(err.message).toBe('没有权限')
+    })
+  })
+
+  it('reads request_id strictly from envelope top level and matches backend format (US4 / T031)', async () => {
+    const fetchImpl = vi.fn().mockResolvedValue(
+      jsonResponse(
+        200,
+        {
+          code: 'OK',
+          data: { value: 42 },
+          request_id: 'req-top-level-strict',
+        },
+        { 'x-request-id': 'req-header-fallback' },
+      ),
+    )
+    const client = makeClient(fetchImpl)
+    const result = await client.get<{ value: number }>('/strict-id')
+    expect(result.requestId).toBe('req-top-level-strict')
+  })
+
+  it('triggers onUnauthorized and rejects on HTTP 200 UNAUTHENTICATED envelope', async () => {
+    const onUnauthorized = vi.fn()
+    const fetchImpl = vi.fn().mockResolvedValue(
+      jsonResponse(200, {
+        code: 'UNAUTHENTICATED',
+        error: { message: '登录状态已失效' },
+        request_id: 'req-unauth-001',
+      }),
+    )
+    const client = makeClient(fetchImpl, { onUnauthorized })
+    await expect(client.get('/secure')).rejects.toBeInstanceOf(UnauthorizedError)
+    expect(onUnauthorized).toHaveBeenCalledTimes(1)
+  })
 })

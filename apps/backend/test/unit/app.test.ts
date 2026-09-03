@@ -39,11 +39,11 @@ describe('Fastify foundation', () => {
     const app = buildApp({ logger, database });
     await identityModule.registerHttp(app, stubIdentityDependencies(false));
     const publicRoute = await app.inject({ method: 'POST', url: '/api/v1/identity/phone-otp', payload: {} });
-    expect(publicRoute.statusCode).toBe(400);
-    expect(publicRoute.json().error.code).toBe('VALIDATION_ERROR');
+    expect(publicRoute.statusCode).toBe(200);
+    expect(publicRoute.json().code).toBe('VALIDATION_ERROR');
     const protectedRoute = await app.inject('/api/v1/identity/me');
-    expect(protectedRoute.statusCode).toBe(401);
-    expect(protectedRoute.json().error.code).toBe('UNAUTHENTICATED');
+    expect(protectedRoute.statusCode).toBe(200);
+    expect(protectedRoute.json().code).toBe('UNAUTHENTICATED');
     await app.close();
   });
   it('serves liveness and readiness with request IDs', async () => {
@@ -57,8 +57,8 @@ describe('Fastify foundation', () => {
     app.get('/known', async () => { throw new AppError({ code: 'KNOWN', message: 'Safe', httpStatus: 400 }); });
     app.get('/unknown', async () => { throw new Error('secret stack'); });
     expect((await app.inject('/known')).json().error.message).toBe('Safe');
-    const unknown = await app.inject('/unknown'); expect(unknown.statusCode).toBe(500); expect(unknown.body).not.toContain('secret stack'); expect(unknown.json().error.request_id).toBeTruthy();
-    const missing = await app.inject('/missing'); expect(missing.statusCode).toBe(404); expect(missing.json().error.code).toBe('NOT_FOUND');
+    const unknown = await app.inject('/unknown'); expect(unknown.statusCode).toBe(200); expect(unknown.body).not.toContain('secret stack'); expect(unknown.json().request_id).toBeTruthy();
+    const missing = await app.inject('/missing'); expect(missing.statusCode).toBe(200); expect(missing.json().code).toBe('NOT_FOUND');
     await app.close();
   });
   it('keeps protected routes fail-closed and accepts a test provider', async () => {
@@ -66,8 +66,10 @@ describe('Fastify foundation', () => {
     app.get('/closed', { preHandler: requireAuthentication() }, async () => ({ ok: true }));
     const subjectId = newLogicalUuid();
     app.get('/open', { preHandler: requireAuthentication({ authenticate: async () => ({ subjectId }) }) }, async (request) => ({ subjectId: request.authContext?.subjectId }));
-    expect((await app.inject('/closed')).statusCode).toBe(503);
-    expect((await app.inject('/open')).json().subjectId).toBe(subjectId);
+    const closed = await app.inject('/closed');
+    expect(closed.statusCode).toBe(200);
+    expect(closed.json().code).toBe('AUTHENTICATION_UNAVAILABLE');
+    expect((await app.inject('/open')).json().data.subjectId).toBe(subjectId);
     expect((await app.inject('/health/live')).statusCode).toBe(200);
     await app.close();
   });

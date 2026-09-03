@@ -29,5 +29,6 @@ last_updated: 2026-09-02
 | [ADR-020](ADR-020-audio-production-domain.md) | Audio Production 独立成域（第 10 个业务域，Slot/Task/Attempt/Asset Version/Review，`official_asset_version_id` 唯一正式音频指针） | `frozen` |
 | [ADR-021](ADR-021-content-and-learning-domain-split.md) | Learning 拆分为 Content + Learning（第 11 个业务域；Content = canonical 教学内容、Learning = 用户学习状态；`Learning → Identity`、`Learning → Content`；Audio 契约改 `Audio → Content`；逐表归属 D-150：content 31 张 / learning 10 张） | `frozen` |
 | [ADR-022](ADR-022-platform-menu-routing-config.md) | Platform 扩展后台菜单/路由配置能力（第 7 类能力，打破 6 表冻结边界；新增 `platform.menus` + `platform.menu_permissions`，权限 `platform.menus.read/.write`，Sidebar 配置驱动渲染；D-155） | `frozen` |
+| [ADR-023](ADR-023-unified-api-contract.md) | 前后端统一请求格式与业务状态码（HTTP 一律 200 + 顶层 `code` 信封 `{code,data?,error?,request_id}`；业务状态码词汇表；全量迁移 `AppError.code`；前端按 `code` 判定；同步切版；请求侧收敛；修订 `api-standard.md` 响应契约；D-156） | `frozen` |
 
 ADR 记录长期取舍；字段和业务规格仍以对应领域文档为唯一事实源。

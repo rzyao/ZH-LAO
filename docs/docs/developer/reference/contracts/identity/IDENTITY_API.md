@@ -3,7 +3,7 @@ status: audited
 phase: 2
 phase_name: Identity Domain
 document: IDENTITY_API
-last_updated: 2026-09-02
+last_updated: 2026-09-03
 depends_on:
   - FOUNDATION_GATE = PASS
   - IDENTITY_IMPLEMENTATION_PLAN.md
@@ -17,6 +17,8 @@ derived_from: domains/identity/database.md
 ---
 
 > 迁移说明：本文是迁移时保留的契约/证据快照，不是当前调度权限。当前产品状态请看 [ZH-LAO 产品开发全景](/developer/)，执行规格请看 `.specify/` 与 `specs/`，真实完成请以代码、测试与 CI 为准。
+>
+> **契约修订 (ADR-023, 2026-09-03)**：所有业务响应 HTTP 一律 **200**，成败由响应体顶层 `code`（业务状态码）权威表达；原 HTTP 状态码（200/204/400/401/403/404/409/429/500/503）仅作日志/监控参考语义。无返回体操作（原 204）→ `{ "code": "OK", "data": null, "request_id": "..." }`。统一信封与词汇表见 [api-standard.md](/developer/reference/architecture/applications/api-standard.md) 与 [business-status-codes.md](/developer/reference/architecture/applications/business-status-codes.md)。已按此修订 §7 HTTP Status Mapping 与错误包体示例。
 
 # ZH-LAO  — IDENTITY API
 
@@ -157,14 +159,14 @@ Identity API 不额外制造复杂通用 envelope。
 
 # 6. Error Envelope
 
-继续使用 Foundation 已冻结的错误结构。
+继续使用 Foundation 已冻结的错误结构（ADR-023 统一信封，HTTP 一律 200）。
 
 语义示例：
 
 ```json
 {
+  "code": "OTP_INVALID",
   "error": {
-    "code": "OTP_INVALID",
     "message": "The verification code is invalid."
   },
   "request_id": "..."
@@ -173,8 +175,9 @@ Identity API 不额外制造复杂通用 envelope。
 
 规则：
 
-- `code` 是稳定 machine-readable code；
-- `message` 是安全、可面向用户的通用描述；
+- `code` 是稳定 machine-readable business status code（UPPER_SNAKE_CASE，见 [business-status-codes.md](/developer/reference/architecture/applications/business-status-codes.md)）；
+- `error.message` 是安全、可面向用户的通用描述；
+- `request_id` 顶层携带；
 - 不包含 stack；
 - 不包含 SQL；
 - 不包含 provider response body；
@@ -185,23 +188,27 @@ Identity API 不额外制造复杂通用 envelope。
 
 # 7. HTTP Status Mapping
 
-默认映射：
+> **ADR-023 (2026-09-03)**: 所有业务响应 HTTP 一律 **200**，成败由响应体顶层
+> `code`（业务状态码）权威表达。原 HTTP 状态码仅作日志/监控参考语义。
+> 完整词汇表见 [business-status-codes.md](/developer/reference/architecture/applications/business-status-codes.md)。
 
-| 语义 | HTTP |
-|---|---:|
-| 成功读取/更新 | 200 |
-| 创建类业务完成 | 200 |
-| 无响应体撤销类 | 204 或 200，具体 endpoint 按本文冻结 |
-| Validation | 400 |
-| Unauthenticated / invalid credential | 401 |
-| Authenticated but forbidden | 403 |
-| Resource logically unavailable | 404 |
-| Conflict / ownership / duplicate | 409 |
-| Rate limited | 429 |
-| Provider temporarily unavailable | 503 |
-| Unexpected server error | 500 |
+默认映射（HTTP 一律 200）：
 
-Identity authentication API 不使用 `404 phone not found` 暴露账号存在性。
+| 语义 | 业务码 `code` | HTTP 参考 |
+|---|---:|---:|
+| 成功读取/更新 | `OK` | 200 |
+| 创建类业务完成 | `OK` | 200 |
+| 无响应体撤销类 | `OK` + `data: null` | 200（原 204） |
+| Validation | `VALIDATION_ERROR` | 400 |
+| Unauthenticated / invalid credential | `UNAUTHENTICATED` / `INVALID_CREDENTIAL` | 401 |
+| Authenticated but forbidden | `FORBIDDEN` | 403 |
+| Resource logically unavailable | `NOT_FOUND` | 404 |
+| Conflict / ownership / duplicate | `CONFLICT` / `STALE_VERSION_CONFLICT` / `DEVICE_OWNERSHIP_CONFLICT` | 409 |
+| Rate limited | `RATE_LIMITED` / `LOGIN_RATE_LIMITED` / `OTP_RATE_LIMITED` | 429 |
+| Provider temporarily unavailable | `PROVIDER_UNAVAILABLE` | 503 |
+| Unexpected server error | `INTERNAL_ERROR` | 500 |
+
+Identity authentication API 不使用 `404 phone not found` 暴露账号存在性（对应业务码不返回 `NOT_FOUND`，而返回 `INVALID_CREDENTIAL`）。
 
 ---
 
@@ -1637,12 +1644,12 @@ HTTP：
 429
 ```
 
-Body：
+Body（ADR-023 统一信封，HTTP 200）：
 
 ```json
 {
+  "code": "OTP_RATE_LIMITED",
   "error": {
-    "code": "OTP_RATE_LIMITED",
     "message": "Too many verification requests. Try again later."
   },
   "request_id": "..."

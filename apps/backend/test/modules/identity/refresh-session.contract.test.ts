@@ -58,13 +58,16 @@ describe('US2 RefreshSession Contract', () => {
     });
 
     expect(response.statusCode).toBe(200);
-    expect(response.json()).toEqual({
+    const body = response.json();
+    expect(body.code).toBe('OK');
+    expect(body.data).toEqual({
       access_token: 'fresh-jwt-token',
       token_type: 'Bearer',
       expires_in: 900,
       refresh_token: 'new-opaque-refresh-token',
       session_expires_at: sessionExpiresAt.toISOString()
     });
+    expect(body.request_id).toBeDefined();
     expect(capturedRefreshToken).toBe('old-valid-token');
     await app.close();
   });
@@ -97,8 +100,8 @@ describe('US2 RefreshSession Contract', () => {
       }
     });
 
-    expect(response.statusCode).toBe(401);
-    expect(response.json().error.code).toBe('INVALID_CREDENTIAL');
+    expect(response.statusCode).toBe(200);
+    expect(response.json().code).toBe('INVALID_CREDENTIAL');
     await app.close();
   });
 });

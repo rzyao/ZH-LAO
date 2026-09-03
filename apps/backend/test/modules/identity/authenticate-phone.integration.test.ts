@@ -70,7 +70,9 @@ describe('US1 AuthenticateWithPhoneOtp Integration Contract', () => {
     });
 
     expect(response.statusCode).toBe(200);
-    expect(response.json()).toEqual({
+    const body = response.json();
+    expect(body.code).toBe('OK');
+    expect(body.data).toEqual({
       user_id: userPublicId,
       account_status: 'active',
       is_new_user: true,
@@ -80,6 +82,7 @@ describe('US1 AuthenticateWithPhoneOtp Integration Contract', () => {
       refresh_token: 'mock-raw-refresh-token',
       session_expires_at: sessionExpiresAt.toISOString()
     });
+    expect(body.request_id).toBeDefined();
     await app.close();
   });
 });

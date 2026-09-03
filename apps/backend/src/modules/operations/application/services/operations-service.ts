@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { AppError } from '../../../../errors/app-error.js';
+import type { BusinessStatusCode } from '../../../../errors/business-codes.js';
 import type { AuthContext } from '../../../../auth/auth-context.js';
 import type { DatabaseExecutor } from '../../../../database/executor.js';
 import type { TransactionManager } from '../../../../database/transaction-manager.js';
@@ -7,7 +8,7 @@ import type { IdentityPublicQueries, UserPublicId } from '../../../identity/publ
 import type { OperationsRepository } from '../ports/index.js';
 import { OPERATOR_PERMISSION_CATALOG,isOperatorPermissionKey,type AuthorizedOperatorContext,type OperatorPermissionKey,type OperationsAuditRecorder,type OperationsAuthorizer,type OperationsOperatorResolver,type OperatorSummary } from '../../public/index.js';
 
-const err=(code:string,message:string,httpStatus:number)=>new AppError({code,message,httpStatus});
+const err=(code:BusinessStatusCode,message:string,httpStatus:number)=>new AppError({code,message,httpStatus});
 const pgCode=(e:unknown)=>typeof e==='object'&&e!==null&&'code' in e?String((e as {code?:unknown}).code):undefined;
 const name=(s:string)=>{const v=s.trim();if(!v||v.length>100)throw err('INVALID_ARGUMENT','Invalid display/name',400);return v;};
 const safe=(details:Readonly<Record<string,unknown>>={})=>{const text=JSON.stringify(details);if(text.length>8192)throw err('INVALID_ARGUMENT','Audit details too large',400);if(/password|token|authorization|secret|card|payment_credential/i.test(text))throw err('INVALID_ARGUMENT','Sensitive audit details are forbidden',400);return details;};

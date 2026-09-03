@@ -7,6 +7,7 @@ import { installAuthContext } from '../auth/auth-hook.js';
 import { installErrorHandler } from '../errors/error-handler.js';
 import { registerHealthRoutes, type ReadinessState } from '../http/health-routes.js';
 import { installRequestContext } from '../http/request-context.js';
+import { installResponseEnvelope } from '../http/response-envelope.js';
 
 export type AppDependencies = { logger: Logger; database: DatabaseExecutor; readinessState?: ReadinessState; authenticationProvider?: AuthenticationProvider };
 
@@ -15,6 +16,7 @@ export function buildApp(dependencies: AppDependencies): FastifyInstance {
   installRequestContext(app);
   installAuthContext(app);
   installErrorHandler(app);
+  installResponseEnvelope(app);
   registerHealthRoutes(app, dependencies.database, dependencies.readinessState ?? { isShuttingDown: false });
   return app;
 }

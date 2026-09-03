@@ -3,7 +3,7 @@ status: frozen
 phase: 4
 phase_name: Operations Domain
 document: OPERATIONS_API
-last_updated: 2026-09-02
+last_updated: 2026-09-03
 repository_commit_audited: 000f4c4aafacf4938d74902eddc4d78323196a89
 depends_on:
   - OPERATIONS_USE_CASES.md
@@ -13,6 +13,8 @@ lifecycle: historical
 ---
 
 > 迁移说明：本文是迁移时保留的契约/证据快照，不是当前调度权限。当前产品状态请看 [ZH-LAO 产品开发全景](/developer/)，执行规格请看 `.specify/` 与 `specs/`，真实完成请以代码、测试与 CI 为准。
+>
+> **契约修订 (ADR-023, 2026-09-03)**：所有业务响应 HTTP 一律 **200**，成败由响应体顶层 `code`（业务状态码）权威表达；原 HTTP 状态码（201/200/204 等）仅作日志/监控参考语义。无返回体操作（原 204）→ `{ "code": "OK", "data": null, "request_id": "..." }`。统一信封与词汇表见 [api-standard.md](/developer/reference/architecture/applications/api-standard.md) 与 [business-status-codes.md](/developer/reference/architecture/applications/business-status-codes.md)。
 
 
 # ZH-LAO  — Operations API / Public Contract
