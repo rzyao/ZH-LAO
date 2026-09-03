@@ -54,7 +54,7 @@ describe('Fastify foundation', () => {
   });
   it('returns a safe unified error envelope', async () => {
     const app = buildApp({ logger, database });
-    app.get('/known', async () => { throw new AppError({ code: 'KNOWN', message: 'Safe', httpStatus: 400 }); });
+    app.get('/known', async () => { throw new AppError({ code: 'VALIDATION_ERROR', message: 'Safe', httpStatus: 400 }); });
     app.get('/unknown', async () => { throw new Error('secret stack'); });
     expect((await app.inject('/known')).json().error.message).toBe('Safe');
     const unknown = await app.inject('/unknown'); expect(unknown.statusCode).toBe(200); expect(unknown.body).not.toContain('secret stack'); expect(unknown.json().request_id).toBeTruthy();
