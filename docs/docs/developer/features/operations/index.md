@@ -16,7 +16,7 @@ source: scripts/build_developer_feature_catalog.py
 | --- | --- | --- | --- | ---: | --- |
 | [后台 MFA / 邀请 / 登录失败保护](../admin-auth-hardening) | ⚪ not_started | `deferred` | — | 0 | `complete` |
 | [后台操作审计查询](../operator-audit-log) | ⚪ not_started | `active` | — | 5 | `complete` |
-| [后台登录与操作员认证](../admin-login) | 🟢 completed | `active` | 数据库: evidenced; Backend: verified; Admin: verified; Mobile: not_applicable; Integration: verified; Acceptance: verified | 15 | `complete` |
+| [后台登录与操作员认证](../admin-login) | 🟢 completed | `active` | 数据库: evidenced; Backend: verified; Admin: verified; Mobile: not_applicable; Integration: verified; Acceptance: verified | 15 | `manual` |
 | [操作员管理](../operator-management) | ⚪ not_started | `active` | — | 5 | `complete` |
 | [角色权限分配](../permission-assignment) | ⚪ not_started | `active` | — | 5 | `complete` |
 | [角色管理](../role-management) | ⚪ not_started | `active` | — | 5 | `complete` |

@@ -11,7 +11,7 @@ last_updated: 2026-09-03
 
 **批准：** 2026-09-03（主架构会话确认，登记 D-156）
 
-**相关：** [全局 API 接口设计与通信规范](/developer/reference/architecture/applications/api-standard.md)、[Spec Kit 005 spec](/specs/005-unified-api-contract/spec.md)、[设计台账 D-156](/developer/reference/governance/design-register.md)
+**相关：** [全局 API 接口设计与通信规范](/developer/reference/architecture/applications/api-standard.md)、[Spec Kit 005 spec](https://github.com/rzyao/ZH-LAO/blob/main/specs/005-unified-api-contract/spec.md)、[设计台账 D-156](/developer/reference/governance/design-register.md)
 
 ## 背景
 

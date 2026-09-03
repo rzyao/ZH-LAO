@@ -23,7 +23,7 @@ DOCS = ROOT / "docs" / "docs"
 NEW_FEATURES = DOCS / "developer" / "features"
 MANIFEST_PATH = DOCS / "developer" / "feature-manifest.json"
 CATALOG_PATH = DOCS / "developer" / "feature-catalog.json"
-MANUAL_IDS = {"login", "lao-alphabet-management"}
+MANUAL_IDS = {"login", "lao-alphabet-management", "admin-login"}
 TODAY = "2026-09-02"
 
 DOMAIN_NAMES = {

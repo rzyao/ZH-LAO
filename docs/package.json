@@ -7,7 +7,10 @@
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs",
     "docs:lifecycle-audit": "python ../scripts/audit_feature_detail_pages.py && python ../scripts/audit_feature_state_machine.py",
-    "docs:metadata-check": "python ../scripts/check_doc_metadata.py"
+    "docs:metadata-check": "python ../scripts/check_doc_metadata.py",
+    "docs:authority-audit": "python ../scripts/audit_document_authority.py",
+    "docs:links": "python ../scripts/audit_document_authority.py --links-only",
+    "docs:audit": "pnpm docs:metadata-check && pnpm docs:authority-audit && python ../scripts/validate_feature_pages.py"
   },
   "devDependencies": {
     "vitepress": "^1.6.4",

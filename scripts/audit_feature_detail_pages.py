@@ -11,6 +11,8 @@ import yaml
 ROOT = Path(__file__).resolve().parents[1]
 FEATURES_DIR = ROOT / "docs/docs/developer/features"
 PORTFOLIO_STATUSES = {"active", "deferred", "pending_decision"}
+LAYER_STATUSES = {"not_evidenced", "evidenced", "evidenced_limited", "not_applicable", "verified"}
+DELIVERY_LAYERS = {"数据库", "Backend", "Admin", "Mobile", "Integration", "Acceptance"}
 DETAIL_HEADINGS = (
     ("用户价值与功能说明", "用户价值"),
     ("使用者或受益者", "使用者与可观察流程"),
@@ -75,6 +77,22 @@ def check_common(path: Path, text: str, data: dict) -> list[str]:
         value = data.get(key, [])
         if not isinstance(value, list) or not all(isinstance(item, str) for item in value):
             issues.append(f"{key} must be a list of strings")
+    layers = data.get("delivery_layers", {})
+    if layers is not None and not isinstance(layers, dict):
+        issues.append("delivery_layers must be a mapping")
+    elif isinstance(layers, dict):
+        for layer, entry in layers.items():
+            if layer not in DELIVERY_LAYERS:
+                issues.append(f"unknown delivery layer: {layer}")
+            elif not isinstance(entry, dict) or entry.get("status") not in LAYER_STATUSES:
+                issues.append(f"invalid delivery layer status: {layer}")
+            elif entry.get("status") in {"evidenced_limited", "verified"} and not isinstance(entry.get("note"), str):
+                issues.append(f"{entry.get('status')} delivery layer requires a note: {layer}")
+    if data.get("last_verified_at") is not None:
+        if data.get("source_migration") != "manual":
+            issues.append("last_verified_at requires source_migration: manual")
+        if not data.get("delivery_evidence"):
+            issues.append("last_verified_at requires delivery_evidence")
     if not re.search(r"^#\s+.+$", text, re.M):
         issues.append("missing page title heading")
     for alternatives in DETAIL_HEADINGS:

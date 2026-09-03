@@ -55,7 +55,7 @@
         "identity"
       ],
       "portfolio_status": "active",
-      "source_migration": "complete",
+      "source_migration": "manual",
       "delivery_evidence_count": 15,
       "source_migrated_at": "2026-09-02"
     },

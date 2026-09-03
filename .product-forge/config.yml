@@ -59,7 +59,10 @@ codebase:
 
 # Directory where Product Forge feature artifacts are stored
 # Avoid changing this after features have been created
-features_dir: "features"
+# Product Forge artifacts are orchestration records, not repository authorities.
+# Keep them isolated from canonical Spec Kit artifacts (`specs/`) and canonical
+# developer documentation (`docs/docs/developer/`). See .product-forge/README.md.
+features_dir: ".product-forge/features"
 
 # Feature-ROOT placement strategy. Controls ONLY where each feature directory
 # sits under features_dir; the internal artifact tree (research/, product-spec/,
@@ -323,4 +326,7 @@ max_tokens_per_doc: 4000
 
 # Language for all generated documents
 # Examples: "en", "ru", "de"
-output_language: "en"
+# Keep generated coordination artifacts readable alongside the project's
+# Chinese-first canonical documentation. This setting does not authorize Forge
+# to define product/domain/architecture/database/API facts.
+output_language: "zh-CN"

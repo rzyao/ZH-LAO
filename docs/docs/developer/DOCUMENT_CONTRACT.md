@@ -7,6 +7,27 @@ last_updated: 2026-09-02
 
 本契约规定《ZH-LAO 产品开发全景》怎样汇总事实，避免它变成第二套产品规格或第二张会漂移的进度表。
 
+## Authority Chain 与工具边界
+
+所有 Agent 先按以下链路定位事实；下游文档只能细化其被授权的范围，不能反向覆盖上游事实：
+
+```text
+Product Truth
+  → Domain Truth
+  → Architecture Truth
+  → Database / API Contracts
+  → Spec Kit Feature Specification
+  → Implementation
+  → Feature Blueprint / Detail Documentation
+```
+
+- **Product Truth**：`reference/product/`；**Domain Truth**：`reference/domains/`；**Architecture Truth**：`reference/architecture/` 与已接受 ADR；**物理数据库事实**：冻结 migration；**API Contract**：`reference/contracts/` 及领域指定的 frozen public contract。
+- **Spec Kit**（`.specify/` 与 `specs/`）是唯一 machine-readable / executable Feature Specification workflow，受 `.specify/memory/constitution.md` 约束。它是上述 authority 的下游，不得以 spec、plan 或 tasks 推翻它们。
+- **Product Forge**（`.product-forge/` 与其扩展技能）是可选 lifecycle / orchestration：可组织 research、gate、traceability 和 handoff，但不是 Product、Domain、Architecture、Database 或 API authority。其新 artifact 位于 `.product-forge/features/`。
+- **Feature Blueprint**（`features/`）是下游产品能力与交付证据视图；它不能定义领域状态机、字段或 API schema。旧 **Feature Lane 六栏模型**是 **DEPRECATED / NON-CANONICAL / MUST NOT BE RESTORED**；`delivery_layers` 仅记录证据，不是 Lane 生命周期。
+- 发生冲突时停止并列出精确来源，交由对应 authority owner 决定；代码、任务勾选、页面存在、`active`、Product Forge gate 都不能自行证明实现或验证。
+- 根目录研究资产的类别和可用范围见[研究分类](reference/governance/research-classification.md)；会话事实的覆盖入口见[来源覆盖清单](reference/governance/source-coverage.md)。
+
 ## 功能页最小结构
 
 每个能力条目应尽量包含：

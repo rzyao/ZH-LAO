@@ -11,7 +11,7 @@ last_updated: 2026-09-03
 
 **批准：** 2026-09-03（主架构会话确认，登记 D-155）
 
-**相关：** [ADR-019 Operations 为后台控制平面](ADR-019-operations-backoffice-control-plane.md)、[ADR-021 Content + Learning 拆分](ADR-021-content-and-learning-domain-split.md)、[Platform 域](/developer/reference/domains/platform/index.md)、[Platform 数据库](/developer/reference/domains/platform/database.md)、[Operations RBAC](/developer/reference/domains/operations/rbac.md)、[Admin 导航结构](/developer/reference/admin/navigation.md)、[Admin 页面清单](/developer/reference/admin/pages.md)、[Spec Kit 004 spec](/specs/004-menu-routing-management/spec.md)、[设计台账 D-155](/developer/reference/governance/design-register.md)
+**相关：** [ADR-019 Operations 为后台控制平面](ADR-019-operations-backoffice-control-plane.md)、[ADR-021 Content + Learning 拆分](ADR-021-content-and-learning-domain-split.md)、[Platform 域](/developer/reference/domains/platform/index.md)、[Platform 数据库](/developer/reference/domains/platform/database.md)、[Operations RBAC](/developer/reference/domains/operations/rbac.md)、[Admin 导航结构](/developer/reference/admin/navigation.md)、[Admin 页面清单](/developer/reference/admin/pages.md)、[Spec Kit 004 spec](https://github.com/rzyao/ZH-LAO/blob/main/specs/004-menu-routing-management/spec.md)、[设计台账 D-155](/developer/reference/governance/design-register.md)
 
 ## 背景
 

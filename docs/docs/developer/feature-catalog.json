@@ -183,8 +183,8 @@
     "total_entries": 163
   },
   "source_migration_counts": {
-    "complete": 101,
-    "manual": 2
+    "complete": 100,
+    "manual": 3
   },
   "features": [
     {
@@ -289,7 +289,7 @@
         "Acceptance": "verified"
       },
       "dev_status": "completed",
-      "source_migration": "complete",
+      "source_migration": "manual",
       "path": "admin-login"
     },
     {

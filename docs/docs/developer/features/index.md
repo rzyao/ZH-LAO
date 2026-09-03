@@ -14,8 +14,8 @@ source: scripts/build_developer_feature_catalog.py
 
 - Portfolio：`active` 80、`deferred` 17、`pending_decision` 6。
 - 证据条目：有 frontmatter evidence 的 55 页、无 evidence 的 48 页，共 163 条。
-- 来源迁移：`complete` 101 页、`manual` 2 页；旧 102 页已按退役清单处理。
-- 人工分层核验：`manual` 页 2 页（[login](login)、[lao-alphabet-management](lao-alphabet-management)），其余 101 页六层交付状态默认 `not_evidenced`，待按[文档契约](../DOCUMENT_CONTRACT)增量补录。
+- 来源迁移：`complete` 100 页、`manual` 3 页；旧 102 页已按退役清单处理。
+- 人工分层核验：`manual` 页 3 页（[login](login)、[lao-alphabet-management](lao-alphabet-management)），其余 100 页六层交付状态默认 `not_evidenced`，待按[文档契约](../DOCUMENT_CONTRACT)增量补录。
 - 主领域规模：audio 1、chat 15、commerce 15、content 7、identity 6、learning 17、operations 7、platform 7、rewards 3、social 14、trust 7、unassigned 4。
 
 ### 分层状态计数（六层交付层）

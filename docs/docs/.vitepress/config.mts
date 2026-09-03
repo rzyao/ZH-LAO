@@ -322,7 +322,8 @@ const governanceSidebar = [
       { text: '文档系统规范', link: '/developer/reference/governance/DOMAIN_DOCUMENT_STANDARD' },
       { text: '设计决策台账', link: '/developer/reference/governance/design-register' },
       { text: '未决事项', link: '/developer/reference/governance/open-questions' },
-      { text: '来源覆盖清单', link: '/developer/reference/governance/source-coverage' }
+      { text: '来源覆盖清单', link: '/developer/reference/governance/source-coverage' },
+      { text: '研究分类', link: '/developer/reference/governance/research-classification' }
     ]
   }
 ]

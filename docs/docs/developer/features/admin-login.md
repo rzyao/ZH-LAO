@@ -5,7 +5,7 @@ portfolio_status: active
 domain:
 - operations
 - identity
-source_migration: complete
+source_migration: manual
 delivery_evidence:
 - https://github.com/rzyao/ZH-LAO/blob/main/specs/003-admin-login/spec.md
 - https://github.com/rzyao/ZH-LAO/blob/main/specs/003-admin-login/contracts/http-api.md

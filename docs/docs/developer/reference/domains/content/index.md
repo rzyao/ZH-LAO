@@ -128,7 +128,10 @@ Content V1 固定 **31 张业务表**。完整表清单、字段、约束、索�
 - [知识内容](knowledge.md)：语言知识、发音知识属性、释义与例句。
 - [课程体系](curriculum.md)：Course、Unit、Lesson、Section 与 LessonItem。
 - [词典](dictionary.md)：词典语义、Equivalent、Relation 与 Tag。
+- [词汇](vocabulary.md)、[句子](sentence.md) 与 [音节](syllable.md)：具体内容对象的规范语义。
 - [练习](practice.md)：练习与题目定义、标准答案与规则。
+- [音频绑定](audio-binding.md)：Content 向 Audio 提供规范生产输入的边界。
+- [版本复核](versioning-review.md)：Content Revision 的复核与约束记录。
 - [数据设计](database.md)：31 张表与数据库契约。
 - [音频生产 Feature](/developer/features/audio-production)
 - [ADR-021](/developer/reference/adr/ADR-021-content-and-learning-domain-split.md)：Content / Learning 边界形成的架构决策历史。
