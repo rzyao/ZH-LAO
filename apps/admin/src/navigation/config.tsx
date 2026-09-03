@@ -5,6 +5,7 @@ import {
   CircleUser,
   CreditCard,
   Database,
+  FileText,
   Gift,
   GraduationCap,
   LayoutDashboard,
@@ -12,6 +13,7 @@ import {
   Settings,
   ShieldCheck,
   SlidersHorizontal,
+  Smartphone,
   Users,
 } from 'lucide-react'
 import type { DomainName } from '@/auth/permissions'
@@ -32,6 +34,53 @@ export interface NavGroup {
   label: string
   items: NavItem[]
 }
+
+export interface SecondaryNav {
+  key: string
+  label: string
+  href: string
+  icon: LucideIcon
+}
+
+export interface SecondaryNavConfig {
+  prefix: string
+  title: string
+  items: SecondaryNav[]
+}
+
+/** Domain-level navigation shown beside the primary sidebar. */
+export const SECONDARY_NAV: SecondaryNavConfig[] = [
+  {
+    prefix: '/content',
+    title: '内容管理',
+    items: [
+      { key: 'letters', label: '字母管理', href: '/content/letters', icon: BookOpen },
+      { key: 'syllables', label: '音节管理', href: '/content/syllables', icon: BookOpen },
+      { key: 'vocabulary', label: '词汇管理', href: '/content/vocabulary', icon: BookOpen },
+      { key: 'sentences', label: '句子与例句', href: '/content/sentences', icon: BookOpen },
+    ],
+  },
+  {
+    prefix: '/operations',
+    title: '运营权限',
+    items: [
+      { key: 'operators', label: '操作员管理', href: '/operations/operators', icon: Users },
+      { key: 'roles', label: '角色与权限', href: '/operations/roles', icon: ShieldCheck },
+      { key: 'audit-logs', label: '操作审计日志', href: '/operations/audit-logs', icon: FileText },
+    ],
+  },
+  {
+    prefix: '/platform',
+    title: '平台控制台',
+    items: [
+      { key: 'feature-flags', label: '功能开关', href: '/platform/feature-flags', icon: SlidersHorizontal },
+      { key: 'runtime-configs', label: '运行时配置', href: '/platform/runtime-configs', icon: Settings },
+      { key: 'app-versions', label: '客户端版本', href: '/platform/app-versions', icon: Smartphone },
+      { key: 'announcements', label: '全服与定向公告', href: '/platform/announcements', icon: MessageSquare },
+      { key: 'regions', label: '支持地区', href: '/platform/regions', icon: Database },
+    ],
+  },
+]
 
 /**
  * Sidebar information architecture (frozen in ADMIN_FOUNDATION_PLAN §8).

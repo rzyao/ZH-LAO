@@ -1,14 +1,10 @@
-import type { Pool, PoolClient } from 'pg';
+import type { DatabaseExecutor } from '../../../database/executor.js';
+import type { TransactionManager } from '../../../database/transaction-manager.js';
 import {
   LaoCharacter,
-  type LaoCharacterClassification,
-  type LaoCharacterSubtype,
-  type OnlineStatus,
 } from '../domain/lao-character.js';
 import {
   LaoCharacterRevision,
-  type CharacterRevisionSnapshot,
-  type RevisionReviewStatus,
 } from '../domain/lao-character-revision.js';
 import type {
   ContentRepository,
@@ -16,10 +12,13 @@ import type {
 } from '../application/ports/repositories.js';
 
 export class PostgresContentRepository implements ContentRepository {
-  constructor(private readonly pool: Pool) {}
+  constructor(
+    private readonly db: DatabaseExecutor,
+    private readonly transactions?: TransactionManager,
+  ) {}
 
   async findCharacterById(id: string): Promise<LaoCharacter | null> {
-    const res = await this.pool.query(
+    const res = await this.db.query(
       `SELECT c.public_id as id, l.character as unicode_char, l.letter_type as classification,
               l.letter_class as subtype, l.sort_order, c.status as online_status,
               c.created_at, c.updated_at,
@@ -34,12 +33,13 @@ export class PostgresContentRepository implements ContentRepository {
       [id]
     );
 
-    if (res.rows.length === 0) return null;
-    return this.mapCharacterRow(res.rows[0]);
+    const first = res.rows[0];
+    if (!first) return null;
+    return this.mapCharacterRow(first as Record<string, unknown>);
   }
 
   async findCharacterByUnicode(unicodeChar: string): Promise<LaoCharacter | null> {
-    const res = await this.pool.query(
+    const res = await this.db.query(
       `SELECT c.public_id as id, l.character as unicode_char, l.letter_type as classification,
               l.letter_class as subtype, l.sort_order, c.status as online_status,
               c.created_at, c.updated_at,
@@ -54,12 +54,13 @@ export class PostgresContentRepository implements ContentRepository {
       [unicodeChar]
     );
 
-    if (res.rows.length === 0) return null;
-    return this.mapCharacterRow(res.rows[0]);
+    const first = res.rows[0];
+    if (!first) return null;
+    return this.mapCharacterRow(first as Record<string, unknown>);
   }
 
   async findRevisionById(revisionId: string): Promise<LaoCharacterRevision | null> {
-    const res = await this.pool.query(
+    const res = await this.db.query(
       `SELECT revision_public_id as id, entity_id as character_id, revision_number as revision_no,
               status as review_status, snapshot, created_by_operator_id, published_at,
               created_at, updated_at
@@ -68,12 +69,13 @@ export class PostgresContentRepository implements ContentRepository {
       [revisionId]
     );
 
-    if (res.rows.length === 0) return null;
-    return this.mapRevisionRow(res.rows[0]);
+    const first = res.rows[0];
+    if (!first) return null;
+    return this.mapRevisionRow(first as Record<string, unknown>);
   }
 
   async findActiveWorkingRevision(characterId: string): Promise<LaoCharacterRevision | null> {
-    const res = await this.pool.query(
+    const res = await this.db.query(
       `SELECT revision_public_id as id, entity_id as character_id, revision_number as revision_no,
               status as review_status, snapshot, created_by_operator_id, published_at,
               created_at, updated_at
@@ -84,12 +86,13 @@ export class PostgresContentRepository implements ContentRepository {
       [characterId]
     );
 
-    if (res.rows.length === 0) return null;
-    return this.mapRevisionRow(res.rows[0]);
+    const first = res.rows[0];
+    if (!first) return null;
+    return this.mapRevisionRow(first as Record<string, unknown>);
   }
 
   async findPublishedRevision(characterId: string): Promise<LaoCharacterRevision | null> {
-    const res = await this.pool.query(
+    const res = await this.db.query(
       `SELECT revision_public_id as id, entity_id as character_id, revision_number as revision_no,
               status as review_status, snapshot, created_by_operator_id, published_at,
               created_at, updated_at
@@ -99,28 +102,26 @@ export class PostgresContentRepository implements ContentRepository {
       [characterId]
     );
 
-    if (res.rows.length === 0) return null;
-    return this.mapRevisionRow(res.rows[0]);
+    const first = res.rows[0];
+    if (!first) return null;
+    return this.mapRevisionRow(first as Record<string, unknown>);
   }
 
   async saveCharacterAndRevision(
     character: LaoCharacter,
     revision: LaoCharacterRevision
   ): Promise<void> {
-    const client = await this.pool.connect();
-    try {
-      await client.query('BEGIN');
-
-      const contentRes = await client.query(
+    const runInTx = async (exec: DatabaseExecutor) => {
+      const contentRes = await exec.query<{ id: string }>(
         `INSERT INTO content.contents (public_id, language, content_type, status, created_at, updated_at)
          VALUES ($1, 'lo', 'lo_letter', $2, $3, $4)
          RETURNING id`,
         [character.id, character.onlineStatus === 'online' ? 'active' : 'disabled', character.createdAt, character.updatedAt]
       );
 
-      const contentDbId = contentRes.rows[0].id;
+      const contentDbId = contentRes.rows[0]?.id;
 
-      await client.query(
+      await exec.query(
         `INSERT INTO content.lo_letters (content_id, character, letter_type, letter_class, name, romanization, sort_order)
          VALUES ($1, $2, $3, $4, $5, $6, $7)`,
         [
@@ -134,7 +135,7 @@ export class PostgresContentRepository implements ContentRepository {
         ]
       );
 
-      await client.query(
+      await exec.query(
         `INSERT INTO content.content_revisions (
            revision_public_id, entity_type, entity_id, revision_number,
            status, snapshot, created_by_operator_id, created_at
@@ -151,7 +152,7 @@ export class PostgresContentRepository implements ContentRepository {
       );
 
       if (!character.noAudio) {
-        await client.query(
+        await exec.query(
           `INSERT INTO audio.audio_slots (
              id, source_domain, content_entity_type, content_entity_id,
              language_code, audio_role, required_content_revision_id,
@@ -163,18 +164,17 @@ export class PostgresContentRepository implements ContentRepository {
           [character.id, revision.id, revision.snapshot.audioInputHash]
         );
       }
+    };
 
-      await client.query('COMMIT');
-    } catch (err) {
-      await client.query('ROLLBACK');
-      throw err;
-    } finally {
-      client.release();
+    if (this.transactions) {
+      await this.transactions.run(runInTx);
+    } else {
+      await runInTx(this.db);
     }
   }
 
   async saveRevision(revision: LaoCharacterRevision): Promise<void> {
-    await this.pool.query(
+    await this.db.query(
       `INSERT INTO content.content_revisions (
          revision_public_id, entity_type, entity_id, revision_number,
          status, snapshot, created_by_operator_id, published_at, created_at
@@ -201,12 +201,9 @@ export class PostgresContentRepository implements ContentRepository {
     targetRevision: LaoCharacterRevision,
     previousPublishedRevision: LaoCharacterRevision | null
   ): Promise<void> {
-    const client = await this.pool.connect();
-    try {
-      await client.query('BEGIN');
-
+    const runInTx = async (exec: DatabaseExecutor) => {
       if (previousPublishedRevision) {
-        await client.query(
+        await exec.query(
           `UPDATE content.content_revisions
            SET status = 'superseded'
            WHERE revision_public_id = $1`,
@@ -214,7 +211,7 @@ export class PostgresContentRepository implements ContentRepository {
         );
       }
 
-      await client.query(
+      await exec.query(
         `UPDATE content.content_revisions
          SET status = 'published', published_at = $1
          WHERE revision_public_id = $2`,
@@ -222,7 +219,7 @@ export class PostgresContentRepository implements ContentRepository {
       );
 
       // Update physical read model
-      await client.query(
+      await exec.query(
         `UPDATE content.lo_letters
          SET name = $1, romanization = $2, sort_order = $3
          FROM content.contents c
@@ -235,13 +232,12 @@ export class PostgresContentRepository implements ContentRepository {
           characterId,
         ]
       );
+    };
 
-      await client.query('COMMIT');
-    } catch (err) {
-      await client.query('ROLLBACK');
-      throw err;
-    } finally {
-      client.release();
+    if (this.transactions) {
+      await this.transactions.run(runInTx);
+    } else {
+      await runInTx(this.db);
     }
   }
 
@@ -257,7 +253,7 @@ export class PostgresContentRepository implements ContentRepository {
       JOIN content.content_revisions cr ON cr.entity_id = c.public_id AND cr.status = 'published'
       WHERE c.status = 'active' AND c.content_type = 'lo_letter'
     `;
-    const params: any[] = [];
+    const params: unknown[] = [];
 
     if (classification) {
       params.push(classification);
@@ -270,49 +266,56 @@ export class PostgresContentRepository implements ContentRepository {
                   WHEN 'symbol' THEN 3
                   ELSE 4 END, l.sort_order ASC`;
 
-    const res = await this.pool.query(query, params);
-    return res.rows.map((r: any) => ({
+    const res = await this.db.query<PublishedCharacterView & {
+      unicode_char: string;
+      ipa_phonetic: string | null;
+      sort_order: number;
+      no_audio: boolean;
+      audio_url: string | null;
+    }>(query, params);
+    return res.rows.map(r => ({
       id: r.id,
       unicodeChar: r.unicode_char,
       classification: r.classification,
       subtype: r.subtype,
-      ipaPhonetic: r.ipa_phonetic,
+      ipaPhonetic: r.ipa_phonetic ?? '',
       name: r.name,
       sortOrder: r.sort_order,
       noAudio: r.no_audio,
-      audioUrl: r.audio_url,
+      audioUrl: r.audio_url ?? null,
     }));
   }
 
-  private mapCharacterRow(row: any): LaoCharacter {
+  private mapCharacterRow(row: Record<string, unknown>): LaoCharacter {
     return new LaoCharacter({
-      id: row.id,
-      unicodeChar: row.unicode_char,
-      classification: row.classification,
-      subtype: row.subtype,
-      sortOrder: row.sort_order ?? 0,
-      noAudio: row.classification === 'symbol',
-      onlineStatus: row.online_status === 'active' ? 'online' : 'offline',
-      publishedRevisionId: row.published_revision_id ?? null,
-      workingRevisionId: row.working_revision_id ?? null,
-      createdAt: new Date(row.created_at),
-      updatedAt: new Date(row.updated_at),
+      id: String(row['id']),
+      unicodeChar: String(row['unicode_char']),
+      classification: row['classification'] as never,
+      subtype: row['subtype'] as never,
+      sortOrder: typeof row['sort_order'] === 'number' ? row['sort_order'] : 0,
+      noAudio: row['classification'] === 'symbol',
+      onlineStatus: row['online_status'] === 'active' ? 'online' : 'offline',
+      publishedRevisionId: (row['published_revision_id'] as string) ?? null,
+      workingRevisionId: (row['working_revision_id'] as string) ?? null,
+      createdAt: new Date(String(row['created_at'])),
+      updatedAt: new Date(String(row['updated_at'])),
     });
   }
 
-  private mapRevisionRow(row: any): LaoCharacterRevision {
-    const snap = typeof row.snapshot === 'string' ? JSON.parse(row.snapshot) : row.snapshot;
+  private mapRevisionRow(row: Record<string, unknown>): LaoCharacterRevision {
+    const rawSnap = row['snapshot'];
+    const snap = typeof rawSnap === 'string' ? JSON.parse(rawSnap) : rawSnap;
     return new LaoCharacterRevision({
-      id: row.id,
-      characterId: row.character_id,
-      revisionNo: row.revision_no,
+      id: String(row['id']),
+      characterId: String(row['character_id']),
+      revisionNo: Number(row['revision_no']),
       snapshot: snap,
-      reviewStatus: row.review_status,
-      createdByOperatorId: row.created_by_operator_id,
-      publishedAt: row.published_at ? new Date(row.published_at) : null,
+      reviewStatus: row['review_status'] as never,
+      createdByOperatorId: row['created_by_operator_id'] ? String(row['created_by_operator_id']) : null,
+      publishedAt: row['published_at'] ? new Date(String(row['published_at'])) : null,
       lockVersion: 0,
-      createdAt: new Date(row.created_at),
-      updatedAt: new Date(row.updated_at ?? row.created_at),
+      createdAt: new Date(String(row['created_at'])),
+      updatedAt: new Date(String(row['updated_at'] ?? row['created_at'])),
     });
   }
 }

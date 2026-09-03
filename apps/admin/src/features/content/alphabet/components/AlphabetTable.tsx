@@ -18,8 +18,8 @@ export const AlphabetTable: React.FC<Props> = ({ items, onRefresh }) => {
     try {
       await alphabetAdminApi.publishCharacter(charId, revId);
       onRefresh();
-    } catch (err: any) {
-      alert(err.message || '发布失败');
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : '发布失败');
     }
   };
 
@@ -27,8 +27,8 @@ export const AlphabetTable: React.FC<Props> = ({ items, onRefresh }) => {
     try {
       await alphabetAdminApi.submitReview(charId, revId);
       onRefresh();
-    } catch (err: any) {
-      alert(err.message || '提交审核失败');
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : '提交审核失败');
     }
   };
 

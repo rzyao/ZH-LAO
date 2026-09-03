@@ -79,3 +79,8 @@ delivery_evidence: []
 Portfolio Status：`deferred`。
 
 该 Feature 当前仍在延期组合中。Operations V1 canonical 明确不拥有 password / OTP / JWT / session，也没有为 MFA、Operator invitation 或登录失败保护冻结新的 Operations 表、API 或状态机。本页只记录真实边界与下一步，不因 Operations Design/Backend Gate 已 PASS 而提前宣称该 Feature 已设计或实现。
+
+## 与已实现能力的边界
+
+- **登录失败保护（频控）** 子集已在 [admin-login](admin-login) 范围实现：`identity.admin.login` 路径的登录失败频控（`apps/backend/src/modules/identity/application/services/login-rate-limiter.ts`，FR-017，429 `LOGIN_RATE_LIMITED`）与失败安全日志已落地。本页仍保持 `deferred`，不因该子集实现而提前宣告整个 Feature 完成。
+- **MFA / 操作员邀请** 仍为延期范围，无实现证据；延续本页记录的边界，不冻结新表、API 或状态机。

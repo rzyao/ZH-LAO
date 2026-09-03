@@ -8,10 +8,6 @@ source: scripts/build_developer_feature_catalog.py
 
 > 返回 [全量功能目录](../) ｜ 本领域共 **15** 个功能（Portfolio：`active` 8、`deferred` 4、`pending_decision` 3）。
 
-## 领域导航
-
-[音频（Audio）](../audio/) · **聊天（Chat）** · [商业（Commerce）](../commerce/) · [内容（Content）](../content/) · [身份（Identity）](../identity/) · [学习（Learning）](../learning/) · [运营（Operations）](../operations/) · [平台（Platform）](../platform/) · [奖励（Rewards）](../rewards/) · [社交（Social）](../social/) · [信任与安全（Trust & Safety）](../trust/) · [unassigned](../unassigned/)
-
 ## 功能
 
 > 开发状态由[六层交付状态](../../DOCUMENT_CONTRACT)推导：`completed` 需 Integration 与 Acceptance 均 `verified`；任一层有证据为 `in_progress`；无证据为 `not_started`。

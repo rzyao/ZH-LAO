@@ -140,41 +140,47 @@
     "unassigned": 4
   },
   "dev_status_counts": {
+    "completed": 1,
     "in_progress": 2,
-    "not_started": 101
+    "not_started": 100
   },
   "layer_status_counts": {
     "数据库": {
-      "evidenced": 1,
+      "evidenced": 2,
       "evidenced_limited": 1,
-      "not_evidenced": 101
+      "not_evidenced": 100
     },
     "Backend": {
       "evidenced": 1,
       "evidenced_limited": 1,
-      "not_evidenced": 101
+      "not_evidenced": 100,
+      "verified": 1
     },
     "Admin": {
       "evidenced": 1,
       "not_applicable": 1,
-      "not_evidenced": 101
+      "not_evidenced": 100,
+      "verified": 1
     },
     "Mobile": {
       "evidenced": 1,
       "evidenced_limited": 1,
-      "not_evidenced": 101
+      "not_applicable": 1,
+      "not_evidenced": 100
     },
     "Integration": {
-      "not_evidenced": 103
+      "not_evidenced": 102,
+      "verified": 1
     },
     "Acceptance": {
-      "not_evidenced": 103
+      "not_evidenced": 102,
+      "verified": 1
     }
   },
   "evidence_counts": {
     "with_evidence": 55,
     "without_evidence": 48,
-    "total_entries": 154
+    "total_entries": 163
   },
   "source_migration_counts": {
     "complete": 101,
@@ -272,17 +278,17 @@
         "operations",
         "identity"
       ],
-      "evidence_count": 6,
+      "evidence_count": 15,
       "layer_statuses": {
         "产品": "not_evidenced",
-        "数据库": "not_evidenced",
-        "Backend": "not_evidenced",
-        "Admin": "not_evidenced",
-        "Mobile": "not_evidenced",
-        "Integration": "not_evidenced",
-        "Acceptance": "not_evidenced"
+        "数据库": "evidenced",
+        "Backend": "verified",
+        "Admin": "verified",
+        "Mobile": "not_applicable",
+        "Integration": "verified",
+        "Acceptance": "verified"
       },
-      "dev_status": "not_started",
+      "dev_status": "completed",
       "source_migration": "complete",
       "path": "admin-login"
     },

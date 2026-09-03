@@ -1,3 +1,5 @@
+import { readAdminSession } from './session-store'
+
 /**
  * Module-level access-token store.
  *
@@ -7,6 +9,13 @@
  */
 
 let accessToken: string | null = null
+
+// Initialize eagerly from persisted session on load to prevent race conditions before effects run.
+try {
+  accessToken = readAdminSession()?.accessToken ?? null
+} catch {
+  // Ignore non-browser / SSR environments
+}
 
 const listeners = new Set<(token: string | null) => void>()
 

@@ -31,8 +31,8 @@ export const AlphabetFormDialog: React.FC<Props> = ({ open, onOpenChange, onSucc
       await alphabetAdminApi.createCharacter(formData);
       onSuccess();
       onOpenChange(false);
-    } catch (err: any) {
-      setError(err.message || '录入失败');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : '录入失败');
     } finally {
       setSubmitting(false);
     }
@@ -61,7 +61,7 @@ export const AlphabetFormDialog: React.FC<Props> = ({ open, onOpenChange, onSucc
               className="w-full border rounded p-2"
               value={formData.classification}
               onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                const val = e.target.value as any;
+                const val = e.target.value as 'consonant' | 'vowel' | 'symbol';
                 setFormData({
                   ...formData,
                   classification: val,

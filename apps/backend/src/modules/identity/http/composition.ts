@@ -2,8 +2,10 @@ import type { TransactionManager } from '../../../database/transaction-manager.j
 import type { DatabaseExecutor } from '../../../database/executor.js';
 import { OutboxWriter } from '../../../outbox/outbox-writer.js';
 import type { IdentityRepositories } from '../application/ports/index.js';
+import type { AdminAuditRecorder } from '../application/ports/admin-audit-port.js';
 import { AccessTokenService, CryptoOtpGenerator, HmacOtpHasher, IdentityEventWriter, OtpConsumptionEngine, RefreshTokenService, UnavailableFacebookCredentialVerifier, type FacebookCredentialVerifier, type OtpDeliveryProvider } from '../application/services/index.js';
-import { AdminAuthenticationService, AuthenticateWithFacebook, AuthenticateWithPhoneOtp, DeviceLifecycle, IdentityState, PhoneCredentialOperations, ProfileOperations, RequestPhoneOtp, SessionLifecycle } from '../application/index.js';
+import { NoopSecurityLog, InMemoryLoginRateLimiter, type SecurityLog } from '../application/services/index.js';
+import { AdminAuthenticationService, AdminCredentialOperations, AuthenticateWithFacebook, AuthenticateWithPhoneOtp, DeviceLifecycle, IdentityState, PhoneCredentialOperations, ProfileOperations, RequestPhoneOtp, SessionLifecycle } from '../application/index.js';
 import { IdentityAuthenticationProvider } from '../infrastructure/index.js';
 import type { IdentityHttpDependencies } from './routes.js';
 
@@ -18,6 +20,8 @@ export type IdentityHttpCompositionOptions = Readonly<{
   otpDelivery: OtpDeliveryProvider;
   facebookVerifier?: FacebookCredentialVerifier;
   eventWriter?: IdentityEventWriter;
+  adminAudit?: AdminAuditRecorder;
+  securityLog?: SecurityLog;
   now?: () => Date;
 }>;
 
@@ -33,9 +37,15 @@ export function createIdentityHttpDependencies(options: IdentityHttpCompositionO
   const events = options.eventWriter ?? new IdentityEventWriter(new OutboxWriter());
   const access = new AccessTokenService(options.jwtHmacSecret, options.jwtIssuer, options.jwtAudience);
   const refresh = new RefreshTokenService();
+  const securityLog = options.securityLog ?? new NoopSecurityLog();
+  const rateLimiter = new InMemoryLoginRateLimiter();
+  const adminAudit = options.adminAudit;
+  const auditOption = adminAudit ? { audit: adminAudit } : {};
   return {
     authentication: new IdentityAuthenticationProvider(access, options.repositories, options.executor),
-    adminAuth: new AdminAuthenticationService(options.transactionManager, options.repositories, access, refresh, now),
+    adminAuth: new AdminAuthenticationService(options.transactionManager, options.repositories, access, refresh, now, { ...auditOption, rateLimiter, securityLog }),
+    adminCredentials: new AdminCredentialOperations(options.transactionManager, options.repositories, adminAudit),
+    ...(adminAudit ? { adminAudit } : {}),
     requestOtp: new RequestPhoneOtp(options.transactionManager, options.repositories, new CryptoOtpGenerator(), otpHasher, options.otpDelivery, undefined, undefined, now),
     phoneAuth: new AuthenticateWithPhoneOtp(options.transactionManager, options.repositories, new OtpConsumptionEngine(options.repositories, otpHasher, now), { prepareRefresh: () => refresh.prepare(), issueAccess: user => access.issue(user) }, events, now),
     facebookAuth: new AuthenticateWithFacebook(options.facebookVerifier ?? new UnavailableFacebookCredentialVerifier(), options.transactionManager, options.repositories, { prepareRefresh: () => refresh.prepare(), issueAccess: user => access.issue(user) }, events, now),

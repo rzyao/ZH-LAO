@@ -6,6 +6,9 @@ import type {
   AppVersionUpdatePolicy,
   FeatureFlag,
   FeatureFlagOverride,
+  MenuInternalId,
+  MenuItem,
+  MenuTreeNode,
   PlatformClientPlatform,
   Region,
   RuntimeConfigRecord,
@@ -15,6 +18,10 @@ import type {
   AnnouncementUseCases,
   AppVersionUseCases,
   FeatureFlagUseCases,
+  MenuCreateInput,
+  MenuReorderInput,
+  MenuUpdateInput,
+  MenuUseCases,
   RegionUseCases,
   RuntimeConfigUseCases,
 } from '../use-cases/index.js';
@@ -27,6 +34,7 @@ export class PlatformManagementService {
     private readonly appVersionUseCases: AppVersionUseCases,
     private readonly announcementUseCases: AnnouncementUseCases,
     private readonly regionUseCases: RegionUseCases,
+    private readonly menuUseCases: MenuUseCases,
   ) {}
 
   // Feature Flags
@@ -235,6 +243,37 @@ export class PlatformManagementService {
   async retireRegion(code: string): Promise<Region> {
     return this.transactionManager.run(async (tx: DatabaseExecutor) => {
       return this.regionUseCases.retireRegion(tx, code);
+    });
+  }
+
+  // Menu (ADR-022)
+  async listMenus(): Promise<readonly MenuTreeNode[]> {
+    return this.transactionManager.run(async (tx: DatabaseExecutor) => {
+      return this.menuUseCases.listTree(tx);
+    });
+  }
+
+  async createMenu(input: MenuCreateInput): Promise<MenuItem> {
+    return this.transactionManager.run(async (tx: DatabaseExecutor) => {
+      return this.menuUseCases.create(tx, input);
+    });
+  }
+
+  async updateMenu(id: MenuInternalId, input: MenuUpdateInput): Promise<MenuItem> {
+    return this.transactionManager.run(async (tx: DatabaseExecutor) => {
+      return this.menuUseCases.update(tx, id, input);
+    });
+  }
+
+  async removeMenu(id: MenuInternalId, expectedUpdatedAt?: Date): Promise<MenuItem> {
+    return this.transactionManager.run(async (tx: DatabaseExecutor) => {
+      return this.menuUseCases.remove(tx, id, expectedUpdatedAt);
+    });
+  }
+
+  async reorderMenus(parentId: MenuInternalId | null, input: MenuReorderInput): Promise<readonly MenuInternalId[]> {
+    return this.transactionManager.run(async (tx: DatabaseExecutor) => {
+      return this.menuUseCases.reorder(tx, parentId, input);
     });
   }
 }

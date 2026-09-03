@@ -1,7 +1,7 @@
-import { expect, test } from '@playwright/test'
+import { expect, test, type Page } from '@playwright/test'
 
 test.describe('Admin Foundation smoke', () => {
-  async function login(page: import('@playwright/test').Page) {
+  async function login(page: Page) {
     await page.addInitScript(() => {
       window.localStorage.setItem('zh-lao.admin.session', JSON.stringify({
         accessToken: 'e2e-access-token',
@@ -56,6 +56,12 @@ test.describe('Admin Foundation smoke', () => {
     await page.goto('/system/design-system')
     await expect(page.getByRole('heading', { name: '设计系统与组件规范' })).toBeVisible()
     await expect(page.getByRole('cell', { name: '示例记录 1', exact: true })).toBeVisible()
+  })
+
+  test('menu management page opens (ADR-022)', async ({ page }) => {
+    await login(page)
+    await page.goto('/platform/menus')
+    await expect(page.getByRole('heading', { name: '菜单与路由管理' })).toBeVisible()
   })
 
   test('404 works for unknown routes', async ({ page }) => {

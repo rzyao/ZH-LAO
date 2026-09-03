@@ -29,8 +29,8 @@ export const ReviewAuditDialog: React.FC<Props> = ({
       await alphabetAdminApi.reviewCharacter(characterId, revisionId, action, remark);
       onSuccess();
       onOpenChange(false);
-    } catch (err: any) {
-      alert(err.message || '审核操作失败');
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : '审核操作失败');
     } finally {
       setSubmitting(false);
     }

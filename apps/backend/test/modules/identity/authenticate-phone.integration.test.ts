@@ -27,7 +27,7 @@ describe('US1 AuthenticateWithPhoneOtp Integration Contract', () => {
       authentication: { authenticate: async () => null } as AuthenticationProvider,
       requestOtp: {} as never,
       phoneAuth: {
-        execute: async (input) => {
+        execute: async (input: { learningDirection?: unknown; device?: { platform?: string } }) => {
           expect(input.learningDirection).toEqual({ nativeLanguage: 'lo', learningLanguage: 'zh' });
           expect(input.device?.platform).toBe('android');
           return {

@@ -4,12 +4,16 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ApiError } from '@/api/errors'
+import { env } from '@/app/config'
 import { useAuth } from '@/auth/context/AuthContext'
+
+/** Unified anti-enumeration message (FR-004): never distinguishes unknown vs. wrong. */
+const GENERIC_AUTH_ERROR = '账号或密码错误，请重试。'
 
 export function LoginPage() {
   const navigate = useNavigate()
   const { status, login } = useAuth()
-  const [username, setUsername] = React.useState('admin')
+  const [username, setUsername] = React.useState('')
   const [password, setPassword] = React.useState('')
   const [error, setError] = React.useState<string | null>(null)
   const [loading, setLoading] = React.useState(false)
@@ -21,12 +25,25 @@ export function LoginPage() {
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setError(null)
+    // FR-002: normalize the username (trim) before submission; the backend also
+    // lowercases, but the client trims to avoid sending obvious whitespace.
+    const normalizedUsername = username.trim()
+    if (!normalizedUsername || !password) {
+      setError(GENERIC_AUTH_ERROR)
+      return
+    }
     setLoading(true)
     try {
-      await login(username, password)
+      await login(normalizedUsername, password)
       await navigate({ to: '/' })
     } catch (cause) {
-      setError(cause instanceof ApiError ? cause.message : cause instanceof Error ? cause.message : '登录失败，请稍后重试。')
+      // FR-004: map all authentication failures to one message so the client
+      // never reveals whether the username or password was wrong.
+      if (cause instanceof ApiError && cause.kind === 'rate_limit') {
+        setError('尝试次数过多，请稍后再试。')
+      } else {
+        setError(GENERIC_AUTH_ERROR)
+      }
     } finally {
       setLoading(false)
     }
@@ -53,7 +70,9 @@ export function LoginPage() {
             登录
           </Button>
         </form>
-        <p className="rounded-md bg-muted px-3 py-2 text-center text-xs text-muted-foreground">默认超管账号：admin / 123456</p>
+        {env.showDefaultAdminHint ? (
+          <p className="rounded-md bg-muted px-3 py-2 text-center text-xs text-muted-foreground">默认超管账号：admin / 123456</p>
+        ) : null}
       </div>
     </div>
   )

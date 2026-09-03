@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { AlphabetTable } from '../components/AlphabetTable';
 import { AlphabetFormDialog } from '../components/AlphabetFormDialog';
+import type { CharacterItem } from '../api';
 
 export const AlphabetPage: React.FC = () => {
-  const [items, setItems] = useState<any[]>([]);
+  const [items, setItems] = useState<CharacterItem[]>([]);
   const [formOpen, setFormOpen] = useState(false);
 
   const fetchItems = async () => {

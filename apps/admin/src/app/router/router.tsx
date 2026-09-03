@@ -1,8 +1,9 @@
-import * as React from 'react'
+import { Suspense } from 'react'
 import {
   createRootRoute,
   createRoute,
   createRouter,
+  lazyRouteComponent,
   Outlet,
   useRouterState,
 } from '@tanstack/react-router'
@@ -20,51 +21,58 @@ import { AuthGuard } from '@/auth/guards/AuthGuard'
 
 /* ---------- Lazy page components (route-level code splitting) ---------- */
 
-const OverviewPage = React.lazy(() =>
+const OverviewPage = lazyRouteComponent(() =>
   import('@/pages/overview/overview').then((module) => ({ default: module.OverviewPage })),
 )
 
-const DesignSystemPage = React.lazy(() =>
+const DesignSystemPage = lazyRouteComponent(() =>
   import('@/pages/system/design-system').then((module) => ({ default: module.DesignSystemPage })),
 )
 
-const ContentLandingPage = React.lazy(() =>
+const ContentLandingPage = lazyRouteComponent(() =>
   import('@/features/content/pages/landing').then((module) => ({ default: module.ContentLandingPage })),
 )
-const AlphabetPage = React.lazy(() =>
+const AlphabetPage = lazyRouteComponent(() =>
   import('@/features/content/alphabet/pages/AlphabetPage').then((module) => ({ default: module.AlphabetPage })),
 )
 
-const PlatformLandingPage = React.lazy(() =>
+const PlatformLandingPage = lazyRouteComponent(() =>
   import('@/features/platform/pages/landing').then((module) => ({ default: module.PlatformLandingPage })),
 )
-const FeatureFlagsPage = React.lazy(() =>
+const FeatureFlagsPage = lazyRouteComponent(() =>
   import('@/features/platform/pages/feature-flags').then((module) => ({ default: module.FeatureFlagsPage })),
 )
-const RuntimeConfigsPage = React.lazy(() =>
+const RuntimeConfigsPage = lazyRouteComponent(() =>
   import('@/features/platform/pages/runtime-configs').then((module) => ({ default: module.RuntimeConfigsPage })),
 )
-const AppVersionsPage = React.lazy(() =>
+const AppVersionsPage = lazyRouteComponent(() =>
   import('@/features/platform/pages/app-versions').then((module) => ({ default: module.AppVersionsPage })),
 )
-const AnnouncementsPage = React.lazy(() =>
+const AnnouncementsPage = lazyRouteComponent(() =>
   import('@/features/platform/pages/announcements').then((module) => ({ default: module.AnnouncementsPage })),
 )
-const RegionsPage = React.lazy(() =>
+const RegionsPage = lazyRouteComponent(() =>
   import('@/features/platform/pages/regions').then((module) => ({ default: module.RegionsPage })),
 )
+const MenusPage = lazyRouteComponent(() =>
+  import('@/features/platform/pages/menus').then((module) => ({ default: module.MenusPage })),
+)
 
-const OperationsLandingPage = React.lazy(() =>
+const OperationsLandingPage = lazyRouteComponent(() =>
   import('@/features/operations/pages/landing').then((module) => ({ default: module.OperationsLandingPage })),
 )
-const OperationsOperatorsPage = React.lazy(() =>
+const OperationsOperatorsPage = lazyRouteComponent(() =>
   import('@/features/operations/pages/operators').then((module) => ({ default: module.OperatorsPage })),
 )
-const OperationsRolesPage = React.lazy(() =>
+const OperationsRolesPage = lazyRouteComponent(() =>
   import('@/features/operations/pages/roles').then((module) => ({ default: module.RolesPage })),
 )
-const OperationsAuditLogsPage = React.lazy(() =>
+const OperationsAuditLogsPage = lazyRouteComponent(() =>
   import('@/features/operations/pages/audit-logs').then((module) => ({ default: module.AuditLogsPage })),
+)
+
+const ChangePasswordPage = lazyRouteComponent(() =>
+  import('@/pages/change-password').then((module) => ({ default: module.ChangePasswordPage })),
 )
 
 /* ---------- Root ---------- */
@@ -74,9 +82,9 @@ function RootComponent() {
   return (
     <AppProviders>
       <ErrorBoundary resetKey={pathname}>
-        <React.Suspense fallback={<PageLoading />}>
+        <Suspense fallback={<PageLoading />}>
           <Outlet />
-        </React.Suspense>
+        </Suspense>
       </ErrorBoundary>
     </AppProviders>
   )
@@ -127,6 +135,19 @@ const platformRuntimeConfigsRoute = createRoute({ getParentRoute: () => shellRou
 const platformAppVersionsRoute = createRoute({ getParentRoute: () => shellRoute, path: '/platform/app-versions', component: AppVersionsPage })
 const platformAnnouncementsRoute = createRoute({ getParentRoute: () => shellRoute, path: '/platform/announcements', component: AnnouncementsPage })
 const platformRegionsRoute = createRoute({ getParentRoute: () => shellRoute, path: '/platform/regions', component: RegionsPage })
+const platformMenusRoute = createRoute({ getParentRoute: () => shellRoute, path: '/platform/menus', component: MenusPage })
+
+const changePasswordRoute = createRoute({
+  getParentRoute: () => shellRoute,
+  path: '/change-password',
+  component: ChangePasswordPage,
+})
+
+const accountChangePasswordRoute = createRoute({
+  getParentRoute: () => shellRoute,
+  path: '/account/change-password',
+  component: ChangePasswordPage,
+})
 
 const designSystemSearchSchema = z.object({ section: z.string().default('overview') })
 
@@ -177,6 +198,9 @@ const routeTree = rootRoute.addChildren([
     platformAppVersionsRoute,
     platformAnnouncementsRoute,
     platformRegionsRoute,
+    platformMenusRoute,
+    changePasswordRoute,
+    accountChangePasswordRoute,
     designSystemRoute,
     notFoundRoute,
   ]),

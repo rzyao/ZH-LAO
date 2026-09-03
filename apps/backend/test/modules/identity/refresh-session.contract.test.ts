@@ -29,7 +29,7 @@ describe('US2 RefreshSession Contract', () => {
       phoneAuth: {} as never,
       facebookAuth: {} as never,
       sessions: {
-        refreshSession: async (token) => {
+        refreshSession: async (token: unknown) => {
           capturedRefreshToken = String(token);
           return {
             accessToken: 'fresh-jwt-token',

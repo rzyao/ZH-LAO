@@ -10,6 +10,7 @@ export type RuntimeConfigInternalId = InternalId<'RuntimeConfigInternalId'>;
 export type AppVersionInternalId = InternalId<'AppVersionInternalId'>;
 export type AnnouncementInternalId = InternalId<'AnnouncementInternalId'>;
 export type RegionInternalId = InternalId<'RegionInternalId'>;
+export type MenuInternalId = InternalId<'MenuInternalId'>;
 
 function parseInternalId<Name extends string>(value: unknown): InternalId<Name> {
   if (typeof value !== 'bigint' || value <= 0n) throw new TypeError('Expected a positive internal BIGINT ID');
@@ -30,3 +31,4 @@ export const parseRuntimeConfigInternalId = (value: unknown): RuntimeConfigInter
 export const parseAppVersionInternalId = (value: unknown): AppVersionInternalId => parseInternalId<'AppVersionInternalId'>(value);
 export const parseAnnouncementInternalId = (value: unknown): AnnouncementInternalId => parseInternalId<'AnnouncementInternalId'>(value);
 export const parseRegionInternalId = (value: unknown): RegionInternalId => parseInternalId<'RegionInternalId'>(value);
+export const parseMenuInternalId = (value: unknown): MenuInternalId => parseInternalId<'MenuInternalId'>(value);

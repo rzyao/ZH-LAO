@@ -30,9 +30,9 @@ export function useExactPermission(permission: OperationsPermission): boolean {
 }
 
 export function PermissionContract({ read, write }: { read: OperationsPermission; write?: OperationsPermission }) {
-  const { status } = useAuth()
-  const hasRead = useExactPermission(read)
-  const hasWrite = write ? useExactPermission(write) : true
+  const { status, permissions } = useAuth()
+  const hasRead = permissions.includes(read)
+  const hasWrite = write ? permissions.includes(write) : true
   return (
     <div className="mb-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground" data-testid="operations-permission-contract">
       <LockKeyhole aria-hidden className="size-3.5" />

@@ -11,6 +11,8 @@ export const PLATFORM_PERMISSIONS = {
   announcementsWrite: 'platform.announcements.write',
   regionsRead: 'platform.regions.read',
   regionsWrite: 'platform.regions.write',
+  menusRead: 'platform.menus.read',
+  menusWrite: 'platform.menus.write',
 } as const
 
 export type PlatformPermission = (typeof PLATFORM_PERMISSIONS)[keyof typeof PLATFORM_PERMISSIONS]

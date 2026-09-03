@@ -1,3 +1,4 @@
+import { Link } from '@tanstack/react-router'
 import { env } from '@/app/config'
 import { Badge } from '@/components/ui/badge'
 import { Breadcrumb, useBreadcrumb } from './breadcrumb'
@@ -33,6 +34,11 @@ export function Header() {
       <div className="flex shrink-0 items-center gap-2">
         <EnvBadge />
         {operator ? <span className="text-xs text-muted-foreground">{operator.name}</span> : null}
+        {operator ? (
+          <Link to="/change-password">
+            <Button variant="ghost" size="sm">修改密码</Button>
+          </Link>
+        ) : null}
         {operator ? <Button variant="ghost" size="sm" onClick={signOut}>退出</Button> : null}
         <ThemeSwitch />
       </div>

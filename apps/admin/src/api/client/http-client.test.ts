@@ -21,7 +21,7 @@ function jsonResponse(status: number, body: unknown, headers?: Record<string, st
 
 function makeClient(
   fetchImpl: typeof fetch,
-  options: { timeoutMs?: number; token?: string; onUnauthorized?: (e: UnauthorizedError) => void } = {},
+  options: { timeoutMs?: number; token?: string; onUnauthorized?: (e: UnauthorizedError) => void; onUnauthorizedRetry?: () => Promise<boolean> } = {},
 ) {
   return new ApiClient({
     baseUrl: 'http://api.test/v1',
@@ -30,6 +30,7 @@ function makeClient(
     getAccessToken:
       options.token === undefined ? undefined : () => options.token ?? null,
     onUnauthorized: options.onUnauthorized,
+    onUnauthorizedRetry: options.onUnauthorizedRetry,
   })
 }
 
@@ -58,6 +59,49 @@ describe('ApiClient', () => {
     const client = makeClient(fetchImpl, { onUnauthorized })
     await expect(client.get('/x')).rejects.toBeInstanceOf(UnauthorizedError)
     expect(onUnauthorized).toHaveBeenCalledTimes(1)
+  })
+
+  it('retries once after onUnauthorizedRetry succeeds (US-002 auto-refresh)', async () => {
+    const onUnauthorized = vi.fn()
+    const onUnauthorizedRetry = vi.fn().mockResolvedValue(true)
+    const fetchImpl = vi
+      .fn()
+      .mockResolvedValueOnce(jsonResponse(401, { code: 'unauthorized', message: 'nope' }))
+      .mockResolvedValueOnce(jsonResponse(200, { ok: true }))
+    const client = makeClient(fetchImpl, { onUnauthorized, onUnauthorizedRetry })
+    const result = await client.get<{ ok: boolean }>('/x')
+    expect(result.data).toEqual({ ok: true })
+    // Refresh succeeded -> request retried, onUnauthorized (session clear) NOT fired.
+    expect(onUnauthorizedRetry).toHaveBeenCalledTimes(1)
+    expect(onUnauthorized).not.toHaveBeenCalled()
+    expect(fetchImpl).toHaveBeenCalledTimes(2)
+  })
+
+  it('does NOT retry and fires onUnauthorized when onUnauthorizedRetry fails', async () => {
+    const onUnauthorized = vi.fn()
+    const onUnauthorizedRetry = vi.fn().mockResolvedValue(false)
+    const fetchImpl = vi
+      .fn()
+      .mockResolvedValue(jsonResponse(401, { code: 'unauthorized', message: 'nope' }))
+    const client = makeClient(fetchImpl, { onUnauthorized, onUnauthorizedRetry })
+    await expect(client.get('/x')).rejects.toBeInstanceOf(UnauthorizedError)
+    expect(onUnauthorizedRetry).toHaveBeenCalledTimes(1)
+    // Refresh failed -> session cleared, no retry.
+    expect(onUnauthorized).toHaveBeenCalledTimes(1)
+    expect(fetchImpl).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not retry the refresh request itself (skipAuth prevents loop)', async () => {
+    const onUnauthorized = vi.fn()
+    const onUnauthorizedRetry = vi.fn().mockResolvedValue(true)
+    const fetchImpl = vi
+      .fn()
+      .mockResolvedValue(jsonResponse(401, { code: 'unauthorized', message: 'nope' }))
+    const client = makeClient(fetchImpl, { onUnauthorized, onUnauthorizedRetry })
+    // skipAuth: true -> no Authorization header, and the 401 must NOT trigger retry.
+    await expect(client.post('/auth/refresh', { skipAuth: true, json: {} })).rejects.toBeInstanceOf(UnauthorizedError)
+    expect(onUnauthorizedRetry).not.toHaveBeenCalled()
+    expect(fetchImpl).toHaveBeenCalledTimes(1)
   })
 
   it('maps HTTP statuses to the correct error kinds', async () => {

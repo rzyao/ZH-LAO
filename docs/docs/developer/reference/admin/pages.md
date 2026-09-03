@@ -29,6 +29,7 @@ Admin 页面分为当前正式页面文档与已实现路由页面：
 | App Versions | `/platform/app-versions` | Platform 页面 |
 | Announcements | `/platform/announcements` | Platform 页面 |
 | Regions | `/platform/regions` | Platform 页面 |
+| 菜单与路由管理 | `/platform/menus` | Platform 页面（权限：`platform.menus.read` / `platform.menus.write`；ADR-022 菜单配置能力落地页，关联 Feature `004-menu-routing-management`） |
 | Design System | `/system/design-system` | 开发专用页面 |
 
 新增可作为 Feature 交付事实的页面时，必须补齐 frontmatter、稳定 `page_id`、页面标准章节，并在 Feature Page 的 `admin_pages` 中反向登记；纯开发专用页面不伪造成产品 Feature。

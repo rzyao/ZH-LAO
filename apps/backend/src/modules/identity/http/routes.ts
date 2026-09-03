@@ -3,6 +3,8 @@ import { z } from 'zod';
 import { requireAuthentication } from '../../../auth/auth-hook.js';
 import type { AuthenticationProvider } from '../../../auth/authentication-provider.js';
 import type { AdminAuthenticationService } from '../application/use-cases/admin-authentication.js';
+import type { AdminCredentialOperations } from '../application/use-cases/admin-credential-ops.js';
+import type { AdminAuditRecorder } from '../application/ports/admin-audit-port.js';
 import { AppError } from '../../../errors/app-error.js';
 import { parseInstallationId, parseRawOtpCode, parseRawRefreshToken, parseUserPublicId } from '../domain/index.js';
 import type { AuthenticateWithFacebook, AuthenticateWithPhoneOtp, DeviceLifecycle, IdentityState, PhoneCredentialOperations, ProfileOperations, RequestPhoneOtp, SessionLifecycle } from '../application/index.js';
@@ -17,16 +19,36 @@ const tokenHeaders = { 'cache-control': 'no-store', pragma: 'no-cache' };
 const mapDevice = (value: z.infer<typeof device>) => ({ installationId: parseInstallationId(value.installation_id), platform: value.platform, ...(value.device_name !== undefined ? { deviceName: value.device_name } : {}), ...(value.app_version !== undefined ? { appVersion: value.app_version } : {}), ...(value.push_token !== undefined ? { pushToken: value.push_token } : {}) });
 const mapDirection = (value: z.infer<typeof direction>) => ({ nativeLanguage: value.native_language, learningLanguage: value.learning_language });
 
-export type IdentityHttpDependencies = Readonly<{ authentication: AuthenticationProvider; adminAuth?: AdminAuthenticationService; requestOtp: RequestPhoneOtp; phoneAuth: AuthenticateWithPhoneOtp; facebookAuth: AuthenticateWithFacebook; sessions: SessionLifecycle; devices: DeviceLifecycle; profile: ProfileOperations; state: IdentityState; phones: PhoneCredentialOperations }>;
+export type IdentityHttpDependencies = Readonly<{
+  authentication: AuthenticationProvider;
+  adminAuth?: AdminAuthenticationService;
+  adminCredentials?: AdminCredentialOperations;
+  adminAudit?: AdminAuditRecorder;
+  requestOtp: RequestPhoneOtp;
+  phoneAuth: AuthenticateWithPhoneOtp;
+  facebookAuth: AuthenticateWithFacebook;
+  sessions: SessionLifecycle;
+  devices: DeviceLifecycle;
+  profile: ProfileOperations;
+  state: IdentityState;
+  phones: PhoneCredentialOperations;
+}>;
 
 export async function registerIdentityRoutes(app: FastifyInstance, dependencies: IdentityHttpDependencies): Promise<void> {
   const protectedRoute = requireAuthentication(dependencies.authentication);
   if (dependencies.adminAuth) {
     app.post('/api/v1/admin/auth/login', async (request, reply) => {
       const body = parse(z.object({ username: z.string().trim().min(1).max(100), password: z.string().min(1).max(200) }).strict(), request.body);
-      const result = await dependencies.adminAuth!.login(body.username, body.password);
+      const result = await dependencies.adminAuth!.login(body.username, body.password, { ipAddress: request.ip, requestId: request.id });
       reply.headers(tokenHeaders);
       return { user_id: result.userPublicId, access_token: result.accessToken, token_type: 'Bearer', expires_in: result.expiresIn, refresh_token: result.refreshToken, session_expires_at: result.sessionExpiresAt.toISOString() };
+    });
+  }
+  if (dependencies.adminCredentials) {
+    app.post('/api/v1/admin/auth/change-password', { preHandler: protectedRoute }, async (request) => {
+      const body = parse(z.object({ current_password: z.string().min(1).max(200), new_password: z.string().min(8).max(128) }).strict(), request.body);
+      const result = await dependencies.adminCredentials!.changePassword(subject(request), body.current_password, body.new_password, { ipAddress: request.ip, requestId: request.id });
+      return { status: result.changed ? 'changed' : 'unchanged', session_revoked: result.sessionRevoked };
     });
   }
   app.post('/api/v1/identity/phone-otp', async (request) => {
@@ -48,9 +70,29 @@ export async function registerIdentityRoutes(app: FastifyInstance, dependencies:
   app.post('/api/v1/identity/sessions/refresh', async (request, reply) => {
     const body = parse(z.object({ refresh_token: z.string().min(1) }).strict(), request.body);
     const result = await dependencies.sessions.refreshSession(parseRawRefreshToken(body.refresh_token)).catch((error) => { if (error instanceof AppError && (error.code === 'SESSION_REVOKED' || error.code === 'SESSION_EXPIRED')) throw new AppError({ code: 'INVALID_CREDENTIAL', message: 'Invalid credential', httpStatus: 401 }); throw error; });
+    if (dependencies.adminAudit) {
+      await dependencies.adminAudit.recordSuccessfulAdminAction({
+        subjectId: result.userPublicId,
+        actionKey: 'identity.admin.refresh',
+        target: { domain: 'identity', type: 'operator', id: result.userPublicId },
+        requestContext: { requestId: request.id, ipAddress: request.ip },
+      });
+    }
     reply.headers(tokenHeaders); return { access_token: result.accessToken, token_type: result.tokenType, expires_in: result.expiresIn, refresh_token: result.refreshToken, session_expires_at: result.sessionExpiresAt.toISOString() };
   });
-  app.post('/api/v1/identity/sessions/logout', async (request, reply) => { const body = parse(z.object({ refresh_token: z.string().min(1) }).strict(), request.body); await dependencies.sessions.logoutCurrent(parseRawRefreshToken(body.refresh_token)); return reply.status(204).send(); });
+  app.post('/api/v1/identity/sessions/logout', async (request, reply) => {
+    const body = parse(z.object({ refresh_token: z.string().min(1) }).strict(), request.body);
+    const subjectId = await dependencies.sessions.logoutCurrent(parseRawRefreshToken(body.refresh_token));
+    if (subjectId && dependencies.adminAudit) {
+      await dependencies.adminAudit.recordSuccessfulAdminAction({
+        subjectId,
+        actionKey: 'identity.admin.logout',
+        target: { domain: 'identity', type: 'operator', id: subjectId },
+        requestContext: { requestId: request.id, ipAddress: request.ip },
+      });
+    }
+    return reply.status(204).send();
+  });
   app.post('/api/v1/identity/sessions/logout-all', { preHandler: protectedRoute }, async (request, reply) => { await dependencies.sessions.logoutAll(subject(request)); return reply.status(204).send(); });
   app.get('/api/v1/identity/me', { preHandler: protectedRoute }, async request => { const value = await dependencies.state.getIdentitySummary(subject(request)); return { user_id: value.userPublicId, status: value.status, auth_providers: value.authProviders, learning_profile: value.learningProfile && { native_language: value.learningProfile.nativeLanguage, learning_language: value.learningProfile.learningLanguage }, profile: value.basicProfile && { display_name: value.basicProfile.displayName, gender: value.basicProfile.gender, birth_date: value.basicProfile.birthDate, country_code: value.basicProfile.countryCode, region_code: value.basicProfile.regionCode, avatar_media_id: value.basicProfile.avatarMediaId } }; });
   app.get('/api/v1/identity/me/status', { preHandler: protectedRoute }, async (request) => ({ status: (await dependencies.state.getCurrentIdentity(subject(request))).status }));

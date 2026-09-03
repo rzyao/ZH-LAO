@@ -53,8 +53,8 @@ describe('Router', () => {
   })
 
   it('renders a Domain placeholder route', async () => {
-    renderAt('/content')
-    expect(await screen.findByText('内容管理 — 即将上线')).toBeInTheDocument()
+    renderAt('/learning')
+    expect(await screen.findByText('学习系统 — 即将上线')).toBeInTheDocument()
   })
 
   it('renders the real Platform Admin landing route', async () => {
@@ -69,10 +69,11 @@ describe('Router', () => {
     expect(await screen.findByText('页面不存在')).toBeInTheDocument()
   })
 
-  it('renders the login route', async () => {
+  it('renders the login route with empty (non-leaking) default fields', async () => {
     renderAt('/login', false)
     expect(await screen.findByRole('heading', { name: 'ZH-LAO Admin' })).toBeInTheDocument()
-    expect(screen.getByLabelText('账号')).toHaveValue('admin')
+    // FR-004: the account field must NOT pre-fill a known account name.
+    expect(screen.getByLabelText('账号')).toHaveValue('')
     expect(screen.getByLabelText('密码')).toHaveAttribute('type', 'password')
   })
 })

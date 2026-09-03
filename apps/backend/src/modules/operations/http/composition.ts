@@ -8,7 +8,7 @@ import { PostgresOperationsRepository } from '../infrastructure/index.js';
 import { registerOperationsRoutes } from './routes.js';
 
 export type OperationsModule = Readonly<{ service: OperationsService; registerHttp(app:FastifyInstance):Promise<void> }>;
-export function buildOperationsModule(options:{executor:DatabaseExecutor;transactionManager:TransactionManager;identity:IdentityPublicQueries;authentication:AuthenticationProvider}):OperationsModule {
-  const service=new OperationsService(options.transactionManager,options.executor,new PostgresOperationsRepository(),options.identity);
+export function buildOperationsModule(options:{executor:DatabaseExecutor;transactionManager:TransactionManager;identity:IdentityPublicQueries;authentication:AuthenticationProvider;service?:OperationsService}):OperationsModule {
+  const service = options.service ?? new OperationsService(options.transactionManager, options.executor, new PostgresOperationsRepository(), options.identity);
   return {service,registerHttp:async app=>registerOperationsRoutes(app,{service,authentication:options.authentication})};
 }

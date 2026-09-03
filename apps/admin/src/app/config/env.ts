@@ -6,6 +6,12 @@ export interface AppEnv {
   appEnvironment: AppEnvironment
   /** Whether the internal design-system showcase is enabled. */
   enableDesignSystem: boolean
+  /**
+   * Whether to show the default bootstrap credential hint on the login page.
+   * Public flag: enabled in dev/test to help first-time bootstrap; production
+   * should set VITE_SHOW_DEFAULT_ADMIN_HINT=false (FR-004 / research decision 7).
+   */
+  showDefaultAdminHint: boolean
 }
 
 function parseEnvironment(): AppEnvironment {
@@ -26,4 +32,5 @@ export const env: AppEnv = {
       : '/api',
   appEnvironment: parseEnvironment(),
   enableDesignSystem: import.meta.env.VITE_ENABLE_DESIGN_SYSTEM !== 'false',
+  showDefaultAdminHint: import.meta.env.VITE_SHOW_DEFAULT_ADMIN_HINT !== 'false',
 }

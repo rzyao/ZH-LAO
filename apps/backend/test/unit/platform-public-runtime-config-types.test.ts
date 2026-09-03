@@ -15,7 +15,7 @@ const forgedDefaultLocale: PlatformRuntimeConfigHandle<number> = { key: 'default
 describe('PlatformRuntimeConfigReader public typing', () => {
   it('preserves the canonical value type carried by Platform-owned handles', () => {
     const reader = {
-      getRuntimeConfig: (_handle: any) => Promise.resolve(''),
+      getRuntimeConfig: (_handle: unknown) => Promise.resolve(''),
     } as unknown as PlatformRuntimeConfigReader;
 
     expectTypeOf(reader.getRuntimeConfig(platformDefaultLocaleConfig)).toEqualTypeOf<Promise<string>>();

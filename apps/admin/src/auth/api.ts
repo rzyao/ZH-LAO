@@ -46,3 +46,12 @@ export async function logoutAdmin(refreshToken: string): Promise<void> {
     json: { refresh_token: refreshToken },
   })
 }
+
+export async function changeAdminPassword(currentPassword: string, newPassword: string): Promise<void> {
+  await apiClient.post('/api/v1/admin/auth/change-password', {
+    json: {
+      current_password: currentPassword,
+      new_password: newPassword,
+    },
+  })
+}

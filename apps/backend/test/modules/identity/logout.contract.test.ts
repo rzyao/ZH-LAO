@@ -28,7 +28,7 @@ describe('US3 Logout and LogoutAll Contract', () => {
       phoneAuth: {} as never,
       facebookAuth: {} as never,
       sessions: {
-        logoutCurrent: async (token) => {
+        logoutCurrent: async (token: unknown) => {
           capturedToken = String(token);
         }
       } as never,
@@ -66,7 +66,7 @@ describe('US3 Logout and LogoutAll Contract', () => {
       phoneAuth: {} as never,
       facebookAuth: {} as never,
       sessions: {
-        logoutAll: async (userId) => {
+        logoutAll: async (userId: unknown) => {
           capturedSubject = String(userId);
         }
       } as never,

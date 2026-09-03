@@ -10,16 +10,10 @@ source: scripts/build_developer_feature_catalog.py
 
 当前目录包含 **103 个 Feature detail 页面**（含 P2 手工核验页）。103 个页面已完成来源迁移；旧 102 个详情页已登记在退役清单中，不再是运行时来源。
 
-## 领域导航
-
-[音频（Audio）](audio/) · [聊天（Chat）](chat/) · [商业（Commerce）](commerce/) · [内容（Content）](content/) · [身份（Identity）](identity/) · [学习（Learning）](learning/) · [运营（Operations）](operations/) · [平台（Platform）](platform/) · [奖励（Rewards）](rewards/) · [社交（Social）](social/) · [信任与安全（Trust & Safety）](trust/) · [unassigned](unassigned/)
-
-> 点击领域名进入对应领域页，查看该领域下的全部功能及分层交付状态。
-
 ## 覆盖摘要
 
 - Portfolio：`active` 80、`deferred` 17、`pending_decision` 6。
-- 证据条目：有 frontmatter evidence 的 55 页、无 evidence 的 48 页，共 154 条。
+- 证据条目：有 frontmatter evidence 的 55 页、无 evidence 的 48 页，共 163 条。
 - 来源迁移：`complete` 101 页、`manual` 2 页；旧 102 页已按退役清单处理。
 - 人工分层核验：`manual` 页 2 页（[login](login)、[lao-alphabet-management](lao-alphabet-management)），其余 101 页六层交付状态默认 `not_evidenced`，待按[文档契约](../DOCUMENT_CONTRACT)增量补录。
 - 主领域规模：audio 1、chat 15、commerce 15、content 7、identity 6、learning 17、operations 7、platform 7、rewards 3、social 14、trust 7、unassigned 4。
@@ -28,12 +22,12 @@ source: scripts/build_developer_feature_catalog.py
 
 | 层 | 当前页面状态计数 |
 | --- | --- |
-| 数据库 | `evidenced` 1, `evidenced_limited` 1, `not_evidenced` 101 |
-| Backend | `evidenced` 1, `evidenced_limited` 1, `not_evidenced` 101 |
-| Admin | `evidenced` 1, `not_applicable` 1, `not_evidenced` 101 |
-| Mobile | `evidenced` 1, `evidenced_limited` 1, `not_evidenced` 101 |
-| Integration | `not_evidenced` 103 |
-| Acceptance | `not_evidenced` 103 |
+| 数据库 | `evidenced` 2, `evidenced_limited` 1, `not_evidenced` 100 |
+| Backend | `evidenced` 1, `evidenced_limited` 1, `not_evidenced` 100, `verified` 1 |
+| Admin | `evidenced` 1, `not_applicable` 1, `not_evidenced` 100, `verified` 1 |
+| Mobile | `evidenced` 1, `evidenced_limited` 1, `not_applicable` 1, `not_evidenced` 100 |
+| Integration | `not_evidenced` 102, `verified` 1 |
+| Acceptance | `not_evidenced` 102, `verified` 1 |
 
 ## 状态说明
 
@@ -52,7 +46,7 @@ source: scripts/build_developer_feature_catalog.py
 | [内容（Content）](content/) | 7 | ⚪ not_started 6、🟡 in_progress 1 | `active` 7 |
 | [身份（Identity）](identity/) | 6 | ⚪ not_started 5、🟡 in_progress 1 | `active` 5、`deferred` 1 |
 | [学习（Learning）](learning/) | 17 | ⚪ not_started 17 | `active` 14、`deferred` 3 |
-| [运营（Operations）](operations/) | 7 | ⚪ not_started 7 | `active` 6、`deferred` 1 |
+| [运营（Operations）](operations/) | 7 | ⚪ not_started 6、🟢 completed 1 | `active` 6、`deferred` 1 |
 | [平台（Platform）](platform/) | 7 | ⚪ not_started 7 | `active` 5、`deferred` 2 |
 | [奖励（Rewards）](rewards/) | 3 | ⚪ not_started 3 | `active` 2、`deferred` 1 |
 | [社交（Social）](social/) | 14 | ⚪ not_started 14 | `active` 13、`pending_decision` 1 |

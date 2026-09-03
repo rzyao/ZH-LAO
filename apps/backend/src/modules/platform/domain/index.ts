@@ -6,3 +6,4 @@ export * from './region.js';
 export * from './runtime-config.js';
 export * from './app-version.js';
 export * from './announcement.js';
+export * from './menu.js';

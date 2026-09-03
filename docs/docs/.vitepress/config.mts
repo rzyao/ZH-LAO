@@ -137,7 +137,10 @@ const domainsSidebar = [
       {
         text: '相关功能',
         collapsed: true,
-        items: [{ text: '登录与会话', link: '/developer/features/login' }]
+        items: [
+          { text: '登录与会话', link: '/developer/features/login' },
+          { text: '后台登录与操作员认证', link: '/developer/features/admin-login' }
+        ]
       }
     ]
   },
@@ -286,7 +289,10 @@ const domainsSidebar = [
       {
         text: '相关功能',
         collapsed: true,
-        items: [{ text: '音频生产', link: '/developer/features/audio-production' }]
+        items: [
+          { text: '后台登录与操作员认证', link: '/developer/features/admin-login' },
+          { text: '音频生产', link: '/developer/features/audio-production' }
+        ]
       }
     ]
   },

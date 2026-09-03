@@ -29,7 +29,7 @@ describe('US4 Facebook Auth Contract', () => {
       requestOtp: {} as never,
       phoneAuth: {} as never,
       facebookAuth: {
-        execute: async (input) => {
+        execute: async (input: { credential: string }) => {
           capturedCredential = input.credential;
           return {
             userPublicId,

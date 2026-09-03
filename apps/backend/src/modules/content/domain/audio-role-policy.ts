@@ -16,7 +16,7 @@ export class AudioRolePolicy {
   ] as const;
 
   static isAudioAllowed(contentType: string, noAudio: boolean): boolean {
-    if (!this.ALLOWED_CONTENT_TYPES.includes(contentType as any)) {
+    if (!this.ALLOWED_CONTENT_TYPES.includes(contentType as (typeof AudioRolePolicy.ALLOWED_CONTENT_TYPES)[number])) {
       return false;
     }
     return !noAudio;

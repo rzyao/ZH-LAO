@@ -1,14 +1,17 @@
 ---
 status: frozen
-last_updated: 2026-08-30
-revision: "2026-08-30 设计 Platform Domain 会话定稿：6 张表字段级定稿 + 全域审计最终修正版"
+last_updated: 2026-09-03
+revision: "2026-08-30 设计 Platform Domain 会话定稿：6 张表字段级定稿 + 全域审计最终修正版；2026-09-03 ADR-022 新增菜单配置能力（第 7 张业务表）"
 schema: platform
 source_share_url: https://chatgpt.com/share/6a9351eb-de4c-83e9-80fe-18dba4fd6eda
 ---
 
 # Platform 数据库总览
 
-Platform Domain 的业务表最终固定为 **6 张**，不增加、不替换：
+> 本页 2026-08-30 定稿 Platform 业务表固定 **6 张**。2026-09-03 经 **ADR-022**（Platform 扩展后台菜单/路由配置能力）批准,新增菜单配置能力,Platform 业务表现在为 **7 张**：
+> `feature_flags` / `feature_flag_overrides` / `runtime_configs` / `app_versions` / `announcements` / `regions` / **`menus`(+ `menu_permissions`)**。
+
+Platform Domain 的业务表当前固定为 **7 张**（含 ADR-022 新增的菜单配置能力）:
 
 1. `platform.feature_flags`
 2. `platform.feature_flag_overrides`
@@ -16,10 +19,11 @@ Platform Domain 的业务表最终固定为 **6 张**，不增加、不替换：
 4. `platform.app_versions`
 5. `platform.announcements`
 6. `platform.regions`
+7. `platform.menus` + `platform.menu_permissions`（菜单/路由配置,ADR-022;字段见 [菜单数据模型](/specs/004-menu-routing-management/data-model.md)）
 
-以下能力虽然与平台运行有关，但**不计入这 6 张业务表**：`system_outbox_events`、Media / Asset Infrastructure、技术审计日志、消息投递基础设施、存储基础设施（见[平台域与基础设施边界](#platform-domain-与-platform-infrastructure-边界)）。
+以下能力虽然与平台运行有关，但**不计入 Platform 业务表**：`system_outbox_events`、Media / Asset Infrastructure、技术审计日志、消息投递基础设施、存储基础设施（见[平台域与基础设施边界](#platform-domain-与-platform-infrastructure-边界)）。
 
-本页以会话的「全域审计最终修正版」为权威基线；若与早期逐表定稿表述存在差异，以修正版为准。
+本页以会话的「全域审计最终修正版」为权威基线；若与早期逐表定稿表述存在差异，以修正版为准。菜单配置能力边界由 ADR-022 定义。
 
 ## 与全局 PostgreSQL 规范的关系
 
@@ -682,7 +686,7 @@ Client Platform 全域统一：`android` / `ios`（涉及 `feature_flag_override
 | `announcements` | region（RESTRICT） | `public_id` | title / content / platform / status / 时间窗口 / published 须有 starts_at | published starts_at partial、region_id partial |
 | `regions` | 无 | `code` | code 格式 / name / locale / timezone 非空 / status 枚举 | 无 |
 
-**共 6 张表，52 个字段。**
+**共 6 张表 + 菜单配置 2 张（`menus` / `menu_permissions`，ADR-022），52 + 菜单字段。**
 
 ## 统一删除策略
 
@@ -697,21 +701,21 @@ Client Platform 全域统一：`android` / `ios`（涉及 `feature_flag_override
 
 必须明确区分：
 
-- **Platform Domain** 负责“产品当前应该如何运行”——即六张业务表，表达业务 / 产品运行状态。
+- **Platform Domain** 负责“产品当前应该如何运行”——即业务表（原 6 张 + ADR-022 新增的菜单配置 2 张），表达业务 / 产品运行状态。
 - **Platform Infrastructure** 负责“软件系统如何可靠地执行、存储、发布和传递这些业务状态”——Transactional Outbox、Media / Asset 存储抽象、event publishing、技术重试、基础设施生命周期、存储元数据、技术 retention 等。
 
 Infrastructure 不因为服务于整个产品就自动成为 Platform Domain 的业务表：`Platform Domain ≠ Platform Infrastructure`。
 
 ### `system_outbox_events`
 
-- 归属：**Platform Infrastructure / Shared Technical Infrastructure**，明确不计入 Platform Domain 六张业务表（Platform 仍是严格 6 表，不是 7 张）。
+- 归属：**Platform Infrastructure / Shared Technical Infrastructure**，明确不计入 Platform Domain 业务表（Platform 业务表为 7 张，outbox 属基础设施，不增为业务表）。
 - **统一 Outbox 原则**：整个 PostgreSQL 系统共用一套 Transactional Outbox，不设计 `social_outbox_events` / `chat_outbox_events` / `commerce_outbox_events` / `rewards_outbox_events` 等每域一套。各 Domain 在自己的业务事务中「业务状态变更 + 写入 `system_outbox_events`」保持同一数据库事务，由统一 Outbox Publisher 读取 → 发布 → 标记已处理 → retry / retention。
 - Event 自身携带来源识别信息（会话示例字段：`event_id`、`source_domain`、`event_type`、`aggregate_type`、`aggregate_id`、`payload`、`occurred_at`、`published_at` 及 retry / delivery metadata）；`source_domain` 区分 `social` / `chat` / `commerce` / `rewards` / `trust_safety` / `operations` / `platform` 等，但不因此拆表。物理字段定稿为 `designing`。
 - 数据治理：技术事件数据，写入后 append-oriented，不得把历史事件当普通业务配置随意 UPDATE / DELETE；已发布数据按统一 retention policy 定期归档或清理，不使用 `retired` 生命周期。
 
 ### Media / Asset Infrastructure
 
-- 归属：共享技术基础设施能力，**不是新的 Platform 业务子域，不增加第七张业务表**；它是 Social / Chat / Commerce / Learning 等域所用 `asset_id` 的最终 authoritative technical owner。
+- 归属：共享技术基础设施能力，**不是新的 Platform 业务子域，不增加业务表**（Platform 业务表为 7 张,Asset Infrastructure 属基础设施,不计入）；它是 Social / Chat / Commerce / Learning 等域所用 `asset_id` 的最终 authoritative technical owner。
 - 负责 Asset 的技术事实：`asset_id UUID`（业务域使用的稳定逻辑标识）；storage provider（S3 / Cloudflare R2 / OSS / 本地兼容对象存储，属基础设施实现）；storage location（`bucket`、`object_key`，必要时 storage region）；content metadata（`mime_type`、`size_bytes`、`checksum`、`width`、`height`、`duration` 等按媒体类型保存）；Asset 自身生命周期（如 uploading / available / deleted / purged，具体状态枚举在 Media Infrastructure 落地时单独定稿，`designing`）。
 - 业务 Domain 只保存 `asset_id UUID`（社交资料照片、聊天图片消息、礼物图片、学习音频等），不重复保存 `storage_provider` / `bucket` / `object_key` / `storage_url` / 内部存储路径 / `checksum` / object metadata——否则更换 S3→R2、迁移 bucket、调整 CDN 时会迫使所有业务域同时改数据。
 - Media Infrastructure 不拥有业务语义：Social Photo 的业务排序、Profile Photo 是否主图、Chat Message 的发送状态、Gift 的商品语义、Moderation Decision、举报状态、用户社交资料（“这张图是否通过安全审核”归 Trust & Safety，“是否用户头像”归 Social，“属于哪条消息”归 Chat）。不能因为所有业务都用文件就把业务关系迁入 Media Infrastructure。
@@ -740,7 +744,7 @@ Platform / Shared Infrastructure（不计入六表）
 
 以下 17 条与「全域审计最终修正版」逐条对应：
 
-1. **PLATFORM-01** Platform Domain 永远保持当前六张业务表，除非未来有新的正式领域设计决策。
+1. **PLATFORM-01** Platform Domain 永远保持当前业务表（原 6 张 + ADR-022 新增菜单配置 2 张，共 7 张业务表），除非未来有新的正式领域设计决策。
 2. **PLATFORM-02** `feature_flags.key` 唯一、稳定、不复用。
 3. **PLATFORM-03** `inactive` / `retired` Feature Flag 的 `default_enabled` 必须为 `false`，最终 effective result 必须为 `false`。
 4. **PLATFORM-04** Feature Flag 已使用后不物理删除。
@@ -753,7 +757,7 @@ Platform / Shared Infrastructure（不计入六表）
 11. **PLATFORM-11** `platform.regions` 是 Platform 自己的产品运营区域定义，不是全系统 Geography Domain。
 12. **PLATFORM-12** 其他 Domain 不因 country / region 属性建立数据库 FK 到 `platform.regions`。跨域只使用稳定 logical code / UUID，V1 可直接使用 `region_code`。
 13. **PLATFORM-13** `system_outbox_events` 是统一共享技术基础设施。只有一套，不按 Domain 分表。
-14. **PLATFORM-14** `system_outbox_events` 不计入 Platform Domain 六张业务表。
+14. **PLATFORM-14** `system_outbox_events` 不计入 Platform Domain 业务表（Platform 业务表为 7 张）。
 15. **PLATFORM-15** Media / Asset 是共享技术基础设施，是所有 `asset_id` 的 authoritative technical owner。
 16. **PLATFORM-16** Social / Chat / Commerce 等 Domain 只保存 `asset_id UUID`，不得重复保存底层 storage provider / bucket / object key。
 17. **PLATFORM-17** 删除策略分类：Feature Flag / Runtime Config / Region 状态化退役；Override 当前关系可 DELETE；App Version / Published Announcement 保留历史；Infrastructure Event / Audit 按 append-oriented + retention policy。

@@ -335,13 +335,6 @@ def build_index(records: list[dict[str, Any]], catalog: dict[str, Any]) -> str:
         primary = page["domains"][0] if page["domains"] else "unassigned"
         grouped.setdefault(primary, []).append(page)
 
-    # 领域导航条：为每个领域生成指向其领域页的链接。
-    # 领域页位于 features/<domain>/index.md，从目录首页用相对路径 <domain>/ 引用。
-    nav_keys = [d for d in sorted(grouped, key=lambda item: (item == "unassigned", item))]
-    nav_items = " · ".join(
-        f"[{domain_names.get(d, d)}]({d}/)" for d in nav_keys
-    )
-
     lines = [
         "---",
         "status: active",
@@ -354,12 +347,6 @@ def build_index(records: list[dict[str, Any]], catalog: dict[str, Any]) -> str:
         "本目录由 `scripts/build_developer_feature_catalog.py` 从 canonical manifest 与新目录页面的 front matter 生成。它不读取已退役的旧目录、不手工复制旧索引，也不把 `active` 推断为 implemented。",
         "",
         f"当前目录包含 **{len(pages)} 个 Feature detail 页面**（含 P2 手工核验页）。103 个页面已完成来源迁移；旧 102 个详情页已登记在退役清单中，不再是运行时来源。",
-        "",
-        "## 领域导航",
-        "",
-        nav_items,
-        "",
-        "> 点击领域名进入对应领域页，查看该领域下的全部功能及分层交付状态。",
         "",
         "## 覆盖摘要",
         "",
@@ -406,21 +393,7 @@ def build_index(records: list[dict[str, Any]], catalog: dict[str, Any]) -> str:
     return "\n".join(lines).rstrip() + "\n"
 
 
-def domain_nav_bar(nav_keys: list[str], domain_names: dict[str, str], current: str | None = None) -> str:
-    """生成领域导航条。current 非空时表示当前所在领域（高亮为粗体），其余为链接。"""
-    parts = []
-    for d in nav_keys:
-        label = domain_names.get(d, d)
-        if d == current:
-            parts.append(f"**{label}**")
-        else:
-            # 领域页之间互链：用相对路径 ../<domain>/
-            prefix = "../" if current else ""
-            parts.append(f"[{label}]({prefix}{d}/)")
-    return " · ".join(parts)
-
-
-def build_domain_page(domain: str, rows: list[dict[str, Any]], nav_keys: list[str], domain_names: dict[str, str], all_catalog: dict[str, Any]) -> str:
+def build_domain_page(domain: str, rows: list[dict[str, Any]], domain_names: dict[str, str], all_catalog: dict[str, Any]) -> str:
     """生成单个领域的索引页 features/<domain>/index.md。"""
     rows = sorted(rows, key=lambda page: (page["title"], page["id"]))
     dist = Counter(page["portfolio"] for page in rows)
@@ -449,10 +422,6 @@ def build_domain_page(domain: str, rows: list[dict[str, Any]], nav_keys: list[st
         f"# {domain_names.get(domain, domain)}",
         "",
         f"> 返回 [全量功能目录](../) ｜ 本领域共 **{len(rows)}** 个功能（Portfolio：{dist_text}）。",
-        "",
-        "## 领域导航",
-        "",
-        domain_nav_bar(nav_keys, domain_names, current=domain),
         "",
         "## 功能",
         "",
@@ -507,10 +476,9 @@ def build_domain_pages(records: list[dict[str, Any]], catalog: dict[str, Any], c
         primary = page["domains"][0] if page["domains"] else "unassigned"
         grouped.setdefault(primary, []).append(page)
 
-    nav_keys = [d for d in sorted(grouped, key=lambda item: (item == "unassigned", item))]
     changed: list[str] = []
     for domain, rows in grouped.items():
-        text = build_domain_page(domain, rows, nav_keys, domain_names, catalog)
+        text = build_domain_page(domain, rows, domain_names, catalog)
         path = NEW_FEATURES / domain / "index.md"
         if check:
             if not path.is_file() or path.read_text(encoding="utf-8") != text:

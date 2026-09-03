@@ -1,4 +1,3 @@
-import { z } from 'zod';
 import { randomUUID } from 'node:crypto';
 import { LaoCharacterRevision } from '../../domain/lao-character-revision.js';
 import type { ContentRepository } from '../ports/repositories.js';

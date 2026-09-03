@@ -13,6 +13,15 @@ export interface ApiClientOptions {
   getAccessToken?: () => string | null
   /** Invoked when a request fails with 401. */
   onUnauthorized?: (error: UnauthorizedError) => void
+  /**
+   * Invoked when a request fails with 401 to give the app a chance to refresh
+   * the access token. Return true to retry the original request once. The
+   * retry happens with the token that getAccessToken() returns after this
+   * resolves. Used by the admin session auto-refresh (US-002).
+   */
+  onUnauthorizedRetry?: () => Promise<boolean>
+  /** Invoked when a request fails with 403 (e.g. to trigger silent /me permission refresh). */
+  onForbidden?: (error: ApiError) => void
   /** Inject a fetch implementation (used by tests). */
   fetchImpl?: typeof fetch
   /** Extra default headers applied to every request. */
@@ -87,6 +96,8 @@ export class ApiClient {
   readonly timeoutMs: number
   private readonly getAccessToken?: () => string | null
   private readonly onUnauthorized?: (error: UnauthorizedError) => void
+  private readonly onUnauthorizedRetry?: () => Promise<boolean>
+  private readonly onForbidden?: (error: ApiError) => void
   private readonly fetchImpl: typeof fetch
   private readonly defaultHeaders: Record<string, string>
 
@@ -95,6 +106,8 @@ export class ApiClient {
     this.timeoutMs = options.timeoutMs ?? 15_000
     this.getAccessToken = options.getAccessToken
     this.onUnauthorized = options.onUnauthorized
+    this.onUnauthorizedRetry = options.onUnauthorizedRetry
+    this.onForbidden = options.onForbidden
     this.fetchImpl = options.fetchImpl ?? ((input, init) => globalThis.fetch(input, init))
     this.defaultHeaders = options.defaultHeaders ?? {}
   }
@@ -131,6 +144,26 @@ export class ApiClient {
     return this.request<T>('DELETE', path, options)
   }
 
+  /** Perform a single fetch with the current access token + body. */
+  private async performFetch(
+    method: string,
+    url: string,
+    fetchOptions: Record<string, unknown>,
+    buildHeaders: () => Headers,
+    buildBody: (headers: Headers) => BodyInit | null,
+    signal: AbortSignal,
+  ): Promise<Response> {
+    const headers = buildHeaders()
+    return this.fetchImpl(url, {
+      ...fetchOptions,
+      method,
+      headers,
+      body: buildBody(headers),
+      signal,
+      credentials: 'include',
+    })
+  }
+
   private async request<T>(
     method: string,
     path: string,
@@ -155,35 +188,57 @@ export class ApiClient {
       else externalSignal.addEventListener('abort', onExternalAbort)
     }
 
-    const headers = new Headers(this.defaultHeaders)
-    headers.set('Accept', 'application/json')
-    headers.set('X-Request-Id', requestId)
+    const buildHeaders = (): Headers => {
+      const headers = new Headers(this.defaultHeaders)
+      headers.set('Accept', 'application/json')
+      headers.set('X-Request-Id', requestId)
+      const token = skipAuth ? null : this.getAccessToken?.() ?? null
+      if (token) headers.set('Authorization', `Bearer ${token}`)
+      return headers
+    }
 
-    const token = skipAuth ? null : this.getAccessToken?.() ?? null
-    if (token) headers.set('Authorization', `Bearer ${token}`)
-
-    let body: BodyInit | null = null
-    if (rawBody !== undefined) {
-      body = rawBody
-    } else if (json !== undefined) {
-      headers.set('Content-Type', 'application/json')
-      body = JSON.stringify(json)
+    const buildBody = (headers: Headers): BodyInit | null => {
+      if (rawBody !== undefined) return rawBody
+      if (json !== undefined) {
+        headers.set('Content-Type', 'application/json')
+        return JSON.stringify(json)
+      }
+      return null
     }
 
     try {
-      const response = await this.fetchImpl(url, {
-        ...fetchOptions,
-        method,
-        headers,
-        body,
-        signal: controller.signal,
-        credentials: 'include',
-      })
+      let response = await this.performFetch(method, url, fetchOptions, buildHeaders, buildBody, controller.signal)
 
-      if (!response.ok) {
+      // US-002: on 401, give the app one chance to refresh the access token and
+      // retry the exact same request once. The refresh itself (skipAuth) never
+      // retries, preventing a refresh loop. onUnauthorized (which clears the
+      // session) fires only when the retry is unavailable or refresh fails.
+      if (!response.ok && !skipAuth && this.onUnauthorizedRetry) {
+        const bodyText = await response.text().catch(() => '')
+        const error = await mapHttpErrorFrom(response, bodyText)
+        if (error instanceof UnauthorizedError) {
+          const refreshed = await this.onUnauthorizedRetry()
+          if (refreshed && !externalSignal?.aborted) {
+            response = await this.performFetch(method, url, fetchOptions, buildHeaders, buildBody, controller.signal)
+          } else {
+            this.onUnauthorized?.(error)
+            throw error
+          }
+        }
+      } else if (!response.ok) {
         const error = await mapHttpError(response)
         if (error instanceof UnauthorizedError) {
           this.onUnauthorized?.(error)
+        } else if (error.kind === 'forbidden') {
+          this.onForbidden?.(error)
+        }
+        throw error
+      }
+
+      if (!response.ok) {
+        const error = await mapHttpError(response)
+        if (error.kind === 'forbidden') {
+          this.onForbidden?.(error)
         }
         throw error
       }
@@ -223,4 +278,24 @@ export class ApiClient {
       externalSignal?.removeEventListener('abort', onExternalAbort)
     }
   }
+}
+
+/** Map an HTTP error from a response that has already been consumed. */
+async function mapHttpErrorFrom(response: Response, bodyText: string): Promise<ApiError> {
+  let body: unknown = null
+  try {
+    body = bodyText ? JSON.parse(bodyText) : null
+  } catch {
+    body = bodyText
+  }
+  const consumed = {
+    status: response.status,
+    statusText: response.statusText,
+    ok: response.ok,
+    headers: response.headers,
+    url: response.url,
+    json: async () => body,
+    text: async () => bodyText,
+  } as unknown as Response
+  return mapHttpError(consumed)
 }

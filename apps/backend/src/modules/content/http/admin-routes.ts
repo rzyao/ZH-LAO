@@ -1,7 +1,7 @@
 import type { FastifyInstance, FastifyPluginAsync } from 'fastify';
-import { CreateCharacterDraftUseCase } from '../application/use-cases/create-character-draft.js';
+import { CreateCharacterDraftUseCase, type CreateCharacterDraftInput } from '../application/use-cases/create-character-draft.js';
 import { DeriveWorkingRevisionUseCase } from '../application/use-cases/derive-working-revision.js';
-import { UpdateCharacterDraftUseCase } from '../application/use-cases/update-character-draft.js';
+import { UpdateCharacterDraftUseCase, type UpdateCharacterDraftInput } from '../application/use-cases/update-character-draft.js';
 import { SubmitCharacterReviewUseCase } from '../application/use-cases/submit-character-review.js';
 import { ReviewCharacterUseCase } from '../application/use-cases/review-character.js';
 import { PublishCharacterUseCase } from '../application/use-cases/publish-character.js';
@@ -25,15 +25,16 @@ export const adminContentRoutes: FastifyPluginAsync<AdminContentRoutesOptions> =
   const publishUC = new PublishCharacterUseCase(contentRepository);
 
   fastify.post('/letters', async (request, reply) => {
-    const body = request.body as any;
+    const body = request.body as CreateCharacterDraftInput;
     try {
       const result = await createDraftUC.execute(body);
       return reply.status(201).send(result);
-    } catch (err: any) {
-      if (err.message.includes('UNICODE_CONFLICT')) {
-        return reply.status(409).send({ error: 'UNICODE_CONFLICT', message: err.message });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      if (message.includes('UNICODE_CONFLICT')) {
+        return reply.status(409).send({ error: 'UNICODE_CONFLICT', message });
       }
-      return reply.status(400).send({ error: 'VALIDATION_ERROR', message: err.message });
+      return reply.status(400).send({ error: 'VALIDATION_ERROR', message });
     }
   });
 
@@ -42,22 +43,24 @@ export const adminContentRoutes: FastifyPluginAsync<AdminContentRoutesOptions> =
     try {
       const result = await deriveWorkingUC.execute(id);
       return reply.status(201).send(result);
-    } catch (err: any) {
-      if (err.message.includes('ACTIVE_WORK_CONFLICT')) {
-        return reply.status(409).send({ error: 'ACTIVE_WORK_CONFLICT', message: err.message });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      if (message.includes('ACTIVE_WORK_CONFLICT')) {
+        return reply.status(409).send({ error: 'ACTIVE_WORK_CONFLICT', message });
       }
-      return reply.status(400).send({ error: 'ERROR', message: err.message });
+      return reply.status(400).send({ error: 'ERROR', message });
     }
   });
 
   fastify.put('/letters/:id/revisions/:revId', async (request, reply) => {
     const { revId } = request.params as { revId: string };
-    const body = request.body as any;
+    const body = request.body as UpdateCharacterDraftInput;
     try {
       await updateDraftUC.execute(revId, body);
       return reply.status(200).send({ success: true });
-    } catch (err: any) {
-      return reply.status(400).send({ error: 'ERROR', message: err.message });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      return reply.status(400).send({ error: 'ERROR', message });
     }
   });
 
@@ -66,8 +69,9 @@ export const adminContentRoutes: FastifyPluginAsync<AdminContentRoutesOptions> =
     try {
       await submitReviewUC.execute(revId);
       return reply.status(200).send({ success: true, status: 'pending_review' });
-    } catch (err: any) {
-      return reply.status(400).send({ error: 'ILLEGAL_STATE_TRANSITION', message: err.message });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      return reply.status(400).send({ error: 'ILLEGAL_STATE_TRANSITION', message });
     }
   });
 
@@ -77,8 +81,9 @@ export const adminContentRoutes: FastifyPluginAsync<AdminContentRoutesOptions> =
     try {
       await reviewUC.execute(revId, body.action, 'admin-operator-id', body.remark);
       return reply.status(200).send({ success: true, status: body.action === 'approve' ? 'approved' : 'rejected' });
-    } catch (err: any) {
-      return reply.status(400).send({ error: 'ILLEGAL_STATE_TRANSITION', message: err.message });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      return reply.status(400).send({ error: 'ILLEGAL_STATE_TRANSITION', message });
     }
   });
 
@@ -87,8 +92,9 @@ export const adminContentRoutes: FastifyPluginAsync<AdminContentRoutesOptions> =
     try {
       await publishUC.execute(id, revId);
       return reply.status(200).send({ success: true, published_revision_id: revId, status: 'published' });
-    } catch (err: any) {
-      return reply.status(400).send({ error: 'ILLEGAL_STATE_TRANSITION', message: err.message });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      return reply.status(400).send({ error: 'ILLEGAL_STATE_TRANSITION', message });
     }
   });
 };

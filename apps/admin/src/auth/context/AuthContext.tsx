@@ -3,8 +3,8 @@ import type { CurrentOperator, AuthStatus } from '../types'
 import { can as canCheck } from '../permissions'
 import type { Permission } from '../permissions'
 import { setAccessToken } from '../token-store'
-import { setUnauthorizedHandler } from '@/api/client'
-import { getCurrentOperator, loginAdmin, logoutAdmin } from '../api'
+import { setForbiddenHandler, setUnauthorizedHandler } from '@/api/client'
+import { changeAdminPassword, getCurrentOperator, loginAdmin, logoutAdmin } from '../api'
 import { clearAdminSession, readAdminSession, writeAdminSession, type AdminSession } from '../session-store'
 
 export interface AuthContextValue {
@@ -16,6 +16,8 @@ export interface AuthContextValue {
   login: (username: string, password: string) => Promise<void>
   setAuthenticated: (operator: CurrentOperator, permissions?: string[]) => void
   signOut: () => void
+  refreshPermissions: () => Promise<void>
+  changePassword: (currentPassword: string, newPassword: string) => Promise<void>
 }
 
 export const AuthContext = React.createContext<AuthContextValue | null>(null)
@@ -41,6 +43,24 @@ export function AuthProvider({ children, initialState }: AuthProviderProps) {
     initialState?.permissions ?? persisted?.permissions ?? [],
   )
 
+  const refreshPermissions = React.useCallback(async () => {
+    try {
+      const current = await getCurrentOperator()
+      setOperator(current.operator)
+      setPermissions(current.permissions)
+      const currentSession = readAdminSession()
+      if (currentSession) {
+        writeAdminSession({
+          ...currentSession,
+          operator: current.operator,
+          permissions: current.permissions,
+        })
+      }
+    } catch {
+      // Failed to refresh operator/permissions; let standard error handlers deal with it
+    }
+  }, [])
+
   React.useEffect(() => {
     setAccessToken(persisted?.accessToken ?? null)
     setUnauthorizedHandler(() => {
@@ -49,8 +69,15 @@ export function AuthProvider({ children, initialState }: AuthProviderProps) {
       setOperator(null)
       setPermissions([])
     })
-    return () => setUnauthorizedHandler(null)
-  }, [persisted])
+    setForbiddenHandler(() => {
+      // 403 forbidden -> silently refresh /me permissions (SC-007)
+      void refreshPermissions()
+    })
+    return () => {
+      setUnauthorizedHandler(null)
+      setForbiddenHandler(null)
+    }
+  }, [persisted, refreshPermissions])
 
   const status: AuthStatus = operator ? 'authenticated' : 'anonymous'
 
@@ -93,8 +120,17 @@ export function AuthProvider({ children, initialState }: AuthProviderProps) {
         setOperator(null)
         setPermissions([])
       },
+      refreshPermissions,
+      changePassword: async (currentPassword, newPassword) => {
+        await changeAdminPassword(currentPassword, newPassword)
+        // Backend revokes all sessions on password change -> clear local session & reset auth
+        setAccessToken(null)
+        clearAdminSession()
+        setOperator(null)
+        setPermissions([])
+      },
     }),
-    [status, operator, permissions],
+    [status, operator, permissions, refreshPermissions],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

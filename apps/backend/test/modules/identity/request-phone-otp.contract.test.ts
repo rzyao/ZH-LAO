@@ -6,7 +6,6 @@ import type { IdentityHttpDependencies } from '../../../src/modules/identity/htt
 import type { AuthenticationProvider } from '../../../src/auth/authentication-provider.js';
 import type { DatabaseExecutor } from '../../../src/database/executor.js';
 import { requiredMigrations } from '../../../src/database/required-migrations.generated.js';
-import { AppError } from '../../../src/errors/app-error.js';
 import { normalizePhoneNumber } from '../../../src/modules/identity/domain/index.js';
 
 describe('US1 RequestPhoneOtp Contract', () => {
@@ -25,7 +24,7 @@ describe('US1 RequestPhoneOtp Contract', () => {
     const dependencies: IdentityHttpDependencies = {
       authentication: { authenticate: async () => null } as AuthenticationProvider,
       requestOtp: {
-        execute: async (input) => {
+        execute: async (input: { phone: unknown }) => {
           capturedPhone = String(input.phone);
           return { expiresAt: new Date(Date.now() + 300_000) };
         }
@@ -64,7 +63,7 @@ describe('US1 RequestPhoneOtp Contract', () => {
     const dependencies: IdentityHttpDependencies = {
       authentication: { authenticate: async () => null } as AuthenticationProvider,
       requestOtp: {
-        execute: async (input) => {
+        execute: async (input: { phone: unknown }) => {
           normalizePhoneNumber(input.phone);
           return { expiresAt: new Date() };
         }

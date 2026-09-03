@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import type { ContentRepository } from '../ports/repositories.js';
+import type { CharacterRevisionSnapshot } from '../../domain/lao-character-revision.js';
 import {
   LaoCharacterClassificationSchema,
   LaoCharacterSubtypeSchema,
@@ -28,15 +29,17 @@ export class UpdateCharacterDraftUseCase {
       throw new Error('Revision not found');
     }
 
+    const patch: Partial<Omit<CharacterRevisionSnapshot, 'audioInputHash'>> = {
+      ...(input.unicodeChar !== undefined ? { unicodeChar: input.unicodeChar } : {}),
+      ...(input.classification !== undefined ? { classification: input.classification } : {}),
+      ...(input.subtype !== undefined ? { subtype: input.subtype } : {}),
+      ...(input.ipaPhonetic !== undefined ? { ipaPhonetic: input.ipaPhonetic } : {}),
+      ...(input.description !== undefined && input.description !== null ? { description: input.description } : {}),
+      ...(input.sortOrder !== undefined ? { sortOrder: input.sortOrder } : {}),
+    };
+
     revision.updateContent(
-      {
-        unicodeChar: input.unicodeChar,
-        classification: input.classification,
-        subtype: input.subtype,
-        ipaPhonetic: input.ipaPhonetic,
-        description: input.description,
-        sortOrder: input.sortOrder,
-      },
+      patch,
       input.lockVersion
     );
 

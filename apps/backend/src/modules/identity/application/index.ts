@@ -9,3 +9,4 @@ export * from './use-cases/phone-credential-operations.js';
 export * from './use-cases/profile-operations.js';
 export * from './use-cases/identity-state.js';
 export * from './use-cases/admin-authentication.js';
+export * from './use-cases/admin-credential-ops.js';

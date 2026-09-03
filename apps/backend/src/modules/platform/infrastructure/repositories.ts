@@ -5,6 +5,7 @@ import {
   parseAppVersionInternalId,
   parseFeatureFlagInternalId,
   parseFeatureFlagOverrideInternalId,
+  parseMenuInternalId,
   parseRegionInternalId,
   parseRuntimeConfigInternalId,
   type AnnouncementInternalId,
@@ -19,6 +20,10 @@ import {
   type FeatureFlagInternalId,
   type FeatureFlagOverride,
   type FeatureFlagStatus,
+  type MenuInternalId,
+  type MenuItem,
+  type MenuPermission,
+  type MenuStatus,
   type PlatformClientPlatform,
   type Region,
   type RegionInternalId,
@@ -32,6 +37,7 @@ import type {
   AppVersionRepository,
   FeatureFlagOverrideRepository,
   FeatureFlagRepository,
+  MenuRepository,
   RegionRepository,
   RuntimeConfigRepository,
 } from '../application/ports/platform-repositories.js';
@@ -883,5 +889,184 @@ export class PostgresRegionRepository implements RegionRepository {
       params,
     );
     return mapRegionRow(result.rows[0]!);
+}
+}
+
+type MenuRow = {
+  id: string | number | bigint;
+  parent_id: string | number | bigint | null;
+  label: string;
+  route_key: string | null;
+  icon: string | null;
+  sort_order: number;
+  status: MenuStatus;
+  created_at: Date;
+  updated_at: Date;
+};
+
+function mapMenuRow(row: MenuRow): MenuItem {
+  return {
+    id: parseMenuInternalId(BigInt(row.id)),
+    parentId: row.parent_id === null ? null : parseMenuInternalId(BigInt(row.parent_id)),
+    label: row.label,
+    routeKey: row.route_key,
+    icon: row.icon,
+    sortOrder: row.sort_order,
+    status: row.status,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+type MenuPermissionRow = {
+  menu_id: string | number | bigint;
+  permission_key: string;
+  created_at: Date;
+};
+
+function mapMenuPermissionRow(row: MenuPermissionRow): MenuPermission {
+  return {
+    menuId: parseMenuInternalId(BigInt(row.menu_id)),
+    permissionKey: row.permission_key,
+    createdAt: row.created_at,
+  };
+}
+
+const MENU_COLUMNS = 'id, parent_id, label, route_key, icon, sort_order, status, created_at, updated_at';
+
+export class PostgresMenuRepository implements MenuRepository {
+  async findById(executor: DatabaseExecutor, id: MenuInternalId, forUpdate = false): Promise<MenuItem | null> {
+    const lock = forUpdate ? ' FOR UPDATE' : '';
+    const result = await executor.query<MenuRow>(
+      `SELECT ${MENU_COLUMNS}
+       FROM platform.menus
+       WHERE id = $1${lock}`,
+      [id],
+    );
+    return result.rows[0] ? mapMenuRow(result.rows[0]) : null;
+  }
+
+  async findDirectChildren(executor: DatabaseExecutor, parentId: MenuInternalId | null): Promise<readonly MenuItem[]> {
+    const result = await executor.query<MenuRow>(
+      `SELECT ${MENU_COLUMNS}
+       FROM platform.menus
+       WHERE parent_id IS NOT DISTINCT FROM $1
+       ORDER BY sort_order ASC, id ASC`,
+      [parentId],
+    );
+    return result.rows.map(mapMenuRow);
+  }
+
+  async create(
+    executor: DatabaseExecutor,
+    input: Readonly<{
+      parentId?: MenuInternalId | null;
+      label: string;
+      routeKey?: string | null;
+      icon?: string | null;
+      sortOrder?: number;
+      status?: MenuStatus;
+    }>,
+  ): Promise<MenuItem> {
+    const result = await executor.query<MenuRow>(
+      `INSERT INTO platform.menus (parent_id, label, route_key, icon, sort_order, status)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       RETURNING ${MENU_COLUMNS}`,
+      [
+        input.parentId ?? null,
+        input.label,
+        input.routeKey ?? null,
+        input.icon ?? null,
+        input.sortOrder ?? 0,
+        input.status ?? 'active',
+      ],
+    );
+    return mapMenuRow(result.rows[0]!);
+  }
+
+  async update(
+    executor: DatabaseExecutor,
+    id: MenuInternalId,
+    input: Readonly<{
+      label?: string;
+      routeKey?: string | null;
+      icon?: string | null;
+      sortOrder?: number;
+      status?: MenuStatus;
+    }>,
+  ): Promise<MenuItem> {
+    const updates: string[] = [];
+    const params: unknown[] = [id];
+    let idx = 2;
+    if (input.label !== undefined) {
+      updates.push(`label = $${idx++}`);
+      params.push(input.label);
+    }
+    if (input.routeKey !== undefined) {
+      updates.push(`route_key = $${idx++}`);
+      params.push(input.routeKey);
+    }
+    if (input.icon !== undefined) {
+      updates.push(`icon = $${idx++}`);
+      params.push(input.icon);
+    }
+    if (input.sortOrder !== undefined) {
+      updates.push(`sort_order = $${idx++}`);
+      params.push(input.sortOrder);
+    }
+    if (input.status !== undefined) {
+      updates.push(`status = $${idx++}`);
+      params.push(input.status);
+    }
+    updates.push('updated_at = now()');
+
+    const result = await executor.query<MenuRow>(
+      `UPDATE platform.menus
+       SET ${updates.join(', ')}
+       WHERE id = $1
+       RETURNING ${MENU_COLUMNS}`,
+      params,
+    );
+    return mapMenuRow(result.rows[0]!);
+  }
+
+  async listAll(executor: DatabaseExecutor): Promise<readonly MenuItem[]> {
+    const result = await executor.query<MenuRow>(
+      `SELECT ${MENU_COLUMNS}
+       FROM platform.menus
+       WHERE status <> 'removed'
+       ORDER BY parent_id ASC NULLS FIRST, sort_order ASC, id ASC`,
+    );
+    return result.rows.map(mapMenuRow);
+  }
+
+  async listPermissionsForMenus(
+    executor: DatabaseExecutor,
+    menuIds: readonly MenuInternalId[],
+  ): Promise<readonly MenuPermission[]> {
+    if (menuIds.length === 0) return [];
+    const result = await executor.query<MenuPermissionRow>(
+      `SELECT menu_id, permission_key, created_at
+       FROM platform.menu_permissions
+       WHERE menu_id = ANY($1::bigint[])
+       ORDER BY permission_key ASC`,
+      [menuIds],
+    );
+    return result.rows.map(mapMenuPermissionRow);
+  }
+
+  async replacePermissions(
+    executor: DatabaseExecutor,
+    menuId: MenuInternalId,
+    permissionKeys: readonly string[],
+  ): Promise<void> {
+    await executor.query(`DELETE FROM platform.menu_permissions WHERE menu_id = $1`, [menuId]);
+    if (permissionKeys.length === 0) return;
+    for (const key of permissionKeys) {
+      await executor.query(
+        `INSERT INTO platform.menu_permissions (menu_id, permission_key) VALUES ($1, $2)`,
+        [menuId, key],
+      );
+    }
   }
 }

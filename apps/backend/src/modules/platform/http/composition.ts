@@ -6,6 +6,7 @@ import {
   PostgresAppVersionRepository,
   PostgresFeatureFlagOverrideRepository,
   PostgresFeatureFlagRepository,
+  PostgresMenuRepository,
   PostgresRegionRepository,
   PostgresRuntimeConfigRepository,
 } from '../infrastructure/repositories.js';
@@ -14,10 +15,12 @@ import {
   AppVersionUseCases,
   createDefaultRuntimeConfigRegistry,
   FeatureFlagUseCases,
+  MenuUseCases,
   RegionUseCases,
   RuntimeConfigRegistry,
   RuntimeConfigUseCases,
 } from '../application/use-cases/index.js';
+import { isOperatorPermissionKey } from '../../operations/public/index.js';
 import {
   PlatformManagementService,
   PlatformPublicService,
@@ -32,6 +35,7 @@ export type PlatformModule = Readonly<{
   appVersionUseCases: AppVersionUseCases;
   announcementUseCases: AnnouncementUseCases;
   regionUseCases: RegionUseCases;
+  menuUseCases?: MenuUseCases | undefined;
   runtimeConfigRegistry: RuntimeConfigRegistry;
   registerRoutes: (app: FastifyInstance) => Promise<void>;
 }>;
@@ -51,6 +55,7 @@ export function buildPlatformModule(optionsOrExecutor: DatabaseExecutor | Platfo
   const appVersionRepo = new PostgresAppVersionRepository();
   const announcementRepo = new PostgresAnnouncementRepository();
   const regionRepo = new PostgresRegionRepository();
+  const menuRepo = new PostgresMenuRepository();
 
   const runtimeConfigRegistry = createDefaultRuntimeConfigRegistry();
 
@@ -59,6 +64,7 @@ export function buildPlatformModule(optionsOrExecutor: DatabaseExecutor | Platfo
   const appVersionUseCases = new AppVersionUseCases(appVersionRepo);
   const announcementUseCases = new AnnouncementUseCases(announcementRepo, regionRepo);
   const regionUseCases = new RegionUseCases(regionRepo);
+  const menuUseCases = new MenuUseCases(menuRepo, isOperatorPermissionKey);
 
   const publicService = new PlatformPublicService(
     executor,
@@ -75,6 +81,7 @@ export function buildPlatformModule(optionsOrExecutor: DatabaseExecutor | Platfo
         appVersionUseCases,
         announcementUseCases,
         regionUseCases,
+        menuUseCases,
       )
     : undefined;
 
@@ -86,6 +93,7 @@ export function buildPlatformModule(optionsOrExecutor: DatabaseExecutor | Platfo
     appVersionUseCases,
     announcementUseCases,
     regionUseCases,
+    menuUseCases,
     runtimeConfigRegistry,
     registerRoutes: async (app: FastifyInstance) => {
       await registerPlatformRuntimeRoutes(app, {

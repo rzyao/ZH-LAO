@@ -13,6 +13,10 @@ import type {
   FeatureFlagInternalId,
   FeatureFlagOverride,
   FeatureFlagStatus,
+  MenuInternalId,
+  MenuItem,
+  MenuPermission,
+  MenuStatus,
   PlatformClientPlatform,
   Region,
   RegionInternalId,
@@ -218,4 +222,40 @@ export interface RegionRepository {
       status?: RegionStatus;
     }>,
   ): Promise<Region>;
+}
+
+export interface MenuRepository {
+  findById(executor: DatabaseExecutor, id: MenuInternalId, forUpdate?: boolean): Promise<MenuItem | null>;
+  findDirectChildren(executor: DatabaseExecutor, parentId: MenuInternalId | null): Promise<readonly MenuItem[]>;
+  create(
+    executor: DatabaseExecutor,
+    input: Readonly<{
+      parentId?: MenuInternalId | null;
+      label: string;
+      routeKey?: string | null;
+      icon?: string | null;
+      sortOrder?: number;
+      status?: MenuStatus;
+    }>,
+  ): Promise<MenuItem>;
+  update(
+    executor: DatabaseExecutor,
+    id: MenuInternalId,
+    input: Readonly<{
+      label?: string;
+      routeKey?: string | null;
+      icon?: string | null;
+      sortOrder?: number;
+      status?: MenuStatus;
+    }>,
+  ): Promise<MenuItem>;
+  /** 删除 = 置 removed(终态);级联子项由 use-case 调用 setStatus 逐个处理。 */
+  listAll(executor: DatabaseExecutor): Promise<readonly MenuItem[]>;
+  listPermissionsForMenus(executor: DatabaseExecutor, menuIds: readonly MenuInternalId[]): Promise<readonly MenuPermission[]>;
+  /** 整体替换某菜单项的权限集合(删除后插入)。 */
+  replacePermissions(
+    executor: DatabaseExecutor,
+    menuId: MenuInternalId,
+    permissionKeys: readonly string[],
+  ): Promise<void>;
 }

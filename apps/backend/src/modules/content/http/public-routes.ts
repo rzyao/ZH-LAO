@@ -18,8 +18,9 @@ export const publicContentRoutes: FastifyPluginAsync<PublicContentRoutesOptions>
     try {
       const result = await getPublishedAlphabetUC.execute(classification);
       return reply.status(200).send(result);
-    } catch (err: any) {
-      return reply.status(500).send({ error: 'INTERNAL_ERROR', message: err.message });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      return reply.status(500).send({ error: 'INTERNAL_ERROR', message });
     }
   });
 };

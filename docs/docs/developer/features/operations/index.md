@@ -8,10 +8,6 @@ source: scripts/build_developer_feature_catalog.py
 
 > 返回 [全量功能目录](../) ｜ 本领域共 **7** 个功能（Portfolio：`active` 6、`deferred` 1）。
 
-## 领域导航
-
-[音频（Audio）](../audio/) · [聊天（Chat）](../chat/) · [商业（Commerce）](../commerce/) · [内容（Content）](../content/) · [身份（Identity）](../identity/) · [学习（Learning）](../learning/) · **运营（Operations）** · [平台（Platform）](../platform/) · [奖励（Rewards）](../rewards/) · [社交（Social）](../social/) · [信任与安全（Trust & Safety）](../trust/) · [unassigned](../unassigned/)
-
 ## 功能
 
 > 开发状态由[六层交付状态](../../DOCUMENT_CONTRACT)推导：`completed` 需 Integration 与 Acceptance 均 `verified`；任一层有证据为 `in_progress`；无证据为 `not_started`。
@@ -20,7 +16,7 @@ source: scripts/build_developer_feature_catalog.py
 | --- | --- | --- | --- | ---: | --- |
 | [后台 MFA / 邀请 / 登录失败保护](../admin-auth-hardening) | ⚪ not_started | `deferred` | — | 0 | `complete` |
 | [后台操作审计查询](../operator-audit-log) | ⚪ not_started | `active` | — | 5 | `complete` |
-| [后台登录与操作员认证](../admin-login) | ⚪ not_started | `active` | — | 6 | `complete` |
+| [后台登录与操作员认证](../admin-login) | 🟢 completed | `active` | 数据库: evidenced; Backend: verified; Admin: verified; Mobile: not_applicable; Integration: verified; Acceptance: verified | 15 | `complete` |
 | [操作员管理](../operator-management) | ⚪ not_started | `active` | — | 5 | `complete` |
 | [角色权限分配](../permission-assignment) | ⚪ not_started | `active` | — | 5 | `complete` |
 | [角色管理](../role-management) | ⚪ not_started | `active` | — | 5 | `complete` |
@@ -30,12 +26,12 @@ source: scripts/build_developer_feature_catalog.py
 
 | 层 | 状态计数 |
 | --- | --- |
-| 数据库 | `not_evidenced` 7 |
-| Backend | `not_evidenced` 7 |
-| Admin | `not_evidenced` 7 |
-| Mobile | `not_evidenced` 7 |
-| Integration | `not_evidenced` 7 |
-| Acceptance | `not_evidenced` 7 |
+| 数据库 | `evidenced` 1, `not_evidenced` 6 |
+| Backend | `not_evidenced` 6, `verified` 1 |
+| Admin | `not_evidenced` 6, `verified` 1 |
+| Mobile | `not_applicable` 1, `not_evidenced` 6 |
+| Integration | `not_evidenced` 6, `verified` 1 |
+| Acceptance | `not_evidenced` 6, `verified` 1 |
 
 ## 状态说明
 
