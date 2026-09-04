@@ -102,13 +102,14 @@ ZH-LAO 系统采用 **模块化单体 (Modular Monolith)** 架构，各业务域
 所有业务 API 响应统一为单一信封（ADR-023）：
 
 ```text
-{ "code": <业务状态码>, "data"?: <成功载荷>, "error"?: <失败详情>, "request_id": <追踪ID> }
+{ "code": <业务状态码>, "data"?: <成功载荷>, "error"?: <失败详情>, "request_id": <追踪ID>, "request_path": <请求路径> }
 ```
 
 - **`code`**：业务状态码（`UPPER_SNAKE_CASE`），**成败判断的唯一权威**。成功恒为 `OK`，失败为对应业务码。
 - **`data`**：成功载荷（成功时存在；无返回体操作为 `null`）。
 - **`error`**：失败详情对象（失败时存在；成功时不存在）。
 - **`request_id`**：追踪 ID，**始终存在（含认证前失败）**，由 Fastify 请求入口分配，用于线上排查。
+- **`request_path`**：请求的 URL 路径（不含 query string），**始终存在（含认证前失败）**，用于将响应与请求入口关联。
 
 ### 4.1 成功响应格式
 
@@ -125,7 +126,8 @@ ZH-LAO 系统采用 **模块化单体 (Modular Monolith)** 架构，各业务域
     "created_at": "2026-08-31T10:00:00.000Z",
     "updated_at": "2026-08-31T10:00:00.000Z"
   },
-  "request_id": "req-9f3a8b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c"
+  "request_id": "req-9f3a8b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c",
+  "request_path": "/api/v1/admin/operators"
 }
 ```
 
@@ -201,14 +203,16 @@ ZH-LAO 系统采用 **模块化单体 (Modular Monolith)** 架构，各业务域
       }
     ]
   },
-  "request_id": "req-9f3a8b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c"
+  "request_id": "req-9f3a8b2c-4d5e-6f7a-8b9c-0d1e2f3a4b5c",
+  "request_path": "/api/v1/admin/operators"
 }
 ```
 
 * **`code`**：业务状态码（`UPPER_SNAKE_CASE`），前端据此进行本地化文案或分支流转；完整词汇表见 [business-status-codes.md](./business-status-codes.md)。
 * **`error.message`**：安全的可读错误描述（禁止包含 SQL 语句或内部机密路径）。
-* **`error.details`**：结构化错误数据（字段级校验错误数组、冲突元数据、重试秒数等）。
+* **`error.details`**：结构化错误数据（字段级校验错误数组、冲突元数据、重试秒数等）。字段校验项必须包含 `path`（从请求体根部开始的字段路径数组），以便客户端定位错误字段；不得回显原始输入值。
 * **`request_id`**：顶层追踪 ID（**不在 `error` 内层**），由 Fastify 生成，用于线上排查链路；**始终存在（含认证前失败）**。
+* **`request_path`**：顶层请求 URL 路径（不含 query string），用于将响应与客户端请求入口关联；**始终存在（含认证前失败）**，不得携带 query 参数、请求体或凭据。
 
 ---
 

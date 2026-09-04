@@ -30,7 +30,7 @@ const dummyDb = {
 } as unknown as DatabaseExecutor;
 
 describe('Unified Response Envelope (ADR-023)', () => {
-  it('wraps successful business response with { code: "OK", data, request_id } and HTTP 200', async () => {
+  it('wraps successful business response with { code: "OK", data, request_id, request_path } and HTTP 200', async () => {
     const app = buildApp({ logger: silentLogger, database: dummyDb });
     app.get('/test/success', async () => ({ foo: 'bar' }));
 
@@ -45,6 +45,7 @@ describe('Unified Response Envelope (ADR-023)', () => {
     expect(body.data).toEqual({ foo: 'bar' });
     expect(typeof body.request_id).toBe('string');
     expect(body.request_id.length).toBeGreaterThan(0);
+    expect(body.request_path).toBe('/test/success');
   });
 
   it('wraps empty success response (204 equivalent) with { code: "OK", data: null, request_id } and HTTP 200', async () => {
@@ -63,6 +64,7 @@ describe('Unified Response Envelope (ADR-023)', () => {
     expect(body.code).toBe(OK);
     expect(body.data).toBeNull();
     expect(typeof body.request_id).toBe('string');
+    expect(body.request_path).toBe('/test/empty');
   });
 
   it('forces 201 Created to HTTP 200 and wraps payload in data without drift', async () => {
@@ -93,6 +95,7 @@ describe('Unified Response Envelope (ADR-023)', () => {
       },
     });
     expect(typeof body.request_id).toBe('string');
+    expect(body.request_path).toBe('/test/created');
   });
 
   it('preserves complex list/pagination payload shapes intact inside data (US2)', async () => {
@@ -118,6 +121,7 @@ describe('Unified Response Envelope (ADR-023)', () => {
     expect(body.code).toBe(OK);
     expect(body.data).toEqual(payload);
     expect(typeof body.request_id).toBe('string');
+    expect(body.request_path).toBe('/test/list');
   });
 
   it('serializes AppError into { code, error: { message, details? }, request_id } with HTTP 200', async () => {
@@ -144,6 +148,7 @@ describe('Unified Response Envelope (ADR-023)', () => {
       details: [{ field: 'email', issue: 'invalid' }],
     });
     expect(typeof body.request_id).toBe('string');
+    expect(body.request_path).toBe('/test/error');
   });
 
   it('serializes 404 Route not found as AppError NOT_FOUND with HTTP 200 and request_id', async () => {

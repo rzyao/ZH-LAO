@@ -40,7 +40,17 @@ describe('Fastify foundation', () => {
     await identityModule.registerHttp(app, stubIdentityDependencies(false));
     const publicRoute = await app.inject({ method: 'POST', url: '/api/v1/identity/phone-otp', payload: {} });
     expect(publicRoute.statusCode).toBe(200);
-    expect(publicRoute.json().code).toBe('VALIDATION_ERROR');
+    expect(publicRoute.json()).toMatchObject({
+      code: 'VALIDATION_ERROR',
+      error: {
+        message: 'Request validation failed',
+        details: expect.arrayContaining([
+          expect.objectContaining({ code: expect.any(String), path: ['phone'] }),
+          expect.objectContaining({ code: expect.any(String), path: ['purpose'] }),
+        ]),
+      },
+      request_path: '/api/v1/identity/phone-otp',
+    });
     const protectedRoute = await app.inject('/api/v1/identity/me');
     expect(protectedRoute.statusCode).toBe(200);
     expect(protectedRoute.json().code).toBe('UNAUTHENTICATED');

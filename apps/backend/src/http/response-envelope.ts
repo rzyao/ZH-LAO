@@ -8,7 +8,8 @@ const EXEMPT_PATHS = new Set(['/health/live', '/health/ready']);
 
 /**
  * 判断是否已经是统一信封结构（避免重复包裹）
- * 包含 code、request_id，且含 data 或 error 字段
+ * 包含 code、request_id，且含 data 或 error 字段。
+ * `request_path` 由本 hook 统一补充，避免信任业务处理器提供的路径。
  */
 function isAlreadyEnvelope(parsed: unknown): boolean {
   if (typeof parsed !== 'object' || parsed === null) return false;
@@ -19,15 +20,18 @@ function isAlreadyEnvelope(parsed: unknown): boolean {
   return hasCode && hasRequestId && hasDataOrError;
 }
 
+function requestPath(request: FastifyRequest): string {
+  return new URL(request.raw.url ?? request.url, 'http://localhost').pathname;
+}
+
 /**
  * 统一成功响应信封（ADR-023）：
- * 对所有业务 JSON 成功响应包裹 `{ code: "OK", data, request_id }` 并强制 HTTP 200。
+ * 对所有业务 JSON 成功响应包裹 `{ code: "OK", data, request_id, request_path }` 并强制 HTTP 200。
  * 豁免探针路由及已由 error-handler 输出的错误信封。
  */
 export function installResponseEnvelope(app: FastifyInstance): void {
   app.addHook('onSend', (request: FastifyRequest, reply: FastifyReply, payload: unknown, done) => {
-    const rawUrl = request.raw.url ?? request.url ?? '';
-    const pathname = rawUrl.split('?')[0];
+    const pathname = requestPath(request);
 
     // 1. 豁免基础设施健康检查探针
     if (pathname && EXEMPT_PATHS.has(pathname)) {
@@ -43,6 +47,7 @@ export function installResponseEnvelope(app: FastifyInstance): void {
         code: OK,
         data: null,
         request_id: request.id,
+        request_path: pathname,
       });
       done(null, wrapped);
       return;
@@ -56,7 +61,7 @@ export function installResponseEnvelope(app: FastifyInstance): void {
         // 如果已经是错误信封或已经包裹过的信封，确保 HTTP 200 后直接放行
         if (isAlreadyEnvelope(parsed)) {
           reply.code(200);
-          done(null, payload);
+          done(null, JSON.stringify({ ...parsed, request_path: pathname }));
           return;
         }
 
@@ -67,6 +72,7 @@ export function installResponseEnvelope(app: FastifyInstance): void {
           code: OK,
           data: parsed,
           request_id: request.id,
+          request_path: pathname,
         });
         done(null, wrapped);
         return;
@@ -81,7 +87,7 @@ export function installResponseEnvelope(app: FastifyInstance): void {
     if (typeof payload === 'object' && !Buffer.isBuffer(payload)) {
       if (isAlreadyEnvelope(payload)) {
         reply.code(200);
-        done(null, payload);
+        done(null, { ...payload, request_path: pathname });
         return;
       }
       reply.header('content-type', 'application/json; charset=utf-8');
@@ -90,6 +96,7 @@ export function installResponseEnvelope(app: FastifyInstance): void {
         code: OK,
         data: payload,
         request_id: request.id,
+        request_path: pathname,
       });
       done(null, wrapped);
       return;

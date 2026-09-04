@@ -12,7 +12,19 @@ import type { AuthenticateWithFacebook, AuthenticateWithPhoneOtp, DeviceLifecycl
 const direction = z.object({ native_language: z.enum(['lo', 'zh']), learning_language: z.enum(['lo', 'zh']) }).strict();
 const device = z.object({ installation_id: z.string().uuid(), platform: z.enum(['android', 'ios']), device_name: z.string().max(200).nullable().optional(), app_version: z.string().max(100).nullable().optional(), push_token: z.string().max(1024).nullable().optional() }).strict();
 const profile = z.object({ display_name: z.string().max(200).nullable().optional(), gender: z.enum(['male', 'female', 'other', 'unspecified']).nullable().optional(), birth_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(), country_code: z.string().max(8).nullable().optional(), region_code: z.string().max(32).nullable().optional(), avatar_media_id: z.string().uuid().nullable().optional() }).strict().refine(value => Object.keys(value).length > 0, 'Profile update cannot be empty');
-const parse = <T>(schema: z.ZodType<T>, value: unknown): T => { const result = schema.safeParse(value); if (!result.success) throw new AppError({ code: 'VALIDATION_ERROR', message: 'Request validation failed', httpStatus: 400 }); return result.data; };
+const parse = <T>(schema: z.ZodType<T>, value: unknown): T => {
+  const result = schema.safeParse(value);
+  if (!result.success) {
+    throw new AppError({
+      code: 'VALIDATION_ERROR',
+      message: 'Request validation failed',
+      httpStatus: 400,
+      // `path` lets clients identify the invalid request field without exposing input values.
+      details: result.error.issues.map(({ code, message, path }) => ({ code, message, path })),
+    });
+  }
+  return result.data;
+};
 const subject = (request: FastifyRequest) => { if (!request.authContext) throw new AppError({ code: 'UNAUTHENTICATED', message: 'Authentication required', httpStatus: 401 }); return parseUserPublicId(request.authContext.subjectId); };
 const iso = (value: Date | null) => value?.toISOString() ?? null;
 const tokenHeaders = { 'cache-control': 'no-store', pragma: 'no-cache' };

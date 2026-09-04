@@ -27,6 +27,8 @@ export function installErrorHandler(app: FastifyInstance): void {
         ...(error.details !== undefined ? { details: error.details } : {}),
       },
       request_id: request.id,
+      // Never include the query string: it can contain credentials or other sensitive input.
+      request_path: new URL(request.raw.url ?? request.url, 'http://localhost').pathname,
     });
   });
 }
