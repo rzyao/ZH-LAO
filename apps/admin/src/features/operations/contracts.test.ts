@@ -16,24 +16,24 @@ describe('Operations Admin contracts', () => {
     expect(OPERATIONS_PERMISSIONS.auditLogsRead).toBe('operations.audit_logs.read')
   })
 
-  it('validates operator create input with uuid requirement', () => {
+  it('validates operator create input without an internal UUID', () => {
     expect(
       operatorCreateInputSchema.safeParse({
-        auth_subject_id: 'not-a-uuid',
+        username: '',
         display_name: 'Test Operator',
       }).success,
     ).toBe(false)
 
     expect(
       operatorCreateInputSchema.safeParse({
-        auth_subject_id: '123e4567-e89b-12d3-a456-426614174000',
+        username: 'operator_zhang',
         display_name: 'Test Operator',
       }).success,
     ).toBe(true)
 
     expect(
       operatorCreateInputSchema.safeParse({
-        auth_subject_id: '123e4567-e89b-12d3-a456-426614174000',
+        username: 'operator_zhang',
         display_name: '',
       }).success,
     ).toBe(false)

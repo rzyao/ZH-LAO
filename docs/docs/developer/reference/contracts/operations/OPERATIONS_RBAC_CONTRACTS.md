@@ -827,6 +827,19 @@ Platform 当前实现仍明确未引入 premature outbox；Operations 本设计�
 
 未来如要求强可靠跨域 Audit，必须单独冻结 owner-domain outbox event contract；不得隐式引入。
 
+### 14.8.1 后台账号与 Operator 的受控创建例外（ADR-025）
+
+`POST /api/v1/admin/operations/operators` 是一个明确定义的**同步编排命令**，不是普通的跨 Domain owner mutation。它在已认证、精确权限判定完成后，通过由应用装配层注入的窄写入端口，在**同一个 PostgreSQL 本地事务**中完成：
+
+```text
+Identity 创建 active User + admin credential（含密码哈希）
+→ Operations 创建 active Operator
+→ Operations 写 operations.operators.create 成功审计
+→ COMMIT
+```
+
+这不是分布式事务：项目是同一模块化单体、同一 PostgreSQL 数据库，且没有跨进程协调器。编排器不得直接使用任一 Domain 的 Repository 或 SQL；Identity 与 Operations 分别拥有各自写入端口和事实，事务上下文只作为内部应用装配协作能力传递，不作为公开 Domain Repository API 暴露。任一步失败必须回滚全部写入；密码明文不得进入 Audit 或日志。
+
 ## 15. Audit Query Contract
 
 V1 schema-supported filters：

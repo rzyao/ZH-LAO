@@ -106,6 +106,7 @@ last_updated: 2026-09-03
 | `OPERATOR_DISABLED` | 操作员已被禁用 | 403 | 展示「操作员已被禁用」 |
 | `OPERATOR_NOT_FOUND` | 操作员不存在 | 404 | 展示「操作员不存在」 |
 | `OPERATOR_ALREADY_EXISTS` | 身份主体已映射为操作员 | 409 | 展示「操作员已存在」 |
+| `ADMIN_USERNAME_CONFLICT` | 后台登录用户名已被使用 | 409 | 展示「用户名已被使用」 |
 | `OPERATOR_AUTH_SUBJECT_NOT_FOUND` | 关联身份主体不存在 | 400 | 展示「身份主体不存在」 |
 | `OPERATOR_AUTH_SUBJECT_INACTIVE` | 关联身份主体非 active | 409 | 展示「身份主体非活跃状态」 |
 | `ROLE_NOT_FOUND` | 角色不存在 | 404 | 展示「角色不存在」 |

@@ -195,9 +195,8 @@ export function OperatorsPage() {
       <CreateOperatorDialog
         open={createOpen}
         onOpenChange={setCreateOpen}
-        onSuccess={() => {
-          setCreateOpen(false)
-          toast.success({ title: '操作员创建成功', description: '新操作员已创建，请为其分配管理角色。' })
+  onSuccess={() => {
+          toast.success({ title: '操作员创建成功', description: '请复制一次性初始密码，并为新操作员分配角色。' })
         }}
         onError={fail}
       />
@@ -264,7 +263,7 @@ export function OperatorsPage() {
 
 /* ---------- Subcomponents ---------- */
 
-function CreateOperatorDialog({
+export function CreateOperatorDialog({
   open,
   onOpenChange,
   onSuccess,
@@ -276,21 +275,23 @@ function CreateOperatorDialog({
   onError: (error: unknown) => void
 }) {
   const mutation = useCreateOperator()
+  const [initialPassword, setInitialPassword] = React.useState<string | null>(null)
   const form = useForm<OperatorCreateInput>({
     resolver: zodResolver(operatorCreateInputSchema),
     defaultValues: {
-      auth_subject_id: '',
+      username: '',
       display_name: '',
     },
   })
 
   React.useEffect(() => {
-    if (open) form.reset()
+    if (open) { form.reset(); setInitialPassword(null) }
   }, [open, form])
 
   const onSubmit = async (values: OperatorCreateInput) => {
     try {
-      await mutation.mutateAsync(values)
+      const result = await mutation.mutateAsync(values)
+      setInitialPassword(result.initial_password)
       onSuccess()
     } catch (err) {
       onError(err)
@@ -303,21 +304,12 @@ function CreateOperatorDialog({
         <DialogHeader>
           <DialogTitle>新建后台操作员</DialogTitle>
           <DialogDescription>
-            将已有 Identity 用户 UUID 映射为系统操作员。
+            创建独立后台账号并自动建立操作员映射。系统将在成功后生成一次性初始密码。
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <FormField
-            label="用户 Identity UUID (auth_subject_id)"
-            htmlFor="auth_subject_id"
-            error={form.formState.errors.auth_subject_id?.message}
-            hint="必须为真实有效的 Identity 模块用户 UUID。"
-          >
-            <Input
-              id="auth_subject_id"
-              placeholder="例如 00000000-0000-0000-0000-000000000000"
-              {...form.register('auth_subject_id')}
-            />
+          <FormField label="后台登录用户名" htmlFor="username" error={form.formState.errors.username?.message} hint="用于独立后台登录，不关联 Mobile 用户。">
+            <Input id="username" autoComplete="username" placeholder="例如 zhangsan" {...form.register('username')} />
           </FormField>
           <FormField
             label="显示名称"
@@ -327,11 +319,12 @@ function CreateOperatorDialog({
           >
             <Input id="display_name" placeholder="例如 张三 (运营)" {...form.register('display_name')} />
           </FormField>
+          {initialPassword ? <div className="rounded-md border border-primary/30 bg-primary/5 p-3 text-sm"><p className="font-medium">一次性初始密码</p><code className="mt-1 block break-all select-all">{initialPassword}</code><p className="mt-1 text-xs text-muted-foreground">请立即复制并安全传达；关闭窗口后无法再次查看。</p><Button type="button" size="sm" className="mt-2" onClick={() => void navigator.clipboard.writeText(initialPassword)}>复制密码</Button></div> : null}
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               取消
             </Button>
-            <Button type="submit" disabled={mutation.isPending}>
+            <Button type="submit" disabled={mutation.isPending || Boolean(initialPassword)}>
               {mutation.isPending ? '创建中...' : '确认创建'}
             </Button>
           </DialogFooter>

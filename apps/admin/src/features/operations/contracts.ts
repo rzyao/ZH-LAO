@@ -122,7 +122,7 @@ export const rolePermissionsResponseSchema = z.object({
 /* ---------- Inputs ---------- */
 
 export const operatorCreateInputSchema = z.object({
-  auth_subject_id: z.string().uuid('请输入有效的用户 Identity UUID (auth_subject_id)'),
+  username: z.string().trim().min(1, '请输入后台登录用户名').max(100, '用户名不超过100个字符'),
   display_name: z.string().min(1, '请输入显示名称').max(100, '显示名称不超过100个字符'),
 })
 export type OperatorCreateInput = z.infer<typeof operatorCreateInputSchema>

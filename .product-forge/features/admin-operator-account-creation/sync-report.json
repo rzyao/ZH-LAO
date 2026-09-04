@@ -1,0 +1,10 @@
+{
+  "feature": "admin-operator-account-creation",
+  "date": "2026-09-04",
+  "mode": "quick",
+  "change_request": "CR-001",
+  "verdict": "CONSISTENT",
+  "critical": 0,
+  "warning": 0,
+  "findings": []
+}

@@ -1,0 +1,25 @@
+schema_version: 1
+feature: "admin-operator-account-creation"
+screens:
+  - screen: "create-admin-operator"
+    regions:
+      - region: "create dialog"
+        component: "CMP-Dialog"
+        variant: "default"
+        target_path: "apps/admin/src/features/operations/pages/operators.tsx"
+        journeys: ["JRN-001"]
+      - region: "account fields"
+        component: "CMP-FormField"
+        variant: "default"
+        target_path: "apps/admin/src/features/operations/pages/operators.tsx"
+        journeys: ["JRN-001"]
+      - region: "submit action"
+        component: "CMP-Button"
+        variant: "default"
+        target_path: "apps/admin/src/features/operations/pages/operators.tsx"
+        journeys: ["JRN-001"]
+      - region: "one-time password success notice"
+        component: "CMP-Dialog"
+        variant: "default"
+        target_path: "apps/admin/src/features/operations/pages/operators.tsx"
+        journeys: ["JRN-001"]

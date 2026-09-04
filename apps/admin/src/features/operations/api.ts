@@ -58,8 +58,12 @@ export const operationsAdminApi = {
     const response = await apiClient.post(`${base}/operators`, {
       json: input,
     })
-    const parsed = z.object({ operator: operatorSummarySchema }).parse(response.data)
-    return parsed.operator
+    const parsed = z.object({
+      code: z.literal('OK'),
+      data: z.object({ operator: operatorSummarySchema, initial_password: z.string().min(1) }),
+      request_id: z.string(),
+    }).parse(response.data)
+    return parsed.data
   },
 
   async updateOperator(operatorId: string, input: OperatorUpdateInput) {

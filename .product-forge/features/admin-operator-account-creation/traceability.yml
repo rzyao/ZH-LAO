@@ -1,0 +1,24 @@
+schema_version: 1
+feature: "admin-operator-account-creation"
+last_updated: "2026-09-04"
+journeys:
+  - id: "JRN-001"
+    title: "管理员创建独立后台操作员账号"
+    stories: ["US-001", "US-002", "US-003"]
+    steps:
+      - {id: "STEP-001", tests: ["TC-UI-001"]}
+      - {id: "STEP-002", tests: ["TC-HTTP-001"]}
+      - {id: "STEP-003", tests: ["TC-HTTP-001", "TC-UI-001", "TC-UNIT-001"]}
+    edges:
+      - {id: "EDGE-001", priority: "P0", tests: ["TC-HTTP-002"]}
+      - {id: "EDGE-002", priority: "P0", tests: ["TC-UI-001"]}
+      - {id: "EDGE-003", priority: "P0", tests: ["TC-HTTP-003"]}
+    tests: ["TC-UNIT-001", "TC-HTTP-001", "TC-HTTP-002", "TC-HTTP-003", "TC-HTTP-004", "TC-UI-001", "TC-INT-001", "TC-E2E-001"]
+code:
+  - "apps/backend/src/modules/admin-operator-provisioning/application/admin-operator-provisioning-service.ts"
+  - "apps/backend/src/modules/identity/application/services/admin-account-writer.ts"
+  - "apps/backend/src/modules/operations/application/services/admin-operator-writer.ts"
+  - "apps/backend/src/modules/operations/http/routes.ts"
+  - "apps/admin/src/features/operations/contracts.ts"
+  - "apps/admin/src/features/operations/api.ts"
+  - "apps/admin/src/features/operations/pages/operators.tsx"

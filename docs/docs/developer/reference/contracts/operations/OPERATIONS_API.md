@@ -3,7 +3,7 @@ status: frozen
 phase: 4
 phase_name: Operations Domain
 document: OPERATIONS_API
-last_updated: 2026-09-03
+last_updated: 2026-09-04
 repository_commit_audited: 000f4c4aafacf4938d74902eddc4d78323196a89
 depends_on:
   - OPERATIONS_USE_CASES.md
@@ -15,6 +15,8 @@ lifecycle: historical
 > 迁移说明：本文是迁移时保留的契约/证据快照，不是当前调度权限。当前产品状态请看 [ZH-LAO 产品开发全景](/developer/)，执行规格请看 `.specify/` 与 `specs/`，真实完成请以代码、测试与 CI 为准。
 >
 > **契约修订 (ADR-023, 2026-09-03)**：所有业务响应 HTTP 一律 **200**，成败由响应体顶层 `code`（业务状态码）权威表达；原 HTTP 状态码（201/200/204 等）仅作日志/监控参考语义。无返回体操作（原 204）→ `{ "code": "OK", "data": null, "request_id": "..." }`。统一信封与词汇表见 [api-standard.md](/developer/reference/architecture/applications/api-standard.md) 与 [business-status-codes.md](/developer/reference/architecture/applications/business-status-codes.md)。
+>
+> **契约修订 (ADR-025, 2026-09-04)**：`POST /api/v1/admin/operations/operators` 改为受控创建独立后台账号与 Operator 的单一管理命令；本节取代早期的手工 `auth_subject_id` 输入语义。
 
 
 # ZH-LAO  — Operations API / Public Contract
@@ -220,20 +222,42 @@ Content-Type: application/json
 
 ```json
 {
-  "auth_subject_id": "uuid",
+  "username": "content_operator",
   "display_name": "Content Operator"
 }
 ```
 
 Rules：
 
-- `IdentityPublicQueries` 确认 subject exists + active；
 - strict body / unknown fields rejected；
 - caller 不能提供 status；
 - caller 不能在同一 request 提供 role_ids；
-- `auth_subject_id` immutable after create。
+- caller 不能提供 `auth_subject_id`、密码或任何角色；
+- Identity 创建新的 active 后台认证主体及唯一的 `admin_credentials`，并随机生成符合 Identity 密码策略的一次性初始密码；
+- Operations 创建唯一关联的 active Operator，`auth_subject_id` 仍是不可变的内部跨域逻辑引用；
+- 新账号、凭据、Operator 与成功 Audit 必须在 ADR-025 定义的单一受控本地事务中一起提交或一起回滚；
+- 初始密码只在本次成功响应的 `data.initial_password` 出现一次；不得出现在 Audit、日志、后续读取接口或任何持久化前端状态。
 
-Response：`201`。
+Success response：HTTP `200`，统一信封：
+
+```json
+{
+  "code": "OK",
+  "data": {
+    "operator": {
+      "operator_id": "uuid",
+      "display_name": "Content Operator",
+      "status": "active",
+      "created_at": "...",
+      "updated_at": "..."
+    },
+    "initial_password": "one-time-secret"
+  },
+  "request_id": "..."
+}
+```
+
+Errors use the standard envelope: duplicate username → `ADMIN_USERNAME_CONFLICT`; caller without the exact permission → `FORBIDDEN`; validation or persistence failure creates neither account nor Operator. The response must never expose `auth_subject_id`.
 
 ### 5.4 Update
 

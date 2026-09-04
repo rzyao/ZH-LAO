@@ -1,0 +1,46 @@
+schema_version: 1
+feature: "admin-operator-account-creation"
+journeys:
+  - id: "JRN-001"
+    title: "管理员创建独立后台操作员账号"
+    stories: ["US-001", "US-002", "US-003"]
+    actor: "具备 operations.operators.create 的后台管理员"
+    preconditions:
+      - "管理员已登录后台"
+      - "用户名尚未被使用"
+    entry_state: "操作员管理列表"
+    success_state: "新 Operator 出现在列表中，待分配角色"
+    smoke: true
+    runner: "playwright-cli"
+    steps:
+      - id: "STEP-001"
+        action: "打开新建操作员弹窗"
+        expected: "显示用户名、显示名称；不显示 UUID 或由管理员输入的密码"
+        component: "CMP-Dialog"
+        contract: "pending"
+      - id: "STEP-002"
+        action: "输入有效用户名和显示名称"
+        expected: "字段可提交，错误与对应字段关联"
+        component: "CMP-FormField"
+        contract: "pending"
+      - id: "STEP-003"
+        action: "确认创建"
+        expected: "提交中按钮不可重复触发；成功后展示可复制的一次性初始密码，并提示下一步配置角色" # CR-001: 随机生成并仅当次展示初始密码
+        component: "CMP-Button"
+        contract: "pending"
+    edges:
+      - id: "EDGE-001"
+        priority: "P0"
+        given: "用户名已存在"
+        when: "管理员提交"
+        then: "显示用户名不可用，且不创建 Operator"
+      - id: "EDGE-002"
+        priority: "P0"
+        given: "创建成功提示已被关闭或页面已刷新"
+        when: "创建者再次查看操作员列表"
+        then: "不再显示或返回初始密码" # CR-001: 随机生成并仅当次展示初始密码
+      - id: "EDGE-003"
+        priority: "P0"
+        given: "调用者没有创建权限"
+        when: "其调用创建接口"
+        then: "服务端拒绝且不发生状态变更"

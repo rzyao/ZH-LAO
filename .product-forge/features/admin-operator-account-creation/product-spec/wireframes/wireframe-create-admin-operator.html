@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>线框图：新建后台操作员</title>
+  <style>
+    :root { --background:#fafafa; --card:#fff; --foreground:#1f2937; --muted:#6b7280; --border:#d1d5db; --primary:#2563eb; --radius:.5rem; }
+    body { margin:0; padding:32px; font:14px system-ui,sans-serif; color:var(--foreground); background:var(--background); }
+    .dialog { width:min(520px,calc(100vw - 64px)); margin:auto; padding:24px; border:1px solid var(--border); border-radius:calc(var(--radius) * 1.5); background:var(--card); box-shadow:0 12px 30px #0002; }
+    h1 { margin:0 0 4px; font-size:20px; } p { color:var(--muted); line-height:1.5; } label { display:block; margin-top:16px; font-weight:600; } input { box-sizing:border-box; width:100%; margin-top:6px; padding:10px 12px; border:1px solid var(--border); border-radius:var(--radius); } small { display:block; margin-top:5px; color:var(--muted); } .actions { display:flex; justify-content:flex-end; gap:8px; margin-top:24px; } button { padding:9px 16px; border:1px solid var(--border); border-radius:var(--radius); background:white; font-weight:600; } button.primary { border-color:var(--primary); background:var(--primary); color:white; }
+  </style>
+</head>
+<body>
+  <main class="dialog" aria-label="新建后台操作员">
+    <h1>新建后台操作员</h1>
+    <p>创建独立后台登录账号，并自动建立操作员映射。系统会生成一次性初始密码；创建后请复制并安全传达给用户，再分配角色。</p>
+    <label>用户名<input placeholder="例如 zhangsan" autocomplete="username"></label>
+    <small>用于后台登录，不关联 Mobile 账号。</small>
+    <label>显示名称<input placeholder="例如 张三（运营）"></label>
+    <small>不显示或要求任何 UUID。密码由系统随机生成，成功后只展示一次。</small>
+    <div class="actions"><button>取消</button><button class="primary">确认创建</button></div>
+  </main>
+</body>
+</html>
