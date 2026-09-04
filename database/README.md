@@ -6,11 +6,16 @@ the frozen ZH-LAO Domain documentation dated 2026-08-30.
 ## Status
 
 **Baseline status: PASS.** The executable baseline creates all 11 business
-schemas, completes the original 121-table business inventory, and adds the
-Content-owned `content.content_revisions` table required by the now-frozen
-revision contract (122 business tables total). The shared infrastructure
-schema contains the canonical `assets` table and transactional
-`system_outbox_events` table.
+schemas and 125 business tables (the original 121-table business inventory,
+plus the Content-owned `content.content_revisions` table required by the
+now-frozen revision contract, plus `identity.admin_credentials` and the two
+ADR-022 menu-configuration tables `platform.menus` /
+`platform.menu_permissions`). The shared infrastructure schema contains the
+canonical `assets` table and transactional `system_outbox_events` table
+(2 infrastructure tables, 127 tables in total).
+
+The catalog inventory is checked against `checks/expected-schema.json`, which
+must be kept in sync whenever a migration adds or removes a table.
 
 The physical contracts resolved in this increment are recorded in
 `checks/frozen-physical-contracts.md`. See
@@ -92,6 +97,15 @@ Migration order:
 15. `1220_identity_auth_runtime.sql` — OTP, devices, and revocable sessions
 16. `1230_system_outbox.sql` — shared transactional outbox
 17. `1240_content_revision.sql` — Content revision history and publication
+18. `1250_platform_override_indexes.sql` — partial-unique feature flag overrides
+19. `1260_admin_credentials.sql` — Admin back-office credential records
+20. `1270_platform_menus.sql` — menus and menu permissions (ADR-022, DDL + seed)
+
+Migration files are frozen once merged: `migrate` records filename and SHA-256
+in `public.v2_schema_migrations`, and re-applying a file whose contents have
+changed is rejected with `Applied migration checksum mismatch`. Edit a frozen
+file only when the resulting schema is unchanged (formatting/comments) and no
+database has applied the previous bytes; otherwise add a new migration.
 
 The standalone boundary query in `checks/illegal_cross_domain_fk.sql` must
 return zero rows. The Node audit runs the same catalog rule and also verifies

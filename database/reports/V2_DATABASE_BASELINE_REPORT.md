@@ -1,6 +1,6 @@
 # V2 Database Baseline Report
 
-Generated from PostgreSQL catalog at: 2026-08-30T19:58:11.947Z
+Generated from PostgreSQL catalog at: 2026-09-04T01:23:54.953Z
 
 Final status: **PASS**
 
@@ -8,12 +8,12 @@ Final status: **PASS**
 
 | Item | Value |
 | --- | --- |
-| Database | zh_lao_v2_validation_20260830195811_5a099b4c |
-| PostgreSQL | 18.6 (Debian 18.6-1.pgdg13+2) |
-| Role | zh_lao |
+| Database | zh_lao_v2_baseline |
+| PostgreSQL | 18.0 |
+| Role | postgres |
 | Business schemas | identity, content, learning, social, chat, audio, commerce, rewards, trust, operations, platform |
 | Infrastructure schemas | infrastructure |
-| Business tables | 122 core+revision / 121 original target |
+| Business tables | 125 core+revision / 121 original target |
 | Infrastructure tables | 2 |
 | Extensions | pg_trgm 1.6, plpgsql 1.0 |
 | Illegal cross-domain FK | 0 |
@@ -24,30 +24,32 @@ Only `pg_trgm` was added by V2. `plpgsql` is built in. The V2 baseline did not i
 
 | Migration | SHA-256 | Applied at |
 | --- | --- | --- |
-| 0000_infrastructure.sql | 5d918e0280348c62b2f9ca1a8a7d57cf15a779f2da40c2f2cb0493ce70099e5a | 2026-08-30T19:58:11.187Z |
-| 0100_identity.sql | 0e6d17346ed339145b4cdc7dc0c6772262685169eca64f1b503ca2bedb183d36 | 2026-08-30T19:58:11.199Z |
-| 0200_operations.sql | c35fa48ff2bf841550cac0927879b999b827c23b84a01ebf9bd55b01986fc632 | 2026-08-30T19:58:11.211Z |
-| 0300_platform.sql | 42df6a8c3a78ab149f57e4bd28e6896aae1590e8349a0a9dc2e54b5fa4791183 | 2026-08-30T19:58:11.226Z |
-| 0400_content.sql | c722654def7a71079d98c355d046d8d6bc3a68f304f3998573d0862540a40986 | 2026-08-30T19:58:11.263Z |
-| 0500_learning.sql | 7f6007c313f684385a5dba4cf9ad134b49293468d7479cc7a415c5bfbabfb06c | 2026-08-30T19:58:11.383Z |
-| 0600_audio.sql | 42ca0d357babb1acf6b4ead5a500b16c096a8b8a1b3861b67e0ee3f4dddbc453 | 2026-08-30T19:58:11.414Z |
-| 0700_social.sql | b5853d01e9fecb129cf0d95f71e36d6d221dbec8a3c50d6ef0a3e8d93120b4a9 | 2026-08-30T19:58:11.467Z |
-| 0800_chat.sql | 32b0ab8f5e4f1c05a229c99fd6063fbfd4947e3f2014578ae6bc0a5cefeb8126 | 2026-08-30T19:58:11.512Z |
-| 0900_commerce.sql | 79c56da178e30e303955fa88837a7c735e707a04578a5cc9c56d9ea8d188282d | 2026-08-30T19:58:11.535Z |
-| 1000_rewards.sql | 86f4dc243a826481a51e37e595d90923d1e570f62923e69e13c6396b78c5a792 | 2026-08-30T19:58:11.628Z |
-| 1100_trust.sql | c08b1476e4ffe1736e135657dff0001ca92c57465e6236fbf645fd1f5c20964a | 2026-08-30T19:58:11.651Z |
-| 1200_asset_infrastructure.sql | e2f0a031d749e1937764ca4b551bbae31a73b1a13f874ce2a1b961bc95b3e585 | 2026-08-30T19:58:11.676Z |
-| 1210_trust_evidence.sql | b69422055ca78c7b44d44825154bdfa0c360da8ced978222d05c7d83ec3c5816 | 2026-08-30T19:58:11.685Z |
-| 1220_identity_auth_runtime.sql | f8de46ddc9f570778fb0e4049cf3a9a6bb32be129a5363a4f1e47026bd31e100 | 2026-08-30T19:58:11.695Z |
-| 1230_system_outbox.sql | e110b36048b6f842833601c86a4ab825ba8a044d0b708b7a3527b9391743cd29 | 2026-08-30T19:58:11.706Z |
-| 1240_content_revision.sql | 89fca2f3e362f8e254167dae4a55edd27d5f320942b63a65c70fbd8f63569cb2 | 2026-08-30T19:58:11.713Z |
-| 1250_platform_override_indexes.sql | 3cab64c353926d8b5c9ae890d15e04789dcd1739a927812be876488792dc836f | 2026-08-30T19:58:11.721Z |
+| 0000_infrastructure.sql | 5d918e0280348c62b2f9ca1a8a7d57cf15a779f2da40c2f2cb0493ce70099e5a | 2026-09-04T01:23:53.172Z |
+| 0100_identity.sql | 0e6d17346ed339145b4cdc7dc0c6772262685169eca64f1b503ca2bedb183d36 | 2026-09-04T01:23:53.185Z |
+| 0200_operations.sql | c35fa48ff2bf841550cac0927879b999b827c23b84a01ebf9bd55b01986fc632 | 2026-09-04T01:23:53.204Z |
+| 0300_platform.sql | 42df6a8c3a78ab149f57e4bd28e6896aae1590e8349a0a9dc2e54b5fa4791183 | 2026-09-04T01:23:53.230Z |
+| 0400_content.sql | c722654def7a71079d98c355d046d8d6bc3a68f304f3998573d0862540a40986 | 2026-09-04T01:23:53.269Z |
+| 0500_learning.sql | 7f6007c313f684385a5dba4cf9ad134b49293468d7479cc7a415c5bfbabfb06c | 2026-09-04T01:23:53.441Z |
+| 0600_audio.sql | 42ca0d357babb1acf6b4ead5a500b16c096a8b8a1b3861b67e0ee3f4dddbc453 | 2026-09-04T01:23:53.487Z |
+| 0700_social.sql | b5853d01e9fecb129cf0d95f71e36d6d221dbec8a3c50d6ef0a3e8d93120b4a9 | 2026-09-04T01:23:53.566Z |
+| 0800_chat.sql | 32b0ab8f5e4f1c05a229c99fd6063fbfd4947e3f2014578ae6bc0a5cefeb8126 | 2026-09-04T01:23:53.682Z |
+| 0900_commerce.sql | 79c56da178e30e303955fa88837a7c735e707a04578a5cc9c56d9ea8d188282d | 2026-09-04T01:23:53.716Z |
+| 1000_rewards.sql | 86f4dc243a826481a51e37e595d90923d1e570f62923e69e13c6396b78c5a792 | 2026-09-04T01:23:53.850Z |
+| 1100_trust.sql | c08b1476e4ffe1736e135657dff0001ca92c57465e6236fbf645fd1f5c20964a | 2026-09-04T01:23:53.916Z |
+| 1200_asset_infrastructure.sql | d30944c818f6b39aa9bb1dd8b4584869991425d1c0df6d4067c8675ba402056d | 2026-09-04T01:23:53.963Z |
+| 1210_trust_evidence.sql | 5a5978b55b50c5aec09ed02542e72ecb11f6cc6f80cd44ca0a881fd865d0d930 | 2026-09-04T01:23:53.973Z |
+| 1220_identity_auth_runtime.sql | 37adee07f83b4b49499c4497b0c1fa9a9f76820273917169110cfdc0fa3755e8 | 2026-09-04T01:23:53.985Z |
+| 1230_system_outbox.sql | 69752dd12ec2f925c1ab86fefc3616040c13aa59828f11fbad34532bd5b331db | 2026-09-04T01:23:54.011Z |
+| 1240_content_revision.sql | e2f29697c5d328b938642f9393e0e0e356aa5df6a400c839b4c306cd0a9dbd77 | 2026-09-04T01:23:54.022Z |
+| 1250_platform_override_indexes.sql | 7365c2b163588aea63aa19a931b195e9c33a5115662582310207a7df28d9f7b1 | 2026-09-04T01:23:54.034Z |
+| 1260_admin_credentials.sql | a61edef0fc199688303852f7c73725e11b05b82ab3371d780fd5f33d9fbac96f | 2026-09-04T01:23:54.040Z |
+| 1270_platform_menus.sql | acb25a095c6a4d916d8fba71fd6c56b1d3e5fbf4caad7d78c1eb4d66ee1da35a | 2026-09-04T01:23:54.047Z |
 
 ## Domain summary
 
 | Schema | Tables | PK | FK | UNIQUE constraints | CHECK | Indexes |
 | --- | --- | --- | --- | --- | --- | --- |
-| identity | 7 | 7 | 7 | 4 | 13 | 20 |
+| identity | 8 | 8 | 8 | 6 | 15 | 23 |
 | content | 32 | 32 | 42 | 27 | 47 | 69 |
 | learning | 10 | 10 | 1 | 1 | 15 | 17 |
 | social | 19 | 19 | 26 | 10 | 26 | 43 |
@@ -57,7 +59,7 @@ Only `pg_trgm` was added by V2. `plpgsql` is built in. The V2 baseline did not i
 | rewards | 5 | 5 | 5 | 8 | 31 | 32 |
 | trust | 6 | 6 | 7 | 2 | 45 | 28 |
 | operations | 5 | 5 | 4 | 2 | 13 | 12 |
-| platform | 6 | 6 | 3 | 5 | 28 | 17 |
+| platform | 8 | 8 | 5 | 5 | 32 | 20 |
 
 ### Infrastructure inventory
 
@@ -177,6 +179,42 @@ Unresolved specification blockers: 0.
 ## Complete PostgreSQL catalog
 
 ### identity
+
+#### identity.admin_credentials
+
+| Column | Type | Nullable | Default | Identity |
+| --- | --- | --- | --- | --- |
+| id | bigint | false | — | a |
+| user_id | bigint | false | — | — |
+| username | character varying(100) | false | — | — |
+| password_hash | character varying(255) | false | — | — |
+| created_at | timestamp with time zone | false | now() | — |
+| updated_at | timestamp with time zone | false | now() | — |
+
+Constraints:
+
+| Name | Type | Definition |
+| --- | --- | --- |
+| ck_admin_credentials_password_hash_not_blank | c | CHECK (btrim(password_hash::text) <> ''::text) |
+| ck_admin_credentials_username_not_blank | c | CHECK (btrim(username::text) <> ''::text) |
+| admin_credentials_user_id_fkey | f | FOREIGN KEY (user_id) REFERENCES identity.users(id) ON DELETE RESTRICT |
+| admin_credentials_created_at_not_null | n | NOT NULL created_at |
+| admin_credentials_id_not_null | n | NOT NULL id |
+| admin_credentials_password_hash_not_null | n | NOT NULL password_hash |
+| admin_credentials_updated_at_not_null | n | NOT NULL updated_at |
+| admin_credentials_user_id_not_null | n | NOT NULL user_id |
+| admin_credentials_username_not_null | n | NOT NULL username |
+| admin_credentials_pkey | p | PRIMARY KEY (id) |
+| admin_credentials_user_id_key | u | UNIQUE (user_id) |
+| admin_credentials_username_key | u | UNIQUE (username) |
+
+Indexes:
+
+| Name | Unique | Predicate | Definition |
+| --- | --- | --- | --- |
+| admin_credentials_pkey | true | — | CREATE UNIQUE INDEX admin_credentials_pkey ON identity.admin_credentials USING btree (id) |
+| admin_credentials_user_id_key | true | — | CREATE UNIQUE INDEX admin_credentials_user_id_key ON identity.admin_credentials USING btree (user_id) |
+| admin_credentials_username_key | true | — | CREATE UNIQUE INDEX admin_credentials_username_key ON identity.admin_credentials USING btree (username) |
 
 #### identity.auth_identities
 
@@ -4858,6 +4896,68 @@ Indexes:
 | --- | --- | --- | --- |
 | feature_flags_pkey | true | — | CREATE UNIQUE INDEX feature_flags_pkey ON platform.feature_flags USING btree (id) |
 | uq_feature_flags_key | true | — | CREATE UNIQUE INDEX uq_feature_flags_key ON platform.feature_flags USING btree (key) |
+
+#### platform.menu_permissions
+
+| Column | Type | Nullable | Default | Identity |
+| --- | --- | --- | --- | --- |
+| menu_id | bigint | false | — | — |
+| permission_key | character varying(100) | false | — | — |
+| created_at | timestamp with time zone | false | now() | — |
+
+Constraints:
+
+| Name | Type | Definition |
+| --- | --- | --- |
+| ck_menu_permissions_permission_key | c | CHECK (permission_key::text ~ '^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*){2,}$'::text) |
+| menu_permissions_menu_id_fkey | f | FOREIGN KEY (menu_id) REFERENCES platform.menus(id) ON DELETE RESTRICT |
+| menu_permissions_created_at_not_null | n | NOT NULL created_at |
+| menu_permissions_menu_id_not_null | n | NOT NULL menu_id |
+| menu_permissions_permission_key_not_null | n | NOT NULL permission_key |
+| pk_menu_permissions | p | PRIMARY KEY (menu_id, permission_key) |
+
+Indexes:
+
+| Name | Unique | Predicate | Definition |
+| --- | --- | --- | --- |
+| pk_menu_permissions | true | — | CREATE UNIQUE INDEX pk_menu_permissions ON platform.menu_permissions USING btree (menu_id, permission_key) |
+
+#### platform.menus
+
+| Column | Type | Nullable | Default | Identity |
+| --- | --- | --- | --- | --- |
+| id | bigint | false | — | a |
+| parent_id | bigint | true | — | — |
+| label | character varying(120) | false | — | — |
+| route_key | character varying(100) | true | — | — |
+| icon | character varying(64) | true | — | — |
+| sort_order | integer | false | 0 | — |
+| status | character varying(16) | false | 'active'::character varying | — |
+| created_at | timestamp with time zone | false | now() | — |
+| updated_at | timestamp with time zone | false | now() | — |
+
+Constraints:
+
+| Name | Type | Definition |
+| --- | --- | --- |
+| ck_menus_label_not_blank | c | CHECK (btrim(label::text) <> ''::text) |
+| ck_menus_route_key_format | c | CHECK (route_key IS NULL OR route_key::text ~ '^[a-z][a-z0-9_.]*$'::text) |
+| ck_menus_status | c | CHECK (status::text = ANY (ARRAY['active'::character varying, 'disabled'::character varying, 'removed'::character varying]::text[])) |
+| menus_parent_id_fkey | f | FOREIGN KEY (parent_id) REFERENCES platform.menus(id) ON DELETE RESTRICT |
+| menus_created_at_not_null | n | NOT NULL created_at |
+| menus_id_not_null | n | NOT NULL id |
+| menus_label_not_null | n | NOT NULL label |
+| menus_sort_order_not_null | n | NOT NULL sort_order |
+| menus_status_not_null | n | NOT NULL status |
+| menus_updated_at_not_null | n | NOT NULL updated_at |
+| menus_pkey | p | PRIMARY KEY (id) |
+
+Indexes:
+
+| Name | Unique | Predicate | Definition |
+| --- | --- | --- | --- |
+| idx_menus_parent_order | false | — | CREATE INDEX idx_menus_parent_order ON platform.menus USING btree (parent_id, sort_order) |
+| menus_pkey | true | — | CREATE UNIQUE INDEX menus_pkey ON platform.menus USING btree (id) |
 
 #### platform.regions
 
