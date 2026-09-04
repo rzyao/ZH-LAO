@@ -46,14 +46,14 @@ export function ErrorState({
     <div
       role="alert"
       className={cn(
-        'flex h-full min-h-[240px] w-full flex-col items-center justify-center gap-2 rounded-md border border-dashed border-destructive/40 bg-destructive/5 px-6 py-10 text-center',
+        'flex h-full min-h-[240px] w-full flex-col items-center justify-center rounded-lg border border-dashed border-destructive/40 bg-destructive/5 px-6 py-10 text-center',
         className,
       )}
     >
-      <div className="flex size-10 items-center justify-center rounded-full bg-destructive/10 text-destructive">
-        <Icon aria-hidden className="size-5" />
+      <div className="flex size-12 items-center justify-center rounded-lg bg-destructive/10 text-destructive">
+        <Icon aria-hidden className="size-6" />
       </div>
-      <h3 className="mt-1 text-sm font-medium">{title}</h3>
+      <h3 className="mt-1 text-base font-semibold">{title}</h3>
       <p className="max-w-md text-sm text-muted-foreground">{displayMessage}</p>
       {displayRequestId ? (
         <p className="mt-1 font-mono text-xs text-muted-foreground/70">
@@ -61,7 +61,7 @@ export function ErrorState({
         </p>
       ) : null}
       {onRetry ? (
-        <Button size="sm" variant="outline" className="mt-2" onClick={onRetry}>
+        <Button variant="outline" className="mt-2" onClick={onRetry}>
           重试
         </Button>
       ) : null}

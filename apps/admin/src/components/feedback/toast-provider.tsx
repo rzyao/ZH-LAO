@@ -16,11 +16,11 @@ const iconByVariant: Record<ToastVariant, React.ReactNode> = {
 }
 
 const toastItemClass: Record<ToastVariant, string> = {
-  default: 'border-border',
-  success: 'border-success/40',
-  warning: 'border-warning/50',
-  danger: 'border-destructive/40',
-  info: 'border-info/40',
+  default: 'border-l-muted-foreground',
+  success: 'border-l-success',
+  warning: 'border-l-warning',
+  danger: 'border-l-destructive',
+  info: 'border-l-info',
 }
 
 /**
@@ -64,7 +64,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       {children}
       <div
         aria-live="polite"
-        className="pointer-events-none fixed bottom-4 right-4 z-[100] flex w-full max-w-sm flex-col gap-2"
+        className="pointer-events-none fixed bottom-6 right-6 z-40 flex w-[calc(100%-3rem)] max-w-[360px] flex-col gap-2"
       >
         {toasts.map((item) => (
           <div
@@ -72,7 +72,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
             role={item.variant === 'danger' ? 'alert' : 'status'}
             data-testid="toast"
             className={cn(
-              'pointer-events-auto flex w-full items-start gap-2 rounded-md border bg-popover p-3 text-popover-foreground shadow-md',
+              'pointer-events-auto flex w-full items-start gap-2 rounded-lg border border-l-[3px] bg-popover p-4 text-popover-foreground shadow-md',
               toastItemClass[item.variant],
             )}
           >
@@ -98,7 +98,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
             <button
               type="button"
               aria-label="关闭通知"
-              className="shrink-0 rounded p-0.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+              className="flex size-9 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
               onClick={() => dismiss(item.id)}
             >
               <X aria-hidden className="size-4" />

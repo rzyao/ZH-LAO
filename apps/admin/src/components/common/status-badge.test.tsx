@@ -18,9 +18,9 @@ describe('StatusBadge', () => {
 
   it('maps each tone to the correct badge variant class', () => {
     const { rerender } = render(<StatusBadge tone="success" label="x" />)
-    expect(document.querySelector('span')?.className).toContain('bg-success')
+    expect(document.querySelector('span')?.className).toContain('text-success')
     rerender(<StatusBadge tone="warning" label="x" />)
-    expect(document.querySelector('span')?.className).toContain('bg-warning')
+    expect(document.querySelector('span')?.className).toContain('text-warning')
     rerender(<StatusBadge tone="muted" label="x" />)
     expect(document.querySelector('span')?.className).toContain('bg-muted')
   })

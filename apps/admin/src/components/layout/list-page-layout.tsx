@@ -21,7 +21,7 @@ export function ListPageLayout({
   return (
     <div className="flex h-full flex-col">
       <PageHeader title={title} description={description} breadcrumb={breadcrumb} actions={actions} />
-      <div className="min-h-0 flex-1 overflow-auto">{children}</div>
+      <div className="min-h-0 flex-1 overflow-auto px-4 py-6 sm:px-8">{children}</div>
     </div>
   )
 }

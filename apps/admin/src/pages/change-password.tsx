@@ -68,14 +68,14 @@ export function ChangePasswordPage() {
   }
 
   return (
-    <div className="flex h-full items-center justify-center p-6">
+    <div className="flex h-full items-center justify-center px-4 py-8">
       <Card
         title="修改登录密码"
         description="修改当前管理员密码。成功后所有活跃会话将被撤销，需重新登录。"
-        className="w-full max-w-md shadow-sm"
+        className="w-full max-w-md"
       >
-        <form className="space-y-4" onSubmit={handleSubmit}>
-          <div className="space-y-1.5">
+        <form className="space-y-5" onSubmit={handleSubmit}>
+          <div className="space-y-2">
             <Label htmlFor="current-password">当前密码</Label>
             <Input
               id="current-password"
@@ -89,7 +89,7 @@ export function ChangePasswordPage() {
             />
           </div>
 
-          <div className="space-y-1.5">
+          <div className="space-y-2">
             <Label htmlFor="new-password">新密码</Label>
             <Input
               id="new-password"
@@ -103,7 +103,7 @@ export function ChangePasswordPage() {
             />
           </div>
 
-          <div className="space-y-1.5">
+          <div className="space-y-2">
             <Label htmlFor="confirm-password">确认新密码</Label>
             <Input
               id="confirm-password"

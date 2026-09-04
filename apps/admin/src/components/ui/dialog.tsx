@@ -15,7 +15,7 @@ const DialogOverlay = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <BaseDialog.Backdrop
     ref={ref}
-    className={cn('fixed inset-0 z-50 bg-black/50', className)}
+    className={cn('fixed inset-0 z-30 bg-black/40', className)}
     {...props}
   />
 ))
@@ -30,7 +30,7 @@ const DialogContent = React.forwardRef<
     <BaseDialog.Popup
       ref={ref}
       className={cn(
-        'fixed left-1/2 top-1/2 z-50 grid w-full max-w-lg -translate-x-1/2 -translate-y-1/2 gap-4 rounded-lg border bg-background p-5 shadow-lg',
+        'fixed left-1/2 top-1/2 z-30 grid w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 gap-4 rounded-xl border bg-card p-6 shadow-xl',
         className,
       )}
       {...props}
@@ -40,8 +40,8 @@ const DialogContent = React.forwardRef<
         render={
           <Button
             variant="ghost"
-            size="icon-sm"
-            className="absolute right-3 top-3"
+            size="icon"
+            className="absolute right-2 top-2"
             aria-label="关闭"
           />
         }
@@ -55,7 +55,7 @@ DialogContent.displayName = 'DialogContent'
 
 const DialogHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
-    className={cn('flex flex-col gap-1.5 text-left', className)}
+    className={cn('flex flex-col gap-1 text-left', className)}
     {...props}
   />
 )
@@ -75,7 +75,7 @@ const DialogTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <BaseDialog.Title
     ref={ref}
-    className={cn('text-base font-semibold leading-none', className)}
+    className={cn('text-xl font-semibold leading-snug tracking-tight', className)}
     {...props}
   />
 ))

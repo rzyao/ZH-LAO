@@ -23,6 +23,8 @@ export function DataTablePagination<TData>({
   const selectedRows = table.getFilteredSelectedRowModel().rows.length
   const { pageIndex, pageSize } = table.getState().pagination
   const pageCount = Math.max(table.getPageCount(), 1)
+  const startRow = totalRows === 0 ? 0 : pageIndex * pageSize + 1
+  const endRow = Math.min((pageIndex + 1) * pageSize, totalRows)
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-2 px-1 py-1 text-xs text-muted-foreground">
@@ -32,10 +34,10 @@ export function DataTablePagination<TData>({
             {selectedRows} / {totalRows} 已选
           </span>
         ) : (
-          <span>共 {totalRows} 条</span>
+          <span className="tabular-nums">{startRow}-{endRow} / 共 {totalRows} 条</span>
         )}
       </div>
-      <div className="flex items-center gap-4">
+      <div className="flex flex-wrap items-center gap-4">
         <div className="flex items-center gap-1.5">
           <span>每页</span>
           <Select

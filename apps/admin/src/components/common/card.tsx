@@ -14,19 +14,19 @@ export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
  */
 export function Card({ title, description, actions, children, className, ...props }: CardProps) {
   return (
-    <section className={cn('rounded-md border bg-card', className)} {...props}>
+    <section className={cn('rounded-lg border bg-card', className)} {...props}>
       {title ? (
-        <header className="flex items-center justify-between gap-2 border-b px-4 py-2.5">
+        <header className="flex items-center justify-between gap-2 border-b px-6 py-4">
           <div>
-            <h2 className="text-sm font-semibold leading-none">{title}</h2>
+            <h2 className="text-base font-semibold leading-snug">{title}</h2>
             {description ? (
-              <p className="mt-1 text-xs text-muted-foreground">{description}</p>
+              <p className="mt-1 text-[13px] text-muted-foreground">{description}</p>
             ) : null}
           </div>
           {actions ? <div className="flex shrink-0 items-center gap-2">{actions}</div> : null}
         </header>
       ) : null}
-      <div className={cn('p-4', !title && 'p-4')}>{children}</div>
+      <div className={cn('p-6', !title && 'p-6')}>{children}</div>
     </section>
   )
 }

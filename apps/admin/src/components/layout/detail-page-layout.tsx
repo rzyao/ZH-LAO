@@ -34,7 +34,7 @@ export function DetailPageLayout({
           </>
         }
       />
-      <div className="min-h-0 flex-1 overflow-auto p-4">{children}</div>
+      <div className="min-h-0 flex-1 overflow-auto px-4 py-6 sm:px-8">{children}</div>
     </div>
   )
 }

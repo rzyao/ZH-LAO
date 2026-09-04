@@ -13,7 +13,7 @@ const AlertDialogOverlay = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <BaseAlertDialog.Backdrop
     ref={ref}
-    className={cn('fixed inset-0 z-50 bg-black/50', className)}
+    className={cn('fixed inset-0 z-30 bg-black/40', className)}
     {...props}
   />
 ))
@@ -28,7 +28,7 @@ const AlertDialogContent = React.forwardRef<
     <BaseAlertDialog.Popup
       ref={ref}
       className={cn(
-        'fixed left-1/2 top-1/2 z-50 grid w-full max-w-md -translate-x-1/2 -translate-y-1/2 gap-3 rounded-lg border bg-background p-5 shadow-lg',
+        'fixed left-1/2 top-1/2 z-30 grid w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 gap-4 rounded-xl border bg-card p-6 shadow-xl',
         className,
       )}
       {...props}
@@ -41,7 +41,7 @@ const AlertDialogHeader = ({
   className,
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn('flex flex-col gap-1.5 text-left', className)} {...props} />
+  <div className={cn('flex flex-col gap-1 text-left', className)} {...props} />
 )
 AlertDialogHeader.displayName = 'AlertDialogHeader'
 
@@ -62,7 +62,7 @@ const AlertDialogTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <BaseAlertDialog.Title
     ref={ref}
-    className={cn('text-base font-semibold leading-none', className)}
+    className={cn('text-xl font-semibold leading-snug tracking-tight', className)}
     {...props}
   />
 ))

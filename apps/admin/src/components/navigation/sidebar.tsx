@@ -42,9 +42,9 @@ function SidebarItem({
           type="button"
           onClick={() => setOpen((v) => !v)}
           className={cn(
-            'flex h-8 w-full items-center gap-2 rounded-md px-2 text-sm transition-colors',
+            'flex h-9 w-full items-center gap-2 rounded-md border-l-2 border-transparent px-3 text-sm transition-colors',
             active
-              ? 'bg-sidebar-accent font-medium text-sidebar-accent-foreground'
+              ? 'border-primary bg-sidebar-accent font-medium text-sidebar-accent-foreground'
               : 'text-sidebar-foreground/80 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground',
             collapsed && 'justify-center px-0',
           )}
@@ -65,9 +65,9 @@ function SidebarItem({
         <Link
           to={item.href}
           className={cn(
-            'flex h-8 items-center gap-2 rounded-md px-2 text-sm transition-colors',
+            'flex h-9 items-center gap-2 rounded-md border-l-2 border-transparent px-3 text-sm transition-colors',
             active
-              ? 'bg-sidebar-accent font-medium text-sidebar-accent-foreground'
+              ? 'border-primary bg-sidebar-accent font-medium text-sidebar-accent-foreground'
               : 'text-sidebar-foreground/80 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground',
             collapsed && 'justify-center px-0',
           )}
@@ -88,7 +88,7 @@ function SidebarItem({
                 key={child.key}
                 to={child.href}
                 className={cn(
-                  'flex h-7 items-center gap-2 rounded-md px-2 text-xs transition-colors',
+                  'flex h-9 items-center gap-2 rounded-md px-3 text-sm transition-colors',
                   childActive
                     ? 'bg-sidebar-accent font-medium text-sidebar-accent-foreground'
                     : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground',
@@ -117,9 +117,9 @@ function MinimalMenuEntry({ collapsed }: { collapsed: boolean }) {
       <Link
         to="/platform/menus"
         className={cn(
-          'flex h-8 items-center gap-2 rounded-md px-2 text-sm transition-colors',
+          'flex h-9 items-center gap-2 rounded-md border-l-2 border-transparent px-3 text-sm transition-colors',
           active
-            ? 'bg-sidebar-accent font-medium text-sidebar-accent-foreground'
+            ? 'border-primary bg-sidebar-accent font-medium text-sidebar-accent-foreground'
             : 'text-sidebar-foreground/80 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground',
           collapsed && 'justify-center px-0',
         )}
@@ -133,7 +133,7 @@ function MinimalMenuEntry({ collapsed }: { collapsed: boolean }) {
   )
 }
 
-export function Sidebar() {
+export function Sidebar({ mobile = false }: { mobile?: boolean }) {
   const [collapsed, setCollapsed] = React.useState(false)
   const pathname = useRouterState({ select: (state) => state.location.pathname })
   const { nav: groups, secondary, source } = useNavConfig()
@@ -146,12 +146,13 @@ export function Sidebar() {
     <aside
       data-testid="sidebar"
       className={cn(
-        'flex h-full shrink-0 flex-col border-r bg-sidebar text-sidebar-foreground transition-[width] duration-150',
-        collapsed ? 'w-12' : 'w-56',
+        'h-full shrink-0 flex-col border-r bg-sidebar text-sidebar-foreground transition-[width] duration-200',
+        mobile ? 'flex w-60' : 'hidden md:flex',
+        !mobile && (collapsed ? 'w-16' : 'w-60'),
       )}
     >
-      <div className={cn('flex h-12 items-center border-b border-sidebar-border px-2', collapsed && 'justify-center px-0')}>
-        {!collapsed ? (
+      <div className={cn('flex h-12 items-center border-b border-sidebar-border px-2', !mobile && collapsed && 'justify-center px-0')}>
+        {!collapsed || mobile ? (
           <div className="flex min-w-0 items-center gap-2 px-1">
             <span className="flex size-6 shrink-0 items-center justify-center rounded bg-primary text-[10px] font-bold text-primary-foreground">
               ZL
@@ -167,7 +168,7 @@ export function Sidebar() {
           type="button"
           className={cn(
             'ml-auto rounded p-1 text-sidebar-foreground/70 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground',
-            collapsed && 'ml-0',
+            !mobile && collapsed && 'ml-0',
           )}
           onClick={() => setCollapsed((value) => !value)}
           aria-label={collapsed ? '展开侧边栏' : '收起侧边栏'}
@@ -183,7 +184,7 @@ export function Sidebar() {
       <nav className="flex-1 space-y-3 overflow-y-auto p-2" aria-label="主导航">
         {groups.map((group) => (
           <div key={group.key}>
-            {!collapsed ? (
+            {!collapsed || mobile ? (
               <div className="px-2 pb-1 text-[11px] font-medium uppercase tracking-wide text-sidebar-foreground/50">
                 {group.label}
               </div>
@@ -193,7 +194,7 @@ export function Sidebar() {
                 <SidebarItem
                   key={item.key}
                   item={item}
-                  collapsed={collapsed}
+                  collapsed={!mobile && collapsed}
                   pathname={pathname}
                   secondary={secondary.find((entry) => entry.prefix === item.href)}
                 />
@@ -202,18 +203,18 @@ export function Sidebar() {
           </div>
         ))}
 
-        {showMinimalEntry ? <MinimalMenuEntry collapsed={collapsed} /> : null}
+        {showMinimalEntry ? <MinimalMenuEntry collapsed={!mobile && collapsed} /> : null}
 
         {env.enableDesignSystem ? (
           <div>
-            {!collapsed ? (
+            {!collapsed || mobile ? (
               <div className="px-2 pb-1 text-[11px] font-medium uppercase tracking-wide text-sidebar-foreground/50">
                 开发辅助
               </div>
             ) : null}
             <div className="space-y-0.5">
               {DEV_NAV_ITEMS.map((item) => (
-                <SidebarItem key={item.key} item={item} collapsed={collapsed} pathname={pathname} />
+                <SidebarItem key={item.key} item={item} collapsed={!mobile && collapsed} pathname={pathname} />
               ))}
             </div>
           </div>
@@ -223,7 +224,7 @@ export function Sidebar() {
       <div className="flex h-11 items-center gap-2 border-t border-sidebar-border px-3">
         <ChevronLeft aria-hidden className="size-4 text-sidebar-foreground/50" />
         <span className="truncate text-xs text-sidebar-foreground/70">
-          {collapsed ? '' : '管理后台基础框架'}
+          {!mobile && collapsed ? '' : '管理后台基础框架'}
         </span>
       </div>
     </aside>

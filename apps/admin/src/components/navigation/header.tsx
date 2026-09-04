@@ -1,4 +1,5 @@
 import { Link } from '@tanstack/react-router'
+import { Menu } from 'lucide-react'
 import { env } from '@/app/config'
 import { Badge } from '@/components/ui/badge'
 import { Breadcrumb, useBreadcrumb } from './breadcrumb'
@@ -22,20 +23,27 @@ function EnvBadge() {
 }
 
 /** Top header: global breadcrumb + environment + theme switch. */
-export function Header() {
+export function Header({ onOpenNavigation }: { onOpenNavigation?: () => void }) {
   const crumbs = useBreadcrumb()
   const { operator, signOut } = useAuth()
   return (
     <header
       data-testid="header"
-      className="flex h-12 shrink-0 items-center justify-between gap-4 border-b bg-card/60 px-4"
+      className="flex h-12 shrink-0 items-center justify-between gap-4 border-b bg-card/95 px-4"
     >
-      <Breadcrumb items={crumbs} />
+      <div className="flex min-w-0 items-center gap-2">
+        {onOpenNavigation ? (
+          <Button variant="ghost" size="icon" className="md:hidden" aria-label="打开导航" onClick={onOpenNavigation}>
+            <Menu aria-hidden className="size-[18px]" />
+          </Button>
+        ) : null}
+        <Breadcrumb items={crumbs} />
+      </div>
       <div className="flex shrink-0 items-center gap-2">
         <EnvBadge />
-        {operator ? <span className="text-xs text-muted-foreground">{operator.name}</span> : null}
+        {operator ? <span className="hidden text-xs text-muted-foreground sm:inline">{operator.name}</span> : null}
         {operator ? (
-          <Link to="/change-password">
+          <Link to="/change-password" className="hidden sm:block">
             <Button variant="ghost" size="sm">修改密码</Button>
           </Link>
         ) : null}

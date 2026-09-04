@@ -27,14 +27,14 @@ export function EmptyState({
   return (
     <div
       className={cn(
-        'flex h-full min-h-[240px] w-full flex-col items-center justify-center gap-2 rounded-md border border-dashed bg-muted/20 px-6 py-10 text-center',
+        'flex h-full min-h-[240px] w-full flex-col items-center justify-center rounded-lg border border-dashed bg-muted/20 px-6 py-10 text-center',
         className,
       )}
     >
-      <div className="flex size-10 items-center justify-center rounded-full bg-muted text-muted-foreground">
-        <Icon aria-hidden className="size-5" />
+      <div className="flex size-12 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+        <Icon aria-hidden className="size-6" />
       </div>
-      <h3 className="mt-1 text-sm font-medium">{title}</h3>
+      <h3 className="mt-1 text-base font-semibold">{title}</h3>
       {description ? (
         <p className="max-w-sm text-sm text-muted-foreground">{description}</p>
       ) : null}
@@ -54,7 +54,7 @@ export function EmptyStateAction({
   ...props
 }: React.ComponentProps<typeof Button>) {
   return (
-    <Button size="sm" {...props}>
+    <Button {...props}>
       {children}
     </Button>
   )

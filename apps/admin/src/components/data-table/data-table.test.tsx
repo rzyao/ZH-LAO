@@ -27,7 +27,8 @@ const data: DemoRow[] = [
 describe('DataTable foundation', () => {
   it('renders headers and rows', () => {
     render(<DataTable columns={columns} data={data} />)
-    expect(screen.getByRole('columnheader', { name: 'ID' })).toBeInTheDocument()
+    expect(screen.getByRole('columnheader', { name: 'ID' })).toHaveAttribute('scope', 'col')
+    expect(screen.getByText('数据列表')).toBeInTheDocument()
     expect(screen.getByText('Alpha')).toBeInTheDocument()
     expect(screen.getByText('Beta')).toBeInTheDocument()
     expect(screen.getByText('Gamma')).toBeInTheDocument()
