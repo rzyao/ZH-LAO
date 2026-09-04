@@ -17,7 +17,7 @@ schema: content
 | `id` | `bigint generated always as identity primary key` |
 | `public_id` | `uuid not null unique`（应用层生成、不可变；跨域 logical ID，D-150） |
 | `language` | `varchar(8) not null check (zh, lo)` |
-| `content_type` | `varchar(32) not null`; 仅 `zh_pinyin/zh_hanzi/zh_word/zh_sentence/lo_letter/lo_syllable/lo_word/lo_sentence` |
+| `content_type` | `varchar(32) not null`; 仅 `zh_pinyin/zh_syllable/zh_hanzi/zh_word/zh_sentence/lo_letter/lo_syllable/lo_word/lo_sentence` |
 | `status` | `varchar(16) not null default active`; 仅 `active/disabled/archived` |
 | `created_at, updated_at` | `timestamptz not null default now()` |
 
@@ -28,6 +28,7 @@ schema: content
 | 表 | 冻结字段与约束 |
 | --- | --- |
 | `zh_pinyin` | `content_id bigint PK/FK → contents`；`syllable varchar(16) not null`、`initial varchar(8)`、`final varchar(16) not null`、`tone smallint not null check 1..5`、`display_form varchar(16) not null`；UNIQUE `(syllable, tone)`。 |
+| `zh_syllables` | `content_id bigint PK/FK → contents`；`syllable varchar(16) not null unique`、`initial varchar(8)`、`final varchar(16) not null`、`display_form varchar(16) not null`。它是**不带声调**的中文音节身份；`zh_pinyin` 是带声调的拼音实体，二者不得互为别名。 |
 | `zh_hanzi` | `content_id bigint PK/FK → contents`；`character varchar(4) not null unique`、`traditional_character varchar(4)`、`stroke_count smallint check null or >0`、`radical varchar(8)`。不再存 `primary_pinyin`。 |
 | `zh_hanzi_pinyin` | `hanzi_content_id FK → zh_hanzi`、`pinyin_content_id FK → zh_pinyin`、`is_primary boolean not null default false`、`usage_note text`、`created_at timestamptz not null default now()`；PK `(hanzi_content_id,pinyin_content_id)`；partial UNIQUE `hanzi_content_id WHERE is_primary`。 |
 | `zh_words` | `content_id bigint PK/FK → contents`；`simplified varchar(128) not null unique`、`traditional varchar(128)`、`pinyin_text varchar(256)`、`word_class varchar(32)`、`difficulty_level smallint check null or >=1`。 |

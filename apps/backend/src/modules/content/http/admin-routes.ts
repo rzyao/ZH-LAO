@@ -6,7 +6,6 @@ import { SubmitCharacterReviewUseCase } from '../application/use-cases/submit-ch
 import { ReviewCharacterUseCase } from '../application/use-cases/review-character.js';
 import { PublishCharacterUseCase } from '../application/use-cases/publish-character.js';
 import type { ContentRepository } from '../application/ports/repositories.js';
-import type { AudioRequirementSync } from '../application/ports/audio-requirement-sync.js';
 import { AppError } from '../../../errors/app-error.js';
 import {
   ACTIVE_WORK_CONFLICT,
@@ -18,7 +17,6 @@ import {
 
 export interface AdminContentRoutesOptions {
   contentRepository: ContentRepository;
-  audioRequirementSync: AudioRequirementSync;
 }
 
 export const adminContentRoutes: FastifyPluginAsync<AdminContentRoutesOptions> = async (
@@ -32,7 +30,7 @@ export const adminContentRoutes: FastifyPluginAsync<AdminContentRoutesOptions> =
   const updateDraftUC = new UpdateCharacterDraftUseCase(contentRepository);
   const submitReviewUC = new SubmitCharacterReviewUseCase(contentRepository);
   const reviewUC = new ReviewCharacterUseCase(contentRepository);
-  const publishUC = new PublishCharacterUseCase(contentRepository, options.audioRequirementSync);
+  const publishUC = new PublishCharacterUseCase(contentRepository);
 
   fastify.post('/letters', async (request, reply) => {
     const body = request.body as CreateCharacterDraftInput;

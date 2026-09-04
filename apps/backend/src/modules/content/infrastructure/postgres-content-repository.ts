@@ -1,5 +1,7 @@
 import type { DatabaseExecutor } from '../../../database/executor.js';
 import type { TransactionManager } from '../../../database/transaction-manager.js';
+import { OutboxWriter } from '../../../outbox/outbox-writer.js';
+import { newLogicalUuid } from '../../../ids/uuid.js';
 import {
   LaoCharacter,
 } from '../domain/lao-character.js';
@@ -12,6 +14,7 @@ import type {
 } from '../application/ports/repositories.js';
 
 export class PostgresContentRepository implements ContentRepository {
+  private readonly outbox = new OutboxWriter();
   constructor(
     private readonly db: DatabaseExecutor,
     private readonly transactions?: TransactionManager,
@@ -134,7 +137,6 @@ export class PostgresContentRepository implements ContentRepository {
           character.sortOrder,
         ]
       );
-
       await exec.query(
         `INSERT INTO content.content_revisions (
            revision_public_id, entity_type, entity_id, revision_number,
@@ -219,6 +221,9 @@ export class PostgresContentRepository implements ContentRepository {
           characterId,
         ]
       );
+      if (!targetRevision.snapshot.noAudio) {
+        await this.outbox.write(exec, { id: newLogicalUuid(), sourceDomain: 'content', type: 'content.audio_requirement_changed', aggregateType: 'content', aggregateId: characterId as never, payload: { sourceDomain: 'content', entityType: 'lo_letter', entityId: characterId, revisionId: targetRevision.id, languageCode: 'lo', audioRole: 'pronunciation' }, headers: {}, occurredAt: targetRevision.publishedAt ?? new Date() });
+      }
     };
 
     if (this.transactions) {

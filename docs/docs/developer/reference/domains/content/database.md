@@ -7,7 +7,7 @@ source_share_url: https://chatgpt.com/share/6a937088-e570-83e9-912e-11cc3de27eba
 
 # Content 数据库总览
 
-> 「拆分学习域」会话裁决（[ADR-021](/developer/reference/adr/ADR-021-content-and-learning-domain-split.md)，D-147）将原 Learning 域按职责拆分为 Content + Learning；D-150 的 31 张归属基线仍有效。Content–Audio 公共边界收口以**前向迁移 `1280_content_audio_eligible_types.sql`**增加 `zh_syllables`，使已批准的 `zh_syllable` Audio 身份可由 Content 解析；不修改任何冻结迁移。2 张（`pronunciation_audios` / `tts_jobs`）仍由 Audio Production Domain 取代不再建表。本页是 Content 表归属的**唯一权威清单**。
+> 「拆分学习域」会话裁决（[ADR-021](/developer/reference/adr/ADR-021-content-and-learning-domain-split.md)，D-147）将原 Learning 域按职责拆分为 Content + Learning；D-150 的 31 张归属基线仍有效。Content–Audio 公共边界收口以**前向迁移 `1360_content_audio_eligible_types.sql`**增加 `zh_syllables`，使已批准的 `zh_syllable` Audio 身份可由 Content 解析；不修改任何冻结迁移。2 张（`pronunciation_audios` / `tts_jobs`）仍由 Audio Production Domain 取代不再建表。本页是 Content 表归属的**唯一权威清单**。
 
 ## 归属规则（裁决，frozen）
 
