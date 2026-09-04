@@ -316,3 +316,74 @@ Minimum next repair: make the Admin smoke test deterministic against its intende
 navigation/API boundary, and fix the Backend Facebook registration race rather
 than weakening its invariant. Then rerun the required Foundation workflow on
 the resulting `main` SHA.
+
+## 22. Final Gate Recheck — 2026-09-04
+
+This is the final narrow gate recheck. It records only the remote `main`
+baseline and its matching GitHub Actions evidence; it is not a new Foundation
+audit and it changes no product, architecture, API, database, or workflow
+authority.
+
+### Final Baseline and CI
+
+| Item | Evidence |
+| --- | --- |
+| Final `main` SHA | `0ce628f349293d93e3c96b8e2fe18e3e3fa65a75` |
+| Gate E corrective commit | `151d8224e6a2fb7707dcbf7ada51388a275237d6` (`fix/gate-e-admin-content-nav`) — **not merged into `main`**; it is one commit ahead and one commit behind `main`. |
+| Gate F corrective commit | `0ce628f349293d93e3c96b8e2fe18e3e3fa65a75` (`fix(identity): make social registration concurrency-safe`) — present on `main`. |
+| Matching Foundation workflow | [33833680654](https://github.com/rzyao/ZH-LAO/actions/runs/33833680654), `completed` / `failure`, for exactly `0ce628f`. |
+
+| CI job | Remote status | Gate treatment |
+| --- | --- | --- |
+| Admin | `completed` / `failure` | Blocking failure |
+| Backend | `completed` / `success` | CI pass, but Gate remains open on the acceptance rule below |
+| Database | `completed` / `success` | PASS |
+| Docs | `completed` / `success` | PASS |
+| Mobile | `completed` / `failure` | Deferred P2 / non-blocking |
+
+The workflow still declares only Mobile as `continue-on-error: true`; that
+pre-existing policy explicitly describes Mobile Foundation as in progress and
+non-blocking. No E/F change modified the database or docs paths, and no new
+Mobile policy downgrade was made.
+
+### Gate Decisions
+
+**Admin Gate: OPEN.** The current baseline's required Admin CI is failure, so
+Admin lint, typecheck, build, and E2E cannot be recorded as a complete passing
+set. The targeted “内容管理” navigation correction exists only in `151d8224`,
+not in the final baseline. The corrective diff uses a real expandable content
+entry and its `字母管理` route; it contains no `skip`, `fixme`,
+`continue-on-error`, fake menu, or RBAC bypass. That does not substitute for
+required CI evidence on `main`.
+
+**Backend Gate: OPEN.** The matching Backend CI job is green and the Facebook
+race test remains concurrent (`Promise.allSettled` over three same-subject
+registrations); ADR-023 is unchanged, no migration was added, and no
+process-local production lock was introduced. However, the merged Gate F code
+handles a unique-conflict by re-running the registration flow in a bounded
+retry loop (`attempt <= 2`). The final acceptance rule expressly disallows a
+retry-based green result. Consequently the CI success cannot close this gate
+until a non-retry-based concurrency solution is accepted and the corresponding
+required CI is PASS.
+
+**Database Gate: CLOSED.** The current baseline did not modify `database/`.
+The matching independent PostgreSQL 18 database job passed both `database test`
+and `database validate`; this retains the established migration-integrity and
+cross-domain-FK validation evidence without reopening WP-03.
+
+**Docs: PASS.** The matching Docs job passed. No documentation path changed
+between the preceding gate baseline and this recheck baseline.
+
+### Final Gate Result
+
+- **P0 = 0.**
+- **Blocking P1 = 2:** (1) required Admin CI failure because Gate E is not in
+  `main`; (2) Gate F's retry-based Facebook race handling, which is ineligible
+  under this recheck's explicit rule despite a green Backend CI job.
+- **Deferred P2:** Mobile CI failure under the documented pre-existing
+  non-blocking Mobile policy; production provider, observability, and release
+  readiness remain deferred.
+
+**FOUNDATION NOT READY.** The required Admin CI is not PASS, and the Backend
+Gate cannot be closed under the no-retry acceptance condition. No previously
+resolved issue is reopened by this result.
