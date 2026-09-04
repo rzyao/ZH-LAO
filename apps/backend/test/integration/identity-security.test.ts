@@ -17,6 +17,15 @@ const direction = { native_language: 'lo', learning_language: 'zh' } as const;
 const device = () => ({ installation_id: newLogicalUuid(), platform: 'android', push_token: `push-${newLogicalUuid()}` });
 const lastCode = (ctx: IdentityTestApp) => ctx.delivery.deliveries.at(-1)!.code;
 const bearer = (token: string) => ({ authorization: `Bearer ${token}` });
+// ADR-023 统一信封断言：HTTP 一律 200，顶层 code 权威（成功 `{ code:'OK', data, request_id }`，失败 `{ code, error, request_id }`）。
+type Envelope = { code: string; data: unknown; error?: { message: string; details?: unknown }; request_id: string };
+const envelope = (response: { json(): unknown }): Envelope => response.json() as Envelope;
+const success = (response: { json(): unknown }): Record<string, unknown> => {
+  const body = envelope(response);
+  expect(body.code).toBe('OK');
+  return body.data as Record<string, unknown>;
+};
+const businessCode = (response: { json(): unknown }): string => envelope(response).code;
 
 async function withApp(fn: (ctx: IdentityTestApp) => Promise<void>, options: { facebook?: ReadonlyMap<string, string>; verifier?: FacebookCredentialVerifier; logger?: import('pino').Logger<never, boolean> | import('pino').Logger<string, boolean> } = {}) {
   const ctx = await buildIdentityTestApp({ ...(options.logger ? { logger: options.logger } : {}), ...(options.facebook ? { facebookSubjects: options.facebook } : {}), ...(options.verifier ? { facebookVerifier: options.verifier } : {}) });
@@ -44,7 +53,9 @@ integration('IDN-19 identity security hardening', () => {
       expect(rows.rows).toHaveLength(1);
       expect(String(rows.rows[0]!.code_hash)).not.toBe(raw);
       expect(String(rows.rows[0]!.code_hash)).not.toBe(createHash('sha256').update(raw).digest('base64url'));
-      expect((await ctx.app.inject({ method: 'POST', url: '/api/v1/identity/auth/phone', payload: { phone, otp_code: '999999' } })).statusCode).toBe(400);
+      const wrongOtp = await ctx.app.inject({ method: 'POST', url: '/api/v1/identity/auth/phone', payload: { phone, otp_code: '999999' } });
+      expect(wrongOtp.statusCode).toBe(200);
+      expect(businessCode(wrongOtp)).toBe('OTP_INVALID');
     });
   });
 
@@ -60,7 +71,7 @@ integration('IDN-19 identity security hardening', () => {
       const third = await limited.execute({ phone: '+8562061000002', purpose: 'login', ip: '1.1.1.1' }).then(() => null, (error) => error);
       expect((third as Error & { code?: string } | null)?.code).toBe('OTP_RATE_LIMITED');
       const registered = await phoneLogin(ctx, '+8562061000001');
-      const bindIsolated = await limited.execute({ phone: '+8562061000002', purpose: 'bind_phone', ip: '1.1.1.1', authenticatedUserPublicId: parseUserPublicId(registered.json().user_id) }).then(() => 'ok', (error) => (error as Error & { code?: string }).code);
+      const bindIsolated = await limited.execute({ phone: '+8562061000002', purpose: 'bind_phone', ip: '1.1.1.1', authenticatedUserPublicId: parseUserPublicId(success(registered).user_id) }).then(() => 'ok', (error) => (error as Error & { code?: string }).code);
       expect(bindIsolated).toBe('ok');
       const phoneIsolated = await limited.execute({ phone: '+8562061000003', purpose: 'login', ip: '1.1.1.1' }).then(() => 'ok', (error) => (error as Error & { code?: string }).code);
       expect(phoneIsolated).toBe('ok');
@@ -81,25 +92,31 @@ integration('IDN-19 identity security hardening', () => {
 
   it('rejects JWT algorithm, signature, issuer, audience, expiry, tamper, and invalid subjects', async () => {
     await withApp(async (ctx) => {
-      const registered = await phoneLogin(ctx, '+8562061000008'); const sub = registered.json().user_id;
+      const registered = await phoneLogin(ctx, '+8562061000008'); const sub = String(success(registered).user_id);
       const now = Math.floor(Date.now() / 1000);
       const protectedCall = (token: string) => ctx.app.inject({ url: '/api/v1/identity/me', headers: bearer(token) });
+      const expectUnauthenticated = async (token: string) => {
+        const response = await protectedCall(token);
+        expect(response.statusCode).toBe(200);
+        expect(businessCode(response)).toBe('UNAUTHENTICATED');
+      };
       const valid = { sub, iat: now, exp: now + 900, iss: TEST_ISSUER, aud: TEST_AUDIENCE };
-      expect((await protectedCall(signJwt(JWT_TEST_SECRET, valid, 'none'))).statusCode).toBe(401);
-      expect((await protectedCall(signJwt(JWT_TEST_SECRET, { ...valid, iss: 'evil-corpus' }))).statusCode).toBe(401);
-      expect((await protectedCall(signJwt(JWT_TEST_SECRET, { ...valid, aud: 'evil-client' }))).statusCode).toBe(401);
-      expect((await protectedCall(signJwt('wrong-secret-that-is-long-enough-for-hmac', valid))).statusCode).toBe(401);
+      await expectUnauthenticated(signJwt(JWT_TEST_SECRET, valid, 'none'));
+      await expectUnauthenticated(signJwt(JWT_TEST_SECRET, { ...valid, iss: 'evil-corpus' }));
+      await expectUnauthenticated(signJwt(JWT_TEST_SECRET, { ...valid, aud: 'evil-client' }));
+      await expectUnauthenticated(signJwt('wrong-secret-that-is-long-enough-for-hmac', valid));
       const tampered = signJwt(JWT_TEST_SECRET, valid).split('.'); tampered[1] = Buffer.from(JSON.stringify({ ...valid, sub: newLogicalUuid() })).toString('base64url');
-      expect((await protectedCall(tampered.join('.'))).statusCode).toBe(401);
-      expect((await protectedCall(signJwt(JWT_TEST_SECRET, { ...valid, exp: now - 60 }))).statusCode).toBe(401);
-      expect((await protectedCall(signJwt(JWT_TEST_SECRET, { ...valid, sub: 'not-a-uuid' }))).statusCode).toBe(401);
-      expect((await protectedCall(signJwt(JWT_TEST_SECRET, valid))).statusCode).toBe(200);
+      await expectUnauthenticated(tampered.join('.'));
+      await expectUnauthenticated(signJwt(JWT_TEST_SECRET, { ...valid, exp: now - 60 }));
+      await expectUnauthenticated(signJwt(JWT_TEST_SECRET, { ...valid, sub: 'not-a-uuid' }));
+      const accepted = await protectedCall(signJwt(JWT_TEST_SECRET, valid));
+      expect(accepted.statusCode).toBe(200); expect(businessCode(accepted)).toBe('OK');
     });
   });
 
   it('issues opaque high-entropy refresh tokens that never equal the stored hash', async () => {
     await withApp(async (ctx) => {
-      const registered = await phoneLogin(ctx, '+8562061000009'); const raw = registered.json().refresh_token;
+      const registered = await phoneLogin(ctx, '+8562061000009'); const raw = String(success(registered).refresh_token);
       expect(raw.length).toBeGreaterThanOrEqual(60);
       expect(raw).not.toContain('.');
       expect(() => JSON.parse(Buffer.from(raw, 'base64url').toString('utf8'))).toThrow();
@@ -115,7 +132,7 @@ integration('IDN-19 identity security hardening', () => {
     await withApp(async (ctx) => {
       const phone = '+8562061000010'; await otpReq(ctx, phone); const code = lastCode(ctx);
       const registered = await ctx.app.inject({ method: 'POST', url: '/api/v1/identity/auth/phone', payload: { phone, otp_code: code, learning_direction: direction, device: device() } });
-      const token = registered.json(); const refresh = token.refresh_token; const access = token.access_token;
+      const token = success(registered); const refresh = String(token.refresh_token); const access = String(token.access_token);
       await otpReq(ctx, phone); await otpReq(ctx, phone);
       await ctx.app.inject({ url: '/api/v1/identity/me', headers: bearer('invalid-token') });
       await ctx.app.inject({ method: 'POST', url: '/api/v1/identity/auth/facebook', payload: { credential: 'facebook-raw-credential', learning_direction: direction } });
@@ -131,19 +148,25 @@ integration('IDN-19 identity security hardening', () => {
   it('blocks cross-user device, profile, and session manipulation without leaking existence', async () => {
     await withApp(async (ctx) => {
       const userA = await phoneLogin(ctx, '+8562061000011'); const userB = await phoneLogin(ctx, '+8562061000012');
-      const headersA = bearer(userA.json().access_token); const headersB = bearer(userB.json().access_token);
-      const deviceB = (await ctx.app.inject({ url: '/api/v1/identity/me/devices', headers: headersB })).json().items[0]!.installation_id;
+      const dataA = success(userA); const dataB = success(userB);
+      const headersA = bearer(String(dataA.access_token)); const headersB = bearer(String(dataB.access_token));
+      const deviceB = (success(await ctx.app.inject({ url: '/api/v1/identity/me/devices', headers: headersB })).items as Array<Record<string, unknown>>)[0]!.installation_id;
       const foreignRevoke = await ctx.app.inject({ method: 'DELETE', url: `/api/v1/identity/me/devices/${deviceB}`, headers: headersA });
-      expect(foreignRevoke.statusCode).toBe(404);
+      expect(foreignRevoke.statusCode).toBe(200);
+      expect(businessCode(foreignRevoke)).toBe('DEVICE_NOT_FOUND');
       const missingRevoke = await ctx.app.inject({ method: 'DELETE', url: `/api/v1/identity/me/devices/${newLogicalUuid()}`, headers: headersA });
-      expect(missingRevoke.statusCode).toBe(404);
-      expect(foreignRevoke.json().error.code).toBe(missingRevoke.json().error.code);
-      expect(foreignRevoke.json().error.message).toBe(missingRevoke.json().error.message);
-      const patch = await ctx.app.inject({ method: 'PATCH', url: '/api/v1/identity/me/profile', headers: headersA, payload: { user_id: userB.json().user_id } });
-      expect(patch.statusCode).toBe(400);
-      expect((await ctx.app.inject({ url: '/api/v1/identity/me', headers: headersA })).json().user_id).toBe(userA.json().user_id);
-      expect((await ctx.app.inject({ method: 'DELETE', url: `/api/v1/identity/me/sessions/${newLogicalUuid()}`, headers: headersA })).statusCode).toBe(404);
-      expect((await ctx.app.inject({ url: '/api/v1/identity/me/devices', headers: headersB })).json().items).toHaveLength(1);
+      expect(missingRevoke.statusCode).toBe(200);
+      expect(businessCode(missingRevoke)).toBe('DEVICE_NOT_FOUND');
+      expect(businessCode(foreignRevoke)).toBe(businessCode(missingRevoke));
+      expect(envelope(foreignRevoke).error?.message).toBe(envelope(missingRevoke).error?.message);
+      const patch = await ctx.app.inject({ method: 'PATCH', url: '/api/v1/identity/me/profile', headers: headersA, payload: { user_id: String(dataB.user_id) } });
+      expect(patch.statusCode).toBe(200);
+      expect(businessCode(patch)).toBe('VALIDATION_ERROR');
+      expect(success(await ctx.app.inject({ url: '/api/v1/identity/me', headers: headersA })).user_id).toBe(dataA.user_id);
+      const unknownSessionRoute = await ctx.app.inject({ method: 'DELETE', url: `/api/v1/identity/me/sessions/${newLogicalUuid()}`, headers: headersA });
+      expect(unknownSessionRoute.statusCode).toBe(200);
+      expect(businessCode(unknownSessionRoute)).toBe('NOT_FOUND');
+      expect((success(await ctx.app.inject({ url: '/api/v1/identity/me/devices', headers: headersB })).items as Array<unknown>)).toHaveLength(1);
     });
   });
 
@@ -155,14 +178,16 @@ integration('IDN-19 identity security hardening', () => {
       expect(JSON.stringify(fb.json())).not.toContain('opaque-credential');
       const rows = await ctx.pool.query('SELECT provider_subject FROM identity.auth_identities');
       expect(JSON.stringify(rows.rows)).not.toContain('opaque-credential');
-      expect((await ctx.app.inject({ url: '/api/v1/identity/me', headers: bearer(fb.json().access_token) })).json().auth_providers).toEqual(['facebook']);
+      const me = await ctx.app.inject({ url: '/api/v1/identity/me', headers: bearer(String(success(fb).access_token)) });
+      expect(me.statusCode).toBe(200);
+      expect(success(me).auth_providers).toEqual(['facebook']);
     }, { facebook: new Map([['opaque-credential', 'fb-secure-subject']]) });
   });
 
   it('maps provider outage to a safe error and rejects unverifiable credentials', async () => {
     await withApp(async (ctx) => {
       const outage = await ctx.app.inject({ method: 'POST', url: '/api/v1/identity/auth/facebook', payload: { credential: 'anything', learning_direction: direction } });
-      expect(outage.statusCode).toBe(503); expect(outage.json().error.code).toBe('PROVIDER_UNAVAILABLE');
+      expect(outage.statusCode).toBe(200); expect(businessCode(outage)).toBe('PROVIDER_UNAVAILABLE');
       expect(outage.body).not.toContain('stack');
       expect(outage.body).not.toContain('OAuth');
     }, { verifier: new UnavailableFacebookCredentialVerifier() });
@@ -171,15 +196,21 @@ integration('IDN-19 identity security hardening', () => {
   it('keeps OTP purpose and phone scoped: no cross-purpose, cross-phone, or stolen reuse', async () => {
     await withApp(async (ctx) => {
       const fb = await ctx.app.inject({ method: 'POST', url: '/api/v1/identity/auth/facebook', payload: { credential: 'opaque', learning_direction: direction } });
-      const headers = bearer(fb.json().access_token);
+      const fbData = success(fb);
+      const headers = bearer(String(fbData.access_token));
       const phone = '+8562061000013'; const other = '+8562061000014';
-      await otpReq(ctx, phone, 'bind_phone', fb.json().access_token); const bindCode = lastCode(ctx);
-      expect((await ctx.app.inject({ method: 'POST', url: '/api/v1/identity/me/phone/bind', headers, payload: { phone, otp_code: bindCode } })).statusCode).toBe(200);
-      expect((await ctx.app.inject({ method: 'POST', url: '/api/v1/identity/me/phone/bind', headers, payload: { phone: other, otp_code: bindCode } })).statusCode).toBe(409);
+      await otpReq(ctx, phone, 'bind_phone', String(fbData.access_token)); const bindCode = lastCode(ctx);
+      const bind = await ctx.app.inject({ method: 'POST', url: '/api/v1/identity/me/phone/bind', headers, payload: { phone, otp_code: bindCode } });
+      expect(bind.statusCode).toBe(200); expect(businessCode(bind)).toBe('OK');
+      const crossPurpose = await ctx.app.inject({ method: 'POST', url: '/api/v1/identity/me/phone/bind', headers, payload: { phone: other, otp_code: bindCode } });
+      // 该用户已绑定 phone：bindPhone 先拒绝重复绑定（早于 OTP 消费），顶层码 PHONE_ALREADY_BOUND。
+      expect(crossPurpose.statusCode).toBe(200); expect(businessCode(crossPurpose)).toBe('PHONE_ALREADY_BOUND');
       await otpReq(ctx, other, 'login');
-      expect((await ctx.app.inject({ method: 'POST', url: '/api/v1/identity/me/phone/change', headers, payload: { new_phone: other, otp_code: lastCode(ctx) } })).statusCode).toBe(409);
+      const crossPurposeChange = await ctx.app.inject({ method: 'POST', url: '/api/v1/identity/me/phone/change', headers, payload: { new_phone: other, otp_code: lastCode(ctx) } });
+      expect(crossPurposeChange.statusCode).toBe(200); expect(businessCode(crossPurposeChange)).toBe('OTP_ALREADY_USED');
       await otpReq(ctx, phone, 'login');
-      expect((await ctx.app.inject({ method: 'POST', url: '/api/v1/identity/auth/phone', payload: { phone: other, otp_code: lastCode(ctx), learning_direction: direction } })).statusCode).toBe(400);
+      const crossPhone = await ctx.app.inject({ method: 'POST', url: '/api/v1/identity/auth/phone', payload: { phone: other, otp_code: lastCode(ctx), learning_direction: direction } });
+      expect(crossPhone.statusCode).toBe(200); expect(businessCode(crossPhone)).toBe('OTP_INVALID');
     }, { facebook: new Map([['opaque', 'fb-owner']]) });
   });
 
@@ -188,13 +219,14 @@ integration('IDN-19 identity security hardening', () => {
       await phoneLogin(ctx, '+8562061000015');
       const ownedByB = '+8562061000016'; await phoneLogin(ctx, ownedByB);
       const fb = await ctx.app.inject({ method: 'POST', url: '/api/v1/identity/auth/facebook', payload: { credential: 'opaque', learning_direction: direction } });
-      const headers = bearer(fb.json().access_token);
-      await otpReq(ctx, ownedByB, 'bind_phone', fb.json().access_token);
+      const fbData = success(fb);
+      const headers = bearer(String(fbData.access_token));
+      await otpReq(ctx, ownedByB, 'bind_phone', String(fbData.access_token));
       const bind = await ctx.app.inject({ method: 'POST', url: '/api/v1/identity/me/phone/bind', headers, payload: { phone: ownedByB, otp_code: lastCode(ctx) } });
-      expect(bind.statusCode).toBe(409); expect(bind.json().error.code).toBe('IDENTITY_CONFLICT');
-      await otpReq(ctx, ownedByB, 'change_phone', fb.json().access_token);
+      expect(bind.statusCode).toBe(200); expect(businessCode(bind)).toBe('IDENTITY_CONFLICT');
+      await otpReq(ctx, ownedByB, 'change_phone', String(fbData.access_token));
       const change = await ctx.app.inject({ method: 'POST', url: '/api/v1/identity/me/phone/change', headers, payload: { new_phone: ownedByB, otp_code: lastCode(ctx) } });
-      expect(change.statusCode).toBe(409);
+      expect(change.statusCode).toBe(200); expect(businessCode(change)).toBe('PHONE_NOT_BOUND');
     }, { facebook: new Map([['opaque', 'fb-owner']]) });
   });
 });

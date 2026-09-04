@@ -8,6 +8,14 @@ import { buildPlatformModule } from '../../src/modules/platform/http/composition
 
 const adminUrl = process.env.ADMIN_DATABASE_URL;
 const integration = adminUrl ? describe : describe.skip;
+// ADR-023 统一信封：HTTP 一律 200，顶层 code 权威，成功载荷在 data 内。
+type Envelope = { code: string; data: Record<string, unknown>; request_id: string };
+const success = (response: { json(): unknown }): Record<string, unknown> => {
+  const body = response.json() as Envelope;
+  expect(body.code).toBe('OK');
+  return body.data;
+};
+const businessCode = (response: { json(): unknown }): string => (response.json() as { code: string }).code;
 
 integration('Platform HTTP Runtime Endpoints', () => {
   let database: TestDatabase;
@@ -49,7 +57,7 @@ integration('Platform HTTP Runtime Endpoints', () => {
     });
 
     expect(response.statusCode).toBe(200);
-    const body = response.json();
+    const body = success(response);
     expect(body.features).toEqual([
       { key: 'audio_stream', enabled: true, reason: 'default_enabled' },
       { key: 'unregistered_flag', enabled: false, reason: 'flag_not_found' },
@@ -87,7 +95,7 @@ integration('Platform HTTP Runtime Endpoints', () => {
       },
     });
     expect(versionRes.statusCode).toBe(200);
-    expect(versionRes.json()).toMatchObject({
+    expect(success(versionRes)).toMatchObject({
       supported: true,
       latest_version: '3.0.0',
       latest_build_number: 30001,
@@ -99,20 +107,21 @@ integration('Platform HTTP Runtime Endpoints', () => {
       url: '/api/v1/platform/regions',
     });
     expect(regionsRes.statusCode).toBe(200);
-    expect(regionsRes.json().regions.some((r: { code: string }) => r.code === 'MY')).toBe(true);
+    expect((success(regionsRes).regions as Array<{ code: string }>).some((r) => r.code === 'MY')).toBe(true);
 
     const singleRegionRes = await app.inject({
       method: 'GET',
       url: '/api/v1/platform/regions/MY',
     });
     expect(singleRegionRes.statusCode).toBe(200);
-    expect(singleRegionRes.json().code).toBe('MY');
+    expect(success(singleRegionRes).code).toBe('MY');
 
     const notFoundRegionRes = await app.inject({
       method: 'GET',
       url: '/api/v1/platform/regions/ZZ',
     });
-    expect(notFoundRegionRes.statusCode).toBe(404);
+    expect(notFoundRegionRes.statusCode).toBe(200);
+    expect(businessCode(notFoundRegionRes)).toBe('PLATFORM_NOT_FOUND');
   });
 
   it('serves GET /api/v1/platform/announcements', async () => {
@@ -133,6 +142,6 @@ integration('Platform HTTP Runtime Endpoints', () => {
       url: '/api/v1/platform/announcements',
     });
     expect(res.statusCode).toBe(200);
-    expect(res.json().announcements.some((item: { title: string }) => item.title === 'HTTP Notice')).toBe(true);
+    expect((success(res).announcements as Array<{ title: string }>).some((item) => item.title === 'HTTP Notice')).toBe(true);
   });
 });

@@ -15,9 +15,11 @@ const adminUrl = process.env.ADMIN_DATABASE_URL;
 const integration = adminUrl ? describe : describe.skip;
 const logger = pino({ level: 'silent' });
 const direction = { native_language: 'lo', learning_language: 'zh' } as const;
+// ADR-023 统一信封：HTTP 一律 200，顶层 code 权威。
+const businessCode = (response: { json(): unknown }): string => (response.json() as { code: string }).code;
 
 integration('IDN-20 production provider runtime', () => {
-  it('production-like composition without any Facebook provider fails safe with 503, never Fake', async () => {
+  it('production-like composition without any Facebook provider fails safe with PROVIDER_UNAVAILABLE, never Fake', async () => {
     const database: TestDatabase = await createTestDatabase(adminUrl!);
     const pool = createPgPool({ url: database.url, poolMin: 0, poolMax: 3, connectionTimeoutMs: 2000, idleTimeoutMs: 2000 }, logger);
     const app = buildApp({ logger, database: asExecutor(pool) });
@@ -34,8 +36,8 @@ integration('IDN-20 production provider runtime', () => {
         otpDelivery: new UnavailableOtpDeliveryProvider()
       }));
       const facebook = await app.inject({ method: 'POST', url: '/api/v1/identity/auth/facebook', payload: { credential: 'anything', learning_direction: direction } });
-      expect(facebook.statusCode).toBe(503);
-      expect(facebook.json().error.code).toBe('PROVIDER_UNAVAILABLE');
+      expect(facebook.statusCode).toBe(200);
+      expect(businessCode(facebook)).toBe('PROVIDER_UNAVAILABLE');
       expect(facebook.body).not.toContain('INVALID_CREDENTIAL');
     } finally {
       await app.close(); await pool.end(); await database.dispose();
@@ -59,8 +61,8 @@ integration('IDN-20 production provider runtime', () => {
       }));
       const phone = '+8562088888888';
       const response = await app.inject({ method: 'POST', url: '/api/v1/identity/phone-otp', payload: { phone, purpose: 'login' } });
-      expect(response.statusCode).toBe(503);
-      expect(response.json().error.code).toBe('PROVIDER_UNAVAILABLE');
+      expect(response.statusCode).toBe(200);
+      expect(businessCode(response)).toBe('PROVIDER_UNAVAILABLE');
       const pending = await pool.query<{ count: string }>("SELECT count(*)::text AS count FROM identity.otp_challenges WHERE phone_number=$1 AND status='pending'", [phone]);
       expect(Number(pending.rows[0]!.count)).toBe(0);
       const cancelled = await pool.query<{ count: string }>('SELECT count(*)::text AS count FROM identity.otp_challenges WHERE phone_number=$1', [phone]);
@@ -75,8 +77,10 @@ integration('IDN-20 production provider runtime', () => {
     try {
       const facebook = await ctx.app.inject({ method: 'POST', url: '/api/v1/identity/auth/facebook', payload: { credential: 'credential-ok', learning_direction: direction } });
       expect(facebook.statusCode).toBe(200);
+      expect(businessCode(facebook)).toBe('OK');
       const otp = await ctx.app.inject({ method: 'POST', url: '/api/v1/identity/phone-otp', payload: { phone: '+8562088777666', purpose: 'login' } });
       expect(otp.statusCode).toBe(200);
+      expect(businessCode(otp)).toBe('OK');
     } finally {
       await ctx.dispose();
     }
