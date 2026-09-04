@@ -41,7 +41,7 @@
     "rewards": ["reward_deliveries", "reward_events", "reward_grants", "reward_programs", "reward_rules"],
     "trust": ["appeals", "enforcement_actions", "moderation_cases", "moderation_decisions", "moderation_evidence", "reports"],
     "operations": ["operator_audit_logs", "operator_roles", "operators", "role_permissions", "roles"],
-    "platform": ["announcements", "app_versions", "feature_flag_overrides", "feature_flags", "regions", "runtime_configs"],
+    "platform": ["announcements", "app_versions", "feature_flag_overrides", "feature_flags", "menu_permissions", "menus", "regions", "runtime_configs"],
     "infrastructure": ["assets", "system_outbox_events"]
   },
   "logicalUuidColumns": [

@@ -28,6 +28,32 @@ jobs:
       - run: pnpm --dir apps/backend verify
       - run: pnpm --dir apps/backend build
       - run: pnpm --dir apps/backend test:integration
+  # Database Foundation Gate.
+  #
+  # Runs as its own job against an ephemeral PostgreSQL 18 service container so
+  # migrations/validation can prove themselves without developer credentials and
+  # without being blocked by unrelated backend typecheck/lint/test failures.
+  database:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 20
+    env:
+      ADMIN_DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/postgres
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10.20.0 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: pnpm, cache-dependency-path: "**/pnpm-lock.yaml" }
+      - run: pnpm --dir database install --frozen-lockfile
       - run: pnpm --dir database test
       - run: pnpm --dir database validate
   admin:
