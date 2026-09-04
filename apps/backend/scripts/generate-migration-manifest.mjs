@@ -9,7 +9,9 @@ const entries = migrations.map(({ filename, sha256 }) => `  { filename: '${filen
 const generated = `// Generated from database/migrations by scripts/generate-migration-manifest.mjs.\n// Do not edit manually. Frozen migration files remain the sole schema authority.\nexport const requiredMigrations = [\n${entries}\n] as const;\n`;
 
 if (process.argv.includes('--check')) {
-  const current = await readFile(target, 'utf8').catch(() => '');
+  // The generated file may be checked out with CRLF on Windows; validate
+  // canonical content rather than Git's platform-specific working-tree EOL.
+  const current = (await readFile(target, 'utf8').catch(() => '')).replace(/\r\n/g, '\n');
   if (current !== generated) {
     process.stderr.write('Required migration manifest is missing or stale. Run pnpm manifest:generate.\n');
     process.exitCode = 1;

@@ -12,6 +12,9 @@ export async function loadRequiredMigrations() {
     .sort();
   return Promise.all(filenames.map(async (filename) => {
     const sql = await readFile(path.join(migrationsDir, filename), 'utf8');
-    return { filename, sha256: createHash('sha256').update(sql).digest('hex'), sql };
+    // Git may check frozen SQL out with CRLF on Windows while CI uses LF.
+    // Hash canonical text so the ledger and backend manifest stay portable.
+    const canonicalSql = sql.replace(/\r\n/g, '\n');
+    return { filename, sha256: createHash('sha256').update(canonicalSql).digest('hex'), sql };
   }));
 }
