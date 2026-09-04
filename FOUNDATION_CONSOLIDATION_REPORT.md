@@ -222,3 +222,97 @@ reproduced results from unobserved job-log detail.
 Fix the two P1 items only: Admin typecheck integration failures and a green
 post-repair Foundation backend/database CI run. Then re-audit the gate; do not
 start feature development until those results are available.
+
+
+## 21. Final Gate Closure — 2026-09-04
+
+This is a narrow closure recheck, not a repeat Foundation audit. All evidence
+below is for the then-current remote `main` baseline
+`87e6f7cb85808d49f311c11002882e7a421d8a34`
+(`test(backend): align identity HTTP tests with ADR-023`). It contains Gate
+Closure A `f69557bc04584ceed7f9cda0ce09c06f1a64e609`, Gate Closure C
+`ed24e86885814c0901622d445cc4082518154ad7`, and Gate Closure B itself.
+
+### Gate A — Admin: OPEN
+
+Closure A is on the acceptance baseline. The required Admin typecheck and build
+are genuine passes: the Foundation Admin job completed `pnpm --dir apps/admin
+verify` successfully, and that command runs `typecheck`, lint, unit tests,
+and `build` (with `build` itself running TypeScript before Vite). An isolated
+recheck at the exact SHA reproduced that result. The workflow contains neither
+`@ts-nocheck`, disabled strict mode, nor `continue-on-error` for Admin.
+
+The Gate remains open because the required **Admin Foundation CI** job is
+completed **failure**, not pass. In Foundation run
+[33829503287](https://github.com/rzyao/ZH-LAO/actions/runs/33829503287), the
+Admin E2E step failed after verify. The isolated exact-SHA reproduction pinpoints
+the failing smoke assertion: it expects the “内容管理” domain link while its
+remote navigation/API dependencies are unavailable. This is an E2E integration
+failure; it is not a reason to relabel the Admin job as passed.
+
+### Gate B — Backend: OPEN
+
+ADR-023 remains frozen/accepted. The current
+`response-envelope.test.ts` validates HTTP 200 plus top-level `code`,
+`data`/`error`, and `request_id`; current
+`identity-http.test.ts` likewise uses the ADR-023 envelope assertions. No
+pre-ADR HTTP-status assertion of the former 400/401/403/404/409/201/204/500
+form remains in the Backend source scan. Thus the named stale
+`identity-http.test.ts` assertions have been removed without changing the
+production contract.
+
+However, the required Backend CI is completed **failure**. In run 33829503287,
+`pnpm --dir apps/backend verify` failed at
+`test/integration/identity-race.test.ts:118`: the Facebook registration race
+returned a business code outside the asserted `OK`/`CONFLICT` set. The
+subsequent Backend build and integration steps are **skipped**, so they are not
+counted as passing. Gate B is therefore open until the real Facebook race
+behavior is corrected (while retaining the single canonical user/identity/event
+invariant) and the full Backend job is green.
+
+### Gate C — Database: CLOSED
+
+Closure C is on the acceptance baseline and creates an independent required
+`database` job with a PostgreSQL 18 service container. It has no
+`continue-on-error` and is independent of Backend failure. In Foundation run
+33829503287, Database completed **success**: both `pnpm --dir database test`
+and `pnpm --dir database validate` completed successfully against that
+isolated PostgreSQL environment.
+
+The validator creates a disposable database, applies the full migration set,
+requires the second run to be a no-op, runs constraint smoke tests, and rejects
+an injected cross-domain FK; it then runs the catalog audit. This is actual
+PostgreSQL validation evidence for migration integrity, clean/idempotent
+migration, cross-domain FK detection, and schema audit—not an unavailable local
+database being treated as a pass.
+
+### CI Evidence
+
+| Required job / check | Status at 87e6f7cb | Gate treatment |
+| --- | --- | --- |
+| Backend | COMPLETED / FAILURE | Blocking; verify failed and build/integration were skipped |
+| Admin | COMPLETED / FAILURE | Blocking; verify passed but E2E failed |
+| Docs | COMPLETED / SUCCESS | Pass |
+| Database | COMPLETED / SUCCESS | Pass; PostgreSQL 18 `test` + `validate` |
+| Mobile | COMPLETED / FAILURE | Deferred / non-blocking by pre-existing workflow policy |
+
+Only Mobile is marked `continue-on-error: true`; this policy predates Closure
+C and is explicitly documented in the workflow as a separate in-progress
+Mobile Foundation gate. No required Backend, Admin, Docs, or Database job was
+made non-blocking for this recheck.
+
+### Final Verdict
+
+**FOUNDATION NOT READY.**
+
+- **P0 = 0**
+- **Blocking P1 = 2**: the failed Admin E2E integration job and the failed
+  Backend Facebook registration race test.
+- **Deferred P2**: Mobile verification failure under the already-declared
+  non-blocking Mobile policy; production providers, observability, and release
+  readiness remain deferred and were not promoted to blockers.
+
+Minimum next repair: make the Admin smoke test deterministic against its intended
+navigation/API boundary, and fix the Backend Facebook registration race rather
+than weakening its invariant. Then rerun the required Foundation workflow on
+the resulting `main` SHA.
