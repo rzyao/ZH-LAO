@@ -437,3 +437,24 @@ a substitute.
 | Blocking P1 | 0 implementation blockers; required CI result pending |
 | Deferred P2 | Mobile remains non-blocking under the pre-existing workflow policy; production providers, observability, and release readiness remain deferred. |
 | Final report SHA | The commit containing this section; recorded with the final remote main baseline after push. |
+
+### Final GitHub Actions decision
+
+The Foundation workflow for the integrated closure baseline
+`a2e8f3184568d7365db3b38ce3fc36f594c2170a` completed successfully as
+[`33836697269`](https://github.com/rzyao/ZH-LAO/actions/runs/33836697269).
+All required jobs are `completed / success`: Backend, Admin, Database, and
+Docs. The independent Database job ran against PostgreSQL 18 and completed
+both `database test` and `database validate`. Mobile is `completed / failure`
+but remains Deferred P2 under its pre-existing `continue-on-error` policy; no
+workflow policy was altered by this closure.
+
+The final report commit contains this decision and is validated by its own
+matching Foundation run. With P0 = 0, Blocking P1 = 0, all four required CI
+jobs passing, and no known data-integrity or authentication/authorization
+blocker, the frozen formula is satisfied.
+
+**FOUNDATION READY.**
+
+Foundation Gate is closed. No additional Foundation recheck is required.
+Feature Development may begin.
