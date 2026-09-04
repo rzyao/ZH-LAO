@@ -387,3 +387,53 @@ between the preceding gate baseline and this recheck baseline.
 **FOUNDATION NOT READY.** The required Admin CI is not PASS, and the Backend
 Gate cannot be closed under the no-retry acceptance condition. No previously
 resolved issue is reopened by this result.
+
+## 23. Foundation Final Closure — 2026-09-04
+
+This is the final, fixed-scope Foundation closure. It evaluates only the
+frozen Gate criteria and does not reopen prior Foundation audit work.
+
+### Final code baseline
+
+| Item | Evidence |
+| --- | --- |
+| Pre-closure remote `main` | `5f0c44be50684cd3f378cd84aac59c956e09b02b` |
+| Admin integration | Gate E commit `151d8224e6a2fb7707dcbf7ada51388a275237d6` was reviewed and cherry-picked as `2b68287`. Its only change is a real navigation assertion: it accepts expandable domain entries, opens `内容管理`, follows `字母管理`, and asserts the actual route/page. It contains no skip/fixme, assertion reduction, fake navigation, RBAC bypass, or CI bypass. |
+| Facebook concurrency decision | **ACCEPTED CONCURRENCY STRATEGY.** `auth_identities` has the frozen `UNIQUE(provider, provider_subject)` constraint. Registration runs in one transaction; a losing insert rolls back the entire transaction, so it cannot leave a user/profile/event orphan. Gate F (`0ce628f`) catches only that constraint conflict, performs bounded select-after-conflict retry, and converges on the canonical identity. The database—not a process-local lock or retry chance—decides uniqueness. |
+| Race coverage | `identity-race.test.ts` retains three truly concurrent same-subject Facebook registrations (`Promise.allSettled`) and asserts exactly one new user plus one canonical identity, profile set, and registration event. |
+
+### Fixed verification set
+
+| Required check | Final treatment |
+| --- | --- |
+| Backend lint, typecheck, unit tests, architecture check, build | PASS locally: manifest check, typecheck, lint/architecture check, 168 unit tests, and build. The database-backed integration suite is exercised by the required CI PostgreSQL service. |
+| Admin typecheck and lint | PASS locally. |
+| Admin Gate E E2E | PASS locally: the `内容管理` expansion and `字母管理` route test passed without a test bypass. Full required Admin CI remains the final authority. |
+| Database test and validate | Required CI authority: PostgreSQL 18 service job. Local validation was not claimed as a pass because no `ADMIN_DATABASE_URL` is available in this worktree. |
+| Docs audit, lifecycle audit, build | PASS locally: metadata `270/0`, authority `274/0`, feature detail `103/0`, state machine `103/0`, and build completed. |
+
+### Required GitHub Actions evidence
+
+The prior main run for `5f0c44b`,
+[`33835414295`](https://github.com/rzyao/ZH-LAO/actions/runs/33835414295), is
+not carried forward as evidence for the integrated Admin change: it completed
+with Backend, Database, and Docs success; Admin failure; and Mobile failure.
+After this section is committed to `main`, the matching Foundation workflow is
+the sole final evidence. Required jobs must each be `completed / success`:
+Backend, Admin, Database, and Docs. `queued`, `in_progress`, `cancelled`, and
+`skipped` are not passes.
+
+### Gate result pending matching CI
+
+At report-commit time, the only formerly blocking implementation issue is
+integrated (Admin) and the retry-based Facebook strategy is accepted under the
+frozen rule. The final verdict is intentionally deferred until the matching
+remote Foundation workflow completes; no local or historical result is used as
+a substitute.
+
+| Item | Status at report commit |
+| --- | --- |
+| P0 | 0 |
+| Blocking P1 | 0 implementation blockers; required CI result pending |
+| Deferred P2 | Mobile remains non-blocking under the pre-existing workflow policy; production providers, observability, and release readiness remain deferred. |
+| Final report SHA | The commit containing this section; recorded with the final remote main baseline after push. |
