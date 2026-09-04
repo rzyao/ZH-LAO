@@ -1,0 +1,77 @@
+# ⚠ BACKFILLED ARTIFACT
+# Reverse-engineered from `apps/backend` on 2026-09-04.
+# This is NOT the original intent of the feature; it is an inferred description based on code inspection.
+schema_version: 3
+feature: "backend"
+created_at: "2026-09-04"
+last_updated: "2026-09-04T00:00:00+08:00"
+feature_mode: "standard"
+backfilled: true
+scope:
+  primary: "backend"
+  paths:
+    - "apps/backend"
+phases:
+  problem_discovery:
+    status: "not_applicable"
+  research:
+    status: "not_applicable"
+  revalidation:
+    status: "not_applicable"
+  bridge:
+    status: "not_applicable"
+  product_spec:
+    status: "completed"
+    digest_path: "product-spec/digest.md"
+  plan:
+    status: "completed"
+    digest_path: "plan/digest.md"
+  tasks:
+    status: "completed"
+    digest_path: "tasks/digest.md"
+  implement:
+    status: "completed"
+    digest_path: "implement/digest.md"
+  verify:
+    status: "completed"
+    digest_path: "verify/digest.md"
+  design_system_harvest:
+    status: "pending"
+  api_docs:
+    status: "pending"
+  migration_plan:
+    status: "pending"
+  pre_impl_review:
+    status: "pending"
+  security_check:
+    status: "pending"
+  code_review:
+    status: "pending"
+  test_plan:
+    status: "pending"
+  test_run:
+    status: "pending"
+  tracking_plan:
+    status: "pending"
+  i18n_harvest:
+    status: "pending"
+  monitoring_setup:
+    status: "pending"
+  experiment_design:
+    status: "pending"
+  release_readiness:
+    status: "pending"
+  retrospective:
+    status: "pending"
+  spec_merge:
+    status: "pending"
+task_log: []
+gates: []
+sync_runs:
+  last_run: ""
+  total_runs: 0
+dependencies:
+  depends_on: []
+  depended_on_by: []
+role_approvals:
+  solo_mode: true

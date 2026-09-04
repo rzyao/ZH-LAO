@@ -6,6 +6,7 @@ const catalog = [
   'platform.feature_flags.read','platform.feature_flags.write','platform.runtime_configs.read','platform.runtime_configs.write',
   'platform.app_versions.read','platform.app_versions.write','platform.announcements.read','platform.announcements.write','platform.regions.read','platform.regions.write',
   'platform.menus.read','platform.menus.write',
+  'content.letters.write','content.letters.review','content.letters.publish',
 ] as const;
 
 export type OperatorPermissionKey = (typeof catalog)[number];

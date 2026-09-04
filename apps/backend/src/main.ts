@@ -16,6 +16,8 @@ import { buildOperationsModule } from './modules/operations/http/composition.js'
 import { OperationsService } from './modules/operations/application/services/index.js';
 import { PostgresOperationsRepository } from './modules/operations/infrastructure/index.js';
 import { ensureDefaultAdmin } from './modules/identity/application/index.js';
+import { PostgresContentRepository } from './modules/content/infrastructure/index.js';
+import { registerContentRoutes } from './modules/content/http/composition.js';
 
 const config=loadConfig();
 const logger=createLogger(config.logLevel);
@@ -50,6 +52,12 @@ if(process.argv[2]==='--operations-bootstrap'){
   await identityModule.registerHttp(app,identityDependencies);
   await ensureDefaultAdmin({transactions:transactionManager,repositories:createIdentityRepositories,bootstrap:(subjectId,displayName)=>operations.service.bootstrap(subjectId,displayName),username:config.identity.adminUsername,password:config.identity.adminPassword});
   await operations.registerHttp(app);
+  await registerContentRoutes(app, {
+    contentRepository: new PostgresContentRepository(executor, transactionManager),
+    authentication: identityDependencies.authentication,
+    authorizer: operations.service,
+    audit: operations.service,
+  });
   const platform=buildPlatformModule({executor,transactionManager});
   await platformModule.registerHttp(app,{executor,featureFlagUseCases:platform.featureFlagUseCases,appVersionUseCases:platform.appVersionUseCases,announcementUseCases:platform.announcementUseCases,regionUseCases:platform.regionUseCases});
   if(platform.managementService)await registerPlatformManagementRoutes(app,{executor,authentication:identityDependencies.authentication,authorizer:operations.service,audit:operations.service,management:platform.managementService,featureFlags:platform.featureFlagUseCases,runtimeConfigs:platform.runtimeConfigUseCases,appVersions:platform.appVersionUseCases,announcements:platform.announcementUseCases,regions:platform.regionUseCases,menuUseCases:platform.menuUseCases});
