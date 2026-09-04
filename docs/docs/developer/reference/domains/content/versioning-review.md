@@ -98,3 +98,17 @@ C 端可见内容 = (未软删除: online_status != 'deleted')
 1. **[UNKNOWN] 批量发布与版本发版快照包机制（Release Bundle）**：当前版本机制为单实体独立发布粒度，新系统需决策是否引入按单元或按课程的「发布版本包（Release Snapshots）」整体发版机制。
 2. **[UNKNOWN] 多分支/多环境草稿协同流**：对于大规模课程重构，当前单工作版本限制（Active Work Guard）是否满足多人协作教研诉求待评估。
 3. **[UNKNOWN] 审核流分级授权矩阵**：初审、复审、终审权限与人员角色（Auditor / Lead / Admin）的细粒度 RBAC 权限矩阵待完善。
+
+## 7. 中老语言类别权限基线
+
+内容管理不预设编辑员、审核员或发布员等固定角色。Operations 角色保持自定义，只登记下列可组合的精确权限能力：
+
+- 每个类别资源均提供 `read`、`write`、`review`、`publish` 四项动作；
+- 中文资源：`zh_pinyin_elements`、`zh_syllables`、`zh_hanzi`、`zh_words`、`zh_sentences`；
+- 老挝语资源：`lo_letters`、`lo_syllables`、`lo_words`、`lo_sentences`；
+- 权限键格式示例：`content.zh_syllables.write`、`content.lo_words.review`；
+- 菜单可见性使用对应 `.read` 权限；后端对每次操作再次执行精确授权；
+- `review` 与 `publish` 始终是独立能力，可授予同一或不同自定义角色；
+- 权限迁移只为既有 `super_admin` 补齐全部新权限，其他角色由运营人员配置。
+
+本节不解决上文未决的多级审核人员数量或会签规则；首期仍采用单实体、单次审核状态流。

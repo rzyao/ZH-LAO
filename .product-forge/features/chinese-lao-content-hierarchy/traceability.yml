@@ -1,0 +1,137 @@
+schema_version: 1
+feature: "chinese-lao-content-hierarchy"
+last_updated: "2026-09-04T22:45:00+08:00"
+rows:
+  - req: null
+    story: "US-001"
+    journeys: ["JRN-001"]
+    frs: ["FR-001", "FR-002", "FR-003", "FR-004", "FR-005", "FR-008"]
+    must_have: true
+    components: ["CMP-AppShell", "CMP-DataTable", "CMP-Button", "CMP-Dialog", "CMP-Input", "CMP-Select", "CMP-StatusBadge"]
+    contracts: ["API-zhPinyinList", "API-zhPinyinDraft", "API-zhSyllableDraft"]
+    tasks: ["T001", "T004", "T006", "T007", "T009", "T010", "T011", "T012", "T014"]
+    code:
+      - "apps/admin/src/features/content/structured/contracts.ts"
+      - "apps/admin/src/features/content/pages/category.tsx"
+      - "apps/backend/src/modules/content/domain/language-structure.ts"
+      - "apps/backend/src/modules/content/http/structured-admin-routes.ts"
+      - "apps/backend/src/modules/content/infrastructure/postgres-structured-content-repository.ts"
+    tests: ["TC-E2E-001", "TC-INT-001"]
+    events: null
+    status: "implemented"
+  - req: null
+    story: "US-002"
+    journeys: ["JRN-002"]
+    frs: ["FR-001", "FR-002", "FR-003", "FR-004", "FR-005", "FR-008"]
+    must_have: true
+    components: ["CMP-AppShell", "CMP-DataTable", "CMP-Button", "CMP-Dialog", "CMP-StatusBadge"]
+    contracts: ["API-zhHanziDraft", "API-zhWordDraft", "API-zhSentenceDraft"]
+    tasks: ["T003", "T004", "T006", "T007", "T009", "T010", "T011", "T012", "T014"]
+    code:
+      - "apps/admin/src/features/content/pages/category.tsx"
+      - "apps/backend/src/modules/content/domain/structured-content.ts"
+      - "apps/backend/src/modules/content/infrastructure/postgres-structured-content-repository.ts"
+      - "database/migrations/1310_content_language_structures.sql"
+    tests: ["TC-E2E-004", "TC-INT-001"]
+    events: null
+    status: "implemented"
+  - req: null
+    story: "US-003"
+    journeys: ["JRN-003"]
+    frs: ["FR-001", "FR-002", "FR-003", "FR-004", "FR-005"]
+    must_have: true
+    components: ["CMP-AppShell", "CMP-DataTable", "CMP-Button", "CMP-Dialog", "CMP-StatusBadge"]
+    contracts: ["API-loLetterDraft", "API-loSyllableDraft"]
+    tasks: ["T002", "T004", "T006", "T007", "T009", "T010", "T011", "T012", "T014"]
+    code:
+      - "apps/admin/src/features/content/structured/contracts.ts"
+      - "apps/admin/src/features/content/pages/category.tsx"
+      - "apps/backend/src/modules/content/domain/language-structure.ts"
+      - "apps/backend/src/modules/content/http/structured-admin-routes.ts"
+    tests: ["TC-E2E-005", "TC-INT-001"]
+    events: null
+    status: "implemented"
+  - req: null
+    story: "US-004"
+    journeys: ["JRN-004"]
+    frs: ["FR-001", "FR-002", "FR-003", "FR-004", "FR-005"]
+    must_have: true
+    components: ["CMP-AppShell", "CMP-DataTable", "CMP-Button", "CMP-Dialog", "CMP-EmptyState", "CMP-ErrorState", "CMP-StatusBadge"]
+    contracts: ["API-loWordDraft", "API-loSentenceDraft"]
+    tasks: ["T004", "T006", "T007", "T009", "T010", "T011", "T012", "T014"]
+    code:
+      - "apps/admin/src/features/content/pages/category.tsx"
+      - "apps/backend/src/modules/content/infrastructure/postgres-structured-content-repository.ts"
+      - "database/migrations/1310_content_language_structures.sql"
+    tests: ["TC-E2E-002", "TC-INT-001"]
+    events: null
+    status: "implemented"
+  - req: null
+    story: "US-005"
+    journeys: ["JRN-005"]
+    frs: ["FR-003", "FR-004", "FR-005", "FR-006", "FR-007"]
+    must_have: true
+    components: ["CMP-DataTable", "CMP-Button", "CMP-Dialog", "CMP-ConfirmDialog", "CMP-StatusBadge"]
+    contracts: ["API-contentReviewQueue", "API-contentReview", "API-contentPublish"]
+    tasks: ["T002", "T006", "T007", "T009", "T010", "T011", "T012", "T014"]
+    code:
+      - "apps/admin/src/features/content/pages/category.tsx"
+      - "apps/admin/src/components/feedback/confirm-dialog.tsx"
+      - "apps/backend/src/modules/content/application/use-cases/manage-structured-content.ts"
+      - "apps/backend/src/modules/content/http/structured-admin-routes.ts"
+      - "apps/backend/src/modules/operations/public/permissions.ts"
+    tests: ["TC-E2E-003", "TC-INT-001"]
+    events: null
+    status: "implemented"
+journeys:
+  - id: "JRN-001"
+    title: "维护中文拼音与中文音节"
+    steps:
+      - {id: "STEP-001", tests: ["TC-E2E-001"]}
+      - {id: "STEP-002", tests: ["TC-E2E-001"]}
+    edges:
+      - {id: "EDGE-001", priority: "P0", tests: ["TC-INT-001"]}
+    tests: ["TC-E2E-001"]
+  - id: "JRN-002"
+    title: "维护中文汉字、词语与句子"
+    steps:
+      - {id: "STEP-003", tests: ["TC-E2E-004"]}
+      - {id: "STEP-004", tests: ["TC-E2E-004"]}
+    edges:
+      - {id: "EDGE-002", priority: "P1", tests: ["TC-INT-001"]}
+    tests: ["TC-E2E-004"]
+  - id: "JRN-003"
+    title: "维护老挝语字母与音节"
+    steps:
+      - {id: "STEP-005", tests: ["TC-E2E-005"]}
+      - {id: "STEP-006", tests: ["TC-E2E-005"]}
+    edges:
+      - {id: "EDGE-003", priority: "P0", tests: ["TC-INT-001"]}
+    tests: ["TC-E2E-005"]
+  - id: "JRN-004"
+    title: "维护老挝语词语与句子"
+    steps:
+      - {id: "STEP-007", tests: ["TC-E2E-002"]}
+      - {id: "STEP-008", tests: ["TC-E2E-002"]}
+    edges:
+      - {id: "EDGE-004", priority: "P2", tests: ["TC-E2E-002"]}
+    tests: ["TC-E2E-002"]
+  - id: "JRN-005"
+    title: "审核并发布内容版本"
+    steps:
+      - {id: "STEP-009", tests: ["TC-E2E-003"]}
+      - {id: "STEP-010", tests: ["TC-E2E-003"]}
+    edges:
+      - {id: "EDGE-005", priority: "P0", tests: ["TC-E2E-003", "TC-INT-001"]}
+    tests: ["TC-E2E-003"]
+dependencies:
+  - pkg: "@axe-core/playwright"
+    version: "4.13.0"
+    ecosystem: "npm"
+    added_by_task: "TC013"
+    registry_exists: true
+    age_days: 1681
+    downloads_last_month: 36125740
+    list: "none"
+    verdict: "pass"
+    confirmed_by_user: false

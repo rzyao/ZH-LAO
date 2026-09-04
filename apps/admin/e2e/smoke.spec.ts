@@ -10,6 +10,28 @@ test.describe('Admin Foundation smoke', () => {
         permissions: ['*.*.*'],
       }))
     })
+    await page.route('**/api/v1/admin/platform/menus**', (route) => route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ code: 'OK', data: { groups: [] }, request_id: '冒烟测试菜单' }),
+    }))
+    await page.route('**/api/v1/admin/operations/me', (route) => route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        code: 'OK',
+        data: {
+          operator: {
+            operator_id: '00000000-0000-4000-8000-000000000001',
+            display_name: 'admin',
+            status: 'active',
+            roles: [{ role_id: '00000000-0000-4000-8000-000000000002', code: 'super_admin', name: '超级管理员' }],
+            permissions: ['*.*.*'],
+          },
+        },
+        request_id: '冒烟测试权限刷新',
+      }),
+    }))
     await page.goto('/')
   }
 
@@ -24,33 +46,48 @@ test.describe('Admin Foundation smoke', () => {
   test('all 11 domain entries are present in the sidebar', async ({ page }) => {
     await login(page)
     const sidebar = page.getByTestId('sidebar')
-    const labels = [
-      '内容管理', '学习系统', '音频生产', '身份认证', '社交关系', '实时聊天',
-      '交易商城', '奖励中心', '信任与风控', '运营权限', '平台控制台',
+    const directories = [
+      ['学习与内容', ['内容管理', '学习系统', '音频生产']],
+      ['用户与社交', ['身份认证', '社交关系', '实时聊天']],
+      ['商业与财务', ['交易商城', '奖励中心']],
+      ['安全治理', ['信任与风控']],
+      ['系统运维', ['运营权限', '平台控制台']],
     ]
-    // ADR-022 配置驱动导航:带子级的一级项(内容管理/运营权限/平台控制台)以可展开按钮呈现,
-    // 其余一级项以链接呈现;全部 11 个域入口都必须可见。
-    for (const label of labels) {
-      const entry = sidebar
-        .getByRole('link', { name: label, exact: true })
-        .or(sidebar.getByRole('button', { name: label, exact: true }))
-      await expect(entry).toBeVisible()
+    for (const [directory, labels] of directories) {
+      await sidebar.getByRole('button', { name: directory as string, exact: true }).click()
+      for (const label of labels as string[]) {
+        await expect(sidebar.getByRole('link', { name: label, exact: true })).toBeVisible()
+      }
     }
   })
 
-  test('内容管理 entry expands to the content modules', async ({ page }) => {
+  test('内容管理入口展开中老两种语言的类别导航', async ({ page }) => {
     await login(page)
-    const contentEntry = page.getByRole('button', { name: '内容管理', exact: true })
+    await page.getByRole('button', { name: '学习与内容', exact: true }).click()
+    const contentEntry = page.getByRole('link', { name: '内容管理', exact: true })
+    await expect(contentEntry).toHaveAttribute('aria-expanded', 'false')
+    await expect(page.getByText('中文内容', { exact: true })).not.toBeVisible()
     await contentEntry.click()
+    await expect(page).toHaveURL(/\/content$/)
+    await expect(contentEntry).toHaveAttribute('aria-expanded', 'true')
+    await page.getByRole('button', { name: '收起 内容管理', exact: true }).click()
+    await expect(contentEntry).toHaveAttribute('aria-expanded', 'false')
+    await contentEntry.click()
+    await expect(contentEntry).toHaveAttribute('aria-expanded', 'true')
+    const chineseEntry = page.getByRole('button', { name: '中文内容', exact: true })
+    const laoEntry = page.getByRole('button', { name: '老挝语内容', exact: true })
+    await expect(chineseEntry).toBeVisible()
+    await expect(laoEntry).toBeVisible()
+    await laoEntry.click()
     const letters = page.getByRole('link', { name: '字母管理', exact: true })
     await expect(letters).toBeVisible()
     await letters.click()
-    await expect(page).toHaveURL(/\/content\/letters$/)
-    await expect(page.getByRole('heading', { name: /老挝语字母管理/ })).toBeVisible()
+    await expect(page).toHaveURL(/\/content\/lo\/letters$/)
   })
 
   test('navigation works to a domain placeholder', async ({ page }) => {
     await login(page)
+    await page.getByRole('button', { name: '学习与内容', exact: true }).click()
     await page.getByRole('link', { name: '学习系统' }).click()
     await expect(page.getByText('学习系统 — 即将上线')).toBeVisible()
     await expect(page).toHaveURL(/\/learning$/)
@@ -61,6 +98,8 @@ test.describe('Admin Foundation smoke', () => {
     await page.goto('/platform')
     await expect(page.getByRole('heading', { name: '平台控制台' })).toBeVisible()
     await expect(page.getByText('平台控制台 Stage A')).toBeVisible()
+    await page.getByRole('button', { name: '系统运维', exact: true }).click()
+    await page.getByRole('button', { name: '展开 平台控制台', exact: true }).click()
     await expect(page.getByRole('link', { name: /功能开关/ })).toBeVisible()
     await expect(page.getByRole('link', { name: /运行时配置/ })).toBeVisible()
     await expect(page.getByRole('link', { name: /客户端版本/ })).toBeVisible()

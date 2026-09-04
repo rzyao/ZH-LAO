@@ -38,7 +38,7 @@
 
 **Constraints**:
 - 不新增任何未授权数据库物理表或字段，严格映射现有的 `0400_content.sql`、`0600_audio.sql` 与 `1240_content_revision.sql`。
-- 符号类字符（`symbol`）强制锁定 `no_audio = true`，绝对禁止向 Audio 域创建发音槽位。
+- `tone_mark` 与 `other` 强制锁定 `no_audio = true`，绝对禁止向 Audio 域创建发音槽位。
 - C 端可见性守卫严密过滤草稿、待审与已下线内容。
 
 ---
@@ -69,7 +69,7 @@
 |---|---|---|
 | 统一使用公开 `public_id` 作为外部通信 UUID | `0400_content.sql`, ADR-004 | 隐藏内部 `bigint` 主键，防止跨域物理强耦合 |
 | 存量 68 项字符统一纳管于 `LaoCharacter` | `alphabet-decisions.md` (A1) | 建立统一内容底座，保证音节与词汇正字法校验完整性 |
-| 符号类（`symbol`）强制 `no_audio = true` 且 IPA 为 `-` | `alphabet-decisions.md` (A1), `audio-binding.md` | 杜绝向无发音符号派发无意义的录音/TTS 工单 |
+| `tone_mark` 与 `other` 强制 `no_audio = true` 且 IPA 为 `-` | `alphabet-decisions.md` (A1), `audio-binding.md` | 杜绝向无发音符号派发无意义的录音/TTS 工单 |
 | 组内展示排序通过独立 `sort_order` 维护 | `alphabet-decisions.md` (A2) | 解耦教学展示推进次序与字符本体/语言学分类 |
 | 不可变版本修订模型（禁止原地修改已发布内容） | `1240_content_revision.sql`, ADR-003/006 | 保证历史教学快照与对外引用的一致性与可追溯性 |
 | Active Work Guard 守卫（单条目同一时刻唯一活动工作版本） | `versioning-review.md` §1.1 | 防止并发编辑产生版本分叉与脏覆盖 |

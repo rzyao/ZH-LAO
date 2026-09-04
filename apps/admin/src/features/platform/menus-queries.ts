@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { menusApi, type MenuCreateInput, type MenuUpdateInput } from './menus-api'
+import { menusApi, type MenuCreateInput, type MenuMoveInput, type MenuUpdateInput } from './menus-api'
 import type { MenuTreeNode } from '@/navigation/types'
 
 export const menusQueryKeys = {
@@ -20,6 +20,11 @@ export function useMenusQuery(options?: UseMenusQueryOptions) {
     queryKey: menusQueryKeys.root,
     queryFn: ({ signal }) => menusApi.listMenus(signal),
     enabled: options?.enabled,
+    // 菜单决定页面是否可达，进入后台和重新聚焦时都读取最新配置，
+    // 避免数据库迁移或后台改菜单后仍显示会话中的旧导航。
+    staleTime: 0,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
   })
 }
 
@@ -60,6 +65,14 @@ export function useReorderMenus() {
   return useMutation({
     mutationFn: (input: { parentId: number; order: readonly number[]; expected_updated_at?: string }) =>
       menusApi.reorderMenus(input.parentId, input.order, input.expected_updated_at),
+    onSuccess: () => invalidateMenus(queryClient),
+  })
+}
+
+export function useMoveMenu() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (input: { id: number } & MenuMoveInput) => menusApi.moveMenu(input.id, input),
     onSuccess: () => invalidateMenus(queryClient),
   })
 }

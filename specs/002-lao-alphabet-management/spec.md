@@ -14,7 +14,7 @@
 
 ### User Story 1 - 内容管理员创建与维护 LaoCharacter (Priority: P1)
 
-作为一名教研内容管理员，我希望在管理控制台中录入和维护老挝文字母（辅音、元音、符号），精确指定 Unicode 字符、分类体系、IPA 音标、展示排序并配置发音属性，以便为老挝语教学建立标准、权威的基础字符库。
+作为一名教研内容管理员，我希望在管理控制台中录入和维护老挝文字母（辅音、元音、声调符号及其他正字法标记），精确指定 Unicode 字符、分类体系、IPA 音标、展示排序并配置发音属性，以便为老挝语教学建立标准、权威的基础字符库。
 
 **Why this priority**: 字母（`LaoCharacter`）是老挝语内容体系的最底层叶子节点，音节、词汇与课程均严格构建于其上。没有完整的字母元数据与录入维护能力，后续音节拼读、正字法校验与课程体系均无法启动。
 
@@ -23,7 +23,7 @@
 **Acceptance Scenarios**:
 
 1. **Given** 管理员录入一个新的老挝语辅音（如 `ກ`），**When** 提交大类 `consonant`、子分类 `cons_middle`、IPA 音标 `/k/`、发音说明与组内排序号 `sort_order = 1`，**Then** 系统创建 `LaoCharacter` 实体及首个 `Draft` 修订版本，发音属性标记为 `no_audio = false`，并自动按白名单策略初始化 `lo/pronunciation` 单发音槽位。
-2. **Given** 管理员录入一个声调符号或特殊符号（如声调符 `່` 或连字符 `ຼ`），**When** 提交大类 `symbol`、对应子类（如 `symbol_tone` / `symbol_ligature`）且 IPA 标记为 `-`，**Then** 系统创建 `LaoCharacter` 实体，发音属性强制设为 `no_audio = true`，且不创建音频生产槽位。
+2. **Given** 管理员录入一个声调符号或其他正字法标记（如声调符 `່` 或连字符 `ຼ`），**When** 提交大类 `tone_mark` 或 `other`、对应子类（如 `symbol_tone` / `symbol_ligature`）且 IPA 标记为 `-`，**Then** 系统创建 `LaoCharacter` 实体，发音属性强制设为 `no_audio = true`，且不创建音频生产槽位。
 3. **Given** 已经存在已发布字母，**When** 管理员需要修改其教学说明或组内展示排序号 `sort_order`，**Then** 系统在 Active Work Guard 守卫下基于当前已发布版本克隆派生一个新的 `Draft` 工作版本，原发布版本保持线上稳定。
 
 ---
@@ -46,7 +46,7 @@
 
 ### User Story 3 - 学习者查看已发布字母学习库 (Priority: P3)
 
-作为一名老挝语学习者，我希望在客户端查阅标准字母表，按辅音、元音、符号结构化浏览字母、音标、分类及播放标准真人发音，以便掌握老挝语基础字母发音与拼写。
+作为一名老挝语学习者，我希望在客户端查阅标准字母表，按辅音、元音、声调符号及其他标记结构化浏览字母、音标、分类及播放标准真人发音，以便掌握老挝语基础字母发音与拼写。
 
 **Why this priority**: C 端学习者消费是字母内容生产的最终价值体现，必须在严格的多重可见性守卫过滤下提供标准字典序的字母列表与发音播放。
 
@@ -54,7 +54,7 @@
 
 **Acceptance Scenarios**:
 
-1. **Given** 客户端请求老挝语字母表，**When** 执行数据查询，**Then** 系统应用 C 端多重可见性守卫，按分类结构（辅音 27 项、元音 30 项、符号组）及 `sort_order` 升序返回已正式发布的字符列表，任何 `Draft`、`Pending Review` 或 `offline` 字符均被完全过滤。
+1. **Given** 客户端请求老挝语字母表，**When** 执行数据查询，**Then** 系统应用 C 端多重可见性守卫，按分类结构（29 `consonant`、31 `vowel`、4 `tone_mark`、4 `other`）及 `sort_order` 升序返回已正式发布的字符列表，任何 `Draft`、`Pending Review` 或 `offline` 字符均被完全过滤。
 2. **Given** 学习者点击某个已发布辅音（如 `ກ`）试听发音，**When** 请求发音详情，**Then** 仅当该条目 `no_audio == false` 且正式音频资产处于 `valid` 且 `approved` 状态时，返回有效流媒体音频播放地址；对于符号类条目（`no_audio == true`）明确返回无音频标记。
 
 ---
@@ -79,13 +79,13 @@
 ### Functional Requirements
 
 - **FR-001 (Unicode 唯一字符)**: 系统必须支持录入原生老挝文字符，存储与唯一性校验必须遵循 Unicode 码点级精确匹配（`utf8mb4_bin` 规则），禁止忽略声调、变音符或空格进行模糊匹配，全局唯一约束字母本体。
-- **FR-002 (字母大分类体系)**: 系统必须支持三大核心大分类的管理：辅音（`consonant`）、元音（`vowel`）、符号（`symbol`），分类一经确定在同一生命周期内不可随意跨大类变更。
+- **FR-002 (字母大分类体系)**: 系统必须支持冻结物理大分类的管理：辅音（`consonant`）、元音（`vowel`）、声调符号（`tone_mark`）与其他正字法标记（`other`），分类一经确定在同一生命周期内不可随意跨大类变更。
 - **FR-003 (子分类细化管理)**: 系统必须支持基于正字法与声调特征的子分类（`subtype`）管理：
   - 辅音细分：中音组辅音（`cons_middle`）、高音组辅音（`cons_high`）、低音组辅音（`cons_low`）；
   - 元音细分：短元音（`vowel_short`）、长元音（`vowel_long`）；
-  - 符号细分：声调符号（`symbol_tone`）、连字符/复合符号（`symbol_ligature`）、重复符号（`symbol_repeat`）、特殊符号（`symbol_special`）、其他标记（`symbol_other`）。
+  - 声调/其他标记细分：声调符号（`symbol_tone`）、连字符/复合符号（`symbol_ligature`）、重复符号（`symbol_repeat`）、特殊符号（`symbol_special`）、其他标记（`symbol_other`）。
 - **FR-004 (IPA 音标与描述维护)**: 系统必须支持维护国际音标（IPA）转写及语言学/教学描述信息；声调符号及无独立发音符号的音标必须标准标记为 `-`。
-- **FR-005 (no_audio 符号发音规则)**: 系统必须强制实施发音属性门禁：所有 `consonant` 与 `vowel` 分类条目默认 `no_audio = false`；所有 `symbol` 分类条目强制锁定 `no_audio = true`，禁止向符号类实体分派独立音频录制任务。
+- **FR-005 (no_audio 非发音标记规则)**: 系统必须强制实施发音属性门禁：所有 `consonant` 与 `vowel` 分类条目默认 `no_audio = false`；所有 `tone_mark` 与 `other` 条目强制锁定 `no_audio = true`，禁止分派独立音频录制任务。
 - **FR-006 (sort_order 展示与学习序)**: 系统必须支持为每个字母配置独立的组内整型排序字段 `sort_order`，支持教研团队在不破坏 Unicode 码点与语言学结构的前提下灵活调整展示和推荐学习推进顺序。
 - **FR-007 (Audio Slot 策略与哈希联动)**: 系统必须为 `no_audio = false` 的字母自动分配且仅分配 1 个老挝语发音槽位（`lo/pronunciation`）；基于字符本体与 IPA 音标计算 SHA-256 输入哈希（`audio_input_hash`），在发音要素变更时自动联动将历史音频置为陈旧（`stale`）。
 - **FR-008 (不可变修订版本与审核发布生命周期)**: 系统必须为 `LaoCharacter` 实施不可变版本模型（`LaoCharacterRevision`），严格支持 `Draft` $\to$ `Pending Review` $\to$ `Approved` $\to$ `Published` $\to$ `Superseded` 状态机；支持驳回（`Rejected`）；已发布版本严禁原地修改，修改必须克隆派生新 Working Revision，并遵循 Active Work Guard 守卫。
@@ -96,7 +96,7 @@
 ### Key Entities
 
 - **LaoCharacter (字母主实体)**:
-  - 核心属性：`id`（业务唯一标识）、`unicode_char`（老挝文原生字符）、`classification`（大类：consonant/vowel/symbol）、`subtype`（子分类）、`sort_order`（组内排序序号）、`no_audio`（无音频标志）、`online_status`（上线状态：online/offline/deleted）、`published_revision_id`（当前正式发布修订指针）、`working_revision_id`（当前活动工作版本指针）。
+  - 核心属性：`id`（业务唯一标识）、`unicode_char`（老挝文原生字符）、`classification`（大类：consonant/vowel/tone_mark/other）、`subtype`（子分类）、`sort_order`（组内排序序号）、`no_audio`（无音频标志）、`online_status`（上线状态：online/offline/deleted）、`published_revision_id`（当前正式发布修订指针）、`working_revision_id`（当前活动工作版本指针）。
 - **LaoCharacterRevision (字母不可变修订版本)**:
   - 核心属性：`id`、`character_id`、`revision_no`（版本号，单调自增）、`unicode_char`、`ipa_phonetic`（IPA 音标）、`description`（教学说明）、`audio_input_hash`（发音输入 SHA-256 哈希）、`review_status`（审核状态：draft/pending_review/approved/published/rejected/superseded）、`review_remark`（审核意见）、`lock_version`（乐观锁版本号）、`created_by`、`reviewed_by`。
 
@@ -146,7 +146,7 @@
 - **Path**: `docs/docs/developer/reference/domains/content/decisions/alphabet-decisions.md`
 - **Kind**: `markdown`
 - **Symbol**: `Decision A1`, `Decision A2`, `RULE-ALPHA-01` ~ `RULE-ALPHA-04`
-- **Notes**: 约束 68 项字符纳管范围、符号类 `no_audio = true` 强制策略及 `sort_order` 解耦规则。
+- **Notes**: 约束 68 项字符纳管范围、`tone_mark` / `other` 的 `no_audio = true` 强制策略及 `sort_order` 解耦规则。
 
 ### Contract: Content Versioning & Review State Machine
 - **Path**: `docs/docs/developer/reference/domains/content/versioning-review.md`
@@ -186,7 +186,7 @@
 - **SC-002 (草稿零泄露)**: 0% 的未发布数据（`Draft` / `Pending Review` / `Rejected` / `offline`）能够穿透 C 端接口被学习者感知。
 - **SC-003 (Unicode 冲突 100% 拦截)**: 录入重复 Unicode 老挝文字符时的系统拦截成功率达到 100%，杜绝同码点重复数据建档。
 - **SC-004 (不可变性保证)**: 对已发布的历史版本执行直接写操作的拦截率为 100%，版本修改必须 100% 通过克隆派生工作版本完成。
-- **SC-005 (音频白名单合规率)**: 符号类字符（`symbol`）拥有发音槽位的数量严格为 0；辅音/元音字符拥有的发音槽位数量严格为 1。
+- **SC-005 (音频白名单合规率)**: `tone_mark` 与 `other` 字符拥有发音槽位的数量严格为 0；辅音/元音字符拥有的发音槽位数量严格为 1。
 - **SC-006 (陈旧音频拦截率)**: 文本/IPA 发生变更后，旧音频资产的陈旧标记（`stale`）置位与 C 端音频屏蔽生效准确率达到 100%。
 
 ---

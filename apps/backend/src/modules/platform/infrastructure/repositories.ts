@@ -989,6 +989,7 @@ export class PostgresMenuRepository implements MenuRepository {
     id: MenuInternalId,
     input: Readonly<{
       label?: string;
+      parentId?: MenuInternalId | null;
       routeKey?: string | null;
       icon?: string | null;
       sortOrder?: number;
@@ -1001,6 +1002,10 @@ export class PostgresMenuRepository implements MenuRepository {
     if (input.label !== undefined) {
       updates.push(`label = $${idx++}`);
       params.push(input.label);
+    }
+    if (input.parentId !== undefined) {
+      updates.push(`parent_id = $${idx++}`);
+      params.push(input.parentId);
     }
     if (input.routeKey !== undefined) {
       updates.push(`route_key = $${idx++}`);

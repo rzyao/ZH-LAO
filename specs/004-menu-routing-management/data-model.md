@@ -23,7 +23,7 @@
 │ id            bigint identity  (PK)                            │
 │ parent_id     bigint NULL      (自引用 FK → menus.id, RESTRICT) │
 │ label         varchar(120) NOT NULL (btrim <> '')              │
-│ route_key     varchar(100) NULL  (分组可空;非分组 NOT NULL)     │
+│ route_key     varchar(100) NULL  (无路由节点为目录)             │
 │ icon          varchar(64)  NULL  (lucide key)                  │
 │ sort_order    integer NOT NULL DEFAULT 0                       │
 │ status        varchar(16) NOT NULL DEFAULT 'active'            │
@@ -31,7 +31,7 @@
 │ created_at    timestamptz NOT NULL DEFAULT now()               │
 │ updated_at    timestamptz NOT NULL DEFAULT now()               │
 └───────────────────────────────┬────────────────────────────────┘
-                                │ 1:N  (自引用: 分组 → 一级项 → 子项)
+                                │ 1:N  (统一节点自引用，可自由嵌套)
                                 │
 ┌───────────────────────────────┴────────────────────────────────┐
 │                   platform.menu_permissions                     │
@@ -58,9 +58,9 @@
 | 字段 | 类型 | NULL | 默认 | 说明 |
 | --- | --- | --- | --- | --- |
 | `id` | `bigint generated always as identity` | NO | — | 内部 PK,不对外暴露 |
-| `parent_id` | `bigint` | YES | — | 自引用父项;NULL=顶层分组。域内 FK → `menus(id)` `ON DELETE RESTRICT` |
+| `parent_id` | `bigint` | YES | — | 自引用父项;NULL=顶层节点。域内 FK → `menus(id)` `ON DELETE RESTRICT` |
 | `label` | `varchar(120)` | NO | — | 显示名称;`CHECK (btrim(label) <> '')` |
-| `route_key` | `varchar(100)` | 分组可空 | — | 稳定路由目标标识(FR-015);非分组 NOT NULL(应用层校验「parent_id 非空则 route_key 非空」) |
+| `route_key` | `varchar(100)` | YES | — | 稳定路由目标标识(FR-015);与节点位置无关，可为空（无路由节点为容器），带路由节点也可有子项。<!-- CR-001 --> |
 | `icon` | `varchar(64)` | YES | — | lucide-react 图标 key(如 `layout_dashboard`),前端 registry 映射 |
 | `sort_order` | `integer` | NO | `0` | 同层排序键;次级键 `id` 保证确定性(无跨父级唯一约束) |
 | `status` | `varchar(16)` | NO | `'active'` | `CHECK (status IN ('active','disabled','removed'))`;状态转移合法性由 use-case 保证 |
@@ -68,12 +68,13 @@
 | `updated_at` | `timestamptz` | NO | `now()` | 最后更新时间;乐观并发 `expected_updated_at` 依据 |
 
 - **Lifecycle & Constraints**:
-  - 层级: 顶层分组(`parent_id IS NULL`)→ 一级项 → 子项,最大 3 层;深度由应用层
-    use-case 沿祖先链校验,DB 不约束任意深度。
+  - 层级：`parent_id IS NULL` 仅表示根节点。任一未移除节点均可作为父项，且可同时带路由和
+    子项。应用层不设业务深度上限，拒绝自环、后代环和已移除父项；DB 使用邻接表。<!-- CR-004 -->
   - 删除 = `status = 'removed'`(终态,永不物理 DELETE);删除含子项的父项时级联
     置子项为 `removed`。
   - `removed` 语义与 feature_flags `retired` 不同:菜单删除后允许重建同 route_key 新项。
-  - 并发: 编辑/删除/排序请求带 `expected_updated_at`,不匹配 → 409 `PLATFORM_CONFLICT`
+  - 并发: 编辑/删除/排序请求带 `expected_updated_at`,不匹配 → 409 `PLATFORM_CONFLICT`；
+    移动同时校验节点、源层和目标层快照。<!-- CR-001 -->
     (对齐 runtime_configs / app_versions 先例)。
   - 排序: 同层连续 `0..n-1` 下标,整体提交;数据库不依赖唯一性。
 

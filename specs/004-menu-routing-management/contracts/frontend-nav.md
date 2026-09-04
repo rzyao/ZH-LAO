@@ -10,7 +10,7 @@
 ```text
 apps/admin/src/
 ├── navigation/
-│   ├── config.tsx            # 改造: 保留 NAV_GROUPS/SECONDARY_NAV 作为内置 FALLBACK_NAV
+│   ├── config.tsx            # 统一递归 NAV_ITEMS，作为内置安全回退树
 │   ├── route-registry.ts     # 新增: ADMIN_ROUTE_TARGETS(白名单单一事实源)
 │   ├── use-nav-config.ts     # 新增: useNavConfig() hook (fetch + fallback + 权限过滤)
 │   └── types.ts              # 新增(或并入 config): NavNode / RouteTarget 类型
@@ -52,29 +52,32 @@ export function useNavConfig() {
 }
 ```
 
-- **fetch 失败/空树 → `FALLBACK_NAV`**(内置 `NAV_GROUPS`/`SECONDARY_NAV`),绝不白屏。
-- **成功 → `normalizeToNav()`**: 后端嵌套树映射为内部 `NavGroup/NavItem[]`,
-  每个项用 `can()` 过滤(OR 语义: 任一 `permission_key` 命中保留;空列表保留)。
+- **fetch 失败/空树 → `NAV_ITEMS` 安全回退树**，绝不白屏。
+- **成功 → `normalizeToNav()`**：后端嵌套树递归映射为内部 `NavItem[]`。所有节点使用同一
+  类型，`href` 可选，`children` 可递归；每个节点用 `can()` 过滤（多权限 OR）。<!-- CR-004 -->
 - **最小导航(FR-012)**: 空树时 fallback 渲染 总览 `/` + 退出登录 + 「菜单管理」
   入口(若有 `platform.menus.read`)—— 硬编码 `/platform/menus`,防止「配置清空 →
   进不去管理页 → 无法重建」死锁。
 
 ## 3. Sidebar 改造
 
-- `Sidebar` 消费 `useNavConfig()` 的 `nav`,替换对 `NAV_GROUPS`/`SECONDARY_NAV` 的直接引用。
+- `Sidebar` 消费 `useNavConfig()` 的递归 `nav`，不再包含分组适配层。
 - `isActive(pathname, href)` 前缀匹配逻辑**保留不动**(与数据来源无关)。
 - `findNavItemByHref` / `allNavItems` 改造为基于当前 `nav`(成功时)/`FALLBACK_NAV`(失败时)
   的统一读取;`breadcrumb.tsx` 复用同一来源。
-- `NavItem` 接口扩展: `routeKey`、`permissions?: string[]`、`iconKey`。
+- `NavItem` 接口包含可选 `href`、递归 `children`、`routeKey`、`permissions` 和图标。
 - 图标渲染: `ICON_REGISTRY[iconKey] ?? FallbackIcon` 容错(未知 icon 不崩溃)。
+- 每层目录默认收起并使用与页面相同的正常导航字号；带路由且含子项的节点点击链接行时同时
+  跳转和伸缩，并暴露 `aria-expanded`；箭头只伸缩、不跳转。链接与箭头共用整行选中容器，
+  激活背景和左侧高亮边不得断开。面包屑递归查找完整祖先路径。<!-- CR-005 -->
 
 ## 4. 菜单管理页 `/platform/menus`
 
 - 页面文件 `apps/admin/src/features/platform/pages/menus.tsx`。
 - 路由注册: `/platform/menus`(加入 `router.tsx` 与 `route-registry.ts`)。
 - 功能:
-  - 树形展示全部菜单项(分组/一级/子项 + 状态 + 顺序)。
-  - 创建/编辑/删除(移除)/拖拽重排。
+  - 树形展示全部菜单项（任一节点可带路由和子项）+ 状态 + 顺序。
+  - 创建/编辑/删除（移除）/拖拽重排与跨层移动；任意层级都可继续新建子项，不设业务深度上限。<!-- CR-004 -->
   - 「目标路由」下拉框 = `ADMIN_ROUTE_TARGETS`。
   - 可见性权限多选(从可用的权限集合选择,OR 语义)。
   - 写操作带 `expected_updated_at`;`409` 冲突复用现有 `isConflictError`/`mutationErrorMessage`。
@@ -91,6 +94,7 @@ export const useCreateMenu = () => useMutation({ mutationFn: createMenu, onSucce
 export const useUpdateMenu = () => useMutation({ mutationFn: updateMenu, onSuccess: invalidateMenus })
 export const useRemoveMenu = () => useMutation({ mutationFn: removeMenu, onSuccess: invalidateMenus })
 export const useReorderMenus = () => useMutation({ mutationFn: reorderMenus, onSuccess: invalidateMenus })
+export const useMoveMenu = () => useMutation({ mutationFn: moveMenu, onSuccess: invalidateMenus })
 ```
 
 ## 权限与安全

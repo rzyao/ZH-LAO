@@ -3,7 +3,7 @@ import { httpClient } from '../../../api/client/httpClient';
 export interface PublishedCharacter {
   id: string;
   unicodeChar: string;
-  classification: 'consonant' | 'vowel' | 'symbol';
+  classification: 'consonant' | 'vowel' | 'tone_mark' | 'other';
   subtype: string;
   ipaPhonetic: string;
   name: string;

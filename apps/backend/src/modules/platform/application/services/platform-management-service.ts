@@ -19,6 +19,7 @@ import type {
   AppVersionUseCases,
   FeatureFlagUseCases,
   MenuCreateInput,
+  MenuMoveInput,
   MenuReorderInput,
   MenuUpdateInput,
   MenuUseCases,
@@ -275,5 +276,9 @@ export class PlatformManagementService {
     return this.transactionManager.run(async (tx: DatabaseExecutor) => {
       return this.menuUseCases.reorder(tx, parentId, input);
     });
+  }
+
+  async moveMenu(id: MenuInternalId, input: MenuMoveInput): Promise<MenuItem> {
+    return this.transactionManager.run(async (tx: DatabaseExecutor) => this.menuUseCases.move(tx, id, input));
   }
 }

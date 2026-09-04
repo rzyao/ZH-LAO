@@ -1,0 +1,186 @@
+schema_version: 3
+feature: "chinese-lao-content-hierarchy"
+created_at: "2026-09-04"
+last_updated: "2026-09-04T22:52:16+08:00"
+feature_mode: "standard"
+config_override:
+  flow_mode: "fluid"
+scope:
+  primary: "按照已确认的组成层级管理中文与老挝语规范语言知识"
+  paths:
+    - "docs/docs/developer/reference/domains/content"
+    - "database"
+    - "apps/backend/src/modules/content"
+    - "apps/admin/src/features/content"
+    - "apps/mobile/src/features"
+phases:
+  problem_discovery:
+    status: "not_applicable"
+  research:
+    status: "completed"
+    digest_path: "research/digest.md"
+  product_spec:
+    status: "completed"
+    digest_path: "product-spec/digest.md"
+  revalidation:
+    status: "approved"
+  bridge:
+    status: "completed"
+  i18n_harvest:
+    status: "pending"
+  design_system_harvest:
+    status: "completed"
+    digest_path: "design-system/manifest.md"
+  plan:
+    status: "completed"
+    digest_path: "plan/digest.md"
+  tasks:
+    status: "completed"
+    digest_path: "tasks/digest.md"
+  migration_plan:
+    status: "pending"
+  pre_impl_review:
+    status: "pending"
+  implement:
+    status: "completed"
+    digest_path: "implement/digest.md"
+    red_gate:
+      status: "confirmed_failing"
+      tests:
+        - "TC005"
+        - "TC013"
+      skip_reason: null
+  code_review:
+    status: "pending"
+  verify:
+    status: "completed"
+    digest_path: "verify/digest.md"
+  test_plan:
+    status: "pending"
+  test_run:
+    status: "pending"
+  release_readiness:
+    status: "pending"
+  monitoring_setup:
+    status: "pending"
+  experiment_design:
+    status: "pending"
+  spec_merge:
+    status: "pending"
+task_log:
+  - task_id: "TC005"
+    size: "M"
+    status: "completed"
+    paths:
+      - "apps/backend/test/modules/content/language-structure.test.ts"
+      - "apps/backend/test/integration/content-http.test.ts"
+  - task_id: "T006"
+    size: "XL"
+    status: "completed"
+    paths:
+      - "apps/backend/src/modules/content/domain"
+      - "apps/backend/src/modules/content/application"
+      - "apps/backend/src/modules/content/infrastructure"
+  - task_id: "T007"
+    size: "L"
+    status: "completed"
+    paths:
+      - "apps/backend/src/modules/content/http"
+      - "apps/backend/src/modules/operations/public/permissions.ts"
+  - task_id: "T010"
+    size: "XL"
+    status: "completed"
+    paths:
+      - "apps/admin/src/features/content/pages/category.tsx"
+      - "apps/admin/src/features/content/structured"
+  - task_id: "T011"
+    size: "L"
+    status: "completed"
+    paths:
+      - "apps/admin/e2e/content-management.spec.ts"
+      - "apps/backend/test/integration/content-http.test.ts"
+  - task_id: "T012"
+    size: "L"
+    status: "completed"
+    paths:
+      - "apps/admin/src/features/content/pages/category.tsx"
+      - "apps/admin/e2e/content-management.spec.ts"
+  - task_id: "TC013"
+    size: "L"
+    status: "completed"
+    paths:
+      - "apps/admin/e2e/content-management.spec.ts"
+      - "apps/admin/package.json"
+      - "apps/admin/pnpm-lock.yaml"
+  - task_id: "T014"
+    size: "M"
+    status: "completed"
+    paths:
+      - ".product-forge/features/chinese-lao-content-hierarchy/traceability.yml"
+      - ".product-forge/features/chinese-lao-content-hierarchy/product-spec"
+gates:
+  - phase: "research"
+    decision: "approved"
+    timestamp: "2026-09-04T15:42:24+08:00"
+    notes: "研究已批准；仅语言结构表必须分离，Content 身份与版本基础设施可以共享。"
+    conditions: []
+    sync_result: "clean"
+    skip_reason: null
+    rolled_back_to: null
+    reviewed_sha: "04d988db67babef9cce9c481ce606b5ce2fbae61"
+    risk: "low"
+    reviewed_by_model: null
+    cross_model_findings: 0
+  - phase: "product_spec"
+    decision: "approved"
+    timestamp: "2026-09-04T15:42:24+08:00"
+    notes: "用户已批准包含 12 个侧边栏路由和 5 条旅程的大型产品规格。"
+    conditions: []
+    sync_result: "2_high_open"
+    skip_reason: null
+    rolled_back_to: null
+    reviewed_sha: "04d988db67babef9cce9c481ce606b5ce2fbae61"
+    risk: "medium"
+    reviewed_by_model: null
+    cross_model_findings: 0
+  - phase: "revalidation"
+    decision: "approved"
+    timestamp: "2026-09-04T15:42:24+08:00"
+    notes: "用户已锁定产品规格；未解决的中文音节模型和权限矩阵继续作为明确实施阻塞项。"
+    conditions: []
+    sync_result: "2_high_open"
+    skip_reason: null
+    rolled_back_to: null
+    reviewed_sha: "04d988db67babef9cce9c481ce606b5ce2fbae61"
+    risk: "medium"
+    reviewed_by_model: null
+    cross_model_findings: 0
+change_requests:
+  - id: "CR-001"
+    title: "不做旧版兼容"
+    status: "accepted"
+    timestamp: "2026-09-04T21:47:59+08:00"
+    artifacts_affected: 9
+    tasks_added: 0
+    phase_rollback: null
+sync_runs:
+  last_run: "2026-09-04T22:52:16+08:00"
+  total_runs: 4
+  last_drift_count: 0
+  last_critical_count: 0
+  last_verdict: "CONSISTENT"
+dependencies:
+  depends_on: []
+  depended_on_by: []
+role_approvals:
+  solo_mode: true
+research_dimensions:
+  competitors: "completed"
+  ux_patterns: "completed"
+  codebase: "completed"
+  tech_stack: "not_applicable"
+  metrics_roi: "not_applicable"
+input_richness_score: 5
+speckit_mode: "classic"
+delta_specs:
+  - "specs/content/spec.md"

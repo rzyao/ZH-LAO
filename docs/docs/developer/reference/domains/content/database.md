@@ -21,38 +21,42 @@ source_share_url: https://chatgpt.com/share/6a937088-e570-83e9-912e-11cc3de27eba
 
 判断标准：**零用户时依然存在的数据 → Content；用户开始学习后才产生的数据 → Learning。**
 
-## Content 最终表清单（32 张，frozen）
+## Content 最终表清单（36 张，baseline）
 
-### Knowledge（17 张）
+### Knowledge（21 张）
 
 | # | 表 | 说明 |
 | ---: | --- | --- |
 | 1 | `contents` | Content Registry：所有可教学知识的统一身份 |
-| 2 | `zh_pinyin` | 中文拼音 |
-| 3 | `zh_hanzi` | 中文汉字 |
-| 4 | `zh_hanzi_pinyin` | 汉字 ↔ 拼音关系 |
-| 5 | `zh_words` | 中文词 |
-| 6 | `zh_word_hanzi` | 词 ↔ 汉字构成 |
-| 7 | `zh_sentences` | 中文句子 |
-| 8 | `lo_letters` | 老挝语字母 |
-| 9 | `lo_syllables` | 老挝语音节 |
-| 10 | `lo_syllable_letters` | 音节 ↔ 字母构成 |
-| 11 | `lo_words` | 老挝语词 |
-| 12 | `lo_word_syllables` | 词 ↔ 音节构成 |
-| 13 | `lo_sentences` | 老挝语句子 |
-| 14 | `meanings` | 释义 |
-| 15 | `translations` | **canonical 教学翻译**（人工确认的正式翻译内容，D-151） |
-| 16 | `examples` | 例句 |
-| 17 | `pronunciations` | 发音知识属性（音频生产归 Audio Production Domain） |
+| 2 | `zh_pinyin_elements` | 中文拼音基础元素 |
+| 3 | `zh_syllables` | 中文音节（业务所称“发音”） |
+| 4 | `zh_syllable_pinyin_elements` | 中文音节 ↔ 拼音元素有序构成 |
+| 5 | `zh_hanzi` | 中文汉字 |
+| 6 | `zh_hanzi_syllables` | 汉字 ↔ 中文音节关系 |
+| 7 | `zh_words` | 中文词语 |
+| 8 | `zh_word_hanzi` | 词语 ↔ 汉字有序构成 |
+| 9 | `zh_sentences` | 中文句子 |
+| 10 | `zh_sentence_words` | 句子 ↔ 中文词语有序构成 |
+| 11 | `lo_letters` | 老挝语字母 |
+| 12 | `lo_syllables` | 老挝语音节 |
+| 13 | `lo_syllable_letters` | 音节 ↔ 字母有序构成 |
+| 14 | `lo_words` | 老挝语词语 |
+| 15 | `lo_word_syllables` | 词语 ↔ 音节有序构成 |
+| 16 | `lo_sentences` | 老挝语句子 |
+| 17 | `lo_sentence_words` | 句子 ↔ 老挝语词语有序构成 |
+| 18 | `meanings` | 释义 |
+| 19 | `translations` | **canonical 教学翻译**（人工确认的正式翻译内容，D-151） |
+| 20 | `examples` | 例句 |
+| 21 | `pronunciations` | 发音知识属性（音频生产归 Audio Production Domain） |
 
 ### Dictionary（4 张）
 
 | # | 表 | 说明 |
 | ---: | --- | --- |
-| 18 | `content_equivalents` | 跨语言正式对应关系 |
-| 19 | `content_relations` | 同语言内容关系（synonym/antonym 等） |
-| 20 | `tags` | 内容标签定义 |
-| 21 | `content_tags` | 内容 ↔ 标签关系 |
+| 22 | `content_equivalents` | 跨语言正式对应关系 |
+| 23 | `content_relations` | 同语言内容关系（synonym/antonym 等） |
+| 24 | `tags` | 内容标签定义 |
+| 25 | `content_tags` | 内容 ↔ 标签关系 |
 
 （`dictionary_search_history` 是用户搜索行为事实，归 `learning.*`，见 [Learning 数据库](../learning/database.md)。）
 
@@ -60,11 +64,11 @@ source_share_url: https://chatgpt.com/share/6a937088-e570-83e9-912e-11cc3de27eba
 
 | # | 表 | 说明 |
 | ---: | --- | --- |
-| 22 | `courses` | 课程定义与发布状态 |
-| 23 | `units` | 单元 |
-| 24 | `lessons` | Lesson 定义与发布状态 |
-| 25 | `lesson_sections` | Lesson 分节 |
-| 26 | `lesson_items` | Lesson 内容项 |
+| 26 | `courses` | 课程定义与发布状态 |
+| 27 | `units` | 单元 |
+| 28 | `lessons` | Lesson 定义与发布状态 |
+| 29 | `lesson_sections` | Lesson 分节 |
+| 30 | `lesson_items` | Lesson 内容项 |
 
 ### Revision（1 张）
 
@@ -99,11 +103,11 @@ source_share_url: https://chatgpt.com/share/6a937088-e570-83e9-912e-11cc3de27eba
 
 | # | 表 | 说明 |
 | ---: | --- | --- |
-| 27 | `exercises` | 练习定义 |
-| 28 | `questions` | 题目定义 |
-| 29 | `question_contents` | 题目内容引用 |
-| 30 | `question_options` | 题目选项与正确答案 |
-| 31 | `answer_rules` | 答案规则 |
+| 32 | `exercises` | 练习定义 |
+| 33 | `questions` | 题目定义 |
+| 34 | `question_contents` | 题目内容引用 |
+| 35 | `question_options` | 题目选项与正确答案 |
+| 36 | `answer_rules` | 答案规则 |
 
 （`exercise_attempts` / `question_attempts` 是用户作答事实，归 `learning.*`，见 [Learning 数据库](../learning/database.md)。）
 

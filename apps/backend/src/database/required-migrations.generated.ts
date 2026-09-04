@@ -23,4 +23,8 @@ export const requiredMigrations = [
   { filename: '1270_platform_menus.sql', sha256: 'acb25a095c6a4d916d8fba71fd6c56b1d3e5fbf4caad7d78c1eb4d66ee1da35a' },
   { filename: '1280_content_letter_permissions.sql', sha256: '136b9abcf8d0e04f9c1cbf1b7ed11af15c4a1aa44ff092f9805da41fde6c56e4' },
   { filename: '1290_content_revision_review_workflow.sql', sha256: '6d63133a6667c7bdd80459e5df888c77eb6a9b117e543c14cd81fac60bbf41c6' },
+  { filename: '1300_content_language_navigation.sql', sha256: '3b512b6ce3b31e9301e6e59669bac4ebb22acb3b3a7a3e833723ad65ff1b380d' },
+  { filename: '1310_content_language_structures.sql', sha256: '3142fb45053a3d0c794286d03e4e4727632480dfda4cc2aa1fb732baeb7f0ab4' },
+  { filename: '1320_content_language_permissions.sql', sha256: '684994303405b9a0cbb07b8ccecab24eaabed8cc45aa049ecb5c316ab4a185c3' },
+  { filename: '1330_platform_menu_recursive_directories.sql', sha256: 'ce3abae555be0b7984a325ef3342a8ea0d5defd529dfcede6d6c712eec1b6a01' },
 ] as const;

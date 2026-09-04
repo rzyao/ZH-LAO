@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import {
   createMemoryHistory,
   createRouter,
@@ -61,7 +61,26 @@ describe('Router', () => {
     renderAt('/platform')
     expect(await screen.findByRole('heading', { name: '平台控制台' })).toBeInTheDocument()
     expect(screen.getByText('平台控制台 Stage A')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: '系统运维' }))
+    fireEvent.click(screen.getByRole('button', { name: '展开 平台控制台' }))
     expect(screen.getByRole('link', { name: /功能开关/ })).toBeInTheDocument()
+  })
+
+  it('显示相互独立的中文和老挝语内容类别路由', async () => {
+    const chinese = renderAt('/content/zh/pinyin')
+    expect(await screen.findByTestId('content-zh-pinyin-page')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '拼音管理' })).toBeInTheDocument()
+    chinese.unmount()
+
+    renderAt('/content/lo/syllables')
+    expect(await screen.findByTestId('content-lo-syllables-page')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '音节管理' })).toBeInTheDocument()
+  })
+
+  it('老挝语字母语言路由使用统一版本管理页面', async () => {
+    renderAt('/content/lo/letters')
+    expect(await screen.findByTestId('content-lo-letters-page')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '字母管理' })).toBeInTheDocument()
   })
 
   it('renders the 404 page for unknown routes', async () => {
@@ -75,5 +94,11 @@ describe('Router', () => {
     // FR-004: the account field must NOT pre-fill a known account name.
     expect(screen.getByLabelText('账号')).toHaveValue('')
     expect(screen.getByLabelText('密码')).toHaveAttribute('type', 'password')
+  })
+
+  it('redirects an anonymous visitor from a protected page to login', async () => {
+    renderAt('/content/letters', false)
+    expect(await screen.findByLabelText('账号')).toBeInTheDocument()
+    expect(screen.queryByText('老挝语字母管理 (Lao Alphabet)')).not.toBeInTheDocument()
   })
 })

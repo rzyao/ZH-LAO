@@ -16,7 +16,7 @@ function makeItem(partial: Partial<Omit<MenuItem, 'parentId'>> & { id: MenuInter
     id: partial.id,
     parentId: partial.parentId,
     label: partial.label ?? 'item',
-    routeKey: partial.routeKey ?? 'overview',
+    routeKey: Object.hasOwn(partial, 'routeKey') ? partial.routeKey! : 'overview',
     icon: partial.icon ?? null,
     sortOrder: partial.sortOrder ?? 0,
     status: partial.status ?? 'active',
@@ -60,6 +60,7 @@ function fakeMenuRepo(initial: MenuItem[] = []): MenuRepository & { items: MenuI
       const updated: MenuItem = {
         ...existing,
         ...(input.label !== undefined ? { label: input.label } : {}),
+        ...(input.parentId !== undefined ? { parentId: input.parentId } : {}),
         ...(input.routeKey !== undefined ? { routeKey: input.routeKey } : {}),
         ...(input.icon !== undefined ? { icon: input.icon } : {}),
         ...(input.sortOrder !== undefined ? { sortOrder: input.sortOrder } : {}),
@@ -105,29 +106,24 @@ describe('MenuUseCases', () => {
       expect(item.routeKey).toBe('operations');
     });
 
-    it('creates a child under a group, max depth 3 enforced', async () => {
+    it('允许目录自由嵌套，不再限制为三层', async () => {
       const parent = makeItem({ id: parseMenuInternalId(1n), parentId: null, routeKey: 'operations' });
       const group = makeItem({ id: parseMenuInternalId(2n), parentId: parent.id, routeKey: 'operations' });
       const repo = fakeMenuRepo([parent, group]);
       const uc = new MenuUseCases(repo, isOpKey);
 
-      // 3 层有效:分组 → 一级项 → 子项
-      const child = await uc.create(executor, { parentId: group.id, label: '操作员', routeKey: 'operations.operators' });
-      expect(child.parentId).toBe(group.id);
-
-      // 第 4 层被拒
-      await expectAppError(
-        uc.create(executor, { parentId: child.id, label: '越层', routeKey: 'operations.operators' }),
-        'PLATFORM_INVALID_ARGUMENT',
-        400,
-      );
+      const level3 = await uc.create(executor, { parentId: group.id, label: '三级目录' });
+      const level4 = await uc.create(executor, { parentId: level3.id, label: '四级目录' });
+      const level5 = await uc.create(executor, { parentId: level4.id, label: '操作员', routeKey: 'operations.operators' });
+      expect(level5.parentId).toBe(level4.id);
     });
 
-    it('rejects non-group item without route_key', async () => {
+    it('allows a route-less child container (ADR-024 / CR-001)', async () => {
       const parent = makeItem({ id: parseMenuInternalId(1n), parentId: null, routeKey: 'operations' });
       const repo = fakeMenuRepo([parent]);
       const uc = new MenuUseCases(repo, isOpKey);
-      await expectAppError(uc.create(executor, { parentId: parent.id, label: 'x' }), 'PLATFORM_INVALID_ARGUMENT', 400);
+      const child = await uc.create(executor, { parentId: parent.id, label: 'x' });
+      expect(child.routeKey).toBeNull();
     });
   });
 
@@ -221,6 +217,73 @@ describe('MenuUseCases', () => {
     });
   });
 
+  describe('move (CR-001 / ADR-024)', () => {
+    it('moves a top-level node beneath a route-bearing node and normalizes order', async () => {
+      const target = makeItem({ id: parseMenuInternalId(1n), parentId: null, routeKey: 'operations', updatedAt: new Date('2026-02-01T00:00:00Z') });
+      const moving = makeItem({ id: parseMenuInternalId(2n), parentId: null, routeKey: null, updatedAt: new Date('2026-02-01T00:00:00Z') });
+      const repo = fakeMenuRepo([target, moving]);
+      const uc = new MenuUseCases(repo, isOpKey);
+      const moved = await uc.move(executor, moving.id, {
+        parentId: target.id, position: 0,
+        expectedUpdatedAt: moving.updatedAt,
+        sourceLayerUpdatedAt: moving.updatedAt,
+        targetLayerUpdatedAt: target.updatedAt,
+      });
+      expect(moved.parentId).toBe(target.id);
+      expect((await repo.findDirectChildren(executor, target.id)).map((item) => item.id)).toEqual([moving.id]);
+    });
+
+    it('moves a route-bearing child back to the top level', async () => {
+      const parent = makeItem({ id: parseMenuInternalId(1n), parentId: null, routeKey: null, updatedAt: new Date('2026-02-01T00:00:00Z') });
+      const moving = makeItem({ id: parseMenuInternalId(2n), parentId: parent.id, routeKey: 'operations', updatedAt: new Date('2026-02-01T00:00:00Z') });
+      const repo = fakeMenuRepo([parent, moving]);
+      const uc = new MenuUseCases(repo, isOpKey);
+      const moved = await uc.move(executor, moving.id, {
+        parentId: null, position: 1,
+        expectedUpdatedAt: moving.updatedAt,
+        sourceLayerUpdatedAt: moving.updatedAt,
+        targetLayerUpdatedAt: parent.updatedAt,
+      });
+      expect(moved.parentId).toBeNull();
+    });
+
+    it('rejects a move below its own descendant', async () => {
+      const parent = makeItem({ id: parseMenuInternalId(1n), parentId: null, routeKey: null });
+      const child = makeItem({ id: parseMenuInternalId(2n), parentId: parent.id, routeKey: 'operations' });
+      const repo = fakeMenuRepo([parent, child]);
+      const uc = new MenuUseCases(repo, isOpKey);
+      await expectAppError(uc.move(executor, parent.id, {
+        parentId: child.id, position: 0,
+        expectedUpdatedAt: parent.updatedAt,
+        sourceLayerUpdatedAt: parent.updatedAt,
+        targetLayerUpdatedAt: child.updatedAt,
+      }), 'PLATFORM_INVALID_ARGUMENT', 400);
+    });
+
+    it('允许移动到深层目录，但仍拒绝陈旧快照', async () => {
+      const root = makeItem({ id: parseMenuInternalId(1n), parentId: null, routeKey: null, updatedAt: new Date('2026-02-01T00:00:00Z') });
+      const level2 = makeItem({ id: parseMenuInternalId(2n), parentId: root.id, routeKey: null, updatedAt: new Date('2026-02-01T00:00:00Z') });
+      const level3 = makeItem({ id: parseMenuInternalId(3n), parentId: level2.id, routeKey: 'operations', updatedAt: new Date('2026-02-01T00:00:00Z') });
+      const moving = makeItem({ id: parseMenuInternalId(4n), parentId: null, routeKey: 'platform', updatedAt: new Date('2026-02-01T00:00:00Z') });
+      const repo = fakeMenuRepo([root, level2, level3, moving]);
+      const uc = new MenuUseCases(repo, isOpKey);
+      const moved = await uc.move(executor, moving.id, {
+        parentId: level3.id, position: 0,
+        expectedUpdatedAt: moving.updatedAt,
+        sourceLayerUpdatedAt: moving.updatedAt,
+        targetLayerUpdatedAt: level3.updatedAt,
+      });
+      expect(moved.parentId).toBe(level3.id);
+      await expectAppError(uc.move(executor, moving.id, {
+        parentId: root.id, position: 1,
+        expectedUpdatedAt: new Date('2020-01-01T00:00:00Z'),
+        sourceLayerUpdatedAt: moved.updatedAt,
+        targetLayerUpdatedAt: level2.updatedAt,
+      }), 'PLATFORM_CONFLICT', 409);
+      expect((await repo.findById(executor, moving.id))?.parentId).toBe(level3.id);
+    });
+  });
+
   describe('permission catalog validation (FR-007/T026)', () => {
     it('rejects permission key not in operator catalog', async () => {
       const repo = fakeMenuRepo();
@@ -245,6 +308,17 @@ describe('MenuUseCases', () => {
   });
 
   describe('route whitelist (FR-008/T031)', () => {
+    it('接受已登记的中文和老挝语内容类别路由', async () => {
+      const repo = fakeMenuRepo();
+      const uc = new MenuUseCases(repo, isOpKey);
+
+      const chinese = await uc.create(executor, { label: '拼音管理', routeKey: 'content.zh.pinyin' });
+      const lao = await uc.create(executor, { label: '老挝语字母管理', routeKey: 'content.lo.letters' });
+
+      expect(chinese.routeKey).toBe('content.zh.pinyin');
+      expect(lao.routeKey).toBe('content.lo.letters');
+    });
+
     it('rejects route_key outside whitelist', async () => {
       const repo = fakeMenuRepo();
       const uc = new MenuUseCases(repo, isOpKey);

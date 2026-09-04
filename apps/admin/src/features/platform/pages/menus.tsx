@@ -1,4 +1,7 @@
 import * as React from 'react'
+import { DndContext, PointerSensor, type DragEndEvent, useDraggable, useDroppable, useSensor, useSensors } from '@dnd-kit/core'
+import { CSS } from '@dnd-kit/utilities'
+import { GripVertical, Layers3 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -14,6 +17,7 @@ import {
   useMenusQuery,
   useRemoveMenu,
   useReorderMenus,
+  useMoveMenu,
   useUpdateMenu,
   useRouteTargetsQuery,
 } from '../menus-queries'
@@ -26,37 +30,51 @@ const MENU_STATUS_TONES: Record<MenuTreeNode['status'], StatusTone> = {
   removed: 'muted',
 }
 
-function TreeNode({ node, depth, onEdit, onRemove, onMoveChild }: {
+type DropTarget = { parentId: number | null; position: number }
+
+function DropZone({ target }: { target: DropTarget }) {
+  const { isOver, setNodeRef } = useDroppable({ id: `drop:${target.parentId ?? 'root'}:${target.position}`, data: target })
+  return <div ref={setNodeRef} className={`mx-2 h-2 rounded transition-colors ${isOver ? 'bg-primary/40 ring-1 ring-primary' : 'bg-transparent'}`} />
+}
+
+function TreeNode({ node, depth, index, parentId, onEdit, onAddChild, onRemove, onMoveChild }: {
   node: MenuTreeNode
   depth: number
+  index: number
+  parentId: number | null
   onEdit: (node: MenuTreeNode) => void
+  onAddChild: (node: MenuTreeNode) => void
   onRemove: (node: MenuTreeNode) => void
   onMoveChild: (parentId: number, childId: number, direction: -1 | 1) => void
 }) {
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: String(node.id), data: { nodeId: node.id } })
+  const { setNodeRef: setChildDropRef, isOver: isOverChild } = useDroppable({ id: `child:${node.id}`, data: { parentId: node.id, position: node.children.length } satisfies DropTarget })
   return (
     <React.Fragment>
-      <div className="flex items-center gap-2 rounded-md px-2 py-1.5 hover:bg-muted/50" style={{ paddingLeft: `${depth * 1.5 + 0.5}rem` }}>
+      <DropZone target={{ parentId, position: index }} />
+      <div ref={setNodeRef} style={{ paddingLeft: `${depth * 1.5 + 0.5}rem`, transform: CSS.Translate.toString(transform) }} className={`flex items-center gap-2 rounded-lg border px-2 py-2 transition ${isDragging ? 'opacity-40 shadow-lg' : 'border-transparent hover:border-border hover:bg-muted/60'}`}>
+        <button type="button" aria-label={`拖动 ${node.label}`} className="cursor-grab touch-none rounded p-1 text-muted-foreground hover:bg-muted active:cursor-grabbing" {...attributes} {...listeners}><GripVertical className="size-4" /></button>
         <span className="w-4 text-muted-foreground">{depth > 0 ? '└' : ''}</span>
         <span className="flex-1 truncate text-sm">{node.label}</span>
         {node.routeKey ? <code className="shrink-0 text-xs text-muted-foreground">{node.routeKey}</code> : null}
         <StatusBadge tone={MENU_STATUS_TONES[node.status] ?? 'muted'} label={node.status} />
         <div className="flex shrink-0 gap-1">
           <Button size="sm" variant="outline" onClick={() => onEdit(node)}>编辑</Button>
-          <Button size="sm" variant="ghost" onClick={() => onEdit({ ...node, children: [], label: node.label, routeKey: node.routeKey })}>子项</Button>
+          <Button size="sm" variant="ghost" onClick={() => onAddChild(node)}>新建子项</Button>
           <Button size="sm" variant="destructive" onClick={() => onRemove(node)} disabled={node.status === 'removed'}>删除</Button>
         </div>
       </div>
-      {node.children.map((child, index) => (
+      <div ref={setChildDropRef} className={`ml-4 rounded-md ${isOverChild ? 'bg-primary/10 ring-1 ring-primary/40' : ''}`}>
+      {node.children.map((child, childIndex) => (
         <div key={child.id} className="group relative">
-          <TreeNode node={child} depth={depth + 1} onEdit={onEdit} onRemove={onRemove} onMoveChild={onMoveChild} />
-          {depth + 1 <= 2 ? (
-            <div className="absolute right-2 top-1 flex gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
-              <Button size="sm" variant="ghost" className="h-6 px-1" disabled={index === 0} onClick={() => onMoveChild(node.id, child.id, -1)} title="上移">↑</Button>
-              <Button size="sm" variant="ghost" className="h-6 px-1" disabled={index === node.children.length - 1} onClick={() => onMoveChild(node.id, child.id, 1)} title="下移">↓</Button>
-            </div>
-          ) : null}
+          <TreeNode node={child} depth={depth + 1} index={childIndex} parentId={node.id} onEdit={onEdit} onAddChild={onAddChild} onRemove={onRemove} onMoveChild={onMoveChild} />
+          <div className="absolute right-2 top-1 flex gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
+            <Button size="sm" variant="ghost" className="h-6 px-1" disabled={childIndex === 0} onClick={() => onMoveChild(node.id, child.id, -1)} title="上移">↑</Button>
+            <Button size="sm" variant="ghost" className="h-6 px-1" disabled={childIndex === node.children.length - 1} onClick={() => onMoveChild(node.id, child.id, 1)} title="下移">↓</Button>
+          </div>
         </div>
       ))}
+      </div>
     </React.Fragment>
   )
 }
@@ -70,6 +88,8 @@ export function MenusPage() {
   const updateMutation = useUpdateMenu()
   const removeMutation = useRemoveMenu()
   const reorderMutation = useReorderMenus()
+  const moveMutation = useMoveMenu()
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }))
 
   const [editor, setEditor] = React.useState<{ open: boolean; node: MenuTreeNode | null; asChild: boolean }>({ open: false, node: null, asChild: false })
   const [removing, setRemoving] = React.useState<MenuTreeNode | null>(null)
@@ -89,9 +109,8 @@ export function MenusPage() {
 
   const editingId = editor.node?.id
   const editingNode = flatList.find((n) => n.id === editingId) ?? null
-  const editingParentId = editor.asChild && editor.node ? (editor.node.children.length > 0 ? null : editor.node.id) : null
 
-  /** 组内排序: 将 parentId 下的直接子项按当前顺序交换 childId 与相邻项后整体提交(FE-006)。 */
+  /** 同级排序：将 parentId 下的直接子项与相邻项交换后整体提交。 */
   const moveChild = React.useCallback((parentId: number, childId: number, direction: -1 | 1) => {
     const findChildren = (nodes: readonly MenuTreeNode[]): readonly MenuTreeNode[] | null => {
       for (const n of nodes) {
@@ -129,41 +148,93 @@ export function MenusPage() {
     })
   }, [query.data, reorderMutation, toast, fail])
 
+  const layerStamp = React.useCallback((parentId: number | null): string => {
+    const findChildren = (nodes: readonly MenuTreeNode[]): readonly MenuTreeNode[] | null => {
+      if (parentId === null) return nodes
+      for (const node of nodes) {
+        if (node.id === parentId) return node.children
+        const found = findChildren(node.children)
+        if (found) return found
+      }
+      return null
+    }
+    const children = findChildren(query.data ?? []) ?? []
+    const latest = children.reduce<string>((value, node) => value > node.updatedAt ? value : node.updatedAt, '')
+    if (latest || parentId === null) return latest
+    return flatList.find((node) => node.id === parentId)?.updatedAt ?? ''
+  }, [query.data, flatList])
+
+  const handleDragEnd = React.useCallback(({ active, over }: DragEndEvent) => {
+    const target = over?.data.current as DropTarget | undefined
+    const id = Number(active.id)
+    const node = flatList.find((item) => item.id === id)
+    if (!target || !node || !node.updatedAt) return
+    const parentByChild = (nodes: readonly MenuTreeNode[], childId: number, parentId: number | null = null): number | null | undefined => {
+      for (const item of nodes) {
+        if (item.id === childId) return parentId
+        const found = parentByChild(item.children, childId, item.id)
+        if (found !== undefined) return found
+      }
+      return undefined
+    }
+    const sourceParentId = parentByChild(query.data ?? [], id)
+    if (sourceParentId === undefined) return
+    const sourceStamp = layerStamp(sourceParentId)
+    const targetStamp = layerStamp(target.parentId)
+    if (!sourceStamp || !targetStamp) return
+    moveMutation.mutate({ id, parent_id: target.parentId, position: target.position, expected_updated_at: node.updatedAt, source_layer_updated_at: sourceStamp, target_layer_updated_at: targetStamp }, {
+      onSuccess: () => toast.success({ title: '菜单位置已保存' }),
+      onError: fail,
+    })
+  }, [flatList, query.data, layerStamp, moveMutation, toast, fail])
+
   return (
     <ListPageLayout
       title="菜单与路由管理"
-      description="后台侧边栏菜单配置。目标路由受白名单约束;可见性权限多权限任一匹配(OR)控制。"
+      description="后台侧边栏目录配置。所有节点使用同一种模型，可自由嵌套、排序和移动；目标路由受白名单约束。"
       breadcrumb={[{ label: '系统运维' }, { label: '平台控制台', href: '/platform' }, { label: '菜单管理' }]}
       actions={<Button disabled={!canWrite} onClick={() => setEditor({ open: true, node: null, asChild: false })}>新建菜单</Button>}
     >
-      <div className="p-4">
+      <div className="space-y-4 p-4 sm:p-6">
         <PermissionContract read={PLATFORM_PERMISSIONS.menusRead} write={PLATFORM_PERMISSIONS.menusWrite} />
-        <div className="mb-3 flex items-center gap-2">
+        <div className="flex items-center gap-2 rounded-lg border bg-muted/30 px-3 py-2">
+          <Layers3 className="size-4 text-primary" />
           <span className="text-xs text-muted-foreground">目标路由白名单来源:</span>
           <code className="text-xs">{routeTargetsQuery.data?.length ?? 0} 个已注册页面</code>
         </div>
-        <div className="space-y-1 rounded-md border p-2">
-          {(query.data ?? []).map((group, index) => (
-            <div key={group.id} className="group relative">
-              <TreeNode node={group} depth={0} onEdit={(node) => setEditor({ open: true, node, asChild: false })} onRemove={setRemoving} onMoveChild={moveChild} />
+        <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+        <div className="space-y-1 rounded-xl border bg-card p-2 shadow-sm">
+          {(query.data ?? []).map((node, index) => (
+            <div key={node.id} className="group relative">
+              <TreeNode
+                node={node}
+                depth={0}
+                index={index}
+                parentId={null}
+                onEdit={(item) => setEditor({ open: true, node: item, asChild: false })}
+                onAddChild={(parent) => setEditor({ open: true, node: parent, asChild: true })}
+                onRemove={setRemoving}
+                onMoveChild={moveChild}
+              />
               <div className="absolute right-2 top-1 flex gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
-                <Button size="sm" variant="ghost" className="h-6 px-1" disabled={index === 0} onClick={() => moveChild(0, group.id, -1)} title="上移">↑</Button>
-                <Button size="sm" variant="ghost" className="h-6 px-1" disabled={index === (query.data?.length ?? 0) - 1} onClick={() => moveChild(0, group.id, 1)} title="下移">↓</Button>
+                <Button size="sm" variant="ghost" className="h-6 px-1" disabled={index === 0} onClick={() => moveChild(0, node.id, -1)} title="上移">↑</Button>
+                <Button size="sm" variant="ghost" className="h-6 px-1" disabled={index === (query.data?.length ?? 0) - 1} onClick={() => moveChild(0, node.id, 1)} title="下移">↓</Button>
               </div>
             </div>
           ))}
+          <DropZone target={{ parentId: null, position: (query.data ?? []).length }} />
         </div>
+        </DndContext>
         <div className="mt-3 flex items-center gap-2">
-          <span className="text-xs text-muted-foreground">排序: 将鼠标悬停在任意菜单项上,使用 ↑/↓ 调整同级顺序;变更保存即生效。</span>
+          <span className="text-xs text-muted-foreground">拖住左侧把手排序或放入任意目录。无路由节点为目录；带路由节点也可继续包含子项。嵌套层级不作业务限制，变更保存即生效。</span>
         </div>
       </div>
 
       <MenuEditorDialog
         open={editor.open}
-        node={editingNode}
-        parentId={editingParentId}
+        node={editor.asChild ? null : editingNode}
         onOpenChange={(open) => !open && setEditor({ open: false, node: null, asChild: false })}
-        pending={createMutation.isPending || updateMutation.isPending}
+        pending={createMutation.isPending || updateMutation.isPending || moveMutation.isPending}
         onSubmit={(input) => {
           if (editingNode) {
             updateMutation.mutate({ id: editingNode.id, ...input }, {
@@ -195,10 +266,9 @@ export function MenusPage() {
   )
 }
 
-function MenuEditorDialog({ open, node, parentId, onOpenChange, pending, onSubmit }: {
+function MenuEditorDialog({ open, node, onOpenChange, pending, onSubmit }: {
   open: boolean
   node: MenuTreeNode | null
-  parentId: number | null
   onOpenChange: (open: boolean) => void
   pending: boolean
   onSubmit: (input: {
@@ -229,14 +299,12 @@ function MenuEditorDialog({ open, node, parentId, onOpenChange, pending, onSubmi
     }
   }, [open, node])
 
-  const isGroup = node === null && parentId === null
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{node ? '编辑菜单项' : '新建菜单项'}</DialogTitle>
-          <DialogDescription>{isGroup ? '作为顶层分组创建。' : '目标路由必须从已注册页面白名单中选择。'}</DialogDescription>
+          <DialogDescription>路由可选；留空即为容器。节点无论是否带路由都可拥有子项。</DialogDescription>
         </DialogHeader>
         <form
           id="menu-editor"
@@ -246,7 +314,7 @@ function MenuEditorDialog({ open, node, parentId, onOpenChange, pending, onSubmi
             const permissionKeys = permissions.split(',').map((s) => s.trim()).filter(Boolean)
             onSubmit({
               label,
-              route_key: isGroup && !routeKey ? null : routeKey,
+              route_key: routeKey || null,
               icon: icon || null,
               sort_order: sortOrder,
               status,
@@ -260,7 +328,7 @@ function MenuEditorDialog({ open, node, parentId, onOpenChange, pending, onSubmi
           </FormField>
           <FormField label="目标路由 (Route Key)" htmlFor="menu-route">
             <NativeSelect id="menu-route" value={routeKey} onChange={(e) => setRouteKey(e.target.value)}>
-              <option value="">{isGroup ? '(分组,无跳转)' : '请选择目标路由'}</option>
+              <option value="">(容器,无跳转)</option>
               {ADMIN_ROUTE_TARGETS.map((target) => (
                 <option key={target.key} value={target.key}>{target.label} ({target.key})</option>
               ))}

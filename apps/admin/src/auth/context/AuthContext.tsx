@@ -63,6 +63,9 @@ export function AuthProvider({ children, initialState }: AuthProviderProps) {
 
   React.useEffect(() => {
     setAccessToken(persisted?.accessToken ?? null)
+    // 本地权限只用于首屏恢复；随后立即以服务端为准刷新。
+    // 角色新增权限后，已登录的管理员无需退出再登录即可看到新菜单。
+    if (persisted) void refreshPermissions()
     setUnauthorizedHandler(() => {
       setAccessToken(null)
       clearAdminSession()

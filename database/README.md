@@ -71,6 +71,27 @@ For local development, package scripts automatically load an ignored `.env`
 file when it exists; explicitly supplied process environment variables still
 take precedence.
 
+## Legacy Lao letter import
+
+The legacy `study-lao.app_letter` importer moves only the 68 current letter
+records into `content.contents` and `content.lo_letters`. It never imports
+legacy revisions or audio associations, and it does not create audio slots.
+It uses the frozen physical classifications `consonant`, `vowel`, `tone_mark`,
+and `other`. Run a preview first, then add `--apply` to write:
+
+```bash
+DATABASE_URL='postgresql://...' \
+LEGACY_MYSQL_HOST='...' LEGACY_MYSQL_PORT='3307' \
+LEGACY_MYSQL_USER='...' LEGACY_MYSQL_PASSWORD='...' \
+LEGACY_MYSQL_DATABASE='study-lao' \
+node scripts/import-legacy-lao-letters.mjs
+```
+
+The importer validates the 68-record inventory, maps code points exactly, uses
+a transaction and advisory lock, and is idempotent by character and physical
+classification. Imported records are not publicly visible until a separate,
+explicit revision-and-publication workflow creates approved revisions.
+
 ## Migration behavior
 
 The runner takes a PostgreSQL advisory lock and records filename, SHA-256, and

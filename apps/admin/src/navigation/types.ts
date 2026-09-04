@@ -13,32 +13,15 @@ export interface RouteTarget {
 export interface NavItem {
   key: string
   label: string
-  href: string
+  href?: string
   icon: LucideIcon
   routeKey?: string
   permissions?: readonly string[]
   iconKey?: string | null
   domain?: DomainName
   placeholder?: boolean
-}
-
-export interface NavGroup {
-  key: string
-  label: string
-  items: NavItem[]
-}
-
-export interface SecondaryNav {
-  key: string
-  label: string
-  href: string
-  icon: LucideIcon
-}
-
-export interface SecondaryNavConfig {
-  prefix: string
-  title: string
-  items: SecondaryNav[]
+  /** 统一目录树；任一节点都可自由包含子节点。 */
+  children?: readonly NavItem[]
 }
 
 /** 后端菜单树节点(与 contracts/http-api.md 的嵌套树 DTO 对应)。 */

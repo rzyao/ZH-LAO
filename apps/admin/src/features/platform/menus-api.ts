@@ -22,6 +22,14 @@ export interface MenuUpdateInput {
   expected_updated_at?: string
 }
 
+export interface MenuMoveInput {
+  parent_id: number | null
+  position: number
+  expected_updated_at: string
+  source_layer_updated_at: string
+  target_layer_updated_at: string
+}
+
 /**
  * 后端菜单树 DTO 使用 snake_case(route_key/sort_order/updated_at),
  * 前端 MenuTreeNode 使用 camelCase(routeKey/sortOrder/updatedAt)。
@@ -77,6 +85,11 @@ export const menusApi = {
     const response = await apiClient.put(`${base}/menus/${parentId}/order`, {
       json: { order: [...order], expected_updated_at },
     })
+    return response.data
+  },
+
+  async moveMenu(id: number, input: MenuMoveInput) {
+    const response = await apiClient.post(`${base}/menus/${id}/move`, { json: input })
     return response.data
   },
 

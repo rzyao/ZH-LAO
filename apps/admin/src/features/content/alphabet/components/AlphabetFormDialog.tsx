@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { alphabetAdminApi, type CreateCharacterInput } from '../api';
+import { alphabetAdminApi, type CreateCharacterInput, type LaoLetterClassification } from '../api';
 
 interface Props {
   open: boolean;
@@ -61,25 +61,27 @@ export const AlphabetFormDialog: React.FC<Props> = ({ open, onOpenChange, onSucc
               className="w-full border rounded p-2"
               value={formData.classification}
               onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-                const val = e.target.value as 'consonant' | 'vowel' | 'symbol';
+                const val = e.target.value as LaoLetterClassification;
+                const noAudio = val === 'tone_mark' || val === 'other';
                 setFormData({
                   ...formData,
                   classification: val,
-                  subtype: val === 'consonant' ? 'cons_middle' : val === 'vowel' ? 'vowel_short' : 'symbol_tone',
-                  ipaPhonetic: val === 'symbol' ? '-' : formData.ipaPhonetic,
+                  subtype: val === 'consonant' ? 'cons_middle' : val === 'vowel' ? 'vowel_short' : val === 'tone_mark' ? 'symbol_tone' : 'symbol_other',
+                  ipaPhonetic: noAudio ? '-' : formData.ipaPhonetic,
                 });
               }}
             >
               <option value="consonant">辅音 (Consonant)</option>
               <option value="vowel">元音 (Vowel)</option>
-              <option value="symbol">符号 (Symbol)</option>
+              <option value="tone_mark">声调符号 (Tone mark)</option>
+              <option value="other">其他正字法标记 (Other)</option>
             </select>
           </div>
           <div>
             <Label>IPA 音标</Label>
             <Input
               value={formData.ipaPhonetic}
-              disabled={formData.classification === 'symbol'}
+              disabled={formData.classification === 'tone_mark' || formData.classification === 'other'}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, ipaPhonetic: e.target.value })}
               placeholder="例如: /k/"
             />

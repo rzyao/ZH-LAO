@@ -32,5 +32,7 @@ last_updated: 2026-09-04
 | [ADR-024](ADR-024-menu-tree-reparenting.md) | 菜单树支持拖拽重排和换父级；节点位置与可导航性解耦，新增原子移动端点（修订 ADR-022 / D-155） | `frozen` |
 | [ADR-023](ADR-023-unified-api-contract.md) | 前后端统一请求格式与业务状态码（HTTP 一律 200 + 顶层 `code` 信封 `{code,data?,error?,request_id}`；业务状态码词汇表；全量迁移 `AppError.code`；前端按 `code` 判定；同步切版；请求侧收敛；修订 `api-standard.md` 响应契约；D-156） | `frozen` |
 | [ADR-025](ADR-025-admin-operator-account-provisioning.md) | 受控创建后台账号与操作员（随机一次性密码、同库原子编排） | `baseline` |
+| [ADR-026](ADR-026-unified-recursive-admin-menu-tree.md) | 后台菜单移除专门分组类型，统一为可自由嵌套的递归目录树（修订 ADR-022 / ADR-024） | `frozen` |
+| [ADR-027](ADR-027-navigable-directory-row-toggle.md) | 可导航目录点击菜单项目时同步伸缩，箭头保留纯伸缩操作（修订 ADR-026） | `frozen` |
 
 ADR 记录长期取舍；字段和业务规格仍以对应领域文档为唯一事实源。

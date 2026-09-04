@@ -20,8 +20,8 @@
 ## 2. Functional Requirements Completeness
 
 - [x] CHK004 **Unicode 精确比对 (FR-001)**：明确要求采用二进制码点级精确匹配（`utf8mb4_bin` 语义），具备字符唯一性全局约束。
-- [x] CHK005 **分类体系完备性 (FR-002, FR-003)**：完整覆盖三大核心大类（辅音、元音、符号）及正字法细分子分类（`cons_middle`/`cons_high`/`cons_low`、`vowel_short`/`vowel_long`、`symbol_*`）。
-- [x] CHK006 **IPA 音标与发音门禁 (FR-004, FR-005)**：定义了 IPA 标准转写，并对符号类字符强制实施 `no_audio = true` 及音标 `-` 标记。
+- [x] CHK005 **分类体系完备性 (FR-002, FR-003)**：完整覆盖四个物理大类（辅音、元音、声调符号、其他标记）及正字法细分子分类（`cons_middle`/`cons_high`/`cons_low`、`vowel_short`/`vowel_long`、`symbol_*`）。
+- [x] CHK006 **IPA 音标与发音门禁 (FR-004, FR-005)**：定义了 IPA 标准转写，并对 `tone_mark` 与 `other` 强制实施 `no_audio = true` 及音标 `-` 标记。
 - [x] CHK007 **展示序与学习解耦 (FR-006)**：定义了显式组内整型 `sort_order`，确保排序可调且不破坏底层语言学数据结构。
 - [x] CHK008 **音频槽位与哈希联动失效 (FR-007)**：明确 1:1 白名单槽位绑定契约，并规定文本/音标修改触发 `audio_input_hash` 重新计算及历史音频 `stale` 标记。
 - [x] CHK009 **不可变修订版本生命周期 (FR-008)**：严格定义了 `Draft` $\to$ `Pending Review` $\to$ `Approved` $\to$ `Published` $\to$ `Superseded` 状态机，明确已发布内容禁止原地修改及 Active Work Guard 守卫。

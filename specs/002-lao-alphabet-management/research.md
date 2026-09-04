@@ -18,7 +18,7 @@
 - **Backend Domain (`apps/backend`)**:
   - `LaoCharacter` 聚合根生命周期与不可变修订（`LaoCharacterRevision`）版本管理。
   - 严格校验 Unicode 码点唯一性（`utf8mb4_bin` 精确比对）。
-  - 分类（`consonant`/`vowel`/`symbol`）与正字法子分类（`cons_*`, `vowel_*`, `symbol_*`）业务规则校验。
+  - 分类（`consonant`/`vowel`/`tone_mark`/`other`）与正字法子分类（`cons_*`, `vowel_*`, `symbol_*`）业务规则校验。
   - 基于发音要素生成 `audio_input_hash`，并与 `AudioRolePolicy` 联动建槽或标记失效。
   - 提供 Admin 管理 CRUD、提交审核、审核通过/驳回、原子发布接口。
   - 提供 C 端（Mobile/H5）多重可见性守卫过滤的高性能缓存查询接口。
@@ -27,7 +27,7 @@
   - 修订版本对比与 Active Work Guard 守卫状态展示。
   - 审核工作台（审核通过、驳回批注录入、正式发布触发）。
 - **Mobile Learning Consumption (`apps/mobile`)**:
-  - 字母表标准视图展示（辅音 27 组、元音 30 组、符号组），按 `sort_order` 升序渲染。
+  - 字母表标准视图展示（29 `consonant`、31 `vowel`、4 `tone_mark`、4 `other`），按 `sort_order` 升序渲染。
   - 字母详情与发音交互：结合 Audio 投影契约播放流媒体音频（无有效音频时优雅降级为静音态）。
 
 ### 3. 是否复用已有架构资产？
@@ -57,7 +57,7 @@
 ### 决策 2: 字母音频槽位策略与无音频门禁 (Audio Slot Policy & Gate)
 - **Decision**: 
   - 当字母分类为 `consonant` 或 `vowel` 时，发音属性标记为 `no_audio = false`，通过 Domain Service 确保在 `audio.audio_slots` 中存在唯一的 `lo/pronunciation` 槽位，并写入由 `(unicode_char + ipa_phonetic)` 计算出的 SHA-256 `audio_input_hash`。
-  - 当字母分类为 `symbol` 时，强制 `no_audio = true`，绝对不向 `audio.audio_slots` 发起建槽或生产任务。
+  - 当字母分类为 `tone_mark` 或 `other` 时，强制 `no_audio = true`，绝对不向 `audio.audio_slots` 发起建槽或生产任务。
 - **Rationale**: 严格依循 `alphabet-decisions.md` (Decision A1) 与 `audio-binding.md` §1.1 白名单契约。
 
 ---

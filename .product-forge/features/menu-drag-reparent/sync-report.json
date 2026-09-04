@@ -1,0 +1,14 @@
+{
+  "feature": "menu-drag-reparent",
+  "date": "2026-09-04",
+  "mode": "quick",
+  "scope": "CR-005",
+  "phase": "plan",
+  "layers_checked": [5, 6, 8, 9, 10],
+  "critical": 0,
+  "warning": 0,
+  "info": 0,
+  "clean_layers": 5,
+  "verdict": "CONSISTENT",
+  "drift_items": []
+}

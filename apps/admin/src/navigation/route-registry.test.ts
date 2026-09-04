@@ -33,4 +33,24 @@ describe('route-registry (white-list single source of truth)', () => {
     expect(findRouteTargetByKey('platform.feature_flags')?.href).toBe('/platform/feature-flags')
     expect(findRouteTargetByKey('not-exist')).toBeUndefined()
   })
+
+  it('将每个中文和老挝语内容类别登记为独立路由目标', () => {
+    const expected = new Map([
+      ['content.zh.pinyin', '/content/zh/pinyin'],
+      ['content.zh.syllables', '/content/zh/syllables'],
+      ['content.zh.hanzi', '/content/zh/hanzi'],
+      ['content.zh.words', '/content/zh/words'],
+      ['content.zh.sentences', '/content/zh/sentences'],
+      ['content.zh.review', '/content/zh/review'],
+      ['content.lo.letters', '/content/lo/letters'],
+      ['content.lo.syllables', '/content/lo/syllables'],
+      ['content.lo.words', '/content/lo/words'],
+      ['content.lo.sentences', '/content/lo/sentences'],
+      ['content.lo.review', '/content/lo/review'],
+    ])
+
+    for (const [key, href] of expected) {
+      expect(findRouteTargetByKey(key)?.href).toBe(href)
+    }
+  })
 })

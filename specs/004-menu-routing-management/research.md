@@ -1,5 +1,7 @@
 # Research: 后台菜单与路由配置管理 (004-menu-routing-management)
 
+> 本文保留立项时的研究快照。实施后的节点分组与三层假设已由 ADR-024、ADR-026 和 CR-004 修订，现行契约以 `spec.md`、`data-model.md` 与 contracts 为准。
+
 **Phase 0 输出** | 2026-09-03 | 基于代码/文档/冻结迁移现状与已确认的产品决策(生效模式、多权限 OR、seed 预置)
 
 ## 研究基线(已验证现状锚点)

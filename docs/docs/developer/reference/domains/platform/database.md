@@ -19,7 +19,11 @@ Platform Domain 的业务表当前固定为 **7 张**（含 ADR-022 新增的菜
 4. `platform.app_versions`
 5. `platform.announcements`
 6. `platform.regions`
-7. `platform.menus` + `platform.menu_permissions`（菜单/路由配置,ADR-022;字段见 [菜单数据模型](https://github.com/rzyao/ZH-LAO/blob/main/specs/004-menu-routing-management/data-model.md)）
+7. `platform.menus` + `platform.menu_permissions`（统一递归菜单目录，ADR-022、[ADR-024](../../adr/ADR-024-menu-tree-reparenting.md)、[ADR-026](../../adr/ADR-026-unified-recursive-admin-menu-tree.md)；字段见 [菜单数据模型](https://github.com/rzyao/ZH-LAO/blob/main/specs/004-menu-routing-management/data-model.md)）
+
+`platform.menus.parent_id` 是统一节点的自引用关系：`NULL` 仅表示根节点，不表示特殊分组。
+目录可自由嵌套且不设业务深度上限；无 `route_key` 的节点是目录，有路由的节点也可拥有子节点。
+应用层必须拒绝自环、后代环、无效父节点和陈旧并发提交。<!-- ADR-026 / D-165 -->
 
 以下能力虽然与平台运行有关，但**不计入 Platform 业务表**：`system_outbox_events`、Media / Asset Infrastructure、技术审计日志、消息投递基础设施、存储基础设施（见[平台域与基础设施边界](#platform-domain-与-platform-infrastructure-边界)）。
 

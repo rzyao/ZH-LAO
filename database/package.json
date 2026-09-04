@@ -11,6 +11,7 @@
     "test": "node --env-file-if-exists=.env --test test/*.test.mjs"
   },
   "dependencies": {
+    "mysql2": "3.14.4",
     "pg": "^8.16.3"
   },
   "packageManager": "pnpm@10.20.0"

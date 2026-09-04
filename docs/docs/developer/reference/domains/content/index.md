@@ -1,12 +1,14 @@
 ---
-status: frozen
-last_updated: 2026-08-31
+status: baseline
+last_updated: 2026-09-04
 schema: content
 ---
 
 # 内容（Content）
 
 Content Domain 负责**用户要学什么**，是所有与具体用户无关、可被多个用户共同消费的教学内容的 canonical source of truth。
+
+中老语言知识类别的后台 HTTP 契约见 [中老语言内容管理 API](../../contracts/content/CONTENT_LANGUAGE_ADMIN_API.md)。
 
 判断标准：**即使系统中没有任何用户，这条教学数据仍然应该存在，则它属于 Content。**
 
@@ -119,9 +121,9 @@ lesson_published
 
 用户学习行为由 Learning 发布，不能混入 Content 事件模型。
 
-## V1 数据范围
+## 首期数据范围
 
-Content V1 固定 **31 张业务表**。完整表清单、字段、约束、索引和跨域 ID 规则见[数据设计](database.md)。
+Content 首期基线为 **36 张业务表**。中文和老挝语结构表完全分离；统一身份和内容版本基础设施继续共享。完整表清单、字段、约束、索引和跨域 ID 规则见[数据设计](database.md)。
 
 ## 文档地图
 

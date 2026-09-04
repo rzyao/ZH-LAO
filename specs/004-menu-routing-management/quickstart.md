@@ -43,7 +43,7 @@ curl -H "Authorization: Bearer $TOKEN" \
   http://localhost:PORT/api/v1/admin/platform/menus
 ```
 
-**预期**: 返回嵌套树 `{ groups: [...] }`,含分组 → 一级项 → 子项,每项含
+**预期**：返回嵌套树 `{ groups: [...] }`；`groups` 是根节点集合的历史字段名，每个节点含
 `label`/`route_key`/`status`/`sort_order`/`permissions`。无 `removed` 项。
 
 ---
@@ -66,9 +66,9 @@ curl -X POST -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/jso
 
 ### 场景 4: 层级深度限制 (FR-003)
 
-**运行**: 在「一级项」下再创建「子项」,再在「子项」下创建(第 4 层)。
+**运行**：连续创建至少五层目录，并在最深目录下创建带路由的页面节点。
 
-**预期**: 第 4 层创建被拒绝(400),最大深度 3 层(分组 → 一级 → 子)。
+**预期**：全部创建成功并按父子关系返回；系统不设业务深度上限。尝试将祖先移入后代时仍被拒绝且树不变。<!-- CR-004 -->
 
 ---
 

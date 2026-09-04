@@ -17,6 +17,7 @@
 | PATCH | `/api/v1/admin/platform/menus/:id` | `platform.menus.write` | `platform.menus.write` |
 | POST | `/api/v1/admin/platform/menus/:id/remove` | `platform.menus.write` | `platform.menus.write` |
 | PUT | `/api/v1/admin/platform/menus/:parent_id/order` | `platform.menus.write` | `platform.menus.write` |
+| POST | `/api/v1/admin/platform/menus/:id/move` | `platform.menus.write` | `platform.menus.write` |
 | GET | `/api/v1/admin/platform/route-targets` | `platform.menus.read` | — |
 
 ## 通用约定
@@ -84,18 +85,17 @@
 }
 ```
 
-- `groups` = 顶层分组(`parent_id IS NULL`)数组;每项含 `children`(一级项)→
-  `children`(子项)。层级固定 ≤3 层。
-- 字段: `id`(bigint)、`label`、`route_key`(可空,分组可能为 null)、`icon`(可空)、
-  `status`、`sort_order`、`updated_at`、`permissions`(string[],仅叶节点含;
-  分组/中间层可为空数组或省略)、`children`。
+- `groups` = 根节点（`parent_id IS NULL`）数组；字段名为历史传输字段名，不表示特殊分组类型。
+  每个节点含递归 `children`，不设业务层级上限。
+- 字段：`id`、`label`、`route_key`（可空，无路由即目录）、`icon`、`status`、`sort_order`、
+  `updated_at`、`permissions`（任意节点均可配置）和 `children`。
 - `removed` 状态的菜单项不出现在列表中。
 
 ---
 
 ## 2. POST `/api/v1/admin/platform/menus` — 创建菜单项
 
-创建分组(`parent_id` 省略/null)、一级项或子项。
+在根目录（`parent_id` 省略/null）或任意有效父节点下创建统一菜单节点。
 
 **Request Body**:
 ```json
@@ -110,9 +110,9 @@
 ```
 
 **字段说明**:
-- `parent_id`: `bigint | null` 可选 — 不传/null 表示顶层分组;传值表示挂到该父项下。
+- `parent_id`: `bigint | null` 可选 — 不传/null 表示顶层节点;传值表示挂到该父项下。
 - `label`: `string` 必填 — 非空(`btrim(label) <> ''`),≤120 字符。
-- `route_key`: `string` 可选 — 分组可空;非分组必填且必须命中白名单
+- `route_key`: `string` 可选 — 留空表示目录；提供时必须命中白名单
   (`MENU_ROUTE_TARGET_KEYS`,服务端镜像校验)。
 - `icon`: `string | null` 可选 — ≤64 字符(lucide key),后端仅格式校验,不做白名单。
 - `permissions`: `string[]` 可选 — 权限 key 列表;每个 key 必须存在于
@@ -121,9 +121,8 @@
 
 **校验 (400)**:
 - `label` 空白。
-- 非分组且 `route_key` 缺失或不在白名单。
+- 提供的 `route_key` 不在白名单。
 - `permissions` 含不在 catalog 的 key。
-- 层级超深(挂载后深度 > 3)。
 - 父项不存在或父项为 `removed`。
 
 **Response 201**:
@@ -195,7 +194,7 @@
 
 ## 5. PUT `/api/v1/admin/platform/menus/:parent_id/order` — 整体重排单层
 
-`parent_id` 为 `0` 表示顶层(分组层);否则为分组/一级项的 id。
+`parent_id` 为 `0` 表示根目录；否则为任意父节点 id。
 
 **Request Body**:
 ```json
@@ -209,12 +208,37 @@
   `sort_order = 0..n-1`。
 - `expected_updated_at`: 目标父项(或整层代表)的 `updated_at`;不匹配 → 409。
   防止两运营人员并发重排互相覆盖。
-- 跨父级移动不在本端点(前端先改 `parent_id` 再重排)。
+- 跨父级移动使用下述移动端点，不能通过本端点拆成多个请求。
 
 **Response 200**: `{ reordered: [ids] }`
 
 **审计**: `{ command:'reorder', parent_id, order: [...ids] }`(满足 US-004-AS2
   「批量排序可追溯」)。
+
+## 6. POST `/api/v1/admin/platform/menus/:id/move` — 原子移动节点
+
+<!-- CR-001: drag reorder and reparent -->
+
+将节点移动到目标父项的指定位置，并在同一事务内压紧源层与目标层的 `sort_order`。
+
+```json
+{
+  "parent_id": 42,
+  "position": 1,
+  "expected_updated_at": "2026-09-04T08:00:00.000Z",
+  "source_layer_updated_at": "2026-09-04T08:00:00.000Z",
+  "target_layer_updated_at": "2026-09-04T08:00:00.000Z"
+}
+```
+
+- `parent_id`: `bigint | null`;`null` 表示移至顶层。
+- `position`: 非负整数；超出目标层长度时追加。
+- 三个时间戳分别是被移动节点、源层和目标层读取时的最大 `updated_at` 快照；同层移动时
+  源层与目标层可传同一快照。
+- 拒绝节点自身、其任意后代和 `removed` 节点作为父项；若移动后子树任意节点深度超过 3，
+  返回 `PLATFORM_INVALID_ARGUMENT`。任一快照陈旧时返回 `PLATFORM_CONFLICT`。
+
+**审计**: `{ command:'move', id, from_parent_id, to_parent_id, position }`。
 
 ---
 

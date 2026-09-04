@@ -5,6 +5,8 @@ last_updated: 2026-09-03
 
 # ADR-022：Platform 扩展后台菜单与路由配置能力（打破 6 表冻结边界）
 
+> 后续修订：顶层分组、非分组路由要求及最大三层语义已由 [ADR-024](ADR-024-menu-tree-reparenting.md) 与 [ADR-026](ADR-026-unified-recursive-admin-menu-tree.md) 取代；本记录的数据归属、权限、白名单与审计决策继续有效。
+
 **状态：** `已接受`
 
 **日期：** `2026-09-03`

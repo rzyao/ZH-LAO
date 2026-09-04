@@ -5,141 +5,137 @@ import { DEV_NAV_ITEMS } from '@/navigation/config'
 import { useNavConfig } from '@/navigation/use-nav-config'
 import { useAuth } from '@/auth/context/AuthContext'
 import type { NavItem } from '@/navigation/types'
-import type { SecondaryNavConfig } from '@/navigation/types'
 import { env } from '@/app/config'
 import { cn } from '@/lib/utils'
 
-function isActive(pathname: string, href: string): boolean {
+function isActive(pathname: string, href: string | undefined): boolean {
+  if (!href) return false
   if (href === '/') return pathname === '/'
   return pathname === href || pathname.startsWith(`${href}/`)
 }
 
-function SidebarItem({
-  item,
-  collapsed,
-  pathname,
-  secondary,
-}: {
-  item: NavItem
-  collapsed: boolean
-  pathname: string
-  secondary?: SecondaryNavConfig
-}) {
+function hasActiveDescendant(pathname: string, item: NavItem): boolean {
+  return (item.children ?? []).some((child) => isActive(pathname, child.href) || hasActiveDescendant(pathname, child))
+}
+
+function itemRowClass(active: boolean, collapsed: boolean): string {
+  return cn(
+    'flex h-9 min-w-0 items-center gap-2 rounded-md border-l-2 border-transparent px-3 text-sm transition-colors',
+    active
+      ? 'border-primary bg-sidebar-accent font-medium text-sidebar-accent-foreground'
+      : 'text-sidebar-foreground/80 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground',
+    collapsed && 'justify-center px-0',
+  )
+}
+
+/** 统一递归目录节点；任意节点都可带路由、带子项，或同时具备两者。 */
+function SidebarNode({ item, collapsed, pathname }: { item: NavItem; collapsed: boolean; pathname: string }) {
+  const children = item.children ?? []
+  const hasChildren = children.length > 0
   const active = isActive(pathname, item.href)
-  const hasChildren = Boolean(secondary?.items.length)
-  // 点击展开/收起(手风琴式);当前激活时默认展开
-  const [open, setOpen] = React.useState(active)
-  React.useEffect(() => {
-    if (active) setOpen(true)
-  }, [active])
-  const Icon = item.icon
+  const branchActive = active || hasActiveDescendant(pathname, item)
+  const [open, setOpen] = React.useState(false)
   const expanded = !collapsed && hasChildren && open
+  const combinedNavigableDirectory = Boolean(item.href && hasChildren && !collapsed)
+  const Icon = item.icon
+
+  const labelContent = (
+    <>
+      <Icon aria-hidden className="size-4 shrink-0" />
+      {!collapsed ? <span className="truncate">{item.label}</span> : null}
+    </>
+  )
 
   return (
     <div>
-      {hasChildren ? (
-        <button
-          type="button"
-          onClick={() => setOpen((v) => !v)}
-          className={cn(
-            'flex h-9 w-full items-center gap-2 rounded-md border-l-2 border-transparent px-3 text-sm transition-colors',
-            active
-              ? 'border-primary bg-sidebar-accent font-medium text-sidebar-accent-foreground'
-              : 'text-sidebar-foreground/80 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground',
-            collapsed && 'justify-center px-0',
-          )}
-          aria-expanded={expanded}
-          aria-current={active ? 'page' : undefined}
-          title={collapsed ? item.label : undefined}
-        >
-          <Icon aria-hidden className="size-4 shrink-0" />
-          {!collapsed ? <span className="truncate">{item.label}</span> : null}
-          {!collapsed ? (
-            <ChevronDown
-              aria-hidden
-              className={cn('ml-auto size-3.5 shrink-0 text-sidebar-foreground/50 transition-transform', expanded && 'rotate-180')}
-            />
-          ) : null}
-        </button>
-      ) : (
-        <Link
-          to={item.href}
-          className={cn(
-            'flex h-9 items-center gap-2 rounded-md border-l-2 border-transparent px-3 text-sm transition-colors',
-            active
-              ? 'border-primary bg-sidebar-accent font-medium text-sidebar-accent-foreground'
-              : 'text-sidebar-foreground/80 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground',
-            collapsed && 'justify-center px-0',
-          )}
-          aria-current={active ? 'page' : undefined}
-          title={collapsed ? item.label : undefined}
-        >
-          <Icon aria-hidden className="size-4 shrink-0" />
-          {!collapsed ? <span className="truncate">{item.label}</span> : null}
-        </Link>
-      )}
+      <div
+        className={cn(
+          'flex min-w-0 items-center gap-0.5',
+          combinedNavigableDirectory && itemRowClass(active, false),
+          combinedNavigableDirectory && 'gap-0 px-0',
+        )}
+      >
+        {item.href ? (
+          <Link
+            to={item.href}
+            onClick={() => {
+              if (hasChildren && !collapsed) setOpen((value) => !value)
+            }}
+            className={cn(
+              combinedNavigableDirectory
+                ? 'flex h-full min-w-0 flex-1 items-center gap-2 px-3'
+                : itemRowClass(active, collapsed),
+              !combinedNavigableDirectory && 'min-w-0 flex-1',
+            )}
+            aria-current={active ? 'page' : undefined}
+            aria-expanded={hasChildren && !collapsed ? expanded : undefined}
+            title={collapsed ? item.label : undefined}
+          >
+            {labelContent}
+          </Link>
+        ) : (
+          <button
+            type="button"
+            onClick={() => hasChildren && setOpen((value) => !value)}
+            className={cn(itemRowClass(branchActive, collapsed), 'min-w-0 flex-1')}
+            aria-expanded={hasChildren ? expanded : undefined}
+            title={collapsed ? item.label : undefined}
+          >
+            {labelContent}
+            {!collapsed && hasChildren ? (
+              <ChevronDown aria-hidden className={cn('ml-auto size-3.5 shrink-0 transition-transform', expanded && 'rotate-180')} />
+            ) : null}
+          </button>
+        )}
+
+        {item.href && hasChildren && !collapsed ? (
+          <button
+            type="button"
+            onClick={() => setOpen((value) => !value)}
+            className="flex h-full w-8 shrink-0 items-center justify-center rounded-r-md text-sidebar-foreground/60 hover:bg-sidebar-foreground/10 hover:text-sidebar-foreground"
+            aria-label={`${expanded ? '收起' : '展开'} ${item.label}`}
+            aria-expanded={expanded}
+          >
+            <ChevronDown aria-hidden className={cn('size-3.5 transition-transform', expanded && 'rotate-180')} />
+          </button>
+        ) : null}
+      </div>
+
       {expanded ? (
         <div className="ml-4 mt-0.5 space-y-0.5 border-l border-sidebar-border pl-2">
-          {secondary!.items.map((child) => {
-            const childActive = isActive(pathname, child.href)
-            const ChildIcon = child.icon
-            return (
-              <Link
-                key={child.key}
-                to={child.href}
-                className={cn(
-                  'flex h-9 items-center gap-2 rounded-md px-3 text-sm transition-colors',
-                  childActive
-                    ? 'bg-sidebar-accent font-medium text-sidebar-accent-foreground'
-                    : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground',
-                )}
-                aria-current={childActive ? 'page' : undefined}
-              >
-                <ChildIcon aria-hidden className="size-3.5 shrink-0" />
-                <span className="truncate">{child.label}</span>
-              </Link>
-            )
-          })}
+          {children.map((child) => (
+            <SidebarNode key={child.key} item={child} collapsed={false} pathname={pathname} />
+          ))}
         </div>
       ) : null}
     </div>
   )
 }
 
-/** 空树最小导航入口(FR-012):配置被清空时仍可到达菜单管理页重建,防死锁。 */
+/** 配置被清空或读取失败时保留菜单管理入口，避免管理员被困。 */
 function MinimalMenuEntry({ collapsed }: { collapsed: boolean }) {
   const { can } = useAuth()
   const pathname = useRouterState({ select: (state) => state.location.pathname })
   if (!can('platform.menus.read')) return null
   const active = isActive(pathname, '/platform/menus')
   return (
-    <div>
-      <Link
-        to="/platform/menus"
-        className={cn(
-          'flex h-9 items-center gap-2 rounded-md border-l-2 border-transparent px-3 text-sm transition-colors',
-          active
-            ? 'border-primary bg-sidebar-accent font-medium text-sidebar-accent-foreground'
-            : 'text-sidebar-foreground/80 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground',
-          collapsed && 'justify-center px-0',
-        )}
-        aria-current={active ? 'page' : undefined}
-        title={collapsed ? '菜单管理' : undefined}
-      >
-        <MenuSquare aria-hidden className="size-4 shrink-0" />
-        {!collapsed ? <span className="truncate">菜单管理</span> : null}
-      </Link>
-    </div>
+    <Link
+      to="/platform/menus"
+      className={itemRowClass(active, collapsed)}
+      aria-current={active ? 'page' : undefined}
+      title={collapsed ? '菜单管理' : undefined}
+    >
+      <MenuSquare aria-hidden className="size-4 shrink-0" />
+      {!collapsed ? <span className="truncate">菜单管理</span> : null}
+    </Link>
   )
 }
 
 export function Sidebar({ mobile = false }: { mobile?: boolean }) {
   const [collapsed, setCollapsed] = React.useState(false)
   const pathname = useRouterState({ select: (state) => state.location.pathname })
-  const { nav: groups, secondary, source } = useNavConfig()
+  const { nav, source } = useNavConfig()
   const { can } = useAuth()
-
-  // FR-012: 空树时 source=fallback,叠加菜单管理最小入口
   const showMinimalEntry = source === 'fallback' && can('platform.menus.read')
 
   return (
@@ -154,15 +150,11 @@ export function Sidebar({ mobile = false }: { mobile?: boolean }) {
       <div className={cn('flex h-12 items-center border-b border-sidebar-border px-2', !mobile && collapsed && 'justify-center px-0')}>
         {!collapsed || mobile ? (
           <div className="flex min-w-0 items-center gap-2 px-1">
-            <span className="flex size-6 shrink-0 items-center justify-center rounded bg-primary text-[10px] font-bold text-primary-foreground">
-              ZL
-            </span>
+            <span className="flex size-6 shrink-0 items-center justify-center rounded bg-primary text-[10px] font-bold text-primary-foreground">ZL</span>
             <span className="truncate text-sm font-semibold">ZH-LAO 控制台</span>
           </div>
         ) : (
-          <span className="flex size-6 items-center justify-center rounded bg-primary text-[10px] font-bold text-primary-foreground">
-            ZL
-          </span>
+          <span className="flex size-6 items-center justify-center rounded bg-primary text-[10px] font-bold text-primary-foreground">ZL</span>
         )}
         <button
           type="button"
@@ -173,59 +165,25 @@ export function Sidebar({ mobile = false }: { mobile?: boolean }) {
           onClick={() => setCollapsed((value) => !value)}
           aria-label={collapsed ? '展开侧边栏' : '收起侧边栏'}
         >
-          {collapsed ? (
-            <PanelLeftOpen aria-hidden className="size-4" />
-          ) : (
-            <PanelLeftClose aria-hidden className="size-4" />
-          )}
+          {collapsed ? <PanelLeftOpen aria-hidden className="size-4" /> : <PanelLeftClose aria-hidden className="size-4" />}
         </button>
       </div>
 
-      <nav className="flex-1 space-y-3 overflow-y-auto p-2" aria-label="主导航">
-        {groups.map((group) => (
-          <div key={group.key}>
-            {!collapsed || mobile ? (
-              <div className="px-2 pb-1 text-[11px] font-medium uppercase tracking-wide text-sidebar-foreground/50">
-                {group.label}
-              </div>
-            ) : null}
-            <div className="space-y-0.5">
-              {group.items.map((item) => (
-                <SidebarItem
-                  key={item.key}
-                  item={item}
-                  collapsed={!mobile && collapsed}
-                  pathname={pathname}
-                  secondary={secondary.find((entry) => entry.prefix === item.href)}
-                />
-              ))}
-            </div>
-          </div>
+      <nav className="flex-1 space-y-0.5 overflow-y-auto p-2" aria-label="主导航">
+        {nav.map((item) => (
+          <SidebarNode key={item.key} item={item} collapsed={!mobile && collapsed} pathname={pathname} />
         ))}
 
         {showMinimalEntry ? <MinimalMenuEntry collapsed={!mobile && collapsed} /> : null}
 
-        {env.enableDesignSystem ? (
-          <div>
-            {!collapsed || mobile ? (
-              <div className="px-2 pb-1 text-[11px] font-medium uppercase tracking-wide text-sidebar-foreground/50">
-                开发辅助
-              </div>
-            ) : null}
-            <div className="space-y-0.5">
-              {DEV_NAV_ITEMS.map((item) => (
-                <SidebarItem key={item.key} item={item} collapsed={!mobile && collapsed} pathname={pathname} />
-              ))}
-            </div>
-          </div>
-        ) : null}
+        {env.enableDesignSystem
+          ? DEV_NAV_ITEMS.map((item) => <SidebarNode key={item.key} item={item} collapsed={!mobile && collapsed} pathname={pathname} />)
+          : null}
       </nav>
 
       <div className="flex h-11 items-center gap-2 border-t border-sidebar-border px-3">
         <ChevronLeft aria-hidden className="size-4 text-sidebar-foreground/50" />
-        <span className="truncate text-xs text-sidebar-foreground/70">
-          {!mobile && collapsed ? '' : '管理后台基础框架'}
-        </span>
+        <span className="truncate text-xs text-sidebar-foreground/70">{!mobile && collapsed ? '' : '管理后台基础框架'}</span>
       </div>
     </aside>
   )

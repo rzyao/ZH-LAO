@@ -17,8 +17,6 @@ import {
 import type { DatabaseExecutor } from '../../../../database/executor.js';
 import type { MenuRepository } from '../ports/platform-repositories.js';
 
-const MAX_DEPTH = 3; // 分组(1) → 一级项(2) → 子项(3)(ADR-022 §2 / FR-003)
-
 export type MenuCreateInput = Readonly<{
   parentId?: MenuInternalId | null;
   label: string;
@@ -43,6 +41,14 @@ export type MenuReorderInput = Readonly<{
   expectedUpdatedAt?: Date;
 }>;
 
+export type MenuMoveInput = Readonly<{
+  parentId: MenuInternalId | null;
+  position: number;
+  expectedUpdatedAt: Date;
+  sourceLayerUpdatedAt: Date;
+  targetLayerUpdatedAt: Date;
+}>;
+
 /** 校验权限 key ∈ OPERATOR_PERMISSION_CATALOG(FR-007 / D-106: 权限由代码 Registry 定义)。 */
 function validatePermissionsAgainstCatalog(permissions: readonly string[], isOperatorPermissionKey: (k: string) => boolean): void {
   for (const key of permissions) {
@@ -59,26 +65,19 @@ export class MenuUseCases {
     private readonly isOperatorPermissionKey: (k: string) => boolean,
   ) {}
 
-  /** 计算 parent_id 链的深度(1 = 顶层分组,2 = 一级项,3 = 子项)。 */
-  private async depthOf(executor: DatabaseExecutor, parentId: MenuInternalId | null): Promise<number> {
-    if (parentId === null) return 1;
-    let depth = 2;
+  /** 校验父目录可用，并防止既有损坏数据中的父链环导致无限遍历。 */
+  private async assertUsableParent(executor: DatabaseExecutor, parentId: MenuInternalId | null): Promise<void> {
     let cursor = parentId;
-    // 最多向上走 MAX_DEPTH-1 步;超限即超深
-    for (let i = 0; i < MAX_DEPTH; i++) {
+    const visited = new Set<string>();
+    while (cursor !== null) {
+      const key = cursor.toString();
+      if (visited.has(key)) throw invalidArgument('Menu hierarchy contains a cycle');
+      visited.add(key);
       const node = await this.menuRepo.findById(executor, cursor);
-      if (!node) {
-        throw notFound(`Parent menu ${cursor} not found`);
-      }
-      if (node.status === 'removed') {
-        throw invalidArgument(`Parent menu ${cursor} is removed and cannot host children`);
-      }
-      if (node.parentId === null) break;
+      if (!node) throw notFound(`Parent menu ${cursor} not found`);
+      if (node.status === 'removed') throw invalidArgument(`Parent menu ${cursor} is removed and cannot host children`);
       cursor = node.parentId;
-      depth += 1;
-      if (depth > MAX_DEPTH) break;
     }
-    return depth;
   }
 
   async create(executor: DatabaseExecutor, input: MenuCreateInput): Promise<MenuItem> {
@@ -89,19 +88,13 @@ export class MenuUseCases {
     const sortOrder = validateMenuSortOrder(input.sortOrder ?? 0);
     const permissions = input.permissions ?? [];
 
-    // 非分组必须要有 route_key,且必须在白名单内(FR-008 / ADR-022 §6)
-    if (parentId !== null && !routeKey) {
-      throw invalidArgument('Non-group menu items must have a route_key');
-    }
+    // route_key 与位置无关：无 route_key 的节点是容器，带 route_key 的节点也可有子项(ADR-024)。
     if (routeKey) {
       assertMenuRouteKeyWhitelisted(routeKey);
     }
     validatePermissionsAgainstCatalog(permissions, this.isOperatorPermissionKey);
 
-    const depth = await this.depthOf(executor, parentId);
-    if (depth > MAX_DEPTH) {
-      throw invalidArgument(`Menu hierarchy exceeds max depth of ${MAX_DEPTH}`);
-    }
+    await this.assertUsableParent(executor, parentId);
 
     const item = await this.menuRepo.create(executor, {
       parentId,
@@ -143,10 +136,6 @@ export class MenuUseCases {
     if (input.label !== undefined) patch.label = validateMenuLabel(input.label);
     if (input.routeKey !== undefined) {
       const routeKey = validateMenuRouteKey(input.routeKey);
-      // 非分组必须有 route_key;分组允许为空
-      if (existing.parentId !== null && !routeKey) {
-        throw invalidArgument('Non-group menu items must have a route_key');
-      }
       if (routeKey) assertMenuRouteKeyWhitelisted(routeKey);
       patch.routeKey = routeKey;
     }
@@ -158,12 +147,9 @@ export class MenuUseCases {
         throw invalidArgument('Use the remove endpoint to delete a menu item');
       }
       if (input.status === 'active' && existing.status === 'disabled') {
-        // disabled → active 需 route_key 仍有效(白名单)
+        // disabled → active 时，若配置了 route_key，它仍必须在白名单内。
         const effectiveRouteKey = existing.routeKey;
-        if (!effectiveRouteKey) {
-          throw invalidArgument('Cannot re-enable a menu without a route_key');
-        }
-        assertMenuRouteKeyWhitelisted(effectiveRouteKey);
+        if (effectiveRouteKey) assertMenuRouteKeyWhitelisted(effectiveRouteKey);
       }
       patch.status = input.status;
     }
@@ -257,6 +243,76 @@ export class MenuUseCases {
       idx += 1;
     }
     return ids;
+  }
+
+  private async layerUpdatedAt(executor: DatabaseExecutor, parentId: MenuInternalId | null): Promise<Date | null> {
+    const siblings = await this.menuRepo.findDirectChildren(executor, parentId);
+    const latest = siblings.reduce<Date | null>((latest, item) => (
+      latest === null || item.updatedAt > latest ? item.updatedAt : latest
+    ), null);
+    // 空子层由父项自身承载快照，避免首次拖入空容器时丢失并发保护。
+    if (latest === null && parentId !== null) return (await this.menuRepo.findById(executor, parentId))?.updatedAt ?? null;
+    return latest;
+  }
+
+  /** CR-001 / ADR-024：原子移动节点，并压紧源层和目标层排序。 */
+  async move(executor: DatabaseExecutor, id: MenuInternalId, input: MenuMoveInput): Promise<MenuItem> {
+    const menuId = parseMenuInternalId(id);
+    const item = await this.menuRepo.findById(executor, menuId);
+    if (!item || item.status === 'removed') throw notFound(`Menu ${menuId} not found`);
+    if (item.updatedAt.getTime() !== input.expectedUpdatedAt.getTime()) {
+      throw conflict('Menu was modified concurrently');
+    }
+    if (!Number.isInteger(input.position) || input.position < 0) {
+      throw invalidArgument('Menu move position must be a non-negative integer');
+    }
+
+    const targetParent = input.parentId === null ? null : parseMenuInternalId(input.parentId);
+    if (targetParent !== null) {
+      if (targetParent === menuId) throw invalidArgument('A menu cannot be its own parent');
+      let cursor: MenuInternalId | null = targetParent;
+      while (cursor !== null) {
+        if (cursor === menuId) throw invalidArgument('A menu cannot be moved under its descendant');
+        const ancestor = await this.menuRepo.findById(executor, cursor);
+        if (!ancestor || ancestor.status === 'removed') throw invalidArgument(`Parent menu ${cursor} cannot host children`);
+        cursor = ancestor.parentId;
+      }
+    }
+
+    const sourceParent = item.parentId;
+    const sourceVersion = await this.layerUpdatedAt(executor, sourceParent);
+    const targetVersion = sourceParent === targetParent
+      ? sourceVersion
+      : await this.layerUpdatedAt(executor, targetParent);
+    if ((sourceVersion?.getTime() ?? 0) !== input.sourceLayerUpdatedAt.getTime()
+      || (targetVersion?.getTime() ?? 0) !== input.targetLayerUpdatedAt.getTime()) {
+      throw conflict('Menu order was modified concurrently');
+    }
+
+    const source = await this.menuRepo.findDirectChildren(executor, sourceParent);
+    const sourceRemaining = source.filter((child) => child.id !== menuId);
+    const targetBase = sourceParent === targetParent
+      ? sourceRemaining
+      : await this.menuRepo.findDirectChildren(executor, targetParent);
+    const targetOrder = [...targetBase];
+    targetOrder.splice(Math.min(input.position, targetOrder.length), 0, item);
+
+    if (sourceParent !== targetParent) {
+      for (let index = 0; index < sourceRemaining.length; index += 1) {
+        await this.menuRepo.update(executor, sourceRemaining[index]!.id, { sortOrder: index });
+      }
+    }
+
+    let moved: MenuItem | null = null;
+    for (let index = 0; index < targetOrder.length; index += 1) {
+      const current = targetOrder[index]!;
+      const updated = await this.menuRepo.update(executor, current.id, {
+        ...(current.id === menuId ? { parentId: targetParent } : {}),
+        sortOrder: index,
+      });
+      if (current.id === menuId) moved = updated;
+    }
+    return moved!;
   }
 
   /** 组装嵌套树(供管理页 + Sidebar 消费);removed 不出现。 */

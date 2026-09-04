@@ -302,3 +302,52 @@ Task: "management-routes 端点"   (依赖 Service)
 - [X] T050 在 seed 迁移中为「菜单管理」页新增入口:在 `database/migrations/1270_platform_menus.sql` 的系统运维/平台控制台分组(`platform.menus` 表中 parent 为平台控制台一级项)下新增菜单项,`route_key='platform.menus'`、`label='菜单管理'`、`icon='settings'`、可见性权限 `platform.menus.read`,使配置驱动模式下运营人员可直接进入菜单管理页 per US-005/FR-012 (partial)
 - [X] T051 为菜单管理页每个分组/一级项提供组内排序 UI(上移/下移或拖拽),提交对应 `PUT /api/v1/admin/platform/menus/:parent_id/order` 调用,替代当前仅「保存顶层顺序」的单一排序按钮 per FR-006/US-001-AS3 (partial)
 - [X] T052 为顶层菜单重排(`parent_id=0`)提供并发保护:在 `apps/backend/src/modules/platform/application/use-cases/menu-use-cases.ts` 的 `reorder` 当 `parentId === null` 时增加乐观并发校验(如校验根层代表 `updated_at` 或整体版本),不匹配返回 409,满足 SC-005「0 次静默相互覆盖」 per FR-011/SC-005 (partial)
+
+## Phase 10: CR-001 — 拖拽换父级与页面优化
+
+<!-- CR-001: drag reorder and reparent -->
+
+- [ ] T053 [P] [US1] 为节点移动补充 use-case 测试：顶层与子项双向移动、同层排序、环/removed 父项/超深拒绝、三类陈旧快照冲突，在 `apps/backend/src/modules/platform/__tests__/menu-use-cases.test.ts`
+- [X] T054 [US1] 扩展 `MenuRepository` 与 Postgres 实现，支持事务内更新 `parent_id`、读取层级快照和压紧源/目标层顺序，在 `apps/backend/src/modules/platform/application/ports/platform-repositories.ts` 与 `apps/backend/src/modules/platform/infrastructure/repositories.ts`
+- [X] T055 [US1] 实现 `MenuUseCases.move`，验证父项、子树深度和并发快照，并原子更新层级排序，在 `apps/backend/src/modules/platform/application/use-cases/menu-use-cases.ts`
+- [X] T056 [US1] 增加 `POST /api/v1/admin/platform/menus/:id/move` 输入校验、授权和审计，在 `apps/backend/src/modules/platform/http/management-routes.ts`
+- [ ] T057 [P] [US1] 为移动 HTTP 契约及审计 details 补充集成测试，在 `apps/backend/src/modules/platform/__tests__/menu-http.test.ts`
+- [X] T058 [P] [US1] 扩展前端 API/React Query hooks，提交节点与源/目标层快照，在 `apps/admin/src/features/platform/menus-api.ts` 与 `apps/admin/src/features/platform/menus-queries.ts`
+- [X] T059 [US1] 将菜单管理页升级为拖拽树，支持同级排序、换父级、有效落点提示和冲突恢复，并沿用现有设计令牌，在 `apps/admin/src/features/platform/pages/menus.tsx`
+- [ ] T060 [P] [US1] 补充管理页拖拽交互、顶层/子项双向移动及状态文案测试，在 `apps/admin/src/features/platform/pages/menus.test.tsx`
+
+## Phase 11: CR-002 — 侧边栏默认收起
+
+<!-- CR-002: collapse secondary navigation by default -->
+
+- [X] T061 [P] [US5] 为含子项的顶层入口补充「当前子路由激活时仍默认收起，点击后展开」组件回归测试，在 `apps/admin/src/components/navigation/sidebar.test.tsx`
+- [X] T062 [US5] 将 Sidebar 二级菜单初始状态改为默认收起，并移除由路由激活态自动展开的行为，在 `apps/admin/src/components/navigation/sidebar.tsx`
+
+## Phase 12: CR-003 — 移除总览分组标题
+
+<!-- CR-003: hide overview group heading -->
+
+- [X] T063 [P] [US5] 增加「overview 分组不显示标题但总览看板仍可见」组件回归断言，在 `apps/admin/src/components/navigation/sidebar.test.tsx`
+- [X] T064 [US5] 在 Sidebar 隐藏 `overview` 分组标题，保留组内项目顺序和直接导航行为，在 `apps/admin/src/components/navigation/sidebar.tsx`
+
+## Phase 13: CR-004 — 统一递归目录树
+
+<!-- CR-004: unified recursive directories -->
+
+- [X] T065 [P] [US1] 将超过三层的创建与移动用例改为允许任意深度，并继续覆盖自环、后代环、无效父节点和并发冲突，在 `apps/backend/src/modules/platform/__tests__/menu-use-cases.test.ts`
+- [X] T066 [US1] 移除 `MenuUseCases` 的三层业务上限，保留父链和环完整性校验，在 `apps/backend/src/modules/platform/application/use-cases/menu-use-cases.ts`
+- [X] T067 [P] [US5] 将前端导航类型、远端配置转换、Sidebar 与面包屑统一改为递归节点模型，在 `apps/admin/src/navigation/` 与 `apps/admin/src/components/navigation/`
+- [X] T068 [US5] 统一目录与页面字号，令每层目录默认收起，并为带路由父节点分离跳转与展开操作，在 `apps/admin/src/components/navigation/sidebar.tsx`
+- [X] T069 [US1] 修复菜单管理页任意层级“新建子项”，并开放所有层级的排序与拖拽落点，在 `apps/admin/src/features/platform/pages/menus.tsx`
+- [X] T070 [P] [US5] 新增递归权限过滤、任意深度、默认收起和统一字号回归测试，在 `apps/admin/src/navigation/use-nav-config.test.ts` 与 `apps/admin/src/components/navigation/sidebar.test.tsx`
+- [X] T071 [US1] 新增前向迁移 `1330_platform_menu_recursive_directories.sql`，停用历史分组桥接节点并归一化总览与内容目录树。
+- [X] T072 同步 ADR-026、D-165、Platform/Admin 权威文档、API 契约与 Product Forge CR-004，并执行快速一致性检查。
+
+## Phase 14: CR-005 — 二级菜单项目整行点击伸缩
+
+<!-- CR-005: navigable directory row toggles -->
+
+- [X] T073 [P] [US5] 新增带路由二级目录的整行点击伸缩、`aria-expanded` 与箭头独立伸缩组件测试，在 `apps/admin/src/components/navigation/sidebar.test.tsx`。
+- [X] T074 [US5] 为带路由且含子项的 Sidebar 节点增加整行点击伸缩，同时保留链接跳转和箭头纯伸缩，在 `apps/admin/src/components/navigation/sidebar.tsx`。
+- [X] T075 [P] [US5] 更新浏览器回归、ADR-027、D-166、Admin 导航、FR-020、前端契约及 Product Forge CR-005，并执行快速一致性检查。
+- [X] T076 [US5] 将可导航目录的菜单名称与箭头合并到同一选中态容器，并补充完整选中背景组件断言。

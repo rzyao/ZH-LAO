@@ -76,7 +76,7 @@
 - **Fields**:
   - `content_id`: `bigint` PRIMARY KEY REFERENCES `content.contents(id)` ON DELETE RESTRICT。
   - `character`: `varchar(16)` NOT NULL — 原生老挝文字符，严格采用 Unicode 二进制精确比对。
-  - `letter_type`: `varchar(16)` NOT NULL — 大分类，受限为 `CHECK (letter_type IN ('consonant', 'vowel', 'tone_mark', 'other'))`（对应领域 `consonant` / `vowel` / `symbol`）。
+  - `letter_type`: `varchar(16)` NOT NULL — 大分类，受限为 `CHECK (letter_type IN ('consonant', 'vowel', 'tone_mark', 'other'))`；这是 API 与后端共同采用的分类口径。
   - `letter_class`: `varchar(16)` NULL — 正字法子分类（`cons_middle`, `cons_high`, `cons_low`, `vowel_short`, `vowel_long`, `symbol_*`）。
   - `name`: `varchar(64)` NULL — 字母名称或教学说明。
   - `romanization`: `varchar(64)` NULL — IPA 国际音标定义。

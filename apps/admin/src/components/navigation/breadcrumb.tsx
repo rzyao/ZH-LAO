@@ -2,6 +2,17 @@ import { Link, useRouterState } from '@tanstack/react-router'
 import { ChevronRight } from 'lucide-react'
 import type { BreadcrumbItem } from '@/components/common/page-header'
 import { useNavConfig } from '@/navigation/use-nav-config'
+import type { NavItem } from '@/navigation/types'
+
+function findPath(items: readonly NavItem[], pathname: string, ancestors: readonly NavItem[] = []): NavItem[] | null {
+  for (const item of items) {
+    const path = [...ancestors, item]
+    if (item.href === pathname) return path
+    const nested = findPath(item.children ?? [], pathname, path)
+    if (nested) return nested
+  }
+  return null
+}
 
 /** Derive the current breadcrumb trail from the active route (config-driven nav). */
 export function useBreadcrumb(): BreadcrumbItem[] {
@@ -14,27 +25,16 @@ export function useBreadcrumb(): BreadcrumbItem[] {
     return [{ label: '总览' }]
   }
 
-  // 从配置驱动导航(成功时)/内置 fallback 中查找当前路径的 item 与其 group
-  let foundItem: { key: string; label: string } | undefined
-  let foundGroup: { label: string } | undefined
-  for (const group of nav) {
-    for (const entry of group.items) {
-      if (entry.href === pathname || (entry.href !== '/' && pathname.startsWith(`${entry.href}/`))) {
-        foundItem = { key: entry.key, label: entry.label }
-        foundGroup = { label: group.label }
-        break
-      }
-    }
-    if (foundItem) break
-  }
-
   const crumbs: BreadcrumbItem[] = [{ label: '总览', href: '/' }]
-  if (!foundItem) {
+  const path = findPath(nav, pathname)
+  if (!path) {
     crumbs.push({ label: pathname })
     return crumbs
   }
-  if (foundGroup) crumbs.push({ label: foundGroup.label })
-  crumbs.push({ label: foundItem.label })
+  for (const item of path) {
+    if (item.href === '/') continue
+    crumbs.push({ label: item.label, ...(item.href ? { href: item.href } : {}) })
+  }
   return crumbs
 }
 

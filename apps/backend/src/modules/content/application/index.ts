@@ -6,3 +6,5 @@ export * from './use-cases/submit-character-review.js';
 export * from './use-cases/review-character.js';
 export * from './use-cases/publish-character.js';
 export * from './use-cases/get-published-alphabet.js';
+export * from './use-cases/list-managed-characters.js';
+export * from './use-cases/manage-structured-content.js';

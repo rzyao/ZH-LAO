@@ -33,7 +33,7 @@ export class CreateCharacterDraftUseCase {
     const characterId = randomUUID();
     const revisionId = randomUUID();
     const now = new Date();
-    const noAudio = validated.classification === 'symbol';
+    const noAudio = validated.classification === 'tone_mark' || validated.classification === 'other';
     const audioInputHash = computeAudioInputHash(
       validated.unicodeChar,
       noAudio ? '-' : validated.ipaPhonetic

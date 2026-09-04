@@ -1,5 +1,6 @@
 import type { LaoCharacter } from '../../domain/lao-character.js';
 import type { LaoCharacterRevision } from '../../domain/lao-character-revision.js';
+export * from './structured-content-repository.js';
 
 export interface PublishedCharacterView {
   id: string;
@@ -11,6 +12,20 @@ export interface PublishedCharacterView {
   sortOrder: number;
   noAudio: boolean;
   audioUrl: string | null;
+}
+
+export interface ManagedCharacterView {
+  id: string;
+  unicodeChar: string;
+  classification: string;
+  subtype: string;
+  ipaPhonetic: string;
+  name: string;
+  sortOrder: number;
+  noAudio: boolean;
+  status: string;
+  publishedRevisionId: string | null;
+  workingRevisionId: string | null;
 }
 
 export interface ContentRepository {
@@ -30,4 +45,5 @@ export interface ContentRepository {
   ): Promise<void>;
 
   listPublishedCharacters(classification?: string): Promise<PublishedCharacterView[]>;
+  listManagedCharacters(classification?: string): Promise<ManagedCharacterView[]>;
 }

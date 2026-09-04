@@ -69,15 +69,18 @@ export const AlphabetTable: React.FC<Props> = ({ items, onRefresh }) => {
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => handleSubmitReview(item.id, item.id)}
+                  disabled={!item.workingRevisionId}
+                  onClick={() => item.workingRevisionId && handleSubmitReview(item.id, item.workingRevisionId)}
                 >
                   提交审核
                 </Button>
                 <Button
                   size="sm"
                   variant="secondary"
+                  disabled={!item.workingRevisionId}
                   onClick={() => {
-                    setSelectedChar({ charId: item.id, revId: item.id });
+                    if (!item.workingRevisionId) return;
+                    setSelectedChar({ charId: item.id, revId: item.workingRevisionId });
                     setAuditOpen(true);
                   }}
                 >
@@ -86,7 +89,8 @@ export const AlphabetTable: React.FC<Props> = ({ items, onRefresh }) => {
                 <Button
                   size="sm"
                   variant="default"
-                  onClick={() => handlePublish(item.id, item.id)}
+                  disabled={!item.workingRevisionId}
+                  onClick={() => item.workingRevisionId && handlePublish(item.id, item.workingRevisionId)}
                 >
                   正式发布
                 </Button>

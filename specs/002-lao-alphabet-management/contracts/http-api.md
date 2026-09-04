@@ -25,9 +25,9 @@
   ```
 - **Validation**:
   - `unicode_char`: 必须为非空老挝文单字符/符号，全局唯一。
-  - `classification`: 枚举值 `["consonant", "vowel", "symbol"]`。
+  - `classification`: 枚举值 `["consonant", "vowel", "tone_mark", "other"]`。
   - `subtype`: 必须符合大类对应的子类型枚举（如 `cons_middle` 等）。
-  - `ipa_phonetic`: 当 `classification == "symbol"` 时固定为 `"-"`。
+  - `ipa_phonetic`: 当 `classification` 为 `tone_mark` 或 `other` 时固定为 `"-"`。
   - `sort_order`: 必须为大于等于 0 的整数。
 - **Success Response (201 Created)**:
   ```json
@@ -101,11 +101,38 @@
 
 ---
 
-## 4. C 端：获取公开老挝语字母表 (`GET /api/v1/content/letters`)
+## 4. 管理端：获取字母主记录 (`GET /api/v1/admin/content/letters`)
+
+- **Auth**: 需要后台登录令牌及 `content.letters.write` 权限。
+- **Visibility**: 返回所有字母主记录，不以是否存在 `published` 修订作为过滤条件；因此可管理迁移导入后尚未创建修订的记录。
+- **Query Params**:
+  - `classification`: (可选) `consonant` / `vowel` / `tone_mark` / `other`
+- **Success Response (200 OK)**:
+  ```json
+  {
+    "items": [{
+      "id": "7a2b9f3e-8c4d-4e5f-9a1b-2c3d4e5f6a7b",
+      "unicode_char": "ກ",
+      "classification": "consonant",
+      "subtype": "cons_middle",
+      "ipa_phonetic": "/k/",
+      "sort_order": 1,
+      "no_audio": false,
+      "status": "active",
+      "published_revision_id": null,
+      "working_revision_id": null
+    }],
+    "total": 68
+  }
+  ```
+
+---
+
+## 5. C 端：获取公开老挝语字母表 (`GET /api/v1/content/letters`)
 
 - **Auth**: 公开访问（Public，可附带可选学习者 Token）。
 - **Query Params**:
-  - `classification`: (可选) 过滤大类 `consonant` / `vowel` / `symbol`
+  - `classification`: (可选) 过滤大类 `consonant` / `vowel` / `tone_mark` / `other`
 - **Success Response (200 OK)**:
   ```json
   {
@@ -124,7 +151,7 @@
       {
         "id": "8b3c0a4f-9d5e-5f6a-0b2c-3d4e5f6a7b8c",
         "unicode_char": "່",
-        "classification": "symbol",
+        "classification": "tone_mark",
         "subtype": "symbol_tone",
         "ipa_phonetic": "-",
         "name": "Mai Ek",

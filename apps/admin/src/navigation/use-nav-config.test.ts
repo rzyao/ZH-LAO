@@ -1,15 +1,10 @@
 import { describe, expect, it, vi } from 'vitest'
 import { renderHook, waitFor } from '@testing-library/react'
 import { useNavConfig } from './use-nav-config'
-import type { MenuTreeNode } from './types'
+import type { MenuTreeNode, NavItem } from './types'
 
-vi.mock('@/auth/context/AuthContext', () => ({
-  useAuth: vi.fn(),
-}))
-
-vi.mock('@/features/platform/menus-queries', () => ({
-  useMenusQuery: vi.fn(),
-}))
+vi.mock('@/auth/context/AuthContext', () => ({ useAuth: vi.fn() }))
+vi.mock('@/features/platform/menus-queries', () => ({ useMenusQuery: vi.fn() }))
 
 import { useAuth } from '@/auth/context/AuthContext'
 import { useMenusQuery } from '@/features/platform/menus-queries'
@@ -20,7 +15,7 @@ const mockedUseMenusQuery = vi.mocked(useMenusQuery)
 function treeNode(partial: Partial<MenuTreeNode>): MenuTreeNode {
   return {
     id: 1,
-    label: 'node',
+    label: '节点',
     routeKey: 'overview',
     icon: null,
     sortOrder: 0,
@@ -32,81 +27,75 @@ function treeNode(partial: Partial<MenuTreeNode>): MenuTreeNode {
   }
 }
 
+function find(items: readonly NavItem[], label: string): NavItem | undefined {
+  for (const item of items) {
+    if (item.label === label) return item
+    const nested = find(item.children ?? [], label)
+    if (nested) return nested
+  }
+  return undefined
+}
+
 describe('useNavConfig', () => {
-  it('falls back to NAV_GROUPS when fetch errors (FR-009)', async () => {
+  it('菜单读取失败时回退安全默认目录树（FR-009）', async () => {
     mockedUseAuth.mockReturnValue({ can: () => true } as never)
     mockedUseMenusQuery.mockReturnValue({ isError: true, data: undefined } as never)
-
     const { result } = renderHook(() => useNavConfig())
-    await waitFor(() => {
-      expect(result.current.source).toBe('fallback')
-    })
+    await waitFor(() => expect(result.current.source).toBe('fallback'))
+    expect(find(result.current.nav, '中文内容')).toBeDefined()
   })
 
-  it('filters items by OR semantics: any permission match keeps the item (FR-007)', async () => {
-    const can = (p: string) => p === 'operations.roles.read'
-    mockedUseAuth.mockReturnValue({ can } as never)
+  it('按多权限 OR 语义过滤任意层级节点（FR-007）', async () => {
+    mockedUseAuth.mockReturnValue({ can: (permission: string) => permission === 'operations.roles.read' } as never)
     mockedUseMenusQuery.mockReturnValue({
       isError: false,
-      data: [
-        treeNode({
-          id: 1,
-          label: '运营权限',
-          routeKey: 'operations',
-          children: [
-            treeNode({
-              id: 2,
-              label: '操作员管理',
-              routeKey: 'operations.operators',
-              permissions: ['operations.operators.read', 'operations.roles.read'],
-            }),
-            treeNode({
-              id: 3,
-              label: '角色与权限',
-              routeKey: 'operations.roles',
-              permissions: ['operations.roles.read'],
-            }),
-            treeNode({
-              id: 4,
-              label: '无权限项',
-              routeKey: 'operations.audit_logs',
-              permissions: ['operations.audit_logs.read'],
-            }),
-          ],
-        }),
-      ],
+      data: [treeNode({
+        label: '系统运维', routeKey: null, children: [
+          treeNode({ id: 2, label: '操作员管理', routeKey: 'operations.operators', permissions: ['operations.operators.read', 'operations.roles.read'] }),
+          treeNode({ id: 3, label: '角色与权限', routeKey: 'operations.roles', permissions: ['operations.roles.read'] }),
+          treeNode({ id: 4, label: '无权限项', routeKey: 'operations.audit_logs', permissions: ['operations.audit_logs.read'] }),
+        ],
+      })],
     } as never)
 
     const { result } = renderHook(() => useNavConfig())
-    await waitFor(() => {
-      expect(result.current.source).toBe('remote')
-    })
-
-    // OR: 拥有 roles.read 的项(操作员管理、角色与权限)保留;无权限项(审计)隐藏
-    const items = result.current.nav[0]!.items
-    expect(items.map((i) => i.label)).toEqual(['操作员管理', '角色与权限'])
+    await waitFor(() => expect(result.current.source).toBe('remote'))
+    expect(result.current.nav[0]?.children?.map((item) => item.label)).toEqual(['操作员管理', '角色与权限'])
   })
 
-  it('keeps items with empty permission list visible to all authenticated users', async () => {
+  it('空权限列表的节点对已认证用户可见', async () => {
     mockedUseAuth.mockReturnValue({ can: () => false } as never)
     mockedUseMenusQuery.mockReturnValue({
       isError: false,
-      data: [
-        treeNode({
-          id: 1,
-          label: '总览',
-          routeKey: 'overview',
-          children: [
-            treeNode({ id: 2, label: '总览看板', routeKey: 'overview', permissions: [] }),
-          ],
-        }),
-      ],
+      data: [treeNode({ label: '总览看板', routeKey: 'overview', permissions: [] })],
+    } as never)
+    const { result } = renderHook(() => useNavConfig())
+    await waitFor(() => expect(result.current.source).toBe('remote'))
+    expect(result.current.nav.map((item) => item.label)).toEqual(['总览看板'])
+  })
+
+  it('保留任意深度目录并过滤已停用节点', async () => {
+    mockedUseAuth.mockReturnValue({ can: () => true } as never)
+    mockedUseMenusQuery.mockReturnValue({
+      isError: false,
+      data: [treeNode({
+        label: '学习与内容', routeKey: null, children: [treeNode({
+          id: 2, label: '内容管理', routeKey: 'content', children: [treeNode({
+            id: 3, label: '老挝语内容', routeKey: null, children: [treeNode({
+              id: 4, label: '文字基础', routeKey: null, children: [
+                treeNode({ id: 5, label: '字母管理', routeKey: 'content.lo.letters' }),
+                treeNode({ id: 6, label: '旧字母管理', routeKey: 'content.lo.letters', status: 'disabled' }),
+              ],
+            })],
+          })],
+        })],
+      })],
     } as never)
 
     const { result } = renderHook(() => useNavConfig())
-    await waitFor(() => {
-      expect(result.current.source).toBe('remote')
-    })
-    expect(result.current.nav[0]!.items.map((i) => i.label)).toEqual(['总览看板'])
+    await waitFor(() => expect(result.current.source).toBe('remote'))
+    expect(find(result.current.nav, '字母管理')?.href).toBe('/content/lo/letters')
+    expect(find(result.current.nav, '旧字母管理')).toBeUndefined()
+    expect(find(result.current.nav, '文字基础')?.children).toHaveLength(1)
   })
 })

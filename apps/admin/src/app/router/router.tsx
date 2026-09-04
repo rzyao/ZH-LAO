@@ -35,6 +35,12 @@ const ContentLandingPage = lazyRouteComponent(() =>
 const AlphabetPage = lazyRouteComponent(() =>
   import('@/features/content/alphabet/pages/AlphabetPage').then((module) => ({ default: module.AlphabetPage })),
 )
+const ContentCategoryPage = lazyRouteComponent(() =>
+  import('@/features/content/pages/category').then((module) => ({ default: module.ContentCategoryPage })),
+)
+const ContentReviewPage = lazyRouteComponent(() =>
+  import('@/features/content/pages/category').then((module) => ({ default: module.ContentReviewPage })),
+)
 
 const PlatformLandingPage = lazyRouteComponent(() =>
   import('@/features/platform/pages/landing').then((module) => ({ default: module.PlatformLandingPage })),
@@ -82,9 +88,7 @@ function RootComponent() {
   return (
     <AppProviders>
       <ErrorBoundary resetKey={pathname}>
-        <Suspense fallback={<PageLoading />}>
-          <Outlet />
-        </Suspense>
+        <Outlet />
       </ErrorBoundary>
     </AppProviders>
   )
@@ -97,7 +101,16 @@ export const rootRoute = createRootRoute({ component: RootComponent })
 const shellRoute = createRoute({
   getParentRoute: () => rootRoute,
   id: 'shell',
-  component: () => <AuthGuard><AppShell><Outlet /></AppShell></AuthGuard>,
+  // 懒加载只替换主内容区，侧边栏和顶部栏在页面切换时保持挂载，避免整页闪烁。
+  component: () => (
+    <AuthGuard>
+      <AppShell>
+        <Suspense fallback={<PageLoading />}>
+          <Outlet />
+        </Suspense>
+      </AppShell>
+    </AuthGuard>
+  ),
 })
 
 /* ---------- Routes inside the shell ---------- */
@@ -114,6 +127,22 @@ function makeDomainRoute(path: string, domain: string, title: string, descriptio
 
 const contentRoute = createRoute({ getParentRoute: () => shellRoute, path: '/content', component: ContentLandingPage })
 const contentLettersRoute = createRoute({ getParentRoute: () => shellRoute, path: '/content/letters', component: AlphabetPage })
+const contentCategoryRoutes = [
+  ['/content/zh/pinyin', 'zh_pinyin_element'],
+  ['/content/zh/syllables', 'zh_syllable'],
+  ['/content/zh/hanzi', 'zh_hanzi'],
+  ['/content/zh/words', 'zh_word'],
+  ['/content/zh/sentences', 'zh_sentence'],
+  ['/content/lo/syllables', 'lo_syllable'],
+  ['/content/lo/words', 'lo_word'],
+  ['/content/lo/sentences', 'lo_sentence'],
+] as const
+const generatedContentRoutes = contentCategoryRoutes.map(([path, contentType]) =>
+  createRoute({ getParentRoute: () => shellRoute, path, component: () => <ContentCategoryPage contentType={contentType} /> }),
+)
+const contentLaoLettersRoute = createRoute({ getParentRoute: () => shellRoute, path: '/content/lo/letters', component: () => <ContentCategoryPage contentType="lo_letter" /> })
+const contentZhReviewRoute = createRoute({ getParentRoute: () => shellRoute, path: '/content/zh/review', component: () => <ContentReviewPage language="中文" /> })
+const contentLoReviewRoute = createRoute({ getParentRoute: () => shellRoute, path: '/content/lo/review', component: () => <ContentReviewPage language="老挝语" /> })
 
 const learningRoute = makeDomainRoute('/learning', 'learning', '学习系统', '用户学习状态（Learning Domain）')
 const audioRoute = makeDomainRoute('/audio', 'audio', '音频生产', '音频生产流程（Audio Production Domain）')
@@ -180,6 +209,10 @@ const routeTree = rootRoute.addChildren([
     indexRoute,
     contentRoute,
     contentLettersRoute,
+    contentLaoLettersRoute,
+    contentZhReviewRoute,
+    contentLoReviewRoute,
+    ...generatedContentRoutes,
     learningRoute,
     audioRoute,
     identityRoute,

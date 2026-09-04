@@ -8,6 +8,7 @@ import {
 } from '../domain/lao-character-revision.js';
 import type {
   ContentRepository,
+  ManagedCharacterView,
   PublishedCharacterView,
 } from '../application/ports/repositories.js';
 
@@ -260,7 +261,7 @@ export class PostgresContentRepository implements ContentRepository {
       SELECT c.public_id as id, l.character as unicode_char, l.letter_type as classification,
              l.letter_class as subtype, l.romanization as ipa_phonetic, l.name,
              l.sort_order,
-             CASE WHEN l.letter_type = 'symbol' THEN true ELSE false END as no_audio,
+             CASE WHEN l.letter_type IN ('tone_mark', 'other') THEN true ELSE false END as no_audio,
              NULL as audio_url
       FROM content.contents c
       JOIN content.lo_letters l ON l.content_id = c.id
@@ -277,8 +278,9 @@ export class PostgresContentRepository implements ContentRepository {
     query += ` ORDER BY CASE l.letter_type
                   WHEN 'consonant' THEN 1
                   WHEN 'vowel' THEN 2
-                  WHEN 'symbol' THEN 3
-                  ELSE 4 END, l.sort_order ASC`;
+                  WHEN 'tone_mark' THEN 3
+                  WHEN 'other' THEN 4
+                  ELSE 5 END, l.sort_order ASC`;
 
     const res = await this.db.query<PublishedCharacterView & {
       unicode_char: string;
@@ -300,6 +302,51 @@ export class PostgresContentRepository implements ContentRepository {
     }));
   }
 
+  async listManagedCharacters(classification?: string): Promise<ManagedCharacterView[]> {
+    let query = `
+      SELECT c.public_id AS id, l.character AS unicode_char, l.letter_type AS classification,
+             l.letter_class AS subtype, l.romanization AS ipa_phonetic, l.name,
+             l.sort_order, c.status,
+             CASE WHEN l.letter_type IN ('tone_mark', 'other') THEN true ELSE false END AS no_audio,
+             published.revision_public_id AS published_revision_id,
+             working.revision_public_id AS working_revision_id
+      FROM content.contents c
+      JOIN content.lo_letters l ON l.content_id = c.id
+      LEFT JOIN LATERAL (
+        SELECT revision_public_id FROM content.content_revisions
+        WHERE entity_id = c.public_id AND entity_type = 'content' AND status = 'published'
+        LIMIT 1
+      ) published ON true
+      LEFT JOIN LATERAL (
+        SELECT revision_public_id FROM content.content_revisions
+        WHERE entity_id = c.public_id AND entity_type = 'content'
+          AND status IN ('draft', 'pending_review', 'approved', 'rejected')
+        ORDER BY revision_number DESC LIMIT 1
+      ) working ON true
+      WHERE c.content_type = 'lo_letter'
+    `;
+    const params: unknown[] = [];
+    if (classification) {
+      params.push(classification);
+      query += ` AND l.letter_type = $${params.length}`;
+    }
+    query += ` ORDER BY CASE l.letter_type
+                  WHEN 'consonant' THEN 1 WHEN 'vowel' THEN 2
+                  WHEN 'tone_mark' THEN 3 WHEN 'other' THEN 4 ELSE 5 END,
+                l.sort_order ASC`;
+    const res = await this.db.query<{
+      id: string; unicode_char: string; classification: string; subtype: string;
+      ipa_phonetic: string | null; name: string | null; sort_order: number;
+      no_audio: boolean; status: string; published_revision_id: string | null; working_revision_id: string | null;
+    }>(query, params);
+    return res.rows.map((row) => ({
+      id: row.id, unicodeChar: row.unicode_char, classification: row.classification,
+      subtype: row.subtype, ipaPhonetic: row.ipa_phonetic ?? '', name: row.name ?? '',
+      sortOrder: row.sort_order, noAudio: row.no_audio, status: row.status,
+      publishedRevisionId: row.published_revision_id, workingRevisionId: row.working_revision_id,
+    }));
+  }
+
   private mapCharacterRow(row: Record<string, unknown>): LaoCharacter {
     return new LaoCharacter({
       id: String(row['id']),
@@ -307,7 +354,7 @@ export class PostgresContentRepository implements ContentRepository {
       classification: row['classification'] as never,
       subtype: row['subtype'] as never,
       sortOrder: typeof row['sort_order'] === 'number' ? row['sort_order'] : 0,
-      noAudio: row['classification'] === 'symbol',
+      noAudio: row['classification'] === 'tone_mark' || row['classification'] === 'other',
       onlineStatus: row['online_status'] === 'active' ? 'online' : 'offline',
       publishedRevisionId: (row['published_revision_id'] as string) ?? null,
       workingRevisionId: (row['working_revision_id'] as string) ?? null,

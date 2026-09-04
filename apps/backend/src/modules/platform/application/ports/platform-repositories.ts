@@ -243,6 +243,7 @@ export interface MenuRepository {
     id: MenuInternalId,
     input: Readonly<{
       label?: string;
+      parentId?: MenuInternalId | null;
       routeKey?: string | null;
       icon?: string | null;
       sortOrder?: number;

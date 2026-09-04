@@ -22,12 +22,12 @@ describe('Unicode & Domain Invariants', () => {
     expect(char.noAudio).toBe(false);
   });
 
-  it('should enforce noAudio = true for symbols', () => {
+  it('should enforce noAudio = true for tone marks', () => {
     expect(() => {
       new LaoCharacter({
         id: '00000000-0000-0000-0000-000000000002',
         unicodeChar: '່',
-        classification: 'symbol',
+        classification: 'tone_mark',
         subtype: 'symbol_tone',
         sortOrder: 1,
         noAudio: false, // Invalid
@@ -37,7 +37,7 @@ describe('Unicode & Domain Invariants', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
       });
-    }).toThrow('Symbols must strictly enforce noAudio = true');
+    }).toThrow('Tone marks must strictly enforce noAudio = true');
   });
 
   it('should compute consistent SHA-256 hash for audio input', () => {

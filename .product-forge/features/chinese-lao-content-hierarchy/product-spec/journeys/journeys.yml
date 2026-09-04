@@ -1,0 +1,68 @@
+schema_version: 1
+feature: "chinese-lao-content-hierarchy"
+journeys:
+  - id: "JRN-001"
+    title: "维护中文拼音与中文音节"
+    actor: "获授权内容运营人员"
+    stories: ["US-001"]
+    entry: "内容管理 → 中文内容 → 拼音管理"
+    success: "同语言的拼音和中文音节工作版本被保存并可提交审核"
+    preconditions: ["运营人员已认证", "具备相应写入权限"]
+    steps:
+      - {id: "STEP-001", action: "打开拼音管理页并创建或选择拼音", ui: "CMP-DataTable, CMP-Button, CMP-Dialog", expect: "仅显示中文拼音，工作版本状态清晰", contracts: ["API-zhPinyinList", "API-zhPinyinDraft"]}
+      - {id: "STEP-002", action: "打开中文音节管理页并编辑其拼音组成", ui: "CMP-DataTable, CMP-Dialog", expect: "组成项按顺序保存且不可关联老挝语内容", contracts: ["API-zhSyllableDraft"]}
+    edges:
+      - {id: "EDGE-001", of: "STEP-002", case: "跨语言关系", given: "选择老挝语结构项", when: "保存关系", then: "服务端拒绝并定位错误", priority: "P0"}
+    e2e: {runner: "playwright-cli", smoke: true}
+  - id: "JRN-002"
+    title: "维护中文汉字、词语与句子"
+    actor: "获授权内容运营人员"
+    stories: ["US-002"]
+    entry: "内容管理 → 中文内容 → 汉字管理"
+    success: "中文下游内容及有序关系保存为工作版本"
+    preconditions: ["运营人员已认证", "上游中文内容存在"]
+    steps:
+      - {id: "STEP-003", action: "在汉字页创建或编辑汉字并查看关联中文音节", ui: "CMP-DataTable, CMP-Dialog", expect: "显示当前工作和发布版本", contracts: ["API-zhHanziDraft"]}
+      - {id: "STEP-004", action: "在词语和句子页编辑同语言组成关系", ui: "CMP-DataTable, CMP-Dialog", expect: "关系顺序和反向引用可见", contracts: ["API-zhWordDraft", "API-zhSentenceDraft"]}
+    edges:
+      - {id: "EDGE-002", of: "STEP-004", case: "并发编辑", given: "工作版本被其他人更新", when: "保存", then: "显示冲突并保留本地输入", priority: "P1"}
+    e2e: {runner: "playwright-cli", smoke: false}
+  - id: "JRN-003"
+    title: "维护老挝语字母与音节"
+    actor: "获授权内容运营人员"
+    stories: ["US-003"]
+    entry: "内容管理 → 老挝语内容 → 字母管理"
+    success: "字母与音节组成关系保存为工作版本"
+    preconditions: ["运营人员已认证", "具备相应写入权限"]
+    steps:
+      - {id: "STEP-005", action: "在字母管理页创建或派生字母工作版本", ui: "CMP-DataTable, CMP-Dialog", expect: "复用现有老挝字母版本工作流", contracts: ["API-loLetterDraft"]}
+      - {id: "STEP-006", action: "在音节页按顺序编辑字母组成", ui: "CMP-DataTable, CMP-Dialog", expect: "不合法或未发布依赖清晰标记", contracts: ["API-loSyllableDraft"]}
+    edges:
+      - {id: "EDGE-003", of: "STEP-006", case: "组成不完整", given: "缺少必需组成项", when: "提交审核", then: "拒绝并标示缺项", priority: "P0"}
+    e2e: {runner: "playwright-cli", smoke: true}
+  - id: "JRN-004"
+    title: "维护老挝语词语与句子"
+    actor: "获授权内容运营人员"
+    stories: ["US-004"]
+    entry: "内容管理 → 老挝语内容 → 词语管理"
+    success: "词语和句子工作版本保存并展示依赖"
+    preconditions: ["运营人员已认证", "上游老挝语内容存在"]
+    steps:
+      - {id: "STEP-007", action: "编辑词语的音节组成", ui: "CMP-DataTable, CMP-Dialog", expect: "组成顺序和发布状态可见", contracts: ["API-loWordDraft"]}
+      - {id: "STEP-008", action: "编辑句子并查看词语引用", ui: "CMP-DataTable, CMP-Dialog", expect: "反向引用和版本状态可见", contracts: ["API-loSentenceDraft"]}
+    edges:
+      - {id: "EDGE-004", of: "STEP-008", case: "无匹配内容", given: "筛选无结果", when: "查看列表", then: "显示可恢复空状态和创建入口", priority: "P2"}
+    e2e: {runner: "playwright-cli", smoke: false}
+  - id: "JRN-005"
+    title: "审核并发布内容版本"
+    actor: "获授权审核或发布人员"
+    stories: ["US-005"]
+    entry: "内容管理 → 中文内容或老挝语内容 → 审核发布"
+    success: "合法工作版本被原子发布，或得到可定位阻塞信息"
+    preconditions: ["运营人员已认证", "存在待审工作版本"]
+    steps:
+      - {id: "STEP-009", action: "筛选待审核版本并查看与发布版的差异", ui: "CMP-DataTable, CMP-StatusBadge, CMP-Dialog", expect: "显示关系差异和审计信息", contracts: ["API-contentReviewQueue"]}
+      - {id: "STEP-010", action: "审核后执行发布预检并确认发布", ui: "CMP-ConfirmDialog, CMP-StatusBadge", expect: "合法版本原子发布并记录审计", contracts: ["API-contentReview", "API-contentPublish"]}
+    edges:
+      - {id: "EDGE-005", of: "STEP-010", case: "发布依赖阻塞", given: "上游依赖未发布或版本陈旧", when: "发布", then: "不发布且返回可跳转阻塞项", priority: "P0"}
+    e2e: {runner: "playwright-cli", smoke: true}

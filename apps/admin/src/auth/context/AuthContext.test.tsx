@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { render, screen, act } from '@testing-library/react'
+import { render, screen, act, waitFor } from '@testing-library/react'
 import { AuthProvider, useAuth } from './AuthContext'
 import { assertUuid } from '@/api/contracts'
 import { writeAdminSession, readAdminSession } from '../session-store'
@@ -63,7 +63,7 @@ describe('AuthContext - session restoration, 403 recovery & change password', ()
     expect(screen.getByTestId('permissions')).toHaveTextContent('operations.read')
   })
 
-  it('silently refreshes permissions from /me (SC-007)', async () => {
+  it('恢复会话后自动从服务端刷新权限（SC-007）', async () => {
     const operator = { id: assertUuid('00000000-0000-4000-8000-000000000001'), name: 'Alice', roleId: 'admin' }
     writeAdminSession({
       accessToken: 'acc',
@@ -83,12 +83,10 @@ describe('AuthContext - session restoration, 403 recovery & change password', ()
       </AuthProvider>,
     )
 
-    await act(async () => {
-      screen.getByTestId('btn-refresh').click()
+    await waitFor(() => {
+      expect(getCurrentOperatorMock).toHaveBeenCalledTimes(1)
+      expect(screen.getByTestId('permissions')).toHaveTextContent('operations.read,operations.write,platform.*.*')
     })
-
-    expect(getCurrentOperatorMock).toHaveBeenCalledTimes(1)
-    expect(screen.getByTestId('permissions')).toHaveTextContent('operations.read,operations.write,platform.*.*')
     expect(readAdminSession()?.permissions).toEqual(['operations.read', 'operations.write', 'platform.*.*'])
   })
 

@@ -1,0 +1,72 @@
+schema_version: 3
+feature: "menu-drag-reparent"
+created_at: "2026-09-04"
+v2_native: true
+feature_mode: "standard"
+flow_mode: "gated"
+speckit_mode: "classic"
+phases:
+  problem_discovery: { status: "not_applicable" }
+  research: { status: "completed" }
+  product_spec: { status: "completed" }
+  design_system_harvest:
+    status: "completed"
+    digest_path: "design-system/manifest.md"
+  revalidation: { status: "completed" }
+  bridge: { status: "completed" }
+  plan: { status: "in_progress" }
+  tasks: { status: "pending" }
+  pre_impl_review: { status: "pending" }
+  implement: { status: "pending" }
+  code_review: { status: "pending" }
+  verify: { status: "pending" }
+  test_plan: { status: "pending" }
+  test_run: { status: "pending" }
+  release_readiness: { status: "pending" }
+  spec_merge: { status: "pending" }
+  retrospective: { status: "pending" }
+change_requests:
+  - id: "CR-001"
+    title: "拖拽排序、换父级与页面样式优化"
+    status: "accepted"
+    timestamp: "2026-09-04T00:00:00Z"
+    artifacts_affected: 9
+    tasks_added: 8
+    phase_rollback: "plan"
+  - id: "CR-002"
+    title: "侧边栏顶层分组默认收起"
+    status: "accepted"
+    timestamp: "2026-09-04T00:00:00Z"
+    artifacts_affected: 6
+    tasks_added: 2
+    phase_rollback: null
+  - id: "CR-003"
+    title: "移除总览分组标题，保留总览看板"
+    status: "accepted"
+    timestamp: "2026-09-04T00:00:00Z"
+    artifacts_affected: 6
+    tasks_added: 2
+    phase_rollback: null
+  - id: "CR-004"
+    title: "移除分组功能，采用自由嵌套目录"
+    status: "accepted"
+    timestamp: "2026-09-04T15:30:00Z"
+    artifacts_affected: 12
+    tasks_added: 8
+    phase_rollback: "plan"
+  - id: "CR-005"
+    title: "二级菜单项目整行点击伸缩"
+    status: "accepted"
+    timestamp: "2026-09-04T16:00:00Z"
+    artifacts_affected: 9
+    tasks_added: 3
+    phase_rollback: null
+gates: []
+task_log: []
+last_updated: "2026-09-04T16:20:00Z"
+sync_runs:
+  last_run: "2026-09-04T16:10:00Z"
+  total_runs: 4
+  last_drift_count: 0
+  last_critical_count: 0
+  last_verdict: "CONSISTENT"

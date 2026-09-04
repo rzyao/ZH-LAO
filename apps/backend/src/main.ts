@@ -19,7 +19,7 @@ import { AdminOperatorWriter } from './modules/operations/application/services/i
 import { AdminAccountWriter } from './modules/identity/application/services/admin-account-writer.js';
 import { AdminOperatorProvisioningService } from './modules/admin-operator-provisioning/application/admin-operator-provisioning-service.js';
 import { ensureDefaultAdmin } from './modules/identity/application/index.js';
-import { PostgresContentRepository } from './modules/content/infrastructure/index.js';
+import { PostgresContentRepository, PostgresStructuredContentRepository } from './modules/content/infrastructure/index.js';
 import { registerContentRoutes } from './modules/content/http/composition.js';
 
 const config=loadConfig();
@@ -58,6 +58,7 @@ if(process.argv[2]==='--operations-bootstrap'){
   await operations.registerHttp(app);
   await registerContentRoutes(app, {
     contentRepository: new PostgresContentRepository(executor, transactionManager),
+    structuredContentRepository: new PostgresStructuredContentRepository(executor, transactionManager),
     authentication: identityDependencies.authentication,
     authorizer: operations.service,
     audit: operations.service,

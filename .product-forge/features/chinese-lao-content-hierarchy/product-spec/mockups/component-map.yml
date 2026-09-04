@@ -1,0 +1,4 @@
+schema_version: 1
+feature: "chinese-lao-content-hierarchy"
+screens:
+  - {screen: "全部类别管理页面", regions: [{region: "应用外壳", component: "CMP-AppShell", target_path: "apps/admin/src/components/navigation/app-shell.tsx", journeys: ["JRN-001", "JRN-002", "JRN-003", "JRN-004", "JRN-005"]}, {region: "内容列表", component: "CMP-DataTable", target_path: "apps/admin/src/components/data-table/data-table.tsx", journeys: ["JRN-001", "JRN-002", "JRN-003", "JRN-004", "JRN-005"]}, {region: "草稿编辑器", component: "CMP-Dialog", target_path: "apps/admin/src/components/ui/dialog.tsx", journeys: ["JRN-001", "JRN-002", "JRN-003", "JRN-004"]}, {region: "发布确认", component: "CMP-ConfirmDialog", target_path: "apps/admin/src/components/feedback/confirm-dialog.tsx", journeys: ["JRN-005"]}]}

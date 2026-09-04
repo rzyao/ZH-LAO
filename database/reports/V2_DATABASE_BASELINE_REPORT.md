@@ -1,6 +1,6 @@
 # V2 Database Baseline Report
 
-Generated from PostgreSQL catalog at: 2026-09-04T01:23:54.953Z
+Generated from PostgreSQL catalog at: 2026-09-04T15:29:06.954Z
 
 Final status: **PASS**
 
@@ -8,12 +8,12 @@ Final status: **PASS**
 
 | Item | Value |
 | --- | --- |
-| Database | zh_lao_v2_baseline |
-| PostgreSQL | 18.0 |
+| Database | zh_lao |
+| PostgreSQL | 18.6 |
 | Role | postgres |
 | Business schemas | identity, content, learning, social, chat, audio, commerce, rewards, trust, operations, platform |
 | Infrastructure schemas | infrastructure |
-| Business tables | 125 core+revision / 121 original target |
+| Business tables | 129 core+revision / 121 original target |
 | Infrastructure tables | 2 |
 | Extensions | pg_trgm 1.6, plpgsql 1.0 |
 | Illegal cross-domain FK | 0 |
@@ -24,33 +24,39 @@ Only `pg_trgm` was added by V2. `plpgsql` is built in. The V2 baseline did not i
 
 | Migration | SHA-256 | Applied at |
 | --- | --- | --- |
-| 0000_infrastructure.sql | 5d918e0280348c62b2f9ca1a8a7d57cf15a779f2da40c2f2cb0493ce70099e5a | 2026-09-04T01:23:53.172Z |
-| 0100_identity.sql | 0e6d17346ed339145b4cdc7dc0c6772262685169eca64f1b503ca2bedb183d36 | 2026-09-04T01:23:53.185Z |
-| 0200_operations.sql | c35fa48ff2bf841550cac0927879b999b827c23b84a01ebf9bd55b01986fc632 | 2026-09-04T01:23:53.204Z |
-| 0300_platform.sql | 42df6a8c3a78ab149f57e4bd28e6896aae1590e8349a0a9dc2e54b5fa4791183 | 2026-09-04T01:23:53.230Z |
-| 0400_content.sql | c722654def7a71079d98c355d046d8d6bc3a68f304f3998573d0862540a40986 | 2026-09-04T01:23:53.269Z |
-| 0500_learning.sql | 7f6007c313f684385a5dba4cf9ad134b49293468d7479cc7a415c5bfbabfb06c | 2026-09-04T01:23:53.441Z |
-| 0600_audio.sql | 42ca0d357babb1acf6b4ead5a500b16c096a8b8a1b3861b67e0ee3f4dddbc453 | 2026-09-04T01:23:53.487Z |
-| 0700_social.sql | b5853d01e9fecb129cf0d95f71e36d6d221dbec8a3c50d6ef0a3e8d93120b4a9 | 2026-09-04T01:23:53.566Z |
-| 0800_chat.sql | 32b0ab8f5e4f1c05a229c99fd6063fbfd4947e3f2014578ae6bc0a5cefeb8126 | 2026-09-04T01:23:53.682Z |
-| 0900_commerce.sql | 79c56da178e30e303955fa88837a7c735e707a04578a5cc9c56d9ea8d188282d | 2026-09-04T01:23:53.716Z |
-| 1000_rewards.sql | 86f4dc243a826481a51e37e595d90923d1e570f62923e69e13c6396b78c5a792 | 2026-09-04T01:23:53.850Z |
-| 1100_trust.sql | c08b1476e4ffe1736e135657dff0001ca92c57465e6236fbf645fd1f5c20964a | 2026-09-04T01:23:53.916Z |
-| 1200_asset_infrastructure.sql | d30944c818f6b39aa9bb1dd8b4584869991425d1c0df6d4067c8675ba402056d | 2026-09-04T01:23:53.963Z |
-| 1210_trust_evidence.sql | 5a5978b55b50c5aec09ed02542e72ecb11f6cc6f80cd44ca0a881fd865d0d930 | 2026-09-04T01:23:53.973Z |
-| 1220_identity_auth_runtime.sql | 37adee07f83b4b49499c4497b0c1fa9a9f76820273917169110cfdc0fa3755e8 | 2026-09-04T01:23:53.985Z |
-| 1230_system_outbox.sql | 69752dd12ec2f925c1ab86fefc3616040c13aa59828f11fbad34532bd5b331db | 2026-09-04T01:23:54.011Z |
-| 1240_content_revision.sql | e2f29697c5d328b938642f9393e0e0e356aa5df6a400c839b4c306cd0a9dbd77 | 2026-09-04T01:23:54.022Z |
-| 1250_platform_override_indexes.sql | 7365c2b163588aea63aa19a931b195e9c33a5115662582310207a7df28d9f7b1 | 2026-09-04T01:23:54.034Z |
-| 1260_admin_credentials.sql | a61edef0fc199688303852f7c73725e11b05b82ab3371d780fd5f33d9fbac96f | 2026-09-04T01:23:54.040Z |
-| 1270_platform_menus.sql | acb25a095c6a4d916d8fba71fd6c56b1d3e5fbf4caad7d78c1eb4d66ee1da35a | 2026-09-04T01:23:54.047Z |
+| 0000_infrastructure.sql | 5d918e0280348c62b2f9ca1a8a7d57cf15a779f2da40c2f2cb0493ce70099e5a | 2026-09-04T02:09:12.748Z |
+| 0100_identity.sql | 0e6d17346ed339145b4cdc7dc0c6772262685169eca64f1b503ca2bedb183d36 | 2026-09-04T02:09:12.763Z |
+| 0200_operations.sql | c35fa48ff2bf841550cac0927879b999b827c23b84a01ebf9bd55b01986fc632 | 2026-09-04T02:09:12.779Z |
+| 0300_platform.sql | 42df6a8c3a78ab149f57e4bd28e6896aae1590e8349a0a9dc2e54b5fa4791183 | 2026-09-04T02:09:12.800Z |
+| 0400_content.sql | c722654def7a71079d98c355d046d8d6bc3a68f304f3998573d0862540a40986 | 2026-09-04T02:09:12.832Z |
+| 0500_learning.sql | 7f6007c313f684385a5dba4cf9ad134b49293468d7479cc7a415c5bfbabfb06c | 2026-09-04T02:09:12.975Z |
+| 0600_audio.sql | 42ca0d357babb1acf6b4ead5a500b16c096a8b8a1b3861b67e0ee3f4dddbc453 | 2026-09-04T02:09:13.014Z |
+| 0700_social.sql | b5853d01e9fecb129cf0d95f71e36d6d221dbec8a3c50d6ef0a3e8d93120b4a9 | 2026-09-04T02:09:13.102Z |
+| 0800_chat.sql | 32b0ab8f5e4f1c05a229c99fd6063fbfd4947e3f2014578ae6bc0a5cefeb8126 | 2026-09-04T02:09:13.229Z |
+| 0900_commerce.sql | 79c56da178e30e303955fa88837a7c735e707a04578a5cc9c56d9ea8d188282d | 2026-09-04T02:09:13.259Z |
+| 1000_rewards.sql | 86f4dc243a826481a51e37e595d90923d1e570f62923e69e13c6396b78c5a792 | 2026-09-04T02:09:13.370Z |
+| 1100_trust.sql | c08b1476e4ffe1736e135657dff0001ca92c57465e6236fbf645fd1f5c20964a | 2026-09-04T02:09:13.429Z |
+| 1200_asset_infrastructure.sql | d30944c818f6b39aa9bb1dd8b4584869991425d1c0df6d4067c8675ba402056d | 2026-09-04T02:09:13.466Z |
+| 1210_trust_evidence.sql | 5a5978b55b50c5aec09ed02542e72ecb11f6cc6f80cd44ca0a881fd865d0d930 | 2026-09-04T02:09:13.476Z |
+| 1220_identity_auth_runtime.sql | 37adee07f83b4b49499c4497b0c1fa9a9f76820273917169110cfdc0fa3755e8 | 2026-09-04T02:09:13.487Z |
+| 1230_system_outbox.sql | 69752dd12ec2f925c1ab86fefc3616040c13aa59828f11fbad34532bd5b331db | 2026-09-04T02:09:13.512Z |
+| 1240_content_revision.sql | e2f29697c5d328b938642f9393e0e0e356aa5df6a400c839b4c306cd0a9dbd77 | 2026-09-04T02:09:13.521Z |
+| 1250_platform_override_indexes.sql | 7365c2b163588aea63aa19a931b195e9c33a5115662582310207a7df28d9f7b1 | 2026-09-04T02:09:13.533Z |
+| 1260_admin_credentials.sql | a61edef0fc199688303852f7c73725e11b05b82ab3371d780fd5f33d9fbac96f | 2026-09-04T02:09:13.540Z |
+| 1270_platform_menus.sql | acb25a095c6a4d916d8fba71fd6c56b1d3e5fbf4caad7d78c1eb4d66ee1da35a | 2026-09-04T02:09:13.546Z |
+| 1280_content_letter_permissions.sql | 136b9abcf8d0e04f9c1cbf1b7ed11af15c4a1aa44ff092f9805da41fde6c56e4 | 2026-09-04T06:00:27.319Z |
+| 1290_content_revision_review_workflow.sql | 6d63133a6667c7bdd80459e5df888c77eb6a9b117e543c14cd81fac60bbf41c6 | 2026-09-04T06:18:04.607Z |
+| 1300_content_language_navigation.sql | 3b512b6ce3b31e9301e6e59669bac4ebb22acb3b3a7a3e833723ad65ff1b380d | 2026-09-04T13:32:27.308Z |
+| 1310_content_language_structures.sql | 3142fb45053a3d0c794286d03e4e4727632480dfda4cc2aa1fb732baeb7f0ab4 | 2026-09-04T13:54:56.255Z |
+| 1320_content_language_permissions.sql | 684994303405b9a0cbb07b8ccecab24eaabed8cc45aa049ecb5c316ab4a185c3 | 2026-09-04T13:54:56.297Z |
+| 1330_platform_menu_recursive_directories.sql | ce3abae555be0b7984a325ef3342a8ea0d5defd529dfcede6d6c712eec1b6a01 | 2026-09-04T15:29:05.772Z |
 
 ## Domain summary
 
 | Schema | Tables | PK | FK | UNIQUE constraints | CHECK | Indexes |
 | --- | --- | --- | --- | --- | --- | --- |
 | identity | 8 | 8 | 8 | 6 | 15 | 23 |
-| content | 32 | 32 | 42 | 27 | 47 | 69 |
+| content | 36 | 36 | 49 | 29 | 54 | 76 |
 | learning | 10 | 10 | 1 | 1 | 15 | 17 |
 | social | 19 | 19 | 26 | 10 | 26 | 43 |
 | chat | 7 | 7 | 9 | 6 | 14 | 15 |
@@ -600,25 +606,34 @@ Indexes:
 | created_at | timestamp with time zone | false | now() | — |
 | published_at | timestamp with time zone | true | — | — |
 | supersedes_revision_id | bigint | true | — | — |
+| reviewed_by_operator_id | uuid | true | — | — |
+| review_remark | text | true | — | — |
+| reviewed_at | timestamp with time zone | true | — | — |
+| lock_version | integer | false | 0 | — |
+| updated_at | timestamp with time zone | false | now() | — |
 
 Constraints:
 
 | Name | Type | Definition |
 | --- | --- | --- |
 | content_revisions_entity_type_check | c | CHECK (entity_type::text = ANY (ARRAY['content'::character varying, 'course'::character varying, 'lesson'::character varying, 'exercise'::character varying, 'question'::character varying, 'translation'::character varying]::text[])) |
+| content_revisions_lock_version_check | c | CHECK (lock_version >= 0) |
 | content_revisions_published_time_check | c | CHECK (status::text = 'published'::text AND published_at IS NOT NULL OR status::text <> 'published'::text AND published_at IS NULL) |
+| content_revisions_rejected_remark_check | c | CHECK (status::text <> 'rejected'::text OR btrim(COALESCE(review_remark, ''::text)) <> ''::text) |
 | content_revisions_revision_number_check | c | CHECK (revision_number > 0) |
 | content_revisions_snapshot_check | c | CHECK (jsonb_typeof(snapshot) = 'object'::text) |
-| content_revisions_status_check | c | CHECK (status::text = ANY (ARRAY['draft'::character varying, 'published'::character varying, 'superseded'::character varying]::text[])) |
+| content_revisions_status_check | c | CHECK (status::text = ANY (ARRAY['draft'::character varying, 'pending_review'::character varying, 'approved'::character varying, 'published'::character varying, 'rejected'::character varying, 'superseded'::character varying]::text[])) |
 | content_revisions_supersedes_revision_id_fkey | f | FOREIGN KEY (supersedes_revision_id) REFERENCES content.content_revisions(id) ON DELETE RESTRICT |
 | content_revisions_created_at_not_null | n | NOT NULL created_at |
 | content_revisions_entity_id_not_null | n | NOT NULL entity_id |
 | content_revisions_entity_type_not_null | n | NOT NULL entity_type |
 | content_revisions_id_not_null | n | NOT NULL id |
+| content_revisions_lock_version_not_null | n | NOT NULL lock_version |
 | content_revisions_revision_number_not_null | n | NOT NULL revision_number |
 | content_revisions_revision_public_id_not_null | n | NOT NULL revision_public_id |
 | content_revisions_snapshot_not_null | n | NOT NULL snapshot |
 | content_revisions_status_not_null | n | NOT NULL status |
+| content_revisions_updated_at_not_null | n | NOT NULL updated_at |
 | content_revisions_pkey | p | PRIMARY KEY (id) |
 | content_revisions_entity_type_entity_id_revision_number_key | u | UNIQUE (entity_type, entity_id, revision_number) |
 | content_revisions_revision_public_id_key | u | UNIQUE (revision_public_id) |
@@ -632,6 +647,7 @@ Indexes:
 | content_revisions_revision_public_id_key | true | — | CREATE UNIQUE INDEX content_revisions_revision_public_id_key ON content.content_revisions USING btree (revision_public_id) |
 | idx_content_revisions_entity | false | — | CREATE INDEX idx_content_revisions_entity ON content.content_revisions USING btree (entity_type, entity_id, revision_number DESC) |
 | idx_content_revisions_status_time | false | — | CREATE INDEX idx_content_revisions_status_time ON content.content_revisions USING btree (status, published_at DESC) |
+| uq_content_revisions_active_work | true | ((status)::text = ANY ((ARRAY['draft'::character varying, 'pending_review'::character varying, 'approved'::character varying, 'rejected'::character varying])::text[])) | CREATE UNIQUE INDEX uq_content_revisions_active_work ON content.content_revisions USING btree (entity_type, entity_id) WHERE ((status)::text = ANY ((ARRAY['draft'::character varying, 'pending_review'::character varying, 'approved'::character varying, 'rejected'::character varying])::text[])) |
 | uq_content_revisions_current_published | true | ((status)::text = 'published'::text) | CREATE UNIQUE INDEX uq_content_revisions_current_published ON content.content_revisions USING btree (entity_type, entity_id) WHERE ((status)::text = 'published'::text) |
 
 #### content.content_tags
@@ -675,7 +691,7 @@ Constraints:
 
 | Name | Type | Definition |
 | --- | --- | --- |
-| contents_content_type_check | c | CHECK (content_type::text = ANY (ARRAY['zh_pinyin'::character varying, 'zh_hanzi'::character varying, 'zh_word'::character varying, 'zh_sentence'::character varying, 'lo_letter'::character varying, 'lo_syllable'::character varying, 'lo_word'::character varying, 'lo_sentence'::character varying]::text[])) |
+| contents_content_type_check | c | CHECK (content_type::text = ANY (ARRAY['zh_pinyin_element'::character varying, 'zh_syllable'::character varying, 'zh_hanzi'::character varying, 'zh_word'::character varying, 'zh_sentence'::character varying, 'lo_letter'::character varying, 'lo_syllable'::character varying, 'lo_word'::character varying, 'lo_sentence'::character varying]::text[])) |
 | contents_language_check | c | CHECK (language::text = ANY (ARRAY['zh'::character varying, 'lo'::character varying]::text[])) |
 | contents_status_check | c | CHECK (status::text = ANY (ARRAY['active'::character varying, 'disabled'::character varying, 'archived'::character varying]::text[])) |
 | contents_content_type_not_null | n | NOT NULL content_type |
@@ -963,6 +979,33 @@ Indexes:
 | --- | --- | --- | --- |
 | lo_letters_character_letter_type_key | true | — | CREATE UNIQUE INDEX lo_letters_character_letter_type_key ON content.lo_letters USING btree ("character", letter_type) |
 | lo_letters_pkey | true | — | CREATE UNIQUE INDEX lo_letters_pkey ON content.lo_letters USING btree (content_id) |
+
+#### content.lo_sentence_words
+
+| Column | Type | Nullable | Default | Identity |
+| --- | --- | --- | --- | --- |
+| sentence_content_id | bigint | false | — | — |
+| word_content_id | bigint | false | — | — |
+| position | smallint | false | — | — |
+| surface_form | text | true | — | — |
+
+Constraints:
+
+| Name | Type | Definition |
+| --- | --- | --- |
+| lo_sentence_words_position_check | c | CHECK ("position" > 0) |
+| lo_sentence_words_sentence_content_id_fkey | f | FOREIGN KEY (sentence_content_id) REFERENCES content.lo_sentences(content_id) ON DELETE RESTRICT |
+| lo_sentence_words_word_content_id_fkey | f | FOREIGN KEY (word_content_id) REFERENCES content.lo_words(content_id) ON DELETE RESTRICT |
+| lo_sentence_words_position_not_null | n | NOT NULL "position" |
+| lo_sentence_words_sentence_content_id_not_null | n | NOT NULL sentence_content_id |
+| lo_sentence_words_word_content_id_not_null | n | NOT NULL word_content_id |
+| lo_sentence_words_pkey | p | PRIMARY KEY (sentence_content_id, "position") |
+
+Indexes:
+
+| Name | Unique | Predicate | Definition |
+| --- | --- | --- | --- |
+| lo_sentence_words_pkey | true | — | CREATE UNIQUE INDEX lo_sentence_words_pkey ON content.lo_sentence_words USING btree (sentence_content_id, "position") |
 
 #### content.lo_sentences
 
@@ -1409,12 +1452,12 @@ Indexes:
 | zh_hanzi_character_key | true | — | CREATE UNIQUE INDEX zh_hanzi_character_key ON content.zh_hanzi USING btree ("character") |
 | zh_hanzi_pkey | true | — | CREATE UNIQUE INDEX zh_hanzi_pkey ON content.zh_hanzi USING btree (content_id) |
 
-#### content.zh_hanzi_pinyin
+#### content.zh_hanzi_syllables
 
 | Column | Type | Nullable | Default | Identity |
 | --- | --- | --- | --- | --- |
 | hanzi_content_id | bigint | false | — | — |
-| pinyin_content_id | bigint | false | — | — |
+| syllable_content_id | bigint | false | — | — |
 | is_primary | boolean | false | false | — |
 | usage_note | text | true | — | — |
 | created_at | timestamp with time zone | false | now() | — |
@@ -1423,52 +1466,77 @@ Constraints:
 
 | Name | Type | Definition |
 | --- | --- | --- |
-| zh_hanzi_pinyin_hanzi_content_id_fkey | f | FOREIGN KEY (hanzi_content_id) REFERENCES content.zh_hanzi(content_id) ON DELETE RESTRICT |
-| zh_hanzi_pinyin_pinyin_content_id_fkey | f | FOREIGN KEY (pinyin_content_id) REFERENCES content.zh_pinyin(content_id) ON DELETE RESTRICT |
-| zh_hanzi_pinyin_created_at_not_null | n | NOT NULL created_at |
-| zh_hanzi_pinyin_hanzi_content_id_not_null | n | NOT NULL hanzi_content_id |
-| zh_hanzi_pinyin_is_primary_not_null | n | NOT NULL is_primary |
-| zh_hanzi_pinyin_pinyin_content_id_not_null | n | NOT NULL pinyin_content_id |
-| zh_hanzi_pinyin_pkey | p | PRIMARY KEY (hanzi_content_id, pinyin_content_id) |
+| zh_hanzi_syllables_hanzi_content_id_fkey | f | FOREIGN KEY (hanzi_content_id) REFERENCES content.zh_hanzi(content_id) ON DELETE RESTRICT |
+| zh_hanzi_syllables_syllable_content_id_fkey | f | FOREIGN KEY (syllable_content_id) REFERENCES content.zh_syllables(content_id) ON DELETE RESTRICT |
+| zh_hanzi_syllables_created_at_not_null | n | NOT NULL created_at |
+| zh_hanzi_syllables_hanzi_content_id_not_null | n | NOT NULL hanzi_content_id |
+| zh_hanzi_syllables_is_primary_not_null | n | NOT NULL is_primary |
+| zh_hanzi_syllables_syllable_content_id_not_null | n | NOT NULL syllable_content_id |
+| zh_hanzi_syllables_pkey | p | PRIMARY KEY (hanzi_content_id, syllable_content_id) |
 
 Indexes:
 
 | Name | Unique | Predicate | Definition |
 | --- | --- | --- | --- |
-| uq_zh_hanzi_pinyin_primary | true | is_primary | CREATE UNIQUE INDEX uq_zh_hanzi_pinyin_primary ON content.zh_hanzi_pinyin USING btree (hanzi_content_id) WHERE is_primary |
-| zh_hanzi_pinyin_pkey | true | — | CREATE UNIQUE INDEX zh_hanzi_pinyin_pkey ON content.zh_hanzi_pinyin USING btree (hanzi_content_id, pinyin_content_id) |
+| uq_zh_hanzi_syllables_primary | true | is_primary | CREATE UNIQUE INDEX uq_zh_hanzi_syllables_primary ON content.zh_hanzi_syllables USING btree (hanzi_content_id) WHERE is_primary |
+| zh_hanzi_syllables_pkey | true | — | CREATE UNIQUE INDEX zh_hanzi_syllables_pkey ON content.zh_hanzi_syllables USING btree (hanzi_content_id, syllable_content_id) |
 
-#### content.zh_pinyin
+#### content.zh_pinyin_elements
 
 | Column | Type | Nullable | Default | Identity |
 | --- | --- | --- | --- | --- |
 | content_id | bigint | false | — | — |
-| syllable | character varying(16) | false | — | — |
-| initial | character varying(8) | true | — | — |
-| final | character varying(16) | false | — | — |
-| tone | smallint | false | — | — |
+| element_type | character varying(16) | false | — | — |
+| value | character varying(16) | false | — | — |
 | display_form | character varying(16) | false | — | — |
+| sort_order | smallint | true | — | — |
 
 Constraints:
 
 | Name | Type | Definition |
 | --- | --- | --- |
-| zh_pinyin_tone_check | c | CHECK (tone >= 1 AND tone <= 5) |
-| zh_pinyin_content_id_fkey | f | FOREIGN KEY (content_id) REFERENCES content.contents(id) ON DELETE RESTRICT |
-| zh_pinyin_content_id_not_null | n | NOT NULL content_id |
-| zh_pinyin_display_form_not_null | n | NOT NULL display_form |
-| zh_pinyin_final_not_null | n | NOT NULL final |
-| zh_pinyin_syllable_not_null | n | NOT NULL syllable |
-| zh_pinyin_tone_not_null | n | NOT NULL tone |
-| zh_pinyin_pkey | p | PRIMARY KEY (content_id) |
-| zh_pinyin_syllable_tone_key | u | UNIQUE (syllable, tone) |
+| zh_pinyin_elements_element_type_check | c | CHECK (element_type::text = ANY (ARRAY['initial'::character varying, 'final'::character varying, 'tone_mark'::character varying, 'separator'::character varying, 'other'::character varying]::text[])) |
+| zh_pinyin_elements_content_id_fkey | f | FOREIGN KEY (content_id) REFERENCES content.contents(id) ON DELETE RESTRICT |
+| zh_pinyin_elements_content_id_not_null | n | NOT NULL content_id |
+| zh_pinyin_elements_display_form_not_null | n | NOT NULL display_form |
+| zh_pinyin_elements_element_type_not_null | n | NOT NULL element_type |
+| zh_pinyin_elements_value_not_null | n | NOT NULL value |
+| zh_pinyin_elements_pkey | p | PRIMARY KEY (content_id) |
+| zh_pinyin_elements_element_type_value_key | u | UNIQUE (element_type, value) |
 
 Indexes:
 
 | Name | Unique | Predicate | Definition |
 | --- | --- | --- | --- |
-| zh_pinyin_pkey | true | — | CREATE UNIQUE INDEX zh_pinyin_pkey ON content.zh_pinyin USING btree (content_id) |
-| zh_pinyin_syllable_tone_key | true | — | CREATE UNIQUE INDEX zh_pinyin_syllable_tone_key ON content.zh_pinyin USING btree (syllable, tone) |
+| zh_pinyin_elements_element_type_value_key | true | — | CREATE UNIQUE INDEX zh_pinyin_elements_element_type_value_key ON content.zh_pinyin_elements USING btree (element_type, value) |
+| zh_pinyin_elements_pkey | true | — | CREATE UNIQUE INDEX zh_pinyin_elements_pkey ON content.zh_pinyin_elements USING btree (content_id) |
+
+#### content.zh_sentence_words
+
+| Column | Type | Nullable | Default | Identity |
+| --- | --- | --- | --- | --- |
+| sentence_content_id | bigint | false | — | — |
+| word_content_id | bigint | false | — | — |
+| position | smallint | false | — | — |
+| surface_form | text | true | — | — |
+
+Constraints:
+
+| Name | Type | Definition |
+| --- | --- | --- |
+| zh_sentence_words_position_check | c | CHECK ("position" > 0) |
+| zh_sentence_words_sentence_content_id_fkey | f | FOREIGN KEY (sentence_content_id) REFERENCES content.zh_sentences(content_id) ON DELETE RESTRICT |
+| zh_sentence_words_word_content_id_fkey | f | FOREIGN KEY (word_content_id) REFERENCES content.zh_words(content_id) ON DELETE RESTRICT |
+| zh_sentence_words_position_not_null | n | NOT NULL "position" |
+| zh_sentence_words_sentence_content_id_not_null | n | NOT NULL sentence_content_id |
+| zh_sentence_words_word_content_id_not_null | n | NOT NULL word_content_id |
+| zh_sentence_words_pkey | p | PRIMARY KEY (sentence_content_id, "position") |
+
+Indexes:
+
+| Name | Unique | Predicate | Definition |
+| --- | --- | --- | --- |
+| zh_sentence_words_pkey | true | — | CREATE UNIQUE INDEX zh_sentence_words_pkey ON content.zh_sentence_words USING btree (sentence_content_id, "position") |
 
 #### content.zh_sentences
 
@@ -1496,6 +1564,65 @@ Indexes:
 | --- | --- | --- | --- |
 | zh_sentences_pkey | true | — | CREATE UNIQUE INDEX zh_sentences_pkey ON content.zh_sentences USING btree (content_id) |
 | zh_sentences_text_key | true | — | CREATE UNIQUE INDEX zh_sentences_text_key ON content.zh_sentences USING btree (text) |
+
+#### content.zh_syllable_pinyin_elements
+
+| Column | Type | Nullable | Default | Identity |
+| --- | --- | --- | --- | --- |
+| syllable_content_id | bigint | false | — | — |
+| pinyin_element_content_id | bigint | false | — | — |
+| position | smallint | false | — | — |
+| role | character varying(16) | true | — | — |
+
+Constraints:
+
+| Name | Type | Definition |
+| --- | --- | --- |
+| zh_syllable_pinyin_elements_position_check | c | CHECK ("position" > 0) |
+| zh_syllable_pinyin_elements_role_check | c | CHECK (role IS NULL OR (role::text = ANY (ARRAY['initial'::character varying, 'final'::character varying, 'tone_mark'::character varying, 'separator'::character varying, 'other'::character varying]::text[]))) |
+| zh_syllable_pinyin_elements_pinyin_element_content_id_fkey | f | FOREIGN KEY (pinyin_element_content_id) REFERENCES content.zh_pinyin_elements(content_id) ON DELETE RESTRICT |
+| zh_syllable_pinyin_elements_syllable_content_id_fkey | f | FOREIGN KEY (syllable_content_id) REFERENCES content.zh_syllables(content_id) ON DELETE RESTRICT |
+| zh_syllable_pinyin_elements_pinyin_element_content_id_not_null | n | NOT NULL pinyin_element_content_id |
+| zh_syllable_pinyin_elements_position_not_null | n | NOT NULL "position" |
+| zh_syllable_pinyin_elements_syllable_content_id_not_null | n | NOT NULL syllable_content_id |
+| zh_syllable_pinyin_elements_pkey | p | PRIMARY KEY (syllable_content_id, "position") |
+
+Indexes:
+
+| Name | Unique | Predicate | Definition |
+| --- | --- | --- | --- |
+| zh_syllable_pinyin_elements_pkey | true | — | CREATE UNIQUE INDEX zh_syllable_pinyin_elements_pkey ON content.zh_syllable_pinyin_elements USING btree (syllable_content_id, "position") |
+
+#### content.zh_syllables
+
+| Column | Type | Nullable | Default | Identity |
+| --- | --- | --- | --- | --- |
+| content_id | bigint | false | — | — |
+| base_form | character varying(32) | false | — | — |
+| tone | smallint | false | — | — |
+| display_form | character varying(32) | false | — | — |
+
+Constraints:
+
+| Name | Type | Definition |
+| --- | --- | --- |
+| zh_syllables_tone_check | c | CHECK (tone >= 1 AND tone <= 5) |
+| zh_syllables_content_id_fkey | f | FOREIGN KEY (content_id) REFERENCES content.contents(id) ON DELETE RESTRICT |
+| zh_syllables_base_form_not_null | n | NOT NULL base_form |
+| zh_syllables_content_id_not_null | n | NOT NULL content_id |
+| zh_syllables_display_form_not_null | n | NOT NULL display_form |
+| zh_syllables_tone_not_null | n | NOT NULL tone |
+| zh_syllables_pkey | p | PRIMARY KEY (content_id) |
+| zh_syllables_base_form_tone_key | u | UNIQUE (base_form, tone) |
+| zh_syllables_display_form_key | u | UNIQUE (display_form) |
+
+Indexes:
+
+| Name | Unique | Predicate | Definition |
+| --- | --- | --- | --- |
+| zh_syllables_base_form_tone_key | true | — | CREATE UNIQUE INDEX zh_syllables_base_form_tone_key ON content.zh_syllables USING btree (base_form, tone) |
+| zh_syllables_display_form_key | true | — | CREATE UNIQUE INDEX zh_syllables_display_form_key ON content.zh_syllables USING btree (display_form) |
+| zh_syllables_pkey | true | — | CREATE UNIQUE INDEX zh_syllables_pkey ON content.zh_syllables USING btree (content_id) |
 
 #### content.zh_word_hanzi
 

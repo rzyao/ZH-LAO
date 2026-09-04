@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { apiClient } from '@/api/client'
 import { env } from '@/app/config'
-import { NAV_GROUPS } from '@/navigation/config'
+import { allNavItems } from '@/navigation/config'
 import { PageHeader } from '@/components/common/page-header'
 import { StatusBadge } from '@/components/common/status-badge'
 import { Card } from '@/components/common/card'
@@ -125,8 +125,7 @@ export function OverviewPage() {
 
         <Card title="11 业务领域导航（规划建设中）">
           <div className="flex flex-wrap gap-2">
-            {NAV_GROUPS.flatMap((group) =>
-              group.items.map((item) => (
+            {allNavItems().filter((item) => item.domain).map((item) => (
                 <span
                   key={item.key}
                   className="inline-flex items-center gap-2 rounded-md border bg-muted/30 px-2.5 py-1 text-sm"
@@ -134,8 +133,7 @@ export function OverviewPage() {
                   {item.label}
                   <StatusBadge tone="muted" label="开发中" dot={false} />
                 </span>
-              )),
-            )}
+              ))}
           </div>
           <p className="mt-3 text-xs text-muted-foreground">
             各业务领域页面将在对应研发阶段（契约冻结、后端 API 就绪）后接入完整业务管理功能。

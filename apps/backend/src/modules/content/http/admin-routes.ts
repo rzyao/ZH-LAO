@@ -5,6 +5,7 @@ import { UpdateCharacterDraftUseCase, type UpdateCharacterDraftInput } from '../
 import { SubmitCharacterReviewUseCase } from '../application/use-cases/submit-character-review.js';
 import { ReviewCharacterUseCase } from '../application/use-cases/review-character.js';
 import { PublishCharacterUseCase } from '../application/use-cases/publish-character.js';
+import { ListManagedCharactersUseCase } from '../application/use-cases/list-managed-characters.js';
 import type { ContentRepository } from '../application/ports/repositories.js';
 import { AppError } from '../../../errors/app-error.js';
 import {
@@ -37,17 +38,24 @@ export const adminContentRoutes: FastifyPluginAsync<AdminContentRoutesOptions> =
   const submitReviewUC = new SubmitCharacterReviewUseCase(contentRepository);
   const reviewUC = new ReviewCharacterUseCase(contentRepository);
   const publishUC = new PublishCharacterUseCase(contentRepository);
+  const listManagedUC = new ListManagedCharactersUseCase(contentRepository);
   const authenticated = requireAuthentication(authentication);
-  const actor = (request: FastifyRequest, permission: 'content.letters.write' | 'content.letters.review' | 'content.letters.publish') => authorizer.requirePermission(request.authContext!, permission);
+  const actor = (request: FastifyRequest, permission: 'content.lo_letters.write' | 'content.lo_letters.review' | 'content.lo_letters.publish') => authorizer.requirePermission(request.authContext!, permission);
   const requestContext = (request: FastifyRequest) => ({ requestId: request.id, ipAddress: request.ip });
   const record = (request: FastifyRequest, operator: Awaited<ReturnType<typeof actor>>, actionKey: string, id: string | undefined, details: Record<string, unknown>) => audit.recordSuccessfulAction({ operator, actionKey, target: { domain: 'content', type: 'letter', id }, requestContext: requestContext(request), details });
+
+  fastify.get('/letters', { preHandler: authenticated }, async (request, reply) => {
+    await actor(request, 'content.lo_letters.write');
+    const { classification } = request.query as { classification?: string };
+    return reply.code(200).send(await listManagedUC.execute(classification));
+  });
 
   fastify.post('/letters', { preHandler: authenticated }, async (request, reply) => {
     const body = request.body as CreateCharacterDraftInput;
     try {
-      const operator = await actor(request, 'content.letters.write');
+      const operator = await actor(request, 'content.lo_letters.write');
       const result = await createDraftUC.execute(body, operator.operatorId);
-      await record(request, operator, 'content.letters.create', result.characterId, { command: 'create_draft', revision_id: result.revisionId });
+      await record(request, operator, 'content.lo_letters.create', result.characterId, { command: 'create_draft', revision_id: result.revisionId });
       return reply.code(201).send(result);
     } catch (err: unknown) {
       if (err instanceof AppError) throw err;
@@ -62,9 +70,9 @@ export const adminContentRoutes: FastifyPluginAsync<AdminContentRoutesOptions> =
   fastify.post('/letters/:id/derive-working', { preHandler: authenticated }, async (request, reply) => {
     const { id } = request.params as { id: string };
     try {
-      const operator = await actor(request, 'content.letters.write');
+      const operator = await actor(request, 'content.lo_letters.write');
       const result = await deriveWorkingUC.execute(id, operator.operatorId);
-      await record(request, operator, 'content.letters.derive_working', id, { command: 'derive_working', revision_id: result.revisionId });
+      await record(request, operator, 'content.lo_letters.derive_working', id, { command: 'derive_working', revision_id: result.revisionId });
       return reply.code(201).send(result);
     } catch (err: unknown) {
       if (err instanceof AppError) throw err;
@@ -80,9 +88,9 @@ export const adminContentRoutes: FastifyPluginAsync<AdminContentRoutesOptions> =
     const { id, revId } = request.params as { id: string; revId: string };
     const body = request.body as UpdateCharacterDraftInput;
     try {
-      const operator = await actor(request, 'content.letters.write');
+      const operator = await actor(request, 'content.lo_letters.write');
       await updateDraftUC.execute(revId, body);
-      await record(request, operator, 'content.letters.update', id, { command: 'update_draft', revision_id: revId });
+      await record(request, operator, 'content.lo_letters.update', id, { command: 'update_draft', revision_id: revId });
       return reply.code(200).send({ success: true });
     } catch (err: unknown) {
       if (err instanceof AppError) throw err;
@@ -94,9 +102,9 @@ export const adminContentRoutes: FastifyPluginAsync<AdminContentRoutesOptions> =
   fastify.post('/letters/:id/revisions/:revId/submit', { preHandler: authenticated }, async (request, reply) => {
     const { id, revId } = request.params as { id: string; revId: string };
     try {
-      const operator = await actor(request, 'content.letters.write');
+      const operator = await actor(request, 'content.lo_letters.write');
       await submitReviewUC.execute(revId);
-      await record(request, operator, 'content.letters.submit_review', id, { command: 'submit_review', revision_id: revId });
+      await record(request, operator, 'content.lo_letters.submit_review', id, { command: 'submit_review', revision_id: revId });
       return reply.code(200).send({ success: true, status: 'pending_review' });
     } catch (err: unknown) {
       if (err instanceof AppError) throw err;
@@ -109,9 +117,9 @@ export const adminContentRoutes: FastifyPluginAsync<AdminContentRoutesOptions> =
     const { id, revId } = request.params as { id: string; revId: string };
     const body = request.body as { action: 'approve' | 'reject'; remark?: string };
     try {
-      const operator = await actor(request, 'content.letters.review');
+      const operator = await actor(request, 'content.lo_letters.review');
       await reviewUC.execute(revId, body.action, operator.operatorId, body.remark);
-      await record(request, operator, 'content.letters.review', id, { command: 'review', revision_id: revId, action: body.action });
+      await record(request, operator, 'content.lo_letters.review', id, { command: 'review', revision_id: revId, action: body.action });
       return reply.code(200).send({ success: true, status: body.action === 'approve' ? 'approved' : 'rejected' });
     } catch (err: unknown) {
       if (err instanceof AppError) throw err;
@@ -123,9 +131,9 @@ export const adminContentRoutes: FastifyPluginAsync<AdminContentRoutesOptions> =
   fastify.post('/letters/:id/revisions/:revId/publish', { preHandler: authenticated }, async (request, reply) => {
     const { id, revId } = request.params as { id: string; revId: string };
     try {
-      const operator = await actor(request, 'content.letters.publish');
+      const operator = await actor(request, 'content.lo_letters.publish');
       await publishUC.execute(id, revId);
-      await record(request, operator, 'content.letters.publish', id, { command: 'publish', revision_id: revId });
+      await record(request, operator, 'content.lo_letters.publish', id, { command: 'publish', revision_id: revId });
       return reply.code(200).send({ success: true, published_revision_id: revId, status: 'published' });
     } catch (err: unknown) {
       if (err instanceof AppError) throw err;

@@ -123,6 +123,16 @@ Operations 证明“这个后台操作者有没有执行该管理能力的权限
 - 业务领域写入仍由 Owner Domain Application Service 执行；
 - `operator_audit_logs` 是成功后台管理动作的 append-only 审计事实。
 
+## Content 中老语言管理授权
+
+Content 为每个中文和老挝语内容类别登记 `read/write/review/publish` 四项精确权限。Operations 只负责登记、角色配置和授权判断，不定义固定内容岗位：
+
+- 中文资源为 `zh_pinyin_elements`、`zh_syllables`、`zh_hanzi`、`zh_words`、`zh_sentences`；
+- 老挝语资源为 `lo_letters`、`lo_syllables`、`lo_words`、`lo_sentences`；
+- 新权限只在迁移时默认授予保留角色 `super_admin`；
+- 其他角色如何组合读取、编辑、审核和发布能力，由运营人员通过既有角色权限能力配置；
+- Content 后端负责业务状态机和发布依赖判断，Operations 不接管内容状态。
+
 ## 文档地图
 
 - [RBAC 与授权](rbac.md)：Operator、Role、Permission、`super_admin` 与授权算法。

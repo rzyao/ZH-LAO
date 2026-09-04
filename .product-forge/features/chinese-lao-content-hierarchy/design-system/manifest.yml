@@ -1,0 +1,76 @@
+schema_version: 1
+source:
+  components_path: "apps/admin/src/components"
+  tokens_path: "apps/admin/src/design-system/tokens/index.css"
+  framework: "react"
+  storybook: false
+tokens:
+  color:
+    primary: "var(--primary)"
+    surface: "var(--card)"
+    background: "var(--background)"
+    foreground: "var(--foreground)"
+    border: "var(--border)"
+    destructive: "var(--destructive)"
+    warning: "var(--warning)"
+  typography:
+    body: "text-sm"
+    heading: "font-semibold"
+  radius:
+    - "var(--radius-sm)"
+    - "var(--radius-md)"
+    - "var(--radius-lg)"
+components:
+  - id: "CMP-AppShell"
+    import: "@/components/navigation/app-shell"
+    props: []
+    variants: ["desktop", "mobile"]
+    selector: "[data-testid='main-content']"
+  - id: "CMP-DataTable"
+    import: "@/components/data-table/data-table"
+    props: ["columns", "data", "loading", "error", "onRetry", "toolbar", "onRowClick"]
+    variants: ["loading", "empty", "error", "populated"]
+    selector: "table"
+  - id: "CMP-Button"
+    import: "@/components/ui/button"
+    props: ["variant", "size", "loading", "disabled", "onClick"]
+    variants: ["default", "destructive", "outline", "secondary", "ghost", "link"]
+    selector: "button"
+  - id: "CMP-Dialog"
+    import: "@/components/ui/dialog"
+    props: ["open", "onOpenChange"]
+    variants: ["default", "confirmation", "review"]
+    selector: "[role='dialog']"
+  - id: "CMP-Input"
+    import: "@/components/ui/input"
+    props: ["value", "placeholder", "disabled", "aria-invalid"]
+    variants: ["default", "invalid", "disabled"]
+    selector: "input"
+  - id: "CMP-Select"
+    import: "@/components/ui/select"
+    props: ["value", "onValueChange", "disabled"]
+    variants: ["default", "disabled"]
+    selector: "[role='combobox']"
+  - id: "CMP-StatusBadge"
+    import: "@/components/common/status-badge"
+    props: ["tone", "label", "dot"]
+    variants: ["success", "warning", "danger", "neutral"]
+    selector: "[data-status]"
+  - id: "CMP-ConfirmDialog"
+    import: "@/components/feedback/confirm-dialog"
+    props: ["open", "title", "description", "onConfirm"]
+    variants: ["default", "destructive"]
+    selector: "[role='alertdialog']"
+  - id: "CMP-EmptyState"
+    import: "@/components/feedback/empty-state"
+    props: ["title", "description"]
+    variants: ["default"]
+    selector: "[data-testid='empty-state']"
+  - id: "CMP-ErrorState"
+    import: "@/components/feedback/error-state"
+    props: ["error", "onRetry"]
+    variants: ["default"]
+    selector: "[role='alert']"
+notes:
+  - "未检测到 Storybook。"
+  - "多个组件缺少专用稳定测试选择器；在声明端到端测试覆盖前，必须增加功能专属 data-testid。"

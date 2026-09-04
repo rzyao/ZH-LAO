@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
-export const LaoCharacterClassificationSchema = z.enum(['consonant', 'vowel', 'symbol']);
+// This mirrors the frozen PostgreSQL `content.lo_letters.letter_type` constraint.
+export const LaoCharacterClassificationSchema = z.enum(['consonant', 'vowel', 'tone_mark', 'other']);
 export type LaoCharacterClassification = z.infer<typeof LaoCharacterClassificationSchema>;
 
 export const ConsonantSubtypeSchema = z.enum(['cons_middle', 'cons_high', 'cons_low']);
@@ -9,19 +10,22 @@ export type ConsonantSubtype = z.infer<typeof ConsonantSubtypeSchema>;
 export const VowelSubtypeSchema = z.enum(['vowel_short', 'vowel_long']);
 export type VowelSubtype = z.infer<typeof VowelSubtypeSchema>;
 
-export const SymbolSubtypeSchema = z.enum([
-  'symbol_tone',
+export const ToneMarkSubtypeSchema = z.enum(['symbol_tone']);
+export type ToneMarkSubtype = z.infer<typeof ToneMarkSubtypeSchema>;
+
+export const OtherSubtypeSchema = z.enum([
   'symbol_ligature',
   'symbol_repeat',
   'symbol_special',
   'symbol_other',
 ]);
-export type SymbolSubtype = z.infer<typeof SymbolSubtypeSchema>;
+export type OtherSubtype = z.infer<typeof OtherSubtypeSchema>;
 
 export const LaoCharacterSubtypeSchema = z.union([
   ConsonantSubtypeSchema,
   VowelSubtypeSchema,
-  SymbolSubtypeSchema,
+  ToneMarkSubtypeSchema,
+  OtherSubtypeSchema,
 ]);
 export type LaoCharacterSubtype = z.infer<typeof LaoCharacterSubtypeSchema>;
 
@@ -91,10 +95,15 @@ export class LaoCharacter {
       if (this.noAudio !== false) {
         throw new Error('Vowels must have noAudio = false');
       }
-    } else if (this.classification === 'symbol') {
-      SymbolSubtypeSchema.parse(this.subtype);
+    } else if (this.classification === 'tone_mark') {
+      ToneMarkSubtypeSchema.parse(this.subtype);
       if (this.noAudio !== true) {
-        throw new Error('Symbols must strictly enforce noAudio = true');
+        throw new Error('Tone marks must strictly enforce noAudio = true');
+      }
+    } else if (this.classification === 'other') {
+      OtherSubtypeSchema.parse(this.subtype);
+      if (this.noAudio !== true) {
+        throw new Error('Other orthographic marks must strictly enforce noAudio = true');
       }
     }
   }

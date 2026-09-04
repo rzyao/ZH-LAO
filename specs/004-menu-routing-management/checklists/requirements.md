@@ -13,7 +13,7 @@
 
 ## Requirement Completeness
 
-- [x] No [NEEDS CLARIFICATION] markers remain — 全文无标记（层级深度已确认为 3 层）
+- [x] No [NEEDS CLARIFICATION] markers remain — 全文无标记（CR-004 已明确采用自由递归目录）
 - [x] Requirements are testable and unambiguous — FR-001..FR-016 均可验证（Given/When/Then 对应或可度量约束）
 - [x] Success criteria are measurable — SC-001..SC-007 含具体指标（耗时、百分比、次数、时间窗口）
 - [x] Success criteria are technology-agnostic — 无框架/语言/数据库字样，SC 面向业务结果
@@ -32,6 +32,6 @@
 ## Notes
 
 - ✅ **本 spec 的架构变更已获批准**：打破 Platform 冻结 6 表边界、Admin 信息架构冻结、Operations 权限 Catalog 冻结三项基线，已由 **ADR-022**（`docs/docs/developer/reference/adr/ADR-022-platform-menu-routing-config.md`，`frozen`）+ **D-155**（`docs/docs/developer/reference/governance/design-register.md`，`frozen`）于 2026-09-03 正式批准。`SPEC_CONFLICT` GATE 已通过，可正常进入 `/speckit-tasks`。
-- 已确认决策：归属 Platform 域（扩表）、完全动态（后台可编辑）、按变更请求推进（已批准）、菜单层级 3 层；`/speckit-clarify` 补充确认 3 项——创建/编辑即生效（无 draft）、可见性权限多权限 OR、首次上线 seed 预置当前导航等价配置。
+- 已确认决策：归属 Platform 域（扩表）、完全动态（后台可编辑）、按变更请求推进（已批准）、菜单自由递归嵌套；创建/编辑即生效（无 draft）、可见性权限多权限 OR、首次上线 seed 预置导航等价配置。
 - 无 [NEEDS CLARIFICATION] 标记，产品行为定义完整；架构批准门已通过。
 - 验证迭代：1 轮（spec） + 1 轮（clarify 后复验） + 1 轮（ADR-022 批准后复验，所有项仍 PASS）。

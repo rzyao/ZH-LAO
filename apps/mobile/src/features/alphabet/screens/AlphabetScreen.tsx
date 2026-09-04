@@ -21,12 +21,14 @@ export const AlphabetScreen: React.FC = () => {
 
       const consonants = items.filter((c) => c.classification === 'consonant');
       const vowels = items.filter((c) => c.classification === 'vowel');
-      const symbols = items.filter((c) => c.classification === 'symbol');
+      const toneMarks = items.filter((c) => c.classification === 'tone_mark');
+      const others = items.filter((c) => c.classification === 'other');
 
       setSections([
-        { title: '辅音 (Consonants) - 27 项', data: consonants },
-        { title: '元音 (Vowels) - 30 项', data: vowels },
-        { title: '符号与声调 (Symbols)', data: symbols },
+        { title: `辅音 (Consonants) - ${consonants.length} 项`, data: consonants },
+        { title: `元音 (Vowels) - ${vowels.length} 项`, data: vowels },
+        { title: `声调符号 (Tone marks) - ${toneMarks.length} 项`, data: toneMarks },
+        { title: `其他正字法标记 (Other) - ${others.length} 项`, data: others },
       ]);
     } catch (e) {
       console.error(e);
@@ -46,7 +48,7 @@ export const AlphabetScreen: React.FC = () => {
       <View style={styles.header}>
         <AppText style={styles.title}>老挝语字母表</AppText>
         <AppText style={styles.subtitle}>
-          官方标准字典序，掌握 27 个辅音、30 个元音及正字法符号
+          按分类与教学排序浏览辅音、元音、声调符号及其他正字法标记
         </AppText>
       </View>
 

@@ -4,7 +4,7 @@ import type { MenuInternalId } from './ids.js';
 /** 菜单项状态机(ADR-022):初始即 active,removed 为终态(审计保留,永不物理删除)。 */
 export type MenuStatus = 'active' | 'disabled' | 'removed';
 
-/** 菜单项:自引用树(parent_id NULL = 顶层分组;一级项 → 子项,最大 3 层)。 */
+/** 菜单项：自引用目录树，parent_id NULL 表示根节点，不限定业务层级。 */
 export type MenuItem = Readonly<{
   id: MenuInternalId;
   parentId: MenuInternalId | null;
@@ -66,6 +66,17 @@ export const MENU_ROUTE_TARGET_KEYS: readonly string[] = Object.freeze([
   'content.syllables',
   'content.vocabulary',
   'content.sentences',
+  'content.zh.pinyin',
+  'content.zh.syllables',
+  'content.zh.hanzi',
+  'content.zh.words',
+  'content.zh.sentences',
+  'content.zh.review',
+  'content.lo.letters',
+  'content.lo.syllables',
+  'content.lo.words',
+  'content.lo.sentences',
+  'content.lo.review',
   'operations.operators',
   'operations.roles',
   'operations.audit_logs',

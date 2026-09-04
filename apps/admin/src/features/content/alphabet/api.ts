@@ -1,7 +1,11 @@
+import { apiClient } from '@/api/client';
+
+export type LaoLetterClassification = 'consonant' | 'vowel' | 'tone_mark' | 'other';
+
 export interface CharacterItem {
   id: string;
   unicodeChar: string;
-  classification: 'consonant' | 'vowel' | 'symbol';
+  classification: LaoLetterClassification;
   subtype: string;
   ipaPhonetic: string;
   description?: string;
@@ -9,52 +13,51 @@ export interface CharacterItem {
   sortOrder: number;
   noAudio: boolean;
   status?: string;
+  publishedRevisionId?: string | null;
+  workingRevisionId?: string | null;
   audioUrl?: string | null;
 }
 
 export interface CreateCharacterInput {
   unicodeChar: string;
-  classification: 'consonant' | 'vowel' | 'symbol';
+  classification: LaoLetterClassification;
   subtype: string;
   ipaPhonetic: string;
   description: string;
   sortOrder: number;
 }
 
+export interface CharacterListResponse {
+  items: CharacterItem[];
+}
+
 export const alphabetAdminApi = {
+  async listCharacters() {
+    const response = await apiClient.get<CharacterListResponse>('/api/v1/admin/content/letters');
+    return response.data;
+  },
+
   async createCharacter(input: CreateCharacterInput) {
-    const res = await fetch('/api/v1/admin/content/letters', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(input),
+    const response = await apiClient.post('/api/v1/admin/content/letters', {
+      json: input,
     });
-    if (!res.ok) throw new Error(await res.text());
-    return res.json();
+    return response.data;
   },
 
   async submitReview(characterId: string, revId: string) {
-    const res = await fetch(`/api/v1/admin/content/letters/${characterId}/revisions/${revId}/submit`, {
-      method: 'POST',
-    });
-    if (!res.ok) throw new Error(await res.text());
-    return res.json();
+    const response = await apiClient.post(`/api/v1/admin/content/letters/${encodeURIComponent(characterId)}/revisions/${encodeURIComponent(revId)}/submit`);
+    return response.data;
   },
 
   async reviewCharacter(characterId: string, revId: string, action: 'approve' | 'reject', remark?: string) {
-    const res = await fetch(`/api/v1/admin/content/letters/${characterId}/revisions/${revId}/review`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action, remark }),
+    const response = await apiClient.post(`/api/v1/admin/content/letters/${encodeURIComponent(characterId)}/revisions/${encodeURIComponent(revId)}/review`, {
+      json: { action, remark },
     });
-    if (!res.ok) throw new Error(await res.text());
-    return res.json();
+    return response.data;
   },
 
   async publishCharacter(characterId: string, revId: string) {
-    const res = await fetch(`/api/v1/admin/content/letters/${characterId}/revisions/${revId}/publish`, {
-      method: 'POST',
-    });
-    if (!res.ok) throw new Error(await res.text());
-    return res.json();
+    const response = await apiClient.post(`/api/v1/admin/content/letters/${encodeURIComponent(characterId)}/revisions/${encodeURIComponent(revId)}/publish`);
+    return response.data;
   },
 };
