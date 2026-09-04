@@ -1,4 +1,3 @@
-import type { DomainName } from '@/auth/permissions'
 import type { RouteTarget } from './types'
 
 /**

@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { ListPageLayout } from '@/components/layout/list-page-layout'
 import { StatusBadge } from '@/components/common/status-badge'
+import type { StatusTone } from '@/components/common/status-badge'
 import { ConfirmDialog } from '@/components/feedback/confirm-dialog'
 import { useToastApi } from '@/components/feedback/use-toast'
 import { FormField, NativeSelect, PermissionContract, mutationErrorMessage, useExactPermission } from '../components'
@@ -19,20 +20,10 @@ import {
 import { ADMIN_ROUTE_TARGETS } from '@/navigation/route-registry'
 import type { MenuTreeNode } from '@/navigation/types'
 
-const MENU_STATUS_TONES: Record<string, 'success' | 'neutral' | 'muted'> = {
+const MENU_STATUS_TONES: Record<MenuTreeNode['status'], StatusTone> = {
   active: 'success',
-  disabled: 'neutral',
+  disabled: 'muted',
   removed: 'muted',
-}
-
-interface MenuFormValue {
-  label: string
-  route_key: string
-  icon: string
-  sort_order: number
-  status: 'active' | 'disabled'
-  permissions: string
-  parent_id: number | null
 }
 
 function TreeNode({ node, depth, onEdit, onRemove, onMoveChild }: {
@@ -48,7 +39,7 @@ function TreeNode({ node, depth, onEdit, onRemove, onMoveChild }: {
         <span className="w-4 text-muted-foreground">{depth > 0 ? '└' : ''}</span>
         <span className="flex-1 truncate text-sm">{node.label}</span>
         {node.routeKey ? <code className="shrink-0 text-xs text-muted-foreground">{node.routeKey}</code> : null}
-        <StatusBadge tone={MENU_STATUS_TONES[node.status] ?? 'neutral'} label={node.status} />
+        <StatusBadge tone={MENU_STATUS_TONES[node.status] ?? 'muted'} label={node.status} />
         <div className="flex shrink-0 gap-1">
           <Button size="sm" variant="outline" onClick={() => onEdit(node)}>编辑</Button>
           <Button size="sm" variant="ghost" onClick={() => onEdit({ ...node, children: [], label: node.label, routeKey: node.routeKey })}>子项</Button>
@@ -98,7 +89,7 @@ export function MenusPage() {
 
   const editingId = editor.node?.id
   const editingNode = flatList.find((n) => n.id === editingId) ?? null
-  const editingParentId = editor.asChild && editor.node ? (editor.node.children.length > 0 ? null : editor.node.id) : editingNode?.parentId ?? null
+  const editingParentId = editor.asChild && editor.node ? (editor.node.children.length > 0 ? null : editor.node.id) : null
 
   /** 组内排序: 将 parentId 下的直接子项按当前顺序交换 childId 与相邻项后整体提交(FE-006)。 */
   const moveChild = React.useCallback((parentId: number, childId: number, direction: -1 | 1) => {
@@ -180,7 +171,7 @@ export function MenusPage() {
               onError: fail,
             })
           } else {
-            createMutation.mutate({ ...input, parent_id: editor.asChild ? editor.node!.id : input.parent_id }, {
+            createMutation.mutate({ ...input, parent_id: editor.asChild ? editor.node!.id : null }, {
               onSuccess: () => { setEditor({ open: false, node: null, asChild: false }); toast.success({ title: '菜单已创建' }) },
               onError: fail,
             })

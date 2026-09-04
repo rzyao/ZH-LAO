@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
+import { LayoutDashboard } from 'lucide-react'
 import { Sidebar } from './sidebar'
 
 vi.mock('@tanstack/react-router', () => ({
@@ -33,7 +34,7 @@ describe('Sidebar', () => {
     mockedUseAuth.mockReturnValue({ can: () => true } as never)
     mockedUseNavConfig.mockReturnValue({
       nav: [
-        { key: 'g1', label: '总览', items: [{ key: 'overview', label: '总览看板', href: '/', icon: () => null }] },
+        { key: 'g1', label: '总览', items: [{ key: 'overview', label: '总览看板', href: '/', icon: LayoutDashboard }] },
       ],
       secondary: [],
       source: 'remote',
@@ -60,8 +61,8 @@ describe('Sidebar', () => {
     mockedUseAuth.mockReturnValue({ can: (p: string) => p === 'platform.menus.read' } as never)
     mockedUseNavConfig.mockReturnValue({
       nav: [
-        { key: 'overview', label: '总览', items: [{ key: 'overview', label: '总览看板', href: '/', icon: () => null }] },
-        { key: 'system', label: '系统运维', items: [{ key: 'platform', label: '平台控制台', href: '/platform', icon: () => null }] },
+        { key: 'overview', label: '总览', items: [{ key: 'overview', label: '总览看板', href: '/', icon: LayoutDashboard }] },
+        { key: 'system', label: '系统运维', items: [{ key: 'platform', label: '平台控制台', href: '/platform', icon: LayoutDashboard }] },
       ],
       secondary: [],
       source: 'fallback',

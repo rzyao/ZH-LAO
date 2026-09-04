@@ -5,6 +5,7 @@ import { findRouteTargetByKey } from './route-registry'
 import { resolveIcon } from './icon-registry'
 import { NAV_GROUPS, SECONDARY_NAV } from './config'
 import type { NavGroup, NavItem, MenuTreeNode, SecondaryNavConfig } from './types'
+import type { Permission } from '@/auth/permissions'
 
 /**
  * 配置驱动导航(ADR-022 §9 / FR-009 / FR-012)。
@@ -67,7 +68,6 @@ export function normalizeToNav(groups: readonly MenuTreeNode[], can: (permission
 
     // 容器分组:自身 href 在其它分组的一级项中出现 → 仅注册 secondary,不新建 NavGroup。
     if (groupTarget && group.children.length > 0) {
-      const ownHrefs = hrefsByGroup.get(String(group.id)) ?? new Set<string>()
       const providedElsewhere = [...hrefsByGroup.entries()].some(
         ([key, hrefs]) => key !== String(group.id) && hrefs.has(groupTarget.href),
       )
@@ -143,6 +143,6 @@ export function useNavConfig(): NavConfig {
     // - 一级项自身的 children(运营权限/平台控制台等)
     // - 顶层「容器分组」(routeKey=content 的内容管理),其子项经权限过滤后注册为 secondary
     // 因此这里直接返回,不再合并静态 SECONDARY_NAV(它无权限过滤,可能泄露无权菜单)。
-    return normalizeToNav(groups, can)
+    return normalizeToNav(groups, (permission) => can(permission as Permission))
   }, [menusQuery.isError, menusQuery.data, can])
 }

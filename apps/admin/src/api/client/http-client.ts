@@ -1,5 +1,6 @@
 import { ApiError } from '../errors/api-error'
 import { mapHttpError, mapNetworkError, UnauthorizedError } from '../errors'
+import type { ApiErrorBody } from '../contracts/error'
 import { createRequestId } from './request-id'
 import { TimeoutError } from './timeout-error'
 
@@ -244,11 +245,11 @@ export class ApiClient {
 
       // 1. Check if payload is a business error (code !== 'OK') or transport error (!response.ok)
       const isEnvelope = isUnifiedEnvelope(rawPayload)
-      const isBusinessFailure = isEnvelope && rawPayload.code !== 'OK'
+      const isBusinessFailure = isEnvelope && (rawPayload as EnvelopeCandidate).code !== 'OK'
       const isTransportFailure = !response.ok
 
       if (isBusinessFailure || isTransportFailure) {
-        const error = await mapHttpError(response, isEnvelope ? (rawPayload as unknown as import('../contracts/error').ApiErrorBody) : undefined)
+        const error = await mapHttpError(response, isEnvelope ? (rawPayload as unknown as ApiErrorBody) : undefined)
 
         // Retry hook on unauthorized
         if (error instanceof UnauthorizedError && !skipAuth && this.onUnauthorizedRetry) {
@@ -269,10 +270,10 @@ export class ApiClient {
               }
             }
             const retryEnvelope = isUnifiedEnvelope(retryPayload)
-            if (!response.ok || (retryEnvelope && retryPayload.code !== 'OK')) {
+            if (!response.ok || (retryEnvelope && (retryPayload as EnvelopeCandidate).code !== 'OK')) {
               const retryError = await mapHttpError(
                 response,
-                retryEnvelope ? (retryPayload as unknown as import('../contracts/error').ApiErrorBody) : undefined,
+                retryEnvelope ? (retryPayload as unknown as ApiErrorBody) : undefined,
               )
               if (retryError instanceof UnauthorizedError) this.onUnauthorized?.(retryError)
               else if (retryError.kind === 'forbidden') this.onForbidden?.(retryError)
