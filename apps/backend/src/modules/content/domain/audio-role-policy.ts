@@ -22,10 +22,10 @@ export class AudioRolePolicy {
     return !noAudio;
   }
 
-  static getAudioRole(contentType: string): string {
-    if (contentType.startsWith('lo_')) {
-      return 'pronunciation';
-    }
-    return 'tone_1';
+  static supportsRole(contentType: string, audioRole: string): boolean {
+    if (!this.ALLOWED_CONTENT_TYPES.includes(contentType as (typeof AudioRolePolicy.ALLOWED_CONTENT_TYPES)[number])) return false;
+    return contentType.startsWith('lo_')
+      ? audioRole === 'pronunciation'
+      : ['tone_1', 'tone_2', 'tone_3', 'tone_4'].includes(audioRole);
   }
 }

@@ -7,7 +7,7 @@ source_share_url: https://chatgpt.com/share/6a937088-e570-83e9-912e-11cc3de27eba
 
 # Content 数据库总览
 
-> 「拆分学习域」会话裁决（[ADR-021](/developer/reference/adr/ADR-021-content-and-learning-domain-split.md)，D-147）将原 Learning 域按职责拆分为 Content + Learning；**全局分区收口修订（D-150）已给出逐表归属定稿**：原 Learning 43 张必建表中，31 张归 `content.*`、10 张归 `learning.*`、2 张（`pronunciation_audios` / `tts_jobs`）由 Audio Production Domain 取代不再建表。本页是 Content 表归属的**唯一权威清单**；字段级规格见各分层页（本拆分不重新设计已定稿字段契约，仅修正跨域 ID/FK 口径）。
+> 「拆分学习域」会话裁决（[ADR-021](/developer/reference/adr/ADR-021-content-and-learning-domain-split.md)，D-147）将原 Learning 域按职责拆分为 Content + Learning；D-150 的 31 张归属基线仍有效。Content–Audio 公共边界收口以**前向迁移 `1280_content_audio_eligible_types.sql`**增加 `zh_syllables`，使已批准的 `zh_syllable` Audio 身份可由 Content 解析；不修改任何冻结迁移。2 张（`pronunciation_audios` / `tts_jobs`）仍由 Audio Production Domain 取代不再建表。本页是 Content 表归属的**唯一权威清单**。
 
 ## 归属规则（裁决，frozen）
 
@@ -29,6 +29,7 @@ source_share_url: https://chatgpt.com/share/6a937088-e570-83e9-912e-11cc3de27eba
 | ---: | --- | --- |
 | 1 | `contents` | Content Registry：所有可教学知识的统一身份 |
 | 2 | `zh_pinyin` | 中文拼音 |
+| 2A | `zh_syllables` | 中文音节；稳定跨域身份为对应 `contents.public_id`，供 `zh_syllable` Audio Slot 使用 |
 | 3 | `zh_hanzi` | 中文汉字 |
 | 4 | `zh_hanzi_pinyin` | 汉字 ↔ 拼音关系 |
 | 5 | `zh_words` | 中文词 |

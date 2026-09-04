@@ -151,19 +151,6 @@ export class PostgresContentRepository implements ContentRepository {
         ]
       );
 
-      if (!character.noAudio) {
-        await exec.query(
-          `INSERT INTO audio.audio_slots (
-             id, source_domain, content_entity_type, content_entity_id,
-             language_code, audio_role, required_content_revision_id,
-             required_audio_input_hash, status
-           ) VALUES (gen_random_uuid(), 'content', 'lo_letter', $1, 'lo', 'pronunciation', $2, $3, 'active')
-           ON CONFLICT (source_domain, content_entity_type, content_entity_id, language_code, audio_role)
-           DO UPDATE SET required_content_revision_id = EXCLUDED.required_content_revision_id,
-                         required_audio_input_hash = EXCLUDED.required_audio_input_hash`,
-          [character.id, revision.id, revision.snapshot.audioInputHash]
-        );
-      }
     };
 
     if (this.transactions) {

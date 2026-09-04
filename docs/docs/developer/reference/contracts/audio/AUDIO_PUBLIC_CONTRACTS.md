@@ -33,14 +33,14 @@ type AssetId = string;             // Asset Infrastructure logical UUID
 type ContentRevisionId = string;   // Content logical UUID
 
 type AudioSourceRef = {
-  entityType: 'content' | 'course' | 'lesson' | 'exercise' | 'question';
+  entityType: 'lo_letter' | 'lo_syllable' | 'lo_word' | 'lo_sentence' | 'zh_pinyin' | 'zh_syllable';
   entityId: string;
   languageCode: 'zh' | 'lo';
   audioRole: string;
 };
 ```
 
-`sourceDomain` is fixed to `content` in V1 public contract and is not caller-controlled.
+`sourceDomain` is fixed to `content` in V1 public contract and is not caller-controlled. `entityType` is the concrete Content type; generic `content` and course/lesson/exercise/question identities are not Audio Slot identities.
 
 ## 2. Official Audio Read
 

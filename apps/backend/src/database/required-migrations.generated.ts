@@ -21,4 +21,5 @@ export const requiredMigrations = [
   { filename: '1250_platform_override_indexes.sql', sha256: '7365c2b163588aea63aa19a931b195e9c33a5115662582310207a7df28d9f7b1' },
   { filename: '1260_admin_credentials.sql', sha256: 'a61edef0fc199688303852f7c73725e11b05b82ab3371d780fd5f33d9fbac96f' },
   { filename: '1270_platform_menus.sql', sha256: 'acb25a095c6a4d916d8fba71fd6c56b1d3e5fbf4caad7d78c1eb4d66ee1da35a' },
+  { filename: '1280_content_audio_eligible_types.sql', sha256: '8efc23e1ea8e5e1d92ab507f426fa4cf6a2e94e50ce66be2d0d8bb99c8d85c3d' },
 ] as const;

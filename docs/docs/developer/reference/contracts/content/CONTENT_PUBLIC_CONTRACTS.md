@@ -205,7 +205,7 @@ content_revision_id UUID
 
 ```ts
 type ValidateAudioSourceRequest = {
-  entityType: 'content' | 'course' | 'lesson' | 'exercise' | 'question';
+  entityType: 'lo_letter' | 'lo_syllable' | 'lo_word' | 'lo_sentence' | 'zh_pinyin' | 'zh_syllable';
   entityId: string;
   revisionId: ContentRevisionId;
   languageCode: 'zh' | 'lo';
@@ -225,7 +225,7 @@ type ValidatedAudioSource = {
 
 Validation：entity存在；revision属于该 entity；revision已 published；language 与 entity/snapshot一致；audioRole 支持；input可 deterministic 生成。
 
-Content 不调用 Audio repository，也不管理 Slot/Task。Audio发布后，Content/runtime需要 official audio 时通过 Audio public read keyed by source tuple 获取 official asset descriptor。
+Content 不调用 Audio repository，也不管理 Slot/Task。`entityType` 是 Content 的具体实体身份，不能使用泛化的 `content`，也不能使用 `course`、`lesson`、`exercise` 或 `question`。Audio发布后，Content/runtime需要 official audio 时通过 Audio public read keyed by source tuple 获取 official asset descriptor。
 
 ## 10. Asset Contract
 
