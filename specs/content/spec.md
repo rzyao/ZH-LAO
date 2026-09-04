@@ -144,7 +144,7 @@ Canonical fact owners:
 
 - The code repository (backend repository) actually operates `content.lo_letters`, mapping to the `LaoCharacter` domain model.
 - The alphabet feature page self-documents this as a risk: "数据库基线的 `lo_letters` 与新实体/Spec 的字段语义需要在实现 Gate 前完成逐字段核验" (`features/lao-alphabet-management.md`).
-- **Resolution status**: D-158 已裁决采用完整审核状态机；冻结数据库迁移须以新的前向 migration 对齐。该 migration 与全链路验证完成前，实施 Gate 仍为 BLOCKED。
+- **Resolution status**: D-158 已裁决采用完整审核状态机；前向迁移 `1290_content_revision_review_workflow.sql` 已对齐数据库并通过后端真实集成验证。`lo_letters` 的其余实体字段映射仍按本表所列范围接受独立 Gate 核验。
 
 ## Change Log
 

@@ -100,6 +100,8 @@ Migration order:
 18. `1250_platform_override_indexes.sql` — partial-unique feature flag overrides
 19. `1260_admin_credentials.sql` — Admin back-office credential records
 20. `1270_platform_menus.sql` — menus and menu permissions (ADR-022, DDL + seed)
+21. `1280_content_letter_permissions.sql` — Content letter management permissions
+22. `1290_content_revision_review_workflow.sql` — Content Revision review workflow (D-158)
 
 Migration files are frozen once merged: `migrate` records filename and SHA-256
 in `public.v2_schema_migrations`, and re-applying a file whose contents have

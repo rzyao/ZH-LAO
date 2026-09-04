@@ -18,7 +18,7 @@
 - 未发现埋点计划条目或产品分析 Provider 配置。
 - 没有产生功能专属的 Feature Flag 注册表；Platform 中虽存在功能开关能力，但这本身不能证明该聚合回填具备发布治理。
 - 没有发布就绪证据：监控面板、告警、部署、回滚、事件响应及供应链审查均未证明。
-- **实施阻塞：**真实 PostgreSQL 验证表明，字母草稿可经已挂载的管理端创建，但提交审核会被冻结 `1240_content_revision.sql` 的 `content_revisions.status IN ('draft', 'published', 'superseded')` 约束拒绝；当前 Content Spec 的状态机还要求 `pending_review`、`approved`、`rejected`。这属于已登记的代码/Spec 与冻结数据库漂移，必须由 Content/Database authority 通过新的前向迁移和对应 Spec 变更裁决，不能在本回填或路由挂载中自行修复。
+- **已解决的实施阻塞：**D-158 已裁决完整审核状态机，前向迁移 `1290_content_revision_review_workflow.sql` 已在目标 PostgreSQL 成功应用并通过数据库审计；真实集成验证已覆盖草稿创建、提交审核、审核通过与发布。冻结 `1240_content_revision.sql` 保持不变。
 - 未生成权威的 Spec Kit 需求。仓库治理禁止从代码反推权威需求；这是有意保留的缺口，未来应先依据权威的产品、领域、架构和契约资料建立 Spec Kit 功能规格。
 - `task_log` 为空，因为本次扫描无法可靠恢复历史提交和任务规模。
 

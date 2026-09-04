@@ -93,7 +93,7 @@ source_share_url: https://chatgpt.com/share/6a937088-e570-83e9-912e-11cc3de27eba
 
 审核状态机与允许流转以 [Content 版本复核](versioning-review.md) 为唯一完整定义：`draft → pending_review → approved → published → superseded`；`pending_review → rejected → draft`，以及 `approved → draft`。严禁 `draft` 直接发布或批准。
 
-> **D-158 实施约束：**不得修改冻结的 `1240_content_revision.sql`。后续必须以新的前向 migration 实现上述字段、约束、索引及历史三状态数据的兼容迁移；在该 migration 应用前，Content 审核/发布全链路仍为 `BLOCKED`。
+> **D-158 实施记录：**冻结的 `1240_content_revision.sql` 未被修改。前向迁移 `1290_content_revision_review_workflow.sql` 已实现上述字段、约束、索引及历史三状态数据兼容，并在目标 PostgreSQL 通过审计；Content 后端审核/发布链路已获得真实集成测试证据。
 
 ### Practice 定义（5 张）
 

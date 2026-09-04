@@ -18,7 +18,7 @@ source: scripts/build_developer_feature_catalog.py
 | [用户首页与双侧入口](../mobile-home) | ⚪ not_started | `active` | — | 0 | `complete` |
 | [知识内容管理](../knowledge-content-management) | ⚪ not_started | `active` | — | 1 | `complete` |
 | [练习与题库管理](../practice-content-management) | ⚪ not_started | `active` | — | 1 | `complete` |
-| [老挝语字母管理](../lao-alphabet-management) | 🟡 in_progress | `active` | 数据库: evidenced_limited; Backend: evidenced_limited; Admin: evidenced; Mobile: evidenced | 4 | `manual` |
+| [老挝语字母管理](../lao-alphabet-management) | 🟡 in_progress | `active` | 数据库: evidenced_limited; Backend: evidenced_limited; Admin: evidenced; Mobile: evidenced; Integration: evidenced_limited | 4 | `manual` |
 | [词典内容管理](../dictionary-content-management) | ⚪ not_started | `active` | — | 1 | `complete` |
 | [课程编排与发布](../curriculum-management) | ⚪ not_started | `active` | — | 1 | `complete` |
 
@@ -30,7 +30,7 @@ source: scripts/build_developer_feature_catalog.py
 | Backend | `evidenced_limited` 1, `not_evidenced` 6 |
 | Admin | `evidenced` 1, `not_evidenced` 6 |
 | Mobile | `evidenced` 1, `not_evidenced` 6 |
-| Integration | `not_evidenced` 7 |
+| Integration | `evidenced_limited` 1, `not_evidenced` 6 |
 | Acceptance | `not_evidenced` 7 |
 
 ## 状态说明

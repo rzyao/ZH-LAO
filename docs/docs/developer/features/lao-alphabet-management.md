@@ -13,16 +13,17 @@ delivery_evidence:
 delivery_layers:
   数据库:
     status: evidenced_limited
-    note: 基线表已存在；与 HEAD 实体逐字段对齐待 Feature Gate 前核验
+    note: "`1290_content_revision_review_workflow.sql` 已应用并通过审计；`lo_letters` 的其余实体字段映射仍待 Feature Gate 前核验"
   Backend:
     status: evidenced_limited
-    note: 实体/路由/用例齐备，测试 2 files、6 tests 未覆盖 HTTP/E2E
+    note: 实体/路由/用例齐备；真实 PostgreSQL 已验证草稿、提交审核、审核通过和发布，仍未覆盖音频投影与跨端验收
   Admin:
     status: evidenced
   Mobile:
     status: evidenced
   Integration:
-    status: not_evidenced
+    status: evidenced_limited
+    note: 后端与真实 PostgreSQL 的公开查询及完整审核发布流程已验证；Admin/Mobile 跨端联调尚无证据
   Acceptance:
     status: not_evidenced
 last_updated: 2026-09-02

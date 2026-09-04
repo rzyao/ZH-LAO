@@ -32,6 +32,7 @@ export interface LaoCharacterRevisionProps {
   reviewRemark?: string | null;
   createdByOperatorId?: string | null;
   reviewedByOperatorId?: string | null;
+  reviewedAt?: Date | null;
   publishedAt?: Date | null;
   supersedesRevisionId?: string | null;
   lockVersion: number;
@@ -47,6 +48,7 @@ export class LaoCharacterRevision {
   private _reviewStatus: RevisionReviewStatus;
   private _reviewRemark: string | null;
   private _reviewedByOperatorId: string | null;
+  private _reviewedAt: Date | null;
   private _publishedAt: Date | null;
   private _supersedesRevisionId: string | null;
   private _lockVersion: number;
@@ -63,6 +65,7 @@ export class LaoCharacterRevision {
     this._reviewRemark = props.reviewRemark ?? null;
     this.createdByOperatorId = props.createdByOperatorId ?? null;
     this._reviewedByOperatorId = props.reviewedByOperatorId ?? null;
+    this._reviewedAt = props.reviewedAt ?? null;
     this._publishedAt = props.publishedAt ?? null;
     this._supersedesRevisionId = props.supersedesRevisionId ?? null;
     this._lockVersion = props.lockVersion;
@@ -80,6 +83,14 @@ export class LaoCharacterRevision {
 
   get reviewRemark(): string | null {
     return this._reviewRemark;
+  }
+
+  get reviewedByOperatorId(): string | null {
+    return this._reviewedByOperatorId;
+  }
+
+  get reviewedAt(): Date | null {
+    return this._reviewedAt;
   }
 
   get publishedAt(): Date | null {
@@ -101,6 +112,7 @@ export class LaoCharacterRevision {
       throw new Error(`Cannot submit revision for review from status: ${this._reviewStatus}`);
     }
     this._reviewStatus = 'pending_review';
+    this._lockVersion += 1;
     this._updatedAt = new Date();
   }
 
@@ -110,6 +122,8 @@ export class LaoCharacterRevision {
     }
     this._reviewStatus = 'approved';
     this._reviewedByOperatorId = reviewerOperatorId;
+    this._reviewedAt = new Date();
+    this._lockVersion += 1;
     this._updatedAt = new Date();
   }
 
@@ -123,6 +137,8 @@ export class LaoCharacterRevision {
     this._reviewStatus = 'rejected';
     this._reviewedByOperatorId = reviewerOperatorId;
     this._reviewRemark = remark;
+    this._reviewedAt = new Date();
+    this._lockVersion += 1;
     this._updatedAt = new Date();
   }
 
@@ -131,6 +147,7 @@ export class LaoCharacterRevision {
       throw new Error(`Cannot re-edit revision from status: ${this._reviewStatus}`);
     }
     this._reviewStatus = 'draft';
+    this._lockVersion += 1;
     this._updatedAt = new Date();
   }
 
@@ -140,6 +157,7 @@ export class LaoCharacterRevision {
     }
     this._reviewStatus = 'published';
     this._publishedAt = publishedAt;
+    this._lockVersion += 1;
     this._updatedAt = new Date();
   }
 
@@ -148,6 +166,7 @@ export class LaoCharacterRevision {
       throw new Error(`Cannot supersede revision from status: ${this._reviewStatus}`);
     }
     this._reviewStatus = 'superseded';
+    this._lockVersion += 1;
     this._updatedAt = new Date();
   }
 

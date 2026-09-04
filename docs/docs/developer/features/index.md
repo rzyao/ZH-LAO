@@ -26,7 +26,7 @@ source: scripts/build_developer_feature_catalog.py
 | Backend | `evidenced` 1, `evidenced_limited` 1, `not_evidenced` 100, `verified` 1 |
 | Admin | `evidenced` 1, `not_applicable` 1, `not_evidenced` 100, `verified` 1 |
 | Mobile | `evidenced` 1, `evidenced_limited` 1, `not_applicable` 1, `not_evidenced` 100 |
-| Integration | `not_evidenced` 102, `verified` 1 |
+| Integration | `evidenced_limited` 1, `not_evidenced` 101, `verified` 1 |
 | Acceptance | `not_evidenced` 102, `verified` 1 |
 
 ## 状态说明

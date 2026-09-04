@@ -46,7 +46,7 @@ integration('Content HTTP route integration', () => {
     await app.close();
   });
 
-  it('creates a draft through the mounted management endpoint', async () => {
+  it('persists the complete draft-review-publish workflow through mounted management endpoints', async () => {
     const operatorId = '11111111-1111-4111-8111-111111111111';
     const app = buildApp({ logger: pino({ level: 'silent' }), database: executor });
     await registerContentRoutes(app, {
@@ -67,6 +67,18 @@ integration('Content HTTP route integration', () => {
       id: createdData.revisionId,
       characterId: createdData.characterId,
       reviewStatus: 'draft',
+    });
+
+    const submitted = await app.inject({ method: 'POST', url: `/api/v1/admin/content/letters/${createdData.characterId}/revisions/${createdData.revisionId}/submit` });
+    expect(submitted.json()).toMatchObject({ code: 'OK', data: { status: 'pending_review' } });
+    const approved = await app.inject({ method: 'POST', url: `/api/v1/admin/content/letters/${createdData.characterId}/revisions/${createdData.revisionId}/review`, payload: { action: 'approve' } });
+    expect(approved.json()).toMatchObject({ code: 'OK', data: { status: 'approved' } });
+    const published = await app.inject({ method: 'POST', url: `/api/v1/admin/content/letters/${createdData.characterId}/revisions/${createdData.revisionId}/publish` });
+    expect(published.json()).toMatchObject({ code: 'OK', data: { status: 'published' } });
+    expect(await new PostgresContentRepository(executor).findRevisionById(createdData.revisionId)).toMatchObject({
+      reviewStatus: 'published',
+      reviewedByOperatorId: operatorId,
+      reviewedAt: expect.any(Date),
     });
     await app.close();
   });

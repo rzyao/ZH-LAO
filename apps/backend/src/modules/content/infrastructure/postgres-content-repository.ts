@@ -62,8 +62,8 @@ export class PostgresContentRepository implements ContentRepository {
   async findRevisionById(revisionId: string): Promise<LaoCharacterRevision | null> {
     const res = await this.db.query(
       `SELECT revision_public_id as id, entity_id as character_id, revision_number as revision_no,
-              status as review_status, snapshot, created_by_operator_id, published_at,
-              created_at, created_at as updated_at
+              status as review_status, snapshot, created_by_operator_id, reviewed_by_operator_id,
+              review_remark, reviewed_at, published_at, lock_version, created_at, updated_at
        FROM content.content_revisions
        WHERE revision_public_id = $1 AND entity_type = 'content'`,
       [revisionId]
@@ -77,8 +77,8 @@ export class PostgresContentRepository implements ContentRepository {
   async findActiveWorkingRevision(characterId: string): Promise<LaoCharacterRevision | null> {
     const res = await this.db.query(
       `SELECT revision_public_id as id, entity_id as character_id, revision_number as revision_no,
-              status as review_status, snapshot, created_by_operator_id, published_at,
-              created_at, created_at as updated_at
+              status as review_status, snapshot, created_by_operator_id, reviewed_by_operator_id,
+              review_remark, reviewed_at, published_at, lock_version, created_at, updated_at
        FROM content.content_revisions
        WHERE entity_id = $1 AND entity_type = 'content'
          AND status IN ('draft', 'pending_review', 'approved', 'rejected')
@@ -94,8 +94,8 @@ export class PostgresContentRepository implements ContentRepository {
   async findPublishedRevision(characterId: string): Promise<LaoCharacterRevision | null> {
     const res = await this.db.query(
       `SELECT revision_public_id as id, entity_id as character_id, revision_number as revision_no,
-              status as review_status, snapshot, created_by_operator_id, published_at,
-              created_at, created_at as updated_at
+              status as review_status, snapshot, created_by_operator_id, reviewed_by_operator_id,
+              review_remark, reviewed_at, published_at, lock_version, created_at, updated_at
        FROM content.content_revisions
        WHERE entity_id = $1 AND entity_type = 'content' AND status = 'published'
        LIMIT 1`,
@@ -174,15 +174,22 @@ export class PostgresContentRepository implements ContentRepository {
   }
 
   async saveRevision(revision: LaoCharacterRevision): Promise<void> {
-    await this.db.query(
+    const saved = await this.db.query(
       `INSERT INTO content.content_revisions (
          revision_public_id, entity_type, entity_id, revision_number,
-         status, snapshot, created_by_operator_id, published_at, created_at
-       ) VALUES ($1, 'content', $2, $3, $4, $5, $6, $7, $8)
+         status, snapshot, created_by_operator_id, reviewed_by_operator_id,
+         review_remark, reviewed_at, published_at, lock_version, created_at, updated_at
+       ) VALUES ($1, 'content', $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
        ON CONFLICT (revision_public_id)
        DO UPDATE SET status = EXCLUDED.status,
                      snapshot = EXCLUDED.snapshot,
-                     published_at = EXCLUDED.published_at`,
+                     reviewed_by_operator_id = EXCLUDED.reviewed_by_operator_id,
+                     review_remark = EXCLUDED.review_remark,
+                     reviewed_at = EXCLUDED.reviewed_at,
+                     published_at = EXCLUDED.published_at,
+                     lock_version = EXCLUDED.lock_version,
+                     updated_at = EXCLUDED.updated_at
+        WHERE content.content_revisions.lock_version = EXCLUDED.lock_version - 1`,
       [
         revision.id,
         revision.characterId,
@@ -190,10 +197,16 @@ export class PostgresContentRepository implements ContentRepository {
         revision.reviewStatus,
         JSON.stringify(revision.snapshot),
         revision.createdByOperatorId,
+        revision.reviewedByOperatorId,
+        revision.reviewRemark,
+        revision.reviewedAt,
         revision.publishedAt,
+        revision.lockVersion,
         revision.createdAt,
+        new Date(),
       ]
     );
+    if (saved.rowCount !== 1) throw new Error('STALE_VERSION_CONFLICT: Revision changed concurrently');
   }
 
   async publishRevisionAtomic(
@@ -211,12 +224,13 @@ export class PostgresContentRepository implements ContentRepository {
         );
       }
 
-      await exec.query(
+      const published = await exec.query(
         `UPDATE content.content_revisions
-         SET status = 'published', published_at = $1
-         WHERE revision_public_id = $2`,
-        [targetRevision.publishedAt ?? new Date(), targetRevision.id]
+         SET status = 'published', published_at = $1, lock_version = $2, updated_at = now()
+         WHERE revision_public_id = $3 AND lock_version = $2 - 1`,
+        [targetRevision.publishedAt ?? new Date(), targetRevision.lockVersion, targetRevision.id]
       );
+      if (published.rowCount !== 1) throw new Error('STALE_VERSION_CONFLICT: Revision changed concurrently');
 
       // Update physical read model
       await exec.query(
@@ -312,8 +326,11 @@ export class PostgresContentRepository implements ContentRepository {
       snapshot: snap,
       reviewStatus: row['review_status'] as never,
       createdByOperatorId: row['created_by_operator_id'] ? String(row['created_by_operator_id']) : null,
+      reviewedByOperatorId: row['reviewed_by_operator_id'] ? String(row['reviewed_by_operator_id']) : null,
+      reviewRemark: row['review_remark'] ? String(row['review_remark']) : null,
+      reviewedAt: row['reviewed_at'] ? new Date(String(row['reviewed_at'])) : null,
       publishedAt: row['published_at'] ? new Date(String(row['published_at'])) : null,
-      lockVersion: 0,
+      lockVersion: Number(row['lock_version']),
       createdAt: new Date(String(row['created_at'])),
       updatedAt: new Date(String(row['updated_at'] ?? row['created_at'])),
     });

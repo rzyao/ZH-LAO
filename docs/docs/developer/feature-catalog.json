@@ -169,7 +169,8 @@
       "not_evidenced": 100
     },
     "Integration": {
-      "not_evidenced": 102,
+      "evidenced_limited": 1,
+      "not_evidenced": 101,
       "verified": 1
     },
     "Acceptance": {
@@ -1362,7 +1363,7 @@
         "Backend": "evidenced_limited",
         "Admin": "evidenced",
         "Mobile": "evidenced",
-        "Integration": "not_evidenced",
+        "Integration": "evidenced_limited",
         "Acceptance": "not_evidenced"
       },
       "dev_status": "in_progress",
