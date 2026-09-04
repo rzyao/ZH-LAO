@@ -74,8 +74,11 @@ tests and the current `main` tip specifically aligns error-envelope vocabulary
 with ADR-023. A real integration drift was found in `identity-e2e`: it still
 asserted pre-ADR HTTP status codes and bare bodies. Those assertions are
 updated in the follow-up integration repair to assert the top-level business
-code and unwrapped `data`. The P0 contract is consistent: business responses
-use HTTP 200 with top-level `code` and `request_id`; health probes remain exempt.
+code and unwrapped `data`. The subsequent CI run shows that
+`identity-http.test.ts` still contains the same pre-ADR assumptions; that
+remaining test migration is a P1 engineering blocker. The P0 contract itself
+is consistent: business responses use HTTP 200 with top-level `code` and
+`request_id`; health probes remain exempt.
 
 ## 7. WP-06 Result — DONE
 
@@ -162,7 +165,7 @@ assertions described above. A second CI run is required after that test repair.
 | Job | Status | Classification |
 | --- | --- | --- |
 | Docs | PASS | Blocking job passed |
-| Backend | FAIL | Blocking; manifest and ADR-023 integration-test drift repaired; CI re-run required |
+| Backend | FAIL | Blocking; manifest and `identity-e2e` drift repaired, but `identity-http` retains old HTTP/bare-body assertions |
 | Admin | FAIL | Blocking TypeScript errors, including menu property/tone/icon/payload typing failures |
 | Mobile | FAIL | Non-blocking job by workflow policy, but its TypeScript error-constructor constraint failures remain visible |
 
@@ -188,9 +191,10 @@ probe previously passed, but does not replace the final `main` workflow.
 
 1. Repair the Admin TypeScript build failures reported by Foundation CI, then
    obtain a green blocking CI run.
-2. Re-run the Foundation backend job after the manifest and ADR-023 integration
-   test repairs, and retain its database validation result. It must pass before
-   Database can be recorded as PASS.
+2. Update the remaining legacy assertions in `identity-http.test.ts` for the
+   ADR-023 envelope, then obtain a green Foundation backend job and retain its
+   database validation result. It must pass before Database can be recorded as
+   PASS.
 
 ## 17. Deferred P2
 
