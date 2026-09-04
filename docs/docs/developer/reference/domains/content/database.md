@@ -1,6 +1,6 @@
 ---
-status: frozen
-last_updated: 2026-08-30
+status: baseline
+last_updated: 2026-09-04
 schema: content
 source_share_url: https://chatgpt.com/share/6a937088-e570-83e9-912e-11cc3de27eba
 ---
@@ -68,7 +68,7 @@ source_share_url: https://chatgpt.com/share/6a937088-e570-83e9-912e-11cc3de27eba
 
 ### Revision（1 张）
 
-`content_revisions` 为 Content 结构化版本历史（迁移 `1240_content_revision.sql` 冻结；多态 `entity_id` 为 Content logical/public UUID，无物理 FK）：
+`content_revisions` 为 Content 结构化版本历史（迁移 `1240_content_revision.sql` 是冻结的历史基线；D-158 已裁决以**新前向迁移**补齐审核工作流。多态 `entity_id` 为 Content logical/public UUID，无物理 FK）：
 
 | 字段 | 类型 | Null | 默认/约束 | 说明 |
 | --- | --- | --- | --- | --- |
@@ -77,14 +77,23 @@ source_share_url: https://chatgpt.com/share/6a937088-e570-83e9-912e-11cc3de27eba
 | `entity_type` | `varchar(32)` | 否 | CHECK `content/course/lesson/exercise/question/translation` | 版本所属实体类型（多态） |
 | `entity_id` | `uuid` | 否 | — | 实体 Content logical/public UUID |
 | `revision_number` | `integer` | 否 | CHECK `> 0` | 版本号 |
-| `status` | `varchar(16)` | 否 | DEFAULT `draft`; CHECK `draft/published/superseded` | 版本状态 |
+| `status` | `varchar(16)` | 否 | DEFAULT `draft`; CHECK `draft/pending_review/approved/published/rejected/superseded` | 版本审核与发布状态 |
 | `snapshot` | `jsonb` | 否 | CHECK `jsonb_typeof=object` | 版本快照 |
 | `created_by_operator_id` | `uuid` | 是 | — | 创建操作人 |
+| `reviewed_by_operator_id` | `uuid` | 是 | — | 最近一次审核操作人；跨域 logical UUID |
+| `review_remark` | `text` | 是 | `rejected` 时非空 | 驳回原因或审核说明 |
+| `reviewed_at` | `timestamptz` | 是 | — | 最近一次审核时间 |
+| `lock_version` | `integer` | 否 | DEFAULT `0`; CHECK `>= 0` | 乐观锁版本 |
 | `created_at` | `timestamptz` | 否 | DEFAULT `now()` | 创建时间 |
+| `updated_at` | `timestamptz` | 否 | DEFAULT `now()` | 最近修改时间 |
 | `published_at` | `timestamptz` | 是 | 与 `status='published'` 强一致 | 发布时间 |
 | `supersedes_revision_id` | `bigint` | 是 | FK → `content.content_revisions(id)` ON DELETE RESTRICT | 被本版本取代的上一版 |
 
-约束：`UNIQUE(entity_type, entity_id, revision_number)`；`(status='published' AND published_at IS NOT NULL) OR (status<>'published' AND published_at IS NULL)`。索引：`(entity_type,entity_id) WHERE status='published'`、`(entity_type,entity_id,revision_number DESC)`、`(status,published_at DESC)`。
+约束：`UNIQUE(entity_type, entity_id, revision_number)`；`(status='published' AND published_at IS NOT NULL) OR (status<>'published' AND published_at IS NULL)`；`status='rejected'` 时 `review_remark` 必须为非空；同一实体至多一个活动工作版本（`draft/pending_review/approved/rejected`）由 partial unique index 保证。索引：`(entity_type,entity_id) WHERE status='published'`、`(entity_type,entity_id,revision_number DESC)`、`(status,published_at DESC)`。
+
+审核状态机与允许流转以 [Content 版本复核](versioning-review.md) 为唯一完整定义：`draft → pending_review → approved → published → superseded`；`pending_review → rejected → draft`，以及 `approved → draft`。严禁 `draft` 直接发布或批准。
+
+> **D-158 实施约束：**不得修改冻结的 `1240_content_revision.sql`。后续必须以新的前向 migration 实现上述字段、约束、索引及历史三状态数据的兼容迁移；在该 migration 应用前，Content 审核/发布全链路仍为 `BLOCKED`。
 
 ### Practice 定义（5 张）
 

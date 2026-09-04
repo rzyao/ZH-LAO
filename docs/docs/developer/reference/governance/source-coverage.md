@@ -1,6 +1,6 @@
 ---
 status: baseline
-last_updated: 2026-09-02
+last_updated: 2026-09-04
 ---
 
 # 会话覆盖清单
@@ -8,6 +8,15 @@ last_updated: 2026-09-02
 > 文档 authority 与根目录研究资产的分类、保留和引用方式见[研究分类](research-classification.md)。
 
 覆盖标准不是逐字复制对话，而是每条有效产品规则、边界、实体、字段、约束、反例和延期项都有唯一事实源。
+
+## “Content 路由挂载与审核状态机裁决”会话
+
+来源：当前会话，2026-09-04。用户确认 Content 路由完整挂载，并在真实 PostgreSQL 联调发现冻结三状态约束阻塞审核流后，明确作出「裁决」。
+
+| 会话结论 | 文档 |
+| --- | --- |
+| Content 字母公开路由与后台控制面完整挂载，使用 Identity、Operations 精确权限及审计 | [设计台账](design-register.md) D-157、[API Standard](/developer/reference/architecture/applications/api-standard.md) |
+| Content Revision 采用完整六状态审核/发布状态机；冻结迁移保留，使用前向 migration 升级当前数据库契约 | [设计台账](design-register.md) D-158、[Content 数据库](/developer/reference/domains/content/database.md)、[Content 版本复核](/developer/reference/domains/content/versioning-review.md) |
 
 ## “数据库域设计 / 继续设计社交资料”会话
 

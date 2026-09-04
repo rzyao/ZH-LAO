@@ -17,7 +17,7 @@ last_updated: 2026-09-02
 
 ## designing
 
-- Content / Learning：Content 与 Learning 各 `*_media_id` 字段如何接入 Media / Asset Infrastructure；内容发布与版本系统的完整实现模型；TTS / 翻译运营额度与限流参数；`question_reviews` 是否在首期后启用。
+- Content / Learning：Content 与 Learning 各 `*_media_id` 字段如何接入 Media / Asset Infrastructure；TTS / 翻译运营额度与限流参数；`question_reviews` 是否在首期后启用。
 - Social：资料关闭后恢复原资料还是重建资料的产品规则。
 - Chat：应用服务请求/响应、错误码、分页游标和鉴权契约；语音消息、聊天翻译与语音转文字是否进入首期；消息保留和注销匿名化规则。
 - Rewards：Worker 批量大小、租约超时和重试间隔等运行参数；权益型奖励、Manual Grant 与用户时区扩展继续按上方 deferred 范围处理。
