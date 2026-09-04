@@ -63,7 +63,7 @@ export class PostgresContentRepository implements ContentRepository {
     const res = await this.db.query(
       `SELECT revision_public_id as id, entity_id as character_id, revision_number as revision_no,
               status as review_status, snapshot, created_by_operator_id, published_at,
-              created_at, updated_at
+              created_at, created_at as updated_at
        FROM content.content_revisions
        WHERE revision_public_id = $1 AND entity_type = 'content'`,
       [revisionId]
@@ -78,7 +78,7 @@ export class PostgresContentRepository implements ContentRepository {
     const res = await this.db.query(
       `SELECT revision_public_id as id, entity_id as character_id, revision_number as revision_no,
               status as review_status, snapshot, created_by_operator_id, published_at,
-              created_at, updated_at
+              created_at, created_at as updated_at
        FROM content.content_revisions
        WHERE entity_id = $1 AND entity_type = 'content'
          AND status IN ('draft', 'pending_review', 'approved', 'rejected')
@@ -95,7 +95,7 @@ export class PostgresContentRepository implements ContentRepository {
     const res = await this.db.query(
       `SELECT revision_public_id as id, entity_id as character_id, revision_number as revision_no,
               status as review_status, snapshot, created_by_operator_id, published_at,
-              created_at, updated_at
+              created_at, created_at as updated_at
        FROM content.content_revisions
        WHERE entity_id = $1 AND entity_type = 'content' AND status = 'published'
        LIMIT 1`,
