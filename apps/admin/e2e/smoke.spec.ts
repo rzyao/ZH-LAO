@@ -23,20 +23,37 @@ test.describe('Admin Foundation smoke', () => {
 
   test('all 11 domain entries are present in the sidebar', async ({ page }) => {
     await login(page)
+    const sidebar = page.getByTestId('sidebar')
     const labels = [
       '内容管理', '学习系统', '音频生产', '身份认证', '社交关系', '实时聊天',
       '交易商城', '奖励中心', '信任与风控', '运营权限', '平台控制台',
     ]
+    // ADR-022 配置驱动导航:带子级的一级项(内容管理/运营权限/平台控制台)以可展开按钮呈现,
+    // 其余一级项以链接呈现;全部 11 个域入口都必须可见。
     for (const label of labels) {
-      await expect(page.getByRole('link', { name: label })).toBeVisible()
+      const entry = sidebar
+        .getByRole('link', { name: label, exact: true })
+        .or(sidebar.getByRole('button', { name: label, exact: true }))
+      await expect(entry).toBeVisible()
     }
+  })
+
+  test('内容管理 entry expands to the content modules', async ({ page }) => {
+    await login(page)
+    const contentEntry = page.getByRole('button', { name: '内容管理', exact: true })
+    await contentEntry.click()
+    const letters = page.getByRole('link', { name: '字母管理', exact: true })
+    await expect(letters).toBeVisible()
+    await letters.click()
+    await expect(page).toHaveURL(/\/content\/letters$/)
+    await expect(page.getByRole('heading', { name: /老挝语字母管理/ })).toBeVisible()
   })
 
   test('navigation works to a domain placeholder', async ({ page }) => {
     await login(page)
-    await page.getByRole('link', { name: '内容管理' }).click()
-    await expect(page.getByText('内容管理 — 即将上线')).toBeVisible()
-    await expect(page).toHaveURL(/\/content$/)
+    await page.getByRole('link', { name: '学习系统' }).click()
+    await expect(page.getByText('学习系统 — 即将上线')).toBeVisible()
+    await expect(page).toHaveURL(/\/learning$/)
   })
 
   test('Platform entry opens the real Stage A management landing', async ({ page }) => {
