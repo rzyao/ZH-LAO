@@ -15,6 +15,12 @@ const direction = { native_language: 'lo', learning_language: 'zh' } as const;
 const device = (installationId: string = newLogicalUuid()) => ({ installation_id: installationId, platform: 'ios', device_name: 'iPhone', app_version: '2.0.1', push_token: `push-${installationId}` });
 const lastCode = (ctx: IdentityTestApp) => ctx.delivery.deliveries.at(-1)!.code;
 const bearer = (token: string) => ({ authorization: `Bearer ${token}` });
+const success = (response: { json(): unknown }) => {
+  const envelope = response.json() as { code: string; data: Record<string, unknown> };
+  expect(envelope.code).toBe('OK');
+  return envelope.data;
+};
+const businessCode = (response: { json(): unknown }) => (response.json() as { code: string }).code;
 
 async function withApp(fn: (ctx: IdentityTestApp) => Promise<void>, options: { facebook?: string[]; eventWriter?: IdentityEventWriter } = {}) {
   const ctx = await buildIdentityTestApp({
@@ -38,7 +44,7 @@ integration('IDN-18 Domain E2E against real PostgreSQL', () => {
     await withApp(async (ctx) => {
       const phone = '+8562051000001'; const response = await phoneRegister(ctx, phone);
       expect(response.statusCode).toBe(200);
-      const body = response.json();
+      const body = success(response);
       expect(body).toMatchObject({ account_status: 'active', is_new_user: true, token_type: 'Bearer' });
       const user = (await createIdentityRepositories(asExecutor(ctx.pool)).users.findByPublicId(parseUserPublicId(body.user_id)))!;
       expect(await count(ctx, 'SELECT count(*) AS count FROM identity.auth_identities WHERE user_id=$1 AND provider=$2', [user.id.toString(), 'phone'])).toBe(1);
@@ -57,9 +63,9 @@ integration('IDN-18 Domain E2E against real PostgreSQL', () => {
   it('existing phone login reuses the canonical user and never duplicates registration', async () => {
     await withApp(async (ctx) => {
       const phone = '+8562051000002';
-      const first = await phoneRegister(ctx, phone); const userId = first.json().user_id;
+      const first = await phoneRegister(ctx, phone); const userId = success(first).user_id;
       const second = await phoneRegister(ctx, phone);
-      expect(second.json().is_new_user).toBe(false); expect(second.json().user_id).toBe(userId);
+      expect(success(second).is_new_user).toBe(false); expect(success(second).user_id).toBe(userId);
       const user = (await createIdentityRepositories(asExecutor(ctx.pool)).users.findByPublicId(parseUserPublicId(userId)))!;
       expect(await count(ctx, 'SELECT count(*) AS count FROM identity.sessions WHERE user_id=$1 AND status=$2', [user.id.toString(), 'active'])).toBe(2);
       expect(await count(ctx, "SELECT count(*) AS count FROM infrastructure.system_outbox_events WHERE event_type='identity.user_registered.v1' AND aggregate_id=$1", [userId])).toBe(1);
@@ -71,26 +77,26 @@ integration('IDN-18 Domain E2E against real PostgreSQL', () => {
     await withApp(async (ctx) => {
       const facebook = (payload: Record<string, unknown>) => ctx.app.inject({ method: 'POST', url: '/api/v1/identity/auth/facebook', payload });
       const first = await facebook({ credential: 'opaque', learning_direction: direction, device: device() });
-      expect(first.json().is_new_user).toBe(true);
-      const user = (await createIdentityRepositories(asExecutor(ctx.pool)).users.findByPublicId(parseUserPublicId(first.json().user_id)))!;
+      expect(success(first).is_new_user).toBe(true);
+      const user = (await createIdentityRepositories(asExecutor(ctx.pool)).users.findByPublicId(parseUserPublicId(success(first).user_id)))!;
       expect(await count(ctx, 'SELECT count(*) AS count FROM identity.auth_identities WHERE user_id=$1 AND provider=$2', [user.id.toString(), 'facebook'])).toBe(1);
       expect(await count(ctx, 'SELECT count(*) AS count FROM identity.basic_profiles WHERE user_id=$1', [user.id.toString()])).toBe(1);
       expect(await count(ctx, 'SELECT count(*) AS count FROM identity.learning_profiles WHERE user_id=$1', [user.id.toString()])).toBe(1);
-      expect(await count(ctx, "SELECT count(*) AS count FROM infrastructure.system_outbox_events WHERE event_type='identity.user_registered.v1' AND aggregate_id=$1", [first.json().user_id])).toBe(1);
+      expect(await count(ctx, "SELECT count(*) AS count FROM infrastructure.system_outbox_events WHERE event_type='identity.user_registered.v1' AND aggregate_id=$1", [success(first).user_id])).toBe(1);
       const second = await facebook({ credential: 'opaque' });
-      expect(second.json().is_new_user).toBe(false); expect(second.json().user_id).toBe(first.json().user_id);
-      expect(await count(ctx, "SELECT count(*) AS count FROM infrastructure.system_outbox_events WHERE event_type='identity.user_registered.v1' AND aggregate_id=$1", [first.json().user_id])).toBe(1);
+      expect(success(second).is_new_user).toBe(false); expect(success(second).user_id).toBe(success(first).user_id);
+      expect(await count(ctx, "SELECT count(*) AS count FROM infrastructure.system_outbox_events WHERE event_type='identity.user_registered.v1' AND aggregate_id=$1", [success(first).user_id])).toBe(1);
     }, { facebook: ['opaque'] });
   });
 
   it('refresh rotation: replay blocked, sliding TTL extended, only latest hash kept', async () => {
     await withApp(async (ctx) => {
-      const registered = await phoneRegister(ctx, '+8562051000003'); const rawA = registered.json().refresh_token;
+      const registered = await phoneRegister(ctx, '+8562051000003'); const rawA = String(success(registered).refresh_token);
       const first = await ctx.app.inject({ method: 'POST', url: '/api/v1/identity/sessions/refresh', payload: { refresh_token: rawA } });
-      expect(first.statusCode).toBe(200); const rawB = first.json().refresh_token;
-      expect((await ctx.app.inject({ method: 'POST', url: '/api/v1/identity/sessions/refresh', payload: { refresh_token: rawA } })).statusCode).toBe(401);
+      expect(first.statusCode).toBe(200); const rawB = String(success(first).refresh_token);
+      expect(businessCode(await ctx.app.inject({ method: 'POST', url: '/api/v1/identity/sessions/refresh', payload: { refresh_token: rawA } }))).toBe('INVALID_CREDENTIAL');
       const second = await ctx.app.inject({ method: 'POST', url: '/api/v1/identity/sessions/refresh', payload: { refresh_token: rawB } });
-      expect(second.statusCode).toBe(200);
+      expect(second.statusCode).toBe(200); success(second);
       const sessionRows = await db(ctx, 'SELECT refresh_token_hash, expires_at FROM identity.sessions');
       expect(sessionRows.rows).toHaveLength(1);
       expect(JSON.stringify(sessionRows.rows[0]!)).not.toContain(rawB);
@@ -101,14 +107,14 @@ integration('IDN-18 Domain E2E against real PostgreSQL', () => {
 
   it('logout current is idempotent and logout-all revokes every session', async () => {
     await withApp(async (ctx) => {
-      const registered = await phoneRegister(ctx, '+8562051000004'); const token = registered.json();
-      expect((await ctx.app.inject({ method: 'POST', url: '/api/v1/identity/sessions/logout', payload: { refresh_token: token.refresh_token } })).statusCode).toBe(204);
-      expect((await ctx.app.inject({ method: 'POST', url: '/api/v1/identity/sessions/refresh', payload: { refresh_token: token.refresh_token } })).statusCode).toBe(401);
-      const tokenB = (await phoneRegister(ctx, '+8562051000005')).json();
-      const tokenC = (await phoneRegister(ctx, '+8562051000005')).json();
-      expect((await ctx.app.inject({ method: 'POST', url: '/api/v1/identity/sessions/logout-all', headers: bearer(tokenB.access_token) })).statusCode).toBe(204);
-      expect((await ctx.app.inject({ method: 'POST', url: '/api/v1/identity/sessions/refresh', payload: { refresh_token: tokenB.refresh_token } })).statusCode).toBe(401);
-      expect((await ctx.app.inject({ method: 'POST', url: '/api/v1/identity/sessions/refresh', payload: { refresh_token: tokenC.refresh_token } })).statusCode).toBe(401);
+      const token = success(await phoneRegister(ctx, '+8562051000004'));
+      expect(success(await ctx.app.inject({ method: 'POST', url: '/api/v1/identity/sessions/logout', payload: { refresh_token: token.refresh_token } }))).toBeNull();
+      expect(businessCode(await ctx.app.inject({ method: 'POST', url: '/api/v1/identity/sessions/refresh', payload: { refresh_token: token.refresh_token } }))).toBe('INVALID_CREDENTIAL');
+      const tokenB = success(await phoneRegister(ctx, '+8562051000005'));
+      const tokenC = success(await phoneRegister(ctx, '+8562051000005'));
+      expect(success(await ctx.app.inject({ method: 'POST', url: '/api/v1/identity/sessions/logout-all', headers: bearer(String(tokenB.access_token)) }))).toBeNull();
+      expect(businessCode(await ctx.app.inject({ method: 'POST', url: '/api/v1/identity/sessions/refresh', payload: { refresh_token: tokenB.refresh_token } }))).toBe('INVALID_CREDENTIAL');
+      expect(businessCode(await ctx.app.inject({ method: 'POST', url: '/api/v1/identity/sessions/refresh', payload: { refresh_token: tokenC.refresh_token } }))).toBe('INVALID_CREDENTIAL');
     });
   });
 
@@ -117,52 +123,52 @@ integration('IDN-18 Domain E2E against real PostgreSQL', () => {
       const installation = newLogicalUuid(); const phone = '+8562051000006';
       await requests(ctx, phone);
       const login1 = await ctx.app.inject({ method: 'POST', url: '/api/v1/identity/auth/phone', payload: { phone, otp_code: lastCode(ctx), learning_direction: direction, device: device(installation) } });
-      const headers = bearer(login1.json().access_token);
-      expect((await ctx.app.inject({ url: '/api/v1/identity/me/devices', headers })).json().items[0].installation_id).toBe(installation);
-      expect((await ctx.app.inject({ method: 'DELETE', url: `/api/v1/identity/me/devices/${installation}`, headers })).statusCode).toBe(204);
-      expect((await ctx.app.inject({ url: '/api/v1/identity/me/devices', headers })).json().items[0]).toMatchObject({ revoked: true });
+      const loginData = success(login1); const headers = bearer(String(loginData.access_token));
+      expect((success(await ctx.app.inject({ url: '/api/v1/identity/me/devices', headers })).items as Array<Record<string, unknown>>)[0]!.installation_id).toBe(installation);
+      expect(success(await ctx.app.inject({ method: 'DELETE', url: `/api/v1/identity/me/devices/${installation}`, headers }))).toBeNull();
+      expect((success(await ctx.app.inject({ url: '/api/v1/identity/me/devices', headers })).items as Array<Record<string, unknown>>)[0]).toMatchObject({ revoked: true });
       const ordinaryUpdate = new DeviceLifecycle(ctx.transactions, createIdentityRepositories);
-      await expect(ordinaryUpdate.registerOrUpdate(parseUserPublicId(login1.json().user_id), { installationId: parseInstallationId(installation), platform: 'ios', deviceName: 'iPhone' })).rejects.toMatchObject({ code: 'DEVICE_REVOKED' });
-      expect((await ctx.app.inject({ method: 'POST', url: '/api/v1/identity/sessions/refresh', payload: { refresh_token: login1.json().refresh_token } })).statusCode).toBe(401);
+      await expect(ordinaryUpdate.registerOrUpdate(parseUserPublicId(loginData.user_id), { installationId: parseInstallationId(installation), platform: 'ios', deviceName: 'iPhone' })).rejects.toMatchObject({ code: 'DEVICE_REVOKED' });
+      expect(businessCode(await ctx.app.inject({ method: 'POST', url: '/api/v1/identity/sessions/refresh', payload: { refresh_token: loginData.refresh_token } }))).toBe('INVALID_CREDENTIAL');
       await requests(ctx, phone);
       const sameUser = await ctx.app.inject({ method: 'POST', url: '/api/v1/identity/auth/phone', payload: { phone, otp_code: lastCode(ctx), learning_direction: direction, device: device(installation) } });
-      expect(sameUser.statusCode).toBe(200); expect(sameUser.json().is_new_user).toBe(false);
-      expect((await ctx.app.inject({ url: '/api/v1/identity/me/devices', headers: bearer(sameUser.json().access_token) })).json().items[0].revoked).toBe(false);
-      expect((await ctx.app.inject({ method: 'POST', url: '/api/v1/identity/sessions/refresh', payload: { refresh_token: sameUser.json().refresh_token } })).statusCode).toBe(200);
+      expect(sameUser.statusCode).toBe(200); expect(success(sameUser).is_new_user).toBe(false);
+      expect((success(await ctx.app.inject({ url: '/api/v1/identity/me/devices', headers: bearer(String(success(sameUser).access_token)) })).items as Array<Record<string, unknown>>)[0]!.revoked).toBe(false);
+      expect(success(await ctx.app.inject({ method: 'POST', url: '/api/v1/identity/sessions/refresh', payload: { refresh_token: success(sameUser).refresh_token } }))).toBeDefined();
     });
   });
 
   it('profile lifecycle: absent preserved, null clears, birth_date stable, avatar preserved', async () => {
     await withApp(async (ctx) => {
-      const registered = await phoneRegister(ctx, '+8562051000007'); const headers = bearer(registered.json().access_token);
+      const registered = await phoneRegister(ctx, '+8562051000007'); const headers = bearer(String(success(registered).access_token));
       const avatar = newLogicalUuid();
       const patched = await ctx.app.inject({ method: 'PATCH', url: '/api/v1/identity/me/profile', headers, payload: { display_name: 'X', birth_date: '2000-01-31', avatar_media_id: avatar } });
-      expect(patched.json()).toMatchObject({ display_name: 'X', birth_date: '2000-01-31', avatar_media_id: avatar, gender: null });
+      expect(success(patched)).toMatchObject({ display_name: 'X', birth_date: '2000-01-31', avatar_media_id: avatar, gender: null });
       const nulled = await ctx.app.inject({ method: 'PATCH', url: '/api/v1/identity/me/profile', headers, payload: { display_name: null } });
-      expect(nulled.json()).toMatchObject({ display_name: null, birth_date: '2000-01-31', avatar_media_id: avatar });
+      expect(success(nulled)).toMatchObject({ display_name: null, birth_date: '2000-01-31', avatar_media_id: avatar });
       const read = await ctx.app.inject({ url: '/api/v1/identity/me/profile', headers });
-      expect(read.json()).toMatchObject({ display_name: null, birth_date: '2000-01-31', avatar_media_id: avatar });
+      expect(success(read)).toMatchObject({ display_name: null, birth_date: '2000-01-31', avatar_media_id: avatar });
     });
   });
 
   it('learning profile is frozen after registration', async () => {
     await withApp(async (ctx) => {
       const phone = '+8562051000008';
-      const registered = await phoneRegister(ctx, phone); const headers = bearer(registered.json().access_token);
-      expect((await ctx.app.inject({ url: '/api/v1/identity/me/learning-profile', headers })).json()).toEqual(direction);
+      const registered = await phoneRegister(ctx, phone); const headers = bearer(String(success(registered).access_token));
+      expect(success(await ctx.app.inject({ url: '/api/v1/identity/me/learning-profile', headers }))).toEqual(direction);
       for (const payload of [{ native_language: 'zh' }, { learning_language: 'lo' }, { native_language: 'zh', learning_language: 'lo' }]) {
-        expect((await ctx.app.inject({ method: 'PATCH', url: '/api/v1/identity/me/profile', headers, payload })).statusCode).toBe(400);
+        expect(businessCode(await ctx.app.inject({ method: 'PATCH', url: '/api/v1/identity/me/profile', headers, payload }))).toBe('VALIDATION_ERROR');
       }
       await requests(ctx, phone);
       const conflict = await ctx.app.inject({ method: 'POST', url: '/api/v1/identity/auth/phone', payload: { phone, otp_code: lastCode(ctx), learning_direction: { native_language: 'zh', learning_language: 'lo' }, device: device() } });
-      expect(conflict.statusCode).toBe(409); expect(conflict.json().error.code).toBe('LEARNING_DIRECTION_IMMUTABLE');
+      expect(conflict.statusCode).toBe(200); expect(businessCode(conflict)).toBe('LEARNING_DIRECTION_IMMUTABLE');
     });
   });
 
   it('bind phone adds a phone credential to the facebook-first user without creating a new user', async () => {
     await withApp(async (ctx) => {
       const fb = await ctx.app.inject({ method: 'POST', url: '/api/v1/identity/auth/facebook', payload: { credential: 'opaque', learning_direction: direction } });
-      const headers = bearer(fb.json().access_token); const userId = fb.json().user_id;
+      const fbData = success(fb); const headers = bearer(String(fbData.access_token)); const userId = fbData.user_id;
       const phone = '+8562051000009';
       expect((await ctx.app.inject({ method: 'POST', url: '/api/v1/identity/phone-otp', headers, payload: { phone, purpose: 'bind_phone' } })).statusCode).toBe(200);
       const bind = await ctx.app.inject({ method: 'POST', url: '/api/v1/identity/me/phone/bind', headers, payload: { phone, otp_code: lastCode(ctx) } });
@@ -171,14 +177,14 @@ integration('IDN-18 Domain E2E against real PostgreSQL', () => {
       expect(await count(ctx, 'SELECT count(*) AS count FROM identity.users', [])).toBe(1);
       expect(await count(ctx, 'SELECT count(*) AS count FROM identity.auth_identities WHERE user_id=$1 AND provider=$2', [user.id.toString(), 'phone'])).toBe(1);
       const phoneLogin = await phoneRegister(ctx, phone);
-      expect(phoneLogin.json().user_id).toBe(userId); expect(phoneLogin.json().is_new_user).toBe(false);
+      expect(success(phoneLogin).user_id).toBe(userId); expect(success(phoneLogin).is_new_user).toBe(false);
     }, { facebook: ['opaque'] });
   });
 
   it('change phone updates the single credential, old number never resolves, session stays alive', async () => {
     await withApp(async (ctx) => {
       const oldPhone = '+8562051000010'; const newPhone = '+8613866666666';
-      const registered = await phoneRegister(ctx, oldPhone); const headers = bearer(registered.json().access_token); const userId = registered.json().user_id;
+      const registered = await phoneRegister(ctx, oldPhone); const registeredData = success(registered); const headers = bearer(String(registeredData.access_token)); const userId = registeredData.user_id;
       expect((await ctx.app.inject({ method: 'POST', url: '/api/v1/identity/phone-otp', headers, payload: { phone: newPhone, purpose: 'change_phone' } })).statusCode).toBe(200);
       const change = await ctx.app.inject({ method: 'POST', url: '/api/v1/identity/me/phone/change', headers, payload: { new_phone: newPhone, otp_code: lastCode(ctx) } });
       expect(change.statusCode).toBe(200);
@@ -187,16 +193,16 @@ integration('IDN-18 Domain E2E against real PostgreSQL', () => {
       expect(phoneIdentities).toHaveLength(1);
       expect((await createIdentityRepositories(asExecutor(ctx.pool)).authIdentities.findByProviderAndSubject('phone', normalizePhoneNumber(newPhone)))?.userId.toString()).toBe(user.id.toString());
       expect(await createIdentityRepositories(asExecutor(ctx.pool)).authIdentities.findByProviderAndSubject('phone', normalizePhoneNumber(oldPhone))).toBeNull();
-      const oldLogin = await phoneRegister(ctx, oldPhone); expect(oldLogin.json().is_new_user).toBe(true);
-      expect((await ctx.app.inject({ method: 'POST', url: '/api/v1/identity/sessions/refresh', payload: { refresh_token: registered.json().refresh_token } })).statusCode).toBe(200);
-      const newLogin = await phoneRegister(ctx, newPhone); expect(newLogin.json().is_new_user).toBe(false); expect(newLogin.json().user_id).toBe(userId);
+      const oldLogin = await phoneRegister(ctx, oldPhone); expect(success(oldLogin).is_new_user).toBe(true);
+      expect(success(await ctx.app.inject({ method: 'POST', url: '/api/v1/identity/sessions/refresh', payload: { refresh_token: registeredData.refresh_token } }))).toBeDefined();
+      const newLogin = await phoneRegister(ctx, newPhone); expect(success(newLogin).is_new_user).toBe(false); expect(success(newLogin).user_id).toBe(userId);
     });
   });
 
   it('account state transitions revoke sessions atomically and block auth, refresh, and protected access', async () => {
     await withApp(async (ctx) => {
       const phone = '+8562051000011'; const registered = await phoneRegister(ctx, phone);
-      const token = registered.json(); const user = (await createIdentityRepositories(asExecutor(ctx.pool)).users.findByPublicId(parseUserPublicId(token.user_id)))!;
+      const token = success(registered); const user = (await createIdentityRepositories(asExecutor(ctx.pool)).users.findByPublicId(parseUserPublicId(token.user_id)))!;
       const state = new IdentityState(ctx.transactions, createIdentityRepositories, new IdentityEventWriter(new OutboxWriter()));
       await state.changeStatus(parseUserPublicId(token.user_id), 'disabled');
       expect((await db(ctx, 'SELECT status FROM identity.users WHERE id=$1', [user.id.toString()])).rows[0]!.status).toBe('disabled');
@@ -204,13 +210,13 @@ integration('IDN-18 Domain E2E against real PostgreSQL', () => {
       expect(await count(ctx, "SELECT count(*) AS count FROM infrastructure.system_outbox_events WHERE event_type='identity.account_status_changed.v1' AND aggregate_id=$1", [token.user_id])).toBe(1);
       await requests(ctx, phone);
       const login = await ctx.app.inject({ method: 'POST', url: '/api/v1/identity/auth/phone', payload: { phone, otp_code: lastCode(ctx), learning_direction: direction, device: device() } });
-      expect(login.statusCode).toBe(403); expect(login.json().error.code).toBe('ACCOUNT_DISABLED');
-      expect((await ctx.app.inject({ method: 'POST', url: '/api/v1/identity/sessions/refresh', payload: { refresh_token: token.refresh_token } })).json().error.code).toBe('INVALID_CREDENTIAL');
-      expect((await ctx.app.inject({ url: '/api/v1/identity/me', headers: bearer(token.access_token) })).statusCode).toBe(401);
+      expect(login.statusCode).toBe(200); expect(businessCode(login)).toBe('ACCOUNT_DISABLED');
+      expect(businessCode(await ctx.app.inject({ method: 'POST', url: '/api/v1/identity/sessions/refresh', payload: { refresh_token: token.refresh_token } }))).toBe('INVALID_CREDENTIAL');
+      expect(businessCode(await ctx.app.inject({ url: '/api/v1/identity/me', headers: bearer(String(token.access_token)) }))).toBe('UNAUTHENTICATED');
       await state.changeStatus(parseUserPublicId(token.user_id), 'active');
       expect((await db(ctx, 'SELECT status FROM identity.users WHERE id=$1', [user.id.toString()])).rows[0]!.status).toBe('active');
       expect(await count(ctx, 'SELECT count(*) AS count FROM identity.sessions WHERE user_id=$1 AND status=$2', [user.id.toString(), 'active'])).toBe(0);
-      expect((await ctx.app.inject({ method: 'POST', url: '/api/v1/identity/sessions/refresh', payload: { refresh_token: token.refresh_token } })).statusCode).toBe(401);
+      expect(businessCode(await ctx.app.inject({ method: 'POST', url: '/api/v1/identity/sessions/refresh', payload: { refresh_token: token.refresh_token } }))).toBe('INVALID_CREDENTIAL');
       await state.changeStatus(parseUserPublicId(token.user_id), 'closed');
       await expect(state.changeStatus(parseUserPublicId(token.user_id), 'active')).rejects.toMatchObject({ code: 'INVALID_DATA' });
     });
@@ -222,7 +228,7 @@ integration('IDN-18 Domain E2E against real PostgreSQL', () => {
       const phone = '+8562051000012';
       await requests(ctx, phone);
       const response = await ctx.app.inject({ method: 'POST', url: '/api/v1/identity/auth/phone', payload: { phone, otp_code: lastCode(ctx), learning_direction: direction, device: device() } });
-      expect(response.statusCode).toBe(500);
+      expect(response.statusCode).toBe(200); expect(businessCode(response)).toBe('INTERNAL_ERROR');
       expect(await count(ctx, 'SELECT count(*) AS count FROM identity.users', [])).toBe(0);
       expect(await count(ctx, 'SELECT count(*) AS count FROM identity.auth_identities', [])).toBe(0);
       expect(await count(ctx, 'SELECT count(*) AS count FROM identity.learning_profiles', [])).toBe(0);
@@ -234,14 +240,14 @@ integration('IDN-18 Domain E2E against real PostgreSQL', () => {
   it('account status outbox failure rolls back status and revocation atomically', async () => {
     class FailingOutboxWriter extends OutboxWriter { override async write(): Promise<void> { throw new Error('outbox unavailable'); } }
     await withApp(async (ctx) => {
-      const registered = await phoneRegister(ctx, '+8562051000013'); const token = registered.json();
+      const registered = await phoneRegister(ctx, '+8562051000013'); const token = success(registered);
       const user = (await createIdentityRepositories(asExecutor(ctx.pool)).users.findByPublicId(parseUserPublicId(token.user_id)))!;
       const state = new IdentityState(ctx.transactions, createIdentityRepositories, new IdentityEventWriter(new FailingOutboxWriter()));
       await expect(state.changeStatus(parseUserPublicId(token.user_id), 'disabled')).rejects.toThrow('outbox unavailable');
       expect((await db(ctx, 'SELECT status FROM identity.users WHERE id=$1', [user.id.toString()])).rows[0]!.status).toBe('active');
       expect(await count(ctx, 'SELECT count(*) AS count FROM identity.sessions WHERE user_id=$1 AND status=$2', [user.id.toString(), 'active'])).toBe(1);
       expect(await count(ctx, "SELECT count(*) AS count FROM infrastructure.system_outbox_events WHERE event_type='identity.account_status_changed.v1'", [])).toBe(0);
-      expect((await ctx.app.inject({ method: 'POST', url: '/api/v1/identity/sessions/refresh', payload: { refresh_token: token.refresh_token } })).statusCode).toBe(200);
+      expect(success(await ctx.app.inject({ method: 'POST', url: '/api/v1/identity/sessions/refresh', payload: { refresh_token: token.refresh_token } }))).toBeDefined();
     });
   });
 });

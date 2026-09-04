@@ -65,14 +65,17 @@ providers are intentionally not claimed as configured; unavailable adapters
 fail closed. The cache port explicitly records that multi-instance state needs
 an external provider rather than the in-memory adapter.
 
-## 6. WP-05 Result — DONE
+## 6. WP-05 Result — DONE WITH CI RE-RUN REQUIRED
 
 ADR-023, `AppError`, the error handler, response-envelope tests, authentication,
 RBAC, validation, idempotency storage, rate-limit behavior, and Content route
 registration were rechecked. The backend suite includes 8 response-envelope
 tests and the current `main` tip specifically aligns error-envelope vocabulary
-with ADR-023. The P0 contract is consistent: business responses use HTTP 200
-with top-level `code` and `request_id`; health probes remain exempt.
+with ADR-023. A real integration drift was found in `identity-e2e`: it still
+asserted pre-ADR HTTP status codes and bare bodies. Those assertions are
+updated in the follow-up integration repair to assert the top-level business
+code and unwrapped `data`. The P0 contract is consistent: business responses
+use HTTP 200 with top-level `code` and `request_id`; health probes remain exempt.
 
 ## 7. WP-06 Result — DONE
 
@@ -149,13 +152,17 @@ with only a non-blocking bundle-size warning.
 
 ## 14. CI Results
 
-The latest Foundation run for reviewed SHA `207f40b` is
-[`33819075376`](https://github.com/rzyao/ZH-LAO/actions/runs/33819075376):
+The baseline Foundation run for reviewed SHA `207f40b` is
+[`33819075376`](https://github.com/rzyao/ZH-LAO/actions/runs/33819075376).
+The first consolidation run,
+[`33820784299`](https://github.com/rzyao/ZH-LAO/actions/runs/33820784299),
+confirmed the stale manifest repair but then exposed the pre-ADR identity E2E
+assertions described above. A second CI run is required after that test repair.
 
 | Job | Status | Classification |
 | --- | --- | --- |
 | Docs | PASS | Blocking job passed |
-| Backend | FAIL | Blocking; its reviewed manifest condition is repaired here; CI re-run required |
+| Backend | FAIL | Blocking; manifest and ADR-023 integration-test drift repaired; CI re-run required |
 | Admin | FAIL | Blocking TypeScript errors, including menu property/tone/icon/payload typing failures |
 | Mobile | FAIL | Non-blocking job by workflow policy, but its TypeScript error-constructor constraint failures remain visible |
 
@@ -181,9 +188,9 @@ probe previously passed, but does not replace the final `main` workflow.
 
 1. Repair the Admin TypeScript build failures reported by Foundation CI, then
    obtain a green blocking CI run.
-2. Re-run the Foundation backend job after this manifest repair and retain its
-   database validation result. It must pass before Database can be recorded as
-   PASS.
+2. Re-run the Foundation backend job after the manifest and ADR-023 integration
+   test repairs, and retain its database validation result. It must pass before
+   Database can be recorded as PASS.
 
 ## 17. Deferred P2
 
