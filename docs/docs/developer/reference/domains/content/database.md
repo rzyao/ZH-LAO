@@ -7,7 +7,7 @@ source_share_url: https://chatgpt.com/share/6a937088-e570-83e9-912e-11cc3de27eba
 
 # Content 数据库总览
 
-> 「拆分学习域」会话裁决（[ADR-021](/developer/reference/adr/ADR-021-content-and-learning-domain-split.md)，D-147）将原 Learning 域按职责拆分为 Content + Learning；**全局分区收口修订（D-150）已给出逐表归属定稿**：原 Learning 43 张必建表中，31 张归 `content.*`、10 张归 `learning.*`、2 张（`pronunciation_audios` / `tts_jobs`）由 Audio Production Domain 取代不再建表。本页是 Content 表归属的**唯一权威清单**；字段级规格见各分层页（本拆分不重新设计已定稿字段契约，仅修正跨域 ID/FK 口径）。
+> 「拆分学习域」会话裁决（[ADR-021](/developer/reference/adr/ADR-021-content-and-learning-domain-split.md)，D-147）将原 Learning 域按职责拆分为 Content + Learning；D-150 的 31 张归属基线仍有效。Content–Audio 公共边界收口以**前向迁移 `1360_content_audio_eligible_types.sql`**增加 `zh_syllables`，使已批准的 `zh_syllable` Audio 身份可由 Content 解析；不修改任何冻结迁移。2 张（`pronunciation_audios` / `tts_jobs`）仍由 Audio Production Domain 取代不再建表。本页是 Content 表归属的**唯一权威清单**。
 
 ## 归属规则（裁决，frozen）
 
@@ -226,3 +226,9 @@ source_share_url: https://chatgpt.com/share/6a937088-e570-83e9-912e-11cc3de27eba
 - [Curriculum 规格](curriculum.md)（课程编排与发布状态、Content Revision）
 - [Dictionary 规格](dictionary.md)（词典语义与内容关系）
 - [Practice 定义规格](practice.md)（练习/题目定义；作答历史归 [Learning 数据库](../learning/database.md)）
+
+## 分支数据库结构整合（D-172）
+
+2026-09-05 经用户批准，中文结构以 `1310_content_language_structures.sql` 为准。`1360_content_audio_eligible_types.sql` 是音频分支的旧模型，原始 SQL 和已有迁移账本记录保留，通过 `database/checks/migration-supersessions.json` 标记替代关系，新的安装不会执行该重复建表脚本。`1309_content_audio_legacy_preflight.sql` 在 1310 前执行，仅移除无内容身份、无数据的旧无声调音节表；存在旧数据时拒绝迁移，必须先完成显式业务映射，不猜测声调、不静默删除。已应用的旧脚本仍验证校验和，不伪造已应用记录。
+
+Audio 使用同一 Content UUID 与版本快照；`zh_pinyin_element` 和带声调的 `zh_syllable` 定义见 [Content 知识规格](knowledge.md)，音频角色与领域边界见 [Audio Binding](audio-binding.md)。

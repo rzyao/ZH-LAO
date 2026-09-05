@@ -139,3 +139,7 @@ extensions, constraints, and indexes.
 This task stops at the V2 PostgreSQL Database Baseline. Repository, Service,
 API, frontend, and legacy-data migration remain a separate Domain-by-Domain
 Application Migration task.
+
+## Migration supersession (D-172)
+
+`checks/migration-supersessions.json` explicitly retires the audio branch's duplicate `1360_content_audio_eligible_types.sql` in favor of `1310_content_language_structures.sql`. Historical SQL bytes and any applied ledger record remain unchanged and checksum-validated. New databases skip the superseded script. `1309_content_audio_legacy_preflight.sql` permits upgrades from an empty old syllable table; populated untoned identities require an explicit mapping and stop safely instead of losing data. The canonical decision is [Content database](../docs/docs/developer/reference/domains/content/database.md).

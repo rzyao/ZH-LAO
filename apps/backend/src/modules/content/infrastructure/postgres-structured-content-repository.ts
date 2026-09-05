@@ -1,5 +1,8 @@
 import type { DatabaseExecutor } from '../../../database/executor.js';
 import type { TransactionManager } from '../../../database/transaction-manager.js';
+import { newLogicalUuid } from '../../../ids/uuid.js';
+import { OutboxWriter } from '../../../outbox/outbox-writer.js';
+import { AudioRolePolicy } from '../domain/audio-role-policy.js';
 import type {
   ContentReferenceView,
   ContentIdempotencyRecord,
@@ -377,6 +380,18 @@ export class PostgresStructuredContentRepository implements StructuredContentRep
 
       await this.materialize(executor, content, targetRevision.snapshot);
       await executor.query('UPDATE content.contents SET status = \'active\', updated_at = now() WHERE public_id = $1', [content.id]);
+      if (AudioRolePolicy.isAudioAllowed(content.contentType, false)) {
+        const roles = content.language === 'lo' ? ['pronunciation'] : ['tone_1', 'tone_2', 'tone_3', 'tone_4'];
+        for (const audioRole of roles) {
+          await new OutboxWriter().write(executor, {
+            id: newLogicalUuid(), sourceDomain: 'content', type: 'content.audio_requirement_changed',
+            aggregateType: 'content', aggregateId: content.id as ReturnType<typeof newLogicalUuid>,
+            payload: { sourceDomain: 'content', entityType: content.contentType, entityId: content.id,
+              revisionId: targetRevision.id, languageCode: content.language, audioRole },
+            headers: {}, occurredAt: targetRevision.publishedAt ?? new Date(),
+          });
+        }
+      }
     });
   }
 

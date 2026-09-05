@@ -1,11 +1,11 @@
 ---
-status: baseline
-last_updated: 2026-09-02
+status: frozen
+last_updated: 2026-09-05
 ---
 
 # Audio Binding Domain（音频槽位与内容绑定）
 
-> 状态：Domain Framework Draft  
+> 状态：Content–Audio Public Boundary baseline
 > 领域：Content Domain & Audio Domain Boundary  
 > 职责：定义允许拥有音频的实体白名单、音频槽位（Audio Slot）与不可变资产版本模型、内容哈希联动失效机制及 C 端音频投影播放契约。
 
@@ -18,15 +18,13 @@ last_updated: 2026-09-02
 
 | 语言方向 | 允许拥有音频的内容实体 | 音频角色（Audio Role） | 槽位数量 |
 | :--- | :--- | :--- | :--- |
-| **老挝语（Lao）** | 字母（`LaoCharacter`） | `pronunciation`（标准发音） | 1 槽/实体 |
-| **老挝语（Lao）** | 音节（`LaoSyllable`） | `pronunciation`（标准发音） | 1 槽/实体 |
-| **老挝语（Lao）** | 单词（`VocabularyEntry`） | `pronunciation`（标准发音） | 1 槽/实体 |
-| **老挝语（Lao）** | 句子（`SentenceExample`） | `pronunciation`（标准发音） | 1 槽/实体 |
-| **中文（Chinese）** | 拼音（`ZhPinyin`） | `tone_1` ~ `tone_4`（四声调） | 4 槽/实体 |
-| **中文（Chinese）** | 音节（`ZhSyllable`） | `tone_1` ~ `tone_4`（四声调） | 4 槽/实体 |
+| **老挝语（Lao）** | `lo_letter` / `lo_syllable` / `lo_word` / `lo_sentence` | `pronunciation` | 1 槽/实体 |
+| **中文（Chinese）** | `zh_pinyin_element` / `zh_syllable` | `tone_1` ~ `tone_4` | 4 槽/实体 |
 
 ### 1.2 策略门禁
 所有音频生产任务入口必须经由音频角色策略（`AudioRolePolicy`）集中校验，非白名单实体直接拒绝建槽。
+
+`zh_syllable` 是 Content-owned 的可解析实体：其跨域身份为 `content.contents.public_id`，结构记录在 `content.zh_syllables`；它采用 D-164 的 `base_form + tone` 带声调结构（D-172），不是 `zh_pinyin_element` 的别名，也不是 Audio 私有类型。Slot 始终使用 `(source_domain, content_entity_type, content_entity_id, language_code, audio_role)`；`source_domain` 固定为 `content`，`content_entity_type` 必须为上表具体类型，禁止泛化 `content`、课程、课时、练习或题目。
 
 ---
 
@@ -37,7 +35,7 @@ last_updated: 2026-09-02
 - **槽位侧（Audio Slot）**：通过 `(content_entity_type, content_entity_id, language, audio_role)` 唯一确定物理槽位。
 - **不可变资产版本（Audio Asset Version）**：
   - 音频生产（真人录制或 AI 生成）产生单调递增的资产版本；
-  - 资产版本记录源类型、原始/降噪处理后文件、时长、音量（LUFS）、校验和及审核状态；
+  - Audio 记录业务版本、审核/发布和 `asset_id` logical UUID；物理文件 metadata 由 Asset Infrastructure 拥有；
   - 正式音频指针（`official_asset_version_id`）由显式发布动作在事务内原子变更。
 
 ---
@@ -50,9 +48,9 @@ last_updated: 2026-09-02
 ### 3.2 版本升级时的绑定继承规则
 当词条产生后继新修订版本时：
 - 若新修订版本的 `audio_input_hash` 与前序版本**完全相同**（仅修改了非发音字段，如中文释义、描述）：
-  $$\to \text{音频绑定继承，有效性状态标记为 } \mathbf{valid}$$
+  $$\to \text{既有 official pointer 保留，Audio fresh 判断继续可用}$$
 - 若新修订版本的 `audio_input_hash` 发生**变更**（修改了老挝文拼写或发音音标）：
-  $$\to \text{旧音频自动标记为 } \mathbf{stale}\text{（陈旧失效），触发重新录制/生成需求}$$
+  $$\to \text{pointer 不删除；Audio 公开读取拒绝 stale，Content 发布后调用 AudioRequirementSync 更新 requirement}$$
 
 ---
 
@@ -60,10 +58,10 @@ last_updated: 2026-09-02
 
 ### 4.1 播放 URL 返回的前提条件
 客户端在请求内容词条详情时，仅在同时满足以下全部条件时才向前端投影真实音频播放地址：
-1. 音频槽位处于激活状态（`publication_status == 'active'`）；
+1. 音频槽位处于激活状态（`status == 'active'`）；
 2. 关联的正式音频资产已审核通过（`review_status == 'approved'`）；
-3. 该音频资产针对当前发布内容版本的有效性为有效（`validity == 'valid'`）；
-4. 音频资产关联的内容修订版本号与词条当前正式发布的修订版本号一致。
+3. Audio 公开查询以 Slot requirement 与 Asset 输入快照完成 fresh 判断；
+4. Asset 的输入快照与当前发布 Content revision 一致。
 
 ### 4.2 优雅失效
 若上述任一条件不满足（如内容已更新但新音频尚未录制完成），API 返回 `audio_url = null`，客户端展示静音/暂无发音状态，严禁播放与文本不一致的历史陈旧音频。

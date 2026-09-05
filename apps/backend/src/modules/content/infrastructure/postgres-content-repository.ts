@@ -1,5 +1,7 @@
 import type { DatabaseExecutor } from '../../../database/executor.js';
 import type { TransactionManager } from '../../../database/transaction-manager.js';
+import { OutboxWriter } from '../../../outbox/outbox-writer.js';
+import { newLogicalUuid } from '../../../ids/uuid.js';
 import {
   LaoCharacter,
 } from '../domain/lao-character.js';
@@ -13,6 +15,7 @@ import type {
 } from '../application/ports/repositories.js';
 
 export class PostgresContentRepository implements ContentRepository {
+  private readonly outbox = new OutboxWriter();
   constructor(
     private readonly db: DatabaseExecutor,
     private readonly transactions?: TransactionManager,
@@ -135,7 +138,6 @@ export class PostgresContentRepository implements ContentRepository {
           character.sortOrder,
         ]
       );
-
       await exec.query(
         `INSERT INTO content.content_revisions (
            revision_public_id, entity_type, entity_id, revision_number,
@@ -152,19 +154,6 @@ export class PostgresContentRepository implements ContentRepository {
         ]
       );
 
-      if (!character.noAudio) {
-        await exec.query(
-          `INSERT INTO audio.audio_slots (
-             id, source_domain, content_entity_type, content_entity_id,
-             language_code, audio_role, required_content_revision_id,
-             required_audio_input_hash, status
-           ) VALUES (gen_random_uuid(), 'content', 'lo_letter', $1, 'lo', 'pronunciation', $2, $3, 'active')
-           ON CONFLICT (source_domain, content_entity_type, content_entity_id, language_code, audio_role)
-           DO UPDATE SET required_content_revision_id = EXCLUDED.required_content_revision_id,
-                         required_audio_input_hash = EXCLUDED.required_audio_input_hash`,
-          [character.id, revision.id, revision.snapshot.audioInputHash]
-        );
-      }
     };
 
     if (this.transactions) {
@@ -247,6 +236,9 @@ export class PostgresContentRepository implements ContentRepository {
           characterId,
         ]
       );
+      if (!targetRevision.snapshot.noAudio) {
+        await this.outbox.write(exec, { id: newLogicalUuid(), sourceDomain: 'content', type: 'content.audio_requirement_changed', aggregateType: 'content', aggregateId: characterId as never, payload: { sourceDomain: 'content', entityType: 'lo_letter', entityId: characterId, revisionId: targetRevision.id, languageCode: 'lo', audioRole: 'pronunciation' }, headers: {}, occurredAt: targetRevision.publishedAt ?? new Date() });
+      }
     };
 
     if (this.transactions) {

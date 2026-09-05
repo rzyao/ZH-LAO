@@ -1,6 +1,6 @@
 import { fileURLToPath } from 'node:url';
 import { requireDatabaseUrl, withClient } from './db.mjs';
-import { loadRequiredMigrations } from './migration-files.mjs';
+import { loadRequiredMigrations, loadSupersededMigrations } from './migration-files.mjs';
 
 const lockKey = 894_222_002;
 
@@ -21,6 +21,12 @@ export async function migrate(connectionString = requireDatabaseUrl()) {
         'SELECT filename, sha256 FROM public.v2_schema_migrations ORDER BY filename',
       );
       const applied = new Map(appliedResult.rows.map((row) => [row.filename, row.sha256.trim()]));
+      // Supersession never rewrites or fabricates an applied migration record.
+      for (const { filename, sha256 } of await loadSupersededMigrations()) {
+        if (applied.has(filename) && applied.get(filename) !== sha256) {
+          throw new Error(`Applied migration checksum mismatch: ${filename}`);
+        }
+      }
       const executed = [];
       const skipped = [];
 

@@ -237,3 +237,7 @@ last_updated: 2026-09-05
 | 当前流程与工件职责 | `baseline` | [当前开发方式](/developer/development-workflow) |
 | 当前执行状态与迁移时证据基线 | `baseline` | [交付基线](/developer/evidence/delivery-baseline) |
 | 当前可执行规格 | `baseline` | [Spec Kit Constitution](https://github.com/rzyao/ZH-LAO/blob/main/.specify/memory/constitution.md) 与仓库 `specs/` |
+
+## 2026-09-05 main 分支整合裁决
+
+用户明确批准以内容管理新结构适配音频，并保留内容、词典和音频开发成果；对应 [D-172](design-register.md) 与 [Content 数据库整合说明](../domains/content/database.md)。原音频分支 D-157 撞号记录保留为 D-171（superseded），不覆盖原字母路由 D-157。

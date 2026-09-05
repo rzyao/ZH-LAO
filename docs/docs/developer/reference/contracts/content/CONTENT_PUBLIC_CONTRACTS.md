@@ -205,7 +205,7 @@ content_revision_id UUID
 
 ```ts
 type ValidateAudioSourceRequest = {
-  entityType: 'content' | 'course' | 'lesson' | 'exercise' | 'question';
+  entityType: 'lo_letter' | 'lo_syllable' | 'lo_word' | 'lo_sentence' | 'zh_pinyin_element' | 'zh_syllable';
   entityId: string;
   revisionId: ContentRevisionId;
   languageCode: 'zh' | 'lo';

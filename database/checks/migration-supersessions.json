@@ -1,0 +1,7 @@
+{
+  "1360_content_audio_eligible_types.sql": {
+    "replacedBy": "1310_content_language_structures.sql",
+    "decision": "D-172",
+    "reason": "The unified Content model owns tonal syllables and pinyin elements. Preserve this historical SQL and any existing ledger row, but never execute its duplicate CREATE TABLE on the unified baseline."
+  }
+}

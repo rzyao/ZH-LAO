@@ -84,7 +84,7 @@ describe('Identity Core Types', () => {
   });
 
   it('exports only public Identity primitives from the public boundary', () => {
-    expect(Object.keys(identityPublic).sort()).toEqual(['identityAccountStatusSchema', 'isUserPublicId', 'parseIdentityAccountStatus', 'parseUserPublicId']);
+    expect(Object.keys(identityPublic).sort()).toEqual(['AdminCredentialOperations', 'identityAccountStatusSchema', 'isUserPublicId', 'parseIdentityAccountStatus', 'parseUserPublicId']);
     expectTypeOf<IdentityPublicQueries>().toHaveProperty('getIdentityAccountStatus');
     expectTypeOf<IdentityPublicQueries>().toHaveProperty('isIdentityActive');
     expectTypeOf<IdentityPublicQueries>().toHaveProperty('getIdentitySummary');

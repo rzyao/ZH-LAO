@@ -9,6 +9,11 @@ import type { IdentityPublicQueries } from './modules/identity/public/index.js';
 import { createLaoLetterBatchProcessor } from './modules/content/worker/composition.js';
 import { OperationsService } from './modules/operations/application/services/index.js';
 import { PostgresOperationsRepository } from './modules/operations/infrastructure/index.js';
+import { EventHandlerRegistry } from './events/handler-registry.js';
+import { PostgresContentAudioSourceReader } from './modules/content/infrastructure/postgres-content-audio-source-reader.js';
+import { ContentPublicQueryService } from './modules/content/public/content-public-queries.js';
+import { AudioRequirementSyncService } from './modules/audio/application/audio-requirement-sync-service.js';
+import { ContentAudioRequirementHandler } from './modules/audio/worker/content-audio-requirement-handler.js';
 
 const config = loadConfig();
 const logger = createLogger(config.logLevel);
@@ -32,7 +37,11 @@ const batchProcessor = createLaoLetterBatchProcessor({
   batchSize: config.contentLetterBatch.batchSize,
   concurrency: config.contentLetterBatch.concurrency,
 });
-const worker = buildWorker(config, database, logger, undefined, [
+const handlers = new EventHandlerRegistry();
+handlers.register('content.audio_requirement_changed', new ContentAudioRequirementHandler(
+  new AudioRequirementSyncService(database, new ContentPublicQueryService(new PostgresContentAudioSourceReader(database))),
+));
+const worker = buildWorker(config, database, logger, handlers, [
   pollingJob(
     'content-lo-letter-batch',
     config.contentLetterBatch.pollIntervalMs,

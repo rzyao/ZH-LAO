@@ -123,6 +123,7 @@ test('upgrades legacy empty curriculum rows, enforces pointer FKs, and remains i
       targetMigration,
       '1360_admin_credentials_password_change_required.sql',
       '1370_curriculum_lifecycle_idempotency.sql',
+      '1380_operations_password_reset_permission.sql',
     ]);
     await assertPointerContract(connectionString);
 

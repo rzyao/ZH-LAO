@@ -348,6 +348,7 @@ test('1330 upgrade applies later forward migrations and a repeated migration is 
       '1350_curriculum_revision_pointers.sql',
       '1360_admin_credentials_password_change_required.sql',
       '1370_curriculum_lifecycle_idempotency.sql',
+      '1380_operations_password_reset_permission.sql',
     ]);
     await assertSchemaContract(connectionString);
 

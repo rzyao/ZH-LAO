@@ -7,9 +7,10 @@ import {
 } from './contracts'
 
 describe('Operations Admin contracts', () => {
-  it('freezes 16 operations permission constants', () => {
-    expect(Object.keys(OPERATIONS_PERMISSIONS)).toHaveLength(16)
+  it('freezes 17 operations permission constants', () => {
+    expect(Object.keys(OPERATIONS_PERMISSIONS)).toHaveLength(17)
     expect(OPERATIONS_PERMISSIONS.operatorsRead).toBe('operations.operators.read')
+    expect(OPERATIONS_PERMISSIONS.operatorsResetPassword).toBe('operations.operators.reset_password')
     expect(OPERATIONS_PERMISSIONS.operatorsCreate).toBe('operations.operators.create')
     expect(OPERATIONS_PERMISSIONS.rolesRead).toBe('operations.roles.read')
     expect(OPERATIONS_PERMISSIONS.rolePermissionsSet).toBe('operations.role_permissions.set')

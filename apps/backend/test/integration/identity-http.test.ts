@@ -18,7 +18,7 @@ const bearer = (token: string) => ({ authorization: `Bearer ${token}` });
 // ADR-023 统一信封断言：HTTP 一律 200，顶层 code 权威。
 // 成功 `{ code: 'OK', data, request_id }`；失败 `{ code, error: { message, details? }, request_id }`；
 // 原 204 无返回体 → `data: null`；/health/live、/health/ready 豁免（本文件不涉及）。
-type Envelope = { code: string; data: unknown; error?: { message: string; details?: unknown }; request_id: string };
+type Envelope = { code: string; data: unknown; error?: { message: string; details?: unknown }; request_id: string; request_path: string };
 const envelope = (response: { json(): unknown }): Envelope => response.json() as Envelope;
 const success = (response: { json(): unknown }): Record<string, unknown> => {
   const body = envelope(response);
@@ -84,7 +84,8 @@ integration('IDN-17 Identity HTTP/API', () => {
     // 注册状态不得泄漏：已注册与新号码的业务载荷必须一致（request_id 按请求唯一，不参与比较）。
     expect(freshBody.code).toBe(knownBody.code);
     expect(freshBody.data).toEqual(knownBody.data);
-    expect(JSON.stringify(knownBody)).not.toContain('otp');
+    expect(JSON.stringify(knownBody.data)).not.toContain('otp');
+    expect(knownBody.request_path).toBe('/api/v1/identity/phone-otp');
   });
 
   it('requires an authenticated user for bind/change OTP and validates phone', async () => {
