@@ -226,7 +226,7 @@ export function LaoLetterPage({ search }: { search: LaoLetterSearch }) {
     <ListPageLayout
       title="字母管理"
       description="维护老挝语字母、声调符号及其他正字法标记。"
-      breadcrumb={[{ label: '内容管理', href: '/content' }, { label: '老挝语内容' }, { label: '字母管理' }]}
+      breadcrumb={[{ label: '内容管理' }, { label: '老挝语内容' }, { label: '字母管理' }]}
     >
       <div className="p-4" data-testid="content-lo-letters-page">
         <div className="space-y-2">

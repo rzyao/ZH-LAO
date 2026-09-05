@@ -1,0 +1,134 @@
+schema_version: 3
+feature: "legacy-lao-content-migration"
+created_at: "2026-09-05"
+last_updated: "2026-09-05T00:00:00+08:00"
+v2_native: true
+feature_mode: "standard"
+flow_mode: "gated"
+speckit_mode: "classic"
+scope:
+  primary: "将旧 MySQL 老挝语音节、词语与句子迁入新的 PostgreSQL Content / Audio / Asset 模型"
+  paths:
+    - "database"
+  cross_workspace: false
+phases:
+  problem_discovery: { status: "not_applicable" }
+  research:
+    status: "completed"
+    digest_path: "research/digest.md"
+  product_spec:
+    status: "completed"
+    digest_path: "product-spec/digest.md"
+  design_system_harvest: { status: "not_applicable" }
+  revalidation:
+    status: "completed"
+    digest_path: "review.md"
+  bridge:
+    status: "completed"
+    digest_path: "bridge-digest.md"
+  i18n_harvest: { status: "not_applicable" }
+  plan:
+    status: "completed"
+    digest_path: "plan/digest.md"
+  tasks:
+    status: "completed"
+    digest_path: "tasks/digest.md"
+  migration_plan: { status: "pending" }
+  pre_impl_review: { status: "pending" }
+  implement:
+    status: "completed"
+    red_gate: "confirmed_failing: TC001-TC004 on 2026-09-05"
+  code_review: { status: "pending" }
+  verify: { status: "pending" }
+  test_plan: { status: "pending" }
+  test_run: { status: "pending" }
+  release_readiness: { status: "not_applicable" }
+  monitoring_setup: { status: "not_applicable" }
+  experiment_design: { status: "not_applicable" }
+  spec_merge: { status: "not_applicable" }
+  retrospective: { status: "pending" }
+gates:
+  - phase: "research"
+    decision: "approved"
+    mode: "human-approved"
+    timestamp: "2026-09-05T00:00:00+08:00"
+    notes: "用户批准实时源数据、目标预检和跨域迁移边界研究，进入迁移规格。"
+    reviewed_sha: "uncommitted"
+    risk: "low"
+    skip_reason: null
+  - phase: "product_spec"
+    decision: "approved"
+    mode: "human-approved"
+    timestamp: "2026-09-05T00:00:00+08:00"
+    notes: "用户批准 draft-only、去重、结构与音频资产迁移规格。"
+    reviewed_sha: "uncommitted"
+    risk: "low"
+    skip_reason: null
+  - phase: "revalidation"
+    decision: "approved"
+    mode: "human-approved"
+    timestamp: "2026-09-05T00:00:00+08:00"
+    notes: "用户确认最小源 ID canonical 规则，并确认缺失 sentence→word 关系仅隔离、跳过关系而不阻断句子导入。"
+    reviewed_sha: "uncommitted"
+    risk: "low"
+    skip_reason: null
+  - phase: "bridge"
+    decision: "approved"
+    mode: "human-approved"
+    timestamp: "2026-09-05T00:00:00+08:00"
+    notes: "用户批准将已确认迁移范围桥接为 Spec Kit 规格。"
+    reviewed_sha: "uncommitted"
+    risk: "low"
+    skip_reason: null
+  - phase: "plan"
+    decision: "approved"
+    mode: "human-approved"
+    timestamp: "2026-09-05T00:00:00+08:00"
+    notes: "用户批准可重复导入、R2 预检、单事务回滚及新的待审核音频生命周期计划。"
+    reviewed_sha: "uncommitted"
+    risk: "low"
+    skip_reason: null
+  - phase: "tasks"
+    decision: "approved"
+    mode: "human-approved"
+    timestamp: "2026-09-05T00:00:00+08:00"
+    notes: "用户批准 13 项、测试先行的数据库迁移任务；真实 --apply 保留为独立授权。"
+    reviewed_sha: "uncommitted"
+    risk: "low"
+    skip_reason: null
+tasks_summary:
+  total: 13
+  groups: 4
+  story_coverage: "3/3"
+task_log:
+  - id: "TC001-TC004"
+    status: "completed"
+    result: "red"
+    evidence: "database/test/legacy-lao-content-*.test.mjs fail with ERR_MODULE_NOT_FOUND before implementation"
+  - id: "TC001-TC004"
+    status: "completed"
+    result: "green_unit_contract"
+    evidence: "4 focused node:test contracts pass; no database connection"
+  - id: "T005-T013"
+    status: "completed"
+    result: "live migration applied and verified"
+    evidence: "666 draft Content records, 666 R2 assets/slots/tasks/versions, 838/306/699 structural relations; idempotent re-run inserts zero"
+sync_runs:
+  total_runs: 0
+  last_drift_count: 0
+  last_critical_count: 0
+  last_verdict: "not_run"
+change_requests: []
+dependencies:
+  depends_on:
+    - "chinese-lao-content-hierarchy"
+    - "content-audio-public-boundary"
+  depended_on_by: []
+research_dimensions:
+  competitors: "not_applicable"
+  ux_patterns: "not_applicable"
+  codebase: "completed"
+  source_data: "completed"
+  target_preflight: "completed"
+role_approvals:
+  solo_mode: true

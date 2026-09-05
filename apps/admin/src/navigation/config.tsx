@@ -27,7 +27,7 @@ export const NAV_ITEMS: NavItem[] = [
   {
     key: 'learning-content', label: '学习与内容', icon: Folder, children: [
       {
-        key: 'content', label: '内容管理', href: '/content', icon: BookOpen, domain: 'content', children: [
+        key: 'content', label: '内容管理', icon: BookOpen, domain: 'content', children: [
           {
             key: 'zh', label: '中文内容', icon: Folder, children: [
               { key: 'zh-pinyin', label: '拼音管理', href: '/content/zh/pinyin', icon: BookOpen, children: [] },

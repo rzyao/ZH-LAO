@@ -1,0 +1,52 @@
+{
+  "generatedAt": "2026-09-05T04:10:03.657Z",
+  "sourceCount": 666,
+  "byType": {
+    "syllable": 261,
+    "word": 239,
+    "sentence": 166
+  },
+  "relationCounts": {
+    "syllableLetters": 838,
+    "wordSyllables": 306,
+    "sentenceWords": 699
+  },
+  "mode": "apply",
+  "inserted": 0,
+  "skipped": 666,
+  "audioAssets": 0,
+  "isolation": [
+    {
+      "type": "sentence_word",
+      "sourceParentId": "scns025",
+      "sourceChildText": "ຂອບໃຈ",
+      "reason": "sentence_surface_mismatch"
+    },
+    {
+      "type": "sentence_word",
+      "sourceParentId": "scns025",
+      "sourceChildText": "ຫຼາຍໆ",
+      "reason": "sentence_surface_mismatch"
+    },
+    {
+      "type": "sentence_word",
+      "sourceParentId": "scns026",
+      "sourceChildText": "ບໍ່",
+      "reason": "sentence_surface_mismatch"
+    },
+    {
+      "type": "sentence_word",
+      "sourceParentId": "scns026",
+      "sourceChildText": "ເປັນດອກ",
+      "reason": "sentence_surface_mismatch"
+    }
+  ],
+  "copiedAudio": [
+    {
+      "sourceId": "1408217903777583104",
+      "type": "syllable",
+      "sourceUrl": "https://zh-lao-audio.ayaoblog.space/uploads/audio/tts/tts-1407200906163916800.wav",
+      "destinationKey": "migration/legacy-lao-content/2026-09-05/syllable-1408217903777583104.wav"
+    }
+  ]
+}

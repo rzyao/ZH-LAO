@@ -28,7 +28,7 @@ export function CourseListPage() {
     <ListPageLayout
       title="课程管理"
       description="创建和维护课程编排；发布后学习端只读取固定的已发布版本。"
-      breadcrumb={[{ label: '内容管理', href: '/content' }, { label: '课程管理' }]}
+      breadcrumb={[{ label: '内容管理' }, { label: '课程管理' }]}
       actions={<Button onClick={() => void navigate({ to: '/content/courses/new' })}><Plus aria-hidden />创建课程</Button>}
     >
       <DataTable

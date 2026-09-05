@@ -6,6 +6,7 @@ import {
   defaultStringifySearch,
   lazyRouteComponent,
   Outlet,
+  redirect,
   useRouterState,
 } from '@tanstack/react-router'
 import { z } from 'zod'
@@ -142,7 +143,8 @@ function makeDomainRoute(path: string, domain: string, title: string, descriptio
   })
 }
 
-const contentRoute = createRoute({ getParentRoute: () => shellRoute, path: '/content', component: ContentLandingPage })
+// 内容管理是目录；保留旧 URL 并跳转到具体工作台，避免形成空的落地页。
+const contentRoute = createRoute({ getParentRoute: () => shellRoute, path: '/content', beforeLoad: () => { throw redirect({ to: '/content/lo/letters' }) } })
 const contentLettersRoute = createRoute({ getParentRoute: () => shellRoute, path: '/content/letters', component: AlphabetPage })
 const contentCategoryRoutes = [
   ['/content/zh/pinyin', 'zh_pinyin_element'],

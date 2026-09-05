@@ -1,0 +1,22 @@
+feature: legacy-lao-content-migration
+requirements:
+  - id: FR-001
+    tasks: [TC001, T006, T009, T011]
+  - id: FR-002
+    tasks: [TC002, T005]
+  - id: FR-003
+    tasks: [TC004, T009]
+  - id: FR-004
+    tasks: [TC004, T005, T009]
+  - id: FR-005
+    tasks: [TC004, T005, T009]
+  - id: FR-006
+    tasks: [TC002, T005, T007]
+  - id: FR-007
+    tasks: [TC003, T008, T010]
+  - id: FR-008
+    tasks: [TC001, TC003, T008, T011]
+  - id: FR-009
+    tasks: [TC004, T005, T009, T013]
+  - id: FR-010
+    tasks: [T007, T012, T013]
