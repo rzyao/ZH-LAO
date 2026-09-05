@@ -6,4 +6,6 @@
 - `pnpm build` — PASS
 - Content private-Audio SQL scan — PASS (run from repository root)
 
-No Audio production pipeline implementation is included.
+Audio consumes the Content requirement outbox through its public sync port. This
+does not claim that the complete Audio production pipeline is delivered by this
+boundary Feature.
