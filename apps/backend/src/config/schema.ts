@@ -34,9 +34,13 @@ export const environmentSchema = z.object({
   // 每个能力独立选择 Provider。默认 unavailable/none = 能力 Port 存在但未接线，
   // 调用失败安全（PROVIDER_UNAVAILABLE / no-op cache），绝不静默 fake-success。
   // 'memory' / 'fake' 仅供 development/test（production 由 superRefine 拒绝）。
-  // 注：生产 Object Storage / Translation / TTS / Media Provider 尚未冻结；
-  // 未来真实 Provider 值在此枚举扩展，业务域代码无需改动。
-  OBJECT_STORAGE_PROVIDER: z.enum(['unavailable', 'memory']).default('unavailable'),
+  // 注：生产 Object Storage 已冻结为 Cloudflare R2；Translation / TTS / Media
+  // 的真实 Provider 仍未冻结。业务域代码无需依赖任何 Provider。
+  OBJECT_STORAGE_PROVIDER: z.enum(['unavailable', 'memory', 'r2']).default('unavailable'),
+  R2_ENDPOINT: z.url().optional(),
+  R2_BUCKET: z.string().trim().min(1).optional(),
+  R2_ACCESS_KEY_ID: z.string().trim().min(1).optional(),
+  R2_SECRET_ACCESS_KEY: z.string().min(1).optional(),
   TRANSLATION_PROVIDER: z.enum(['unavailable', 'fake']).default('unavailable'),
   TTS_PROVIDER: z.enum(['unavailable', 'fake']).default('unavailable'),
   MEDIA_PROCESSING_PROVIDER: z.enum(['unavailable', 'fake']).default('unavailable'),
@@ -52,6 +56,11 @@ export const environmentSchema = z.object({
   if (value.APP_ENV === 'production' && !value.JWT_HMAC_SECRET) context.addIssue({ code: 'custom', path: ['JWT_HMAC_SECRET'], message: 'is required in production' });
   if (value.APP_ENV === 'production' && value.IDENTITY_OTP_PROVIDER === 'console') context.addIssue({ code: 'custom', path: ['IDENTITY_OTP_PROVIDER'], message: 'console OTP provider is development-only' });
   if (value.APP_ENV === 'production' && value.OBJECT_STORAGE_PROVIDER === 'memory') context.addIssue({ code: 'custom', path: ['OBJECT_STORAGE_PROVIDER'], message: 'memory object storage is development/test-only' });
+  if (value.OBJECT_STORAGE_PROVIDER === 'r2') {
+    for (const key of ['R2_ENDPOINT', 'R2_BUCKET', 'R2_ACCESS_KEY_ID', 'R2_SECRET_ACCESS_KEY'] as const) {
+      if (!value[key]) context.addIssue({ code: 'custom', path: [key], message: 'is required when OBJECT_STORAGE_PROVIDER=r2' });
+    }
+  }
   if (value.APP_ENV === 'production' && value.TRANSLATION_PROVIDER === 'fake') context.addIssue({ code: 'custom', path: ['TRANSLATION_PROVIDER'], message: 'fake translation provider is development/test-only' });
   if (value.APP_ENV === 'production' && value.TTS_PROVIDER === 'fake') context.addIssue({ code: 'custom', path: ['TTS_PROVIDER'], message: 'fake TTS provider is development/test-only' });
   if (value.APP_ENV === 'production' && value.MEDIA_PROCESSING_PROVIDER === 'fake') context.addIssue({ code: 'custom', path: ['MEDIA_PROCESSING_PROVIDER'], message: 'fake media processing provider is development/test-only' });

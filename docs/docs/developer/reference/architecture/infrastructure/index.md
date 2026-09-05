@@ -105,11 +105,13 @@ checksum
 
 具体字段以冻结 Migration / Infrastructure Contract 为准。
 
+对已经通过业务授权的客户端读取，Asset Infrastructure 通过[安全交付公开契约](/developer/reference/contracts/asset/ASSET_DELIVERY_PUBLIC_CONTRACTS)提供短时、opaque 的读取描述符。该契约不改变业务 Domain 的 `asset_id` 引用边界，也不冻结存储 Provider。
+
 业务领域不得重复保存 provider、bucket、object key 等底层存储事实作为自己的 canonical copy。
 
 ## Object Storage
 
-后端存在对象存储 Port，但生产 Provider 尚未最终选择。
+后端对象存储通过 S3-compatible Port 接入；生产 Provider 冻结为 Cloudflare R2。业务代码仍只依赖 Port，Provider endpoint、凭证与 bucket 仅在基础设施配置中出现。
 
 因此架构层只冻结：
 
@@ -119,7 +121,7 @@ Asset Infrastructure → canonical metadata
 Object Storage Adapter → 具体 Provider
 ```
 
-不冻结具体云厂商。
+Cloudflare R2 使用 S3-compatible API；不得把 S3 bucket/object key 或 R2 endpoint 泄露到业务 Domain DTO。
 
 ## 数据库基础设施
 
@@ -215,7 +217,6 @@ Worker lifecycle logging
 
 以下实现尚未最终选型：
 
-- 生产 Object Storage Provider；
 - 正式 SMS Provider；
 - Facebook Production Adapter 具体实现；
 - WebSocket Transport；

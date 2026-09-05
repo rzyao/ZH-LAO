@@ -3,6 +3,7 @@ import { DataTableColumnHeader } from '@/components/data-table/data-table-column
 import { StatusBadge, type StatusTone } from '@/components/common/status-badge'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
+import { AudioPlaybackButton } from './audio-playback-button'
 import type { LaoLetterListItem } from './contracts'
 
 const letterTypeLabels: Readonly<Record<string, string>> = {
@@ -17,8 +18,8 @@ const statusTones: Readonly<Record<string, StatusTone>> = {
 }
 
 export const LAO_LETTER_HIDEABLE_COLUMN_IDS = [
-  'character', 'letter_type', 'letter_class', 'name', 'romanization', 'sort_order',
-  'content_status', 'working_revision_status',
+  'character', 'audio', 'content_status', 'working_revision_status', 'letter_type',
+  'letter_class', 'name', 'romanization', 'sort_order',
 ] as const
 
 export function createLaoLetterColumns(
@@ -32,15 +33,17 @@ export function createLaoLetterColumns(
     cell: ({ row }) => <Checkbox aria-label={`选择 ${row.original.character}`} checked={row.getIsSelected()} onCheckedChange={(checked) => row.toggleSelected(Boolean(checked))} />,
   },
   {
+    accessorKey: 'sort_order',
+    header: ({ column }) => <DataTableColumnHeader column={column} title="排序" />,
+    cell: ({ row }) => row.original.sort_order ?? '—',
+  },
+  {
     accessorKey: 'character',
     header: ({ column }) => <DataTableColumnHeader column={column} title="字符" />,
     cell: ({ row }) => <span className="text-lg font-semibold">{row.original.character}</span>,
   },
-  { accessorKey: 'letter_type', header: '字母类型', cell: ({ row }) => letterTypeLabels[row.original.letter_type] },
-  { accessorKey: 'letter_class', header: '字母类别', cell: ({ row }) => row.original.letter_class ?? '—' },
-  { accessorKey: 'name', header: ({ column }) => <DataTableColumnHeader column={column} title="名称" />, cell: ({ row }) => row.original.name ?? '—' },
-  { accessorKey: 'romanization', header: ({ column }) => <DataTableColumnHeader column={column} title="罗马化" />, cell: ({ row }) => row.original.romanization ?? '—' },
-  { accessorKey: 'sort_order', header: ({ column }) => <DataTableColumnHeader column={column} title="排序号" />, cell: ({ row }) => row.original.sort_order ?? '—' },
+  { accessorKey: 'romanization', header: ({ column }) => <DataTableColumnHeader column={column} title="音标" />, cell: ({ row }) => row.original.romanization ?? '—' },
+  { id: 'audio', header: '音频', cell: ({ row }) => <AudioPlaybackButton audio={row.original.audio} label={row.original.character} rowId={row.original.content_id} /> },
   { accessorKey: 'content_status', header: '内容状态', cell: ({ row }) => <StatusBadge tone={statusTones[row.original.content_status]} label={row.original.content_status} /> },
   {
     accessorKey: 'working_revision_status',
@@ -50,6 +53,9 @@ export function createLaoLetterColumns(
       return status ? <StatusBadge tone={statusTones[status]} label={revisionStatusLabels[status] ?? status} /> : '无'
     },
   },
+  { accessorKey: 'letter_type', header: '字母类型', cell: ({ row }) => letterTypeLabels[row.original.letter_type] },
+  { accessorKey: 'letter_class', header: '字母类别', cell: ({ row }) => row.original.letter_class ?? '—' },
+  { accessorKey: 'name', header: ({ column }) => <DataTableColumnHeader column={column} title="名称" />, cell: ({ row }) => row.original.name ?? '—' },
   {
     id: 'actions',
     header: '操作',

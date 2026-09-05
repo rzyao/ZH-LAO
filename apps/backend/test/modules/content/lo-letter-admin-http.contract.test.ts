@@ -242,7 +242,7 @@ describe('API-LettersQuery HTTP contract (TC-001)', () => {
 
     expect(Object.keys(body.data).sort()).toEqual(['batch_actions', 'items', 'page', 'page_size', 'total']);
     expect(Object.keys(item).sort()).toEqual([
-      'available_actions', 'character', 'content_id', 'content_status', 'letter_class',
+      'audio', 'available_actions', 'character', 'content_id', 'content_status', 'letter_class',
       'letter_type', 'lock_version', 'name', 'romanization', 'sort_order', 'updated_at',
       'working_revision_id', 'working_revision_status',
     ].sort());

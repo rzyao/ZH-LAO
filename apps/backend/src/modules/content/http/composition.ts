@@ -9,6 +9,7 @@ import type {
   LaoLetterAdminRepository,
 } from '../application/ports/lo-letter-admin-repository.js';
 import type { ManageLaoLetterBatchTasks } from '../application/use-cases/manage-lo-letter-batch-tasks.js';
+import type { AudioAdminProjection } from '../application/audio-admin-projection.js';
 import { adminContentRoutes } from './admin-routes.js';
 import { publicContentRoutes } from './public-routes.js';
 import { structuredAdminRoutes } from './structured-admin-routes.js';
@@ -26,6 +27,7 @@ export async function registerContentRoutes(app: FastifyInstance, dependencies: 
   authorizer: OperationsAuthorizer;
   audit: OperationsAuditRecorder;
   transactionalAudit?: OperationsTransactionalAuditBoundary;
+  audioProjection?: AudioAdminProjection;
 }): Promise<void> {
   await app.register(publicContentRoutes, {
     prefix: '/api/v1/content',
@@ -51,6 +53,7 @@ export async function registerContentRoutes(app: FastifyInstance, dependencies: 
         : { laoLetterBatchTaskManager: dependencies.laoLetterBatchTaskManager }),
       authentication: dependencies.authentication,
       authorizer: dependencies.authorizer,
+      ...(dependencies.audioProjection === undefined ? {} : { audioProjection: dependencies.audioProjection }),
     });
   }
   if (dependencies.structuredContentRepository) {
@@ -60,6 +63,7 @@ export async function registerContentRoutes(app: FastifyInstance, dependencies: 
       authentication: dependencies.authentication,
       authorizer: dependencies.authorizer,
       audit: dependencies.audit,
+      ...(dependencies.audioProjection === undefined ? {} : { audioProjection: dependencies.audioProjection }),
     });
   }
 }

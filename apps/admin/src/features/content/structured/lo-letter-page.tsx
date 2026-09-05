@@ -31,6 +31,7 @@ import {
 import { LaoLetterSelectionBanner } from './lo-letter-batch-bar'
 import { LaoLetterBatchActions, type LaoLetterBatchAction } from './lo-letter-batch-actions'
 import { LaoLetterBatchTaskPanel } from './lo-letter-batch-task-panel'
+import { TableAudioPlaybackProvider } from './audio-playback-button'
 
 export { LaoLetterPageView } from './lo-letter-table'
 
@@ -287,7 +288,7 @@ export function LaoLetterPage({ search }: { search: LaoLetterSearch }) {
                 : <ul className="space-y-1">{taskHistory.data.items.map((task) => <li className="flex flex-wrap items-center justify-between gap-2 rounded bg-muted/50 px-3 py-2 text-sm" key={task.task_id}><span>{task.action} · {task.status} · {task.processed_count}/{task.target_count}</span><Button size="sm" variant="ghost" onClick={() => setActiveTaskId(task.task_id)}>查看详情</Button></li>)}</ul>}
             <div className="flex gap-2"><Button disabled={taskHistoryPage <= 1} size="sm" variant="outline" onClick={() => setTaskHistoryPage((page) => page - 1)}>上一页历史</Button><Button disabled={!taskHistory.data || taskHistoryPage * 20 >= taskHistory.data.total} size="sm" variant="outline" onClick={() => setTaskHistoryPage((page) => page + 1)}>下一页历史</Button></div>
           </section>
-          <LaoLetterPageView
+          <TableAudioPlaybackProvider visibleRowIds={query.data?.items.map((item) => item.content_id) ?? []}><LaoLetterPageView
             state={state}
             server={server}
             rowSelection={activeSelection.rowSelection}
@@ -307,7 +308,7 @@ export function LaoLetterPage({ search }: { search: LaoLetterSearch }) {
               order: 'asc',
             })}
             toolbar={<div className="flex flex-wrap items-center gap-2"><LaoLetterQueryControls search={search} searchText={searchText} showPageSize={query.isPending || query.isError} onSearchTextChange={setSearchText} onChange={replaceSearch} /><Button aria-label="恢复默认列" size="sm" variant="outline" onClick={restoreDefaultColumns}><RotateCcw aria-hidden />恢复默认列</Button></div>}
-          />
+          /></TableAudioPlaybackProvider>
         </div>
       </div>
     </ListPageLayout>

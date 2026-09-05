@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import type { AdminAudio } from './audio-playback-button'
 
 export type ContentLanguageCode = 'zh' | 'lo'
 export type StructuredContentType =
@@ -123,6 +124,7 @@ export interface ManagedStructuredContent {
       tags: Array<{ code: string; name: string }>
     }
   } | null
+  audio?: AdminAudio
 }
 
 export interface ManagedStructuredContentList { items: ManagedStructuredContent[]; total: number }
@@ -195,6 +197,11 @@ export const LaoLetterListItemSchema = z.object({
   lock_version: z.number().int().min(0).nullable(),
   updated_at: z.iso.datetime({ offset: true }),
   available_actions: z.array(LaoLetterBatchActionSchema),
+  audio: z.discriminatedUnion('status', [
+    z.object({ status: z.literal('available'), playback: z.object({ url: z.url(), expires_at: z.iso.datetime({ offset: true }), content_type: z.string().startsWith('audio/') }).strict() }).strict(),
+    z.object({ status: z.literal('unavailable') }).strict(),
+    z.object({ status: z.literal('no_audio') }).strict(),
+  ]).optional(),
 }).strict()
 
 export const LaoLetterListDataSchema = z.object({

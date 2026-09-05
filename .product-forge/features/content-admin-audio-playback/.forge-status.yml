@@ -1,0 +1,107 @@
+schema_version: 3
+feature: "content-admin-audio-playback"
+created_at: "2026-09-05"
+last_updated: "2026-09-05T00:46:00Z"
+feature_mode: "lite"
+flow_mode: "gated"
+speckit_mode: "classic"
+scope:
+  primary: "admin"
+  paths: ["apps/admin", "apps/backend"]
+  cross_workspace: true
+phases:
+  problem_discovery: { status: "not_applicable" }
+  research: { status: "not_applicable" }
+  product_spec:
+    status: "completed"
+    digest_path: "product-spec/digest.md"
+  design_system_harvest: { status: "not_applicable" }
+  revalidation: { status: "not_applicable" }
+  bridge: { status: "not_applicable" }
+  i18n_harvest: { status: "not_applicable" }
+  plan:
+    status: "completed"
+    digest_path: "plan/digest.md"
+  tasks: { status: "not_applicable" }
+  migration_plan: { status: "not_applicable" }
+  pre_impl_review: { status: "not_applicable" }
+  implement:
+    status: "completed"
+    digest_path: "implementation-digest.md"
+  code_review: { status: "not_applicable" }
+  verify:
+    status: "completed"
+    digest_path: "verification-digest.md"
+  test_plan: { status: "not_applicable" }
+  test_run: { status: "not_applicable" }
+  release_readiness: { status: "not_applicable" }
+  monitoring_setup: { status: "not_applicable" }
+  experiment_design: { status: "not_applicable" }
+  spec_merge: { status: "not_applicable" }
+gates:
+  - phase: "product_spec"
+    decision: "approved"
+    mode: "human-approved"
+    timestamp: "2026-09-05T00:00:00Z"
+    notes: "User explicitly approved the Lite-mode product specification."
+    conditions:
+      - "Keep the frozen six-type audio whitelist."
+      - "Never expose Audio or Asset internals to the admin client."
+    sync_result: "pre-plan traceability not applicable"
+    reviewed_sha: "185e00aaa78b4b1e280003bf167a6ea92067b4ab"
+    risk: "high"
+  - phase: "implement"
+    decision: "passed"
+    mode: "test-first"
+    timestamp: "2026-09-05T00:32:10Z"
+    notes: "Red tests were recorded before Asset delivery and official-audio query implementations; both then passed."
+    conditions:
+      - "Audio delivery remains fail-closed."
+      - "Only the frozen six content types receive an audio cell."
+    sync_result: "backend_verify_passed"
+    reviewed_sha: null
+    risk: "high"
+  - phase: "verify"
+    decision: "passed"
+    mode: "automated"
+    timestamp: "2026-09-05T00:32:10Z"
+    notes: "Backend verification (312 tests), admin tests (177), production build, 22/22 E2E tests, and documentation audits passed. Admin lint is separately blocked by pre-existing dictionary irregular whitespace errors outside this feature."
+    conditions:
+      - "Production requires complete R2 environment configuration."
+    sync_result: "backend_312_tests_admin_177_tests_build_e2e_22_of_22_docs_passed"
+    reviewed_sha: null
+    risk: "medium"
+  - phase: "plan"
+    decision: "approved"
+    mode: "human-approved"
+    timestamp: "2026-09-05T00:00:00Z"
+    notes: "User explicitly approved the technical plan, including CR-001 Asset Delivery public boundary and the later CR-002 R2 provider selection."
+    conditions:
+      - "Use the frozen Cloudflare R2 S3-compatible provider through the shared Object Storage Port."
+      - "Fail closed when secure delivery is unavailable."
+    sync_result: "docs_audit_lifecycle_audit_build_passed"
+    reviewed_sha: "185e00aaa78b4b1e280003bf167a6ea92067b4ab"
+    risk: "high"
+sync_runs:
+  total_runs: 0
+  last_verdict: "not_run"
+dependencies:
+  depends_on: ["content-audio-public-boundary", "admin-data-table-enhancement"]
+  depended_on_by: []
+role_approvals:
+  solo_mode: true
+change_requests:
+  - id: "CR-001"
+    title: "补充 Asset 安全交付公开契约与实现"
+    status: "accepted"
+    timestamp: "2026-09-05T00:00:00Z"
+    artifacts_affected: 6
+    tasks_added: 5
+    phase_rollback: null
+  - id: "CR-002"
+    title: "冻结 Cloudflare R2 为对象存储 Provider"
+    status: "accepted"
+    timestamp: "2026-09-05T00:00:00Z"
+    artifacts_affected: 5
+    tasks_added: 3
+    phase_rollback: null

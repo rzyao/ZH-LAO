@@ -37,4 +37,8 @@ export class MemoryObjectStorage implements ObjectStoragePort {
     if (entry === undefined) return null;
     return { key, contentType: entry.contentType, sizeBytes: entry.content.byteLength, metadata: entry.metadata };
   }
+
+  async createSignedReadUrl(_key: string, _expiresInSeconds: number): Promise<string> {
+    throw new Error('MEMORY_OBJECT_STORAGE_DOES_NOT_SUPPORT_EXTERNAL_READ_URLS');
+  }
 }

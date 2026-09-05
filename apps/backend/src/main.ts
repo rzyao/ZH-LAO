@@ -23,6 +23,12 @@ import { PostgresContentRepository, PostgresCurriculumRepository, PostgresLaoLet
 import { ManageLaoLetterBatchTasks } from './modules/content/application/index.js';
 import { ManageLaoLetterSelection } from './modules/content/application/use-cases/manage-lo-letter-selection.js';
 import { registerContentRoutes } from './modules/content/http/composition.js';
+import { PostgresContentAudioSourceReader } from './modules/content/infrastructure/postgres-content-audio-source-reader.js';
+import { AudioAdminProjection } from './modules/content/application/audio-admin-projection.js';
+import { AudioOfficialQueryService } from './modules/audio/public/audio-official-query-service.js';
+import { AssetRepository } from './assets/asset-repository.js';
+import { AssetDeliveryService } from './assets/asset-delivery-service.js';
+import { buildCapabilities } from './capabilities/index.js';
 
 const config=loadConfig();
 const logger=createLogger(config.logLevel);
@@ -50,6 +56,7 @@ if(process.argv[2]==='--operations-bootstrap'){
 }else{
   const readinessState={isShuttingDown:false};
   const app=buildApp({logger,database:executor,readinessState});
+  const capabilities=buildCapabilities(config.capabilities);
   const identityPublic=createIdentityPublicQuery(createIdentityRepositories,executor);
   const provisioning=new AdminOperatorProvisioningService(transactionManager,new AdminAccountWriter(),new AdminOperatorWriter(new PostgresOperationsRepository()));
   const operations=buildOperationsModule({executor,transactionManager,identity:identityPublic,authentication:new IdentityAuthenticationProvider(new AccessTokenService(config.identity.jwtHmacSecret??'',config.identity.jwtIssuer,config.identity.jwtAudience),createIdentityRepositories,executor),provisioning,credentials:new AdminCredentialOperations(transactionManager,createIdentityRepositories)});
@@ -59,6 +66,10 @@ if(process.argv[2]==='--operations-bootstrap'){
   await ensureDefaultAdmin({transactions:transactionManager,repositories:createIdentityRepositories,bootstrap:(subjectId,displayName)=>operations.service.bootstrap(subjectId,displayName),username:config.identity.adminUsername,password:config.identity.adminPassword});
   await operations.registerHttp(app);
   const laoLetterAdminRepository=new PostgresLaoLetterAdminRepository(transactionManager);
+  const audioProjection = new AudioAdminProjection(
+    new PostgresContentAudioSourceReader(executor),
+    new AudioOfficialQueryService(executor, new AssetDeliveryService(new AssetRepository(executor), capabilities.objectStorage)),
+  );
   const laoLetterBatchTaskManager=new ManageLaoLetterBatchTasks({
     repository:new PostgresLaoLetterBatchRepository(transactionManager),
     selection:new ManageLaoLetterSelection(laoLetterAdminRepository,transactionManager),
@@ -81,6 +92,7 @@ if(process.argv[2]==='--operations-bootstrap'){
     authorizer: operations.service,
     audit: operations.service,
     transactionalAudit: operations.service,
+    audioProjection,
   });
   const platform=buildPlatformModule({executor,transactionManager});
   await platformModule.registerHttp(app,{executor,featureFlagUseCases:platform.featureFlagUseCases,appVersionUseCases:platform.appVersionUseCases,announcementUseCases:platform.announcementUseCases,regionUseCases:platform.regionUseCases});

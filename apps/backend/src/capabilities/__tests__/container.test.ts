@@ -65,4 +65,14 @@ describe('buildCapabilities (WP-04)', () => {
     const capabilities = buildCapabilities(DEV);
     expect(Object.isFrozen(capabilities)).toBe(true);
   });
+
+  it('wires Cloudflare R2 only when all S3-compatible settings are present', () => {
+    expect(() => buildCapabilities({ ...FAIL_SAFE, objectStorage: 'r2' })).toThrow('R2 configuration is incomplete');
+    const capabilities = buildCapabilities({
+      ...FAIL_SAFE,
+      objectStorage: 'r2',
+      r2: { endpoint: 'https://account.r2.cloudflarestorage.com', bucket: 'audio', accessKeyId: 'key', secretAccessKey: 'secret' },
+    });
+    expect(capabilities.objectStorage).toMatchObject({ name: 'cloudflare-r2' });
+  });
 });

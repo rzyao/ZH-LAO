@@ -16,6 +16,7 @@ import type { TranslationPort } from './ports/translation.js';
 import type { TtsPort } from './ports/tts.js';
 import { MemoryObjectStorage } from './adapters/object-storage/memory-object-storage.js';
 import { UnavailableObjectStorage } from './adapters/object-storage/unavailable-object-storage.js';
+import { R2ObjectStorage } from './adapters/object-storage/r2-object-storage.js';
 import { FakeTranslationProvider } from './adapters/translation/fake-translation.js';
 import { UnavailableTranslationProvider } from './adapters/translation/unavailable-translation.js';
 import { FakeTtsProvider } from './adapters/tts/fake-tts.js';
@@ -35,7 +36,8 @@ export type Capabilities = Readonly<{
 
 /** AppConfig['capabilities'] 的窄化形态，便于独立测试（不依赖完整环境变量）。 */
 export type CapabilityProviderConfig = Readonly<{
-  objectStorage: 'unavailable' | 'memory';
+  objectStorage: 'unavailable' | 'memory' | 'r2';
+  r2?: Readonly<{ endpoint: string; bucket: string; accessKeyId: string; secretAccessKey: string }>;
   translation: 'unavailable' | 'fake';
   tts: 'unavailable' | 'fake';
   media: 'unavailable' | 'fake';
@@ -50,6 +52,11 @@ export function buildCapabilities(config: CapabilityProviderConfig): Capabilitie
   const objectStorage: ObjectStoragePort = (() => {
     switch (config.objectStorage) {
       case 'memory': return new MemoryObjectStorage();
+      case 'r2': {
+        const r2 = config.r2;
+        if (!r2?.endpoint || !r2.bucket || !r2.accessKeyId || !r2.secretAccessKey) throw new Error('R2 configuration is incomplete');
+        return new R2ObjectStorage({ endpoint: r2.endpoint, bucket: r2.bucket, accessKeyId: r2.accessKeyId, secretAccessKey: r2.secretAccessKey });
+      }
       case 'unavailable': return new UnavailableObjectStorage();
       default: return assertNever(config.objectStorage);
     }

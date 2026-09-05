@@ -58,6 +58,21 @@ describe('capability provider configuration (WP-04)', () => {
     });
   });
 
+  it('requires a complete R2 configuration and keeps its credentials in infrastructure config', () => {
+    expect(() => loadConfig({ ...valid, OBJECT_STORAGE_PROVIDER: 'r2' })).toThrow();
+    const config = loadConfig({
+      ...valid,
+      OBJECT_STORAGE_PROVIDER: 'r2',
+      R2_ENDPOINT: 'https://account.r2.cloudflarestorage.com',
+      R2_BUCKET: 'audio',
+      R2_ACCESS_KEY_ID: 'key',
+      R2_SECRET_ACCESS_KEY: 'secret',
+    });
+    expect(config.capabilities.r2).toEqual({
+      endpoint: 'https://account.r2.cloudflarestorage.com', bucket: 'audio', accessKeyId: 'key', secretAccessKey: 'secret',
+    });
+  });
+
   it('rejects unknown provider values instead of silently accepting them', () => {
     expect(() => loadConfig({ ...valid, CACHE_PROVIDER: 'redis' })).toThrow();
     expect(() => loadConfig({ ...valid, TTS_PROVIDER: 'aws-polly' })).toThrow();

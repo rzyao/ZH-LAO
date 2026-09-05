@@ -25,9 +25,8 @@ import type { NavItem } from './types'
 export const NAV_ITEMS: NavItem[] = [
   { key: 'overview', label: '总览看板', href: '/', icon: LayoutDashboard, children: [] },
   {
-    key: 'learning-content', label: '学习与内容', icon: Folder, children: [
-      {
-        key: 'content', label: '内容管理', icon: BookOpen, domain: 'content', children: [
+    key: 'content', label: '内容管理', icon: BookOpen, domain: 'content', children: [
+          { key: 'dictionary', label: '词典管理', href: '/content/dictionary', icon: BookOpen, children: [] },
           {
             key: 'zh', label: '中文内容', icon: Folder, children: [
               { key: 'zh-pinyin', label: '拼音管理', href: '/content/zh/pinyin', icon: BookOpen, children: [] },
@@ -48,12 +47,10 @@ export const NAV_ITEMS: NavItem[] = [
             ],
           },
           { key: 'courses', label: '课程管理', href: '/content/courses', icon: GraduationCap, children: [] },
-        ],
-      },
-      { key: 'learning', label: '学习系统', href: '/learning', icon: GraduationCap, domain: 'learning', placeholder: true, children: [] },
-      { key: 'audio', label: '音频生产', href: '/audio', icon: AudioLines, domain: 'audio', placeholder: true, children: [] },
     ],
   },
+  { key: 'learning', label: '学习系统', href: '/learning', icon: GraduationCap, domain: 'learning', placeholder: true, children: [] },
+  { key: 'audio', label: '音频生产', href: '/audio', icon: AudioLines, domain: 'audio', placeholder: true, children: [] },
   {
     key: 'users-community', label: '用户与社交', icon: Folder, children: [
       { key: 'identity', label: '身份认证', href: '/identity', icon: CircleUser, domain: 'identity', placeholder: true, children: [] },

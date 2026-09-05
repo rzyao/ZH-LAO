@@ -8,6 +8,15 @@ export type ContentAudioSource = { entityType: string; entityId: string; revisio
 export type ValidateAudioSourceRequest = { entityType: AudioEligibleContentEntityType; entityId: string; revisionId: string; languageCode: 'zh' | 'lo'; audioRole: string; requirePublished?: boolean };
 export type ValidatedAudioSource = Omit<ValidateAudioSourceRequest, 'requirePublished'> & { sourceDomain: 'content'; textSnapshot: string; pronunciationSnapshot: unknown | null; audioInputHashMaterial: string };
 export type ContentRevisionView = ContentAudioSource;
+
+export function calculateAudioInputHashMaterial(source: Pick<ContentAudioSource, 'entityType' | 'languageCode' | 'textSnapshot' | 'pronunciationSnapshot'>, audioRole: string): string {
+  return createHash('sha256').update(JSON.stringify([source.entityType, source.languageCode, source.textSnapshot, source.pronunciationSnapshot, audioRole])).digest('hex');
+}
+
+export function isSupportedContentAudioRole(entityType: string, audioRole: string): boolean {
+  return AudioRolePolicy.supportsRole(entityType, audioRole);
+}
+
 export interface ContentAudioSourceReader { findRevision(revisionId: string): Promise<ContentAudioSource | null>; findCurrentPublished(entityType: AudioEligibleContentEntityType, entityId: string): Promise<ContentAudioSource | null>; }
 export class ContentPublicQueryService {
   constructor(private readonly reader: ContentAudioSourceReader) {}
@@ -19,7 +28,7 @@ export class ContentPublicQueryService {
     if (source.languageCode !== request.languageCode) throw new Error('AUDIO_SOURCE_LANGUAGE_MISMATCH');
     if (source.noAudio || !source.textSnapshot.trim()) throw new Error('AUDIO_SOURCE_NOT_RESOLVABLE');
     if (request.requirePublished !== false && source.status !== 'published') throw new Error('AUDIO_SOURCE_REVISION_NOT_PUBLISHED');
-    const audioInputHashMaterial = createHash('sha256').update(JSON.stringify([source.entityType, source.languageCode, source.textSnapshot, source.pronunciationSnapshot, request.audioRole])).digest('hex');
+    const audioInputHashMaterial = calculateAudioInputHashMaterial(source, request.audioRole);
     return { sourceDomain: 'content', entityType: request.entityType, entityId: source.entityId, revisionId: source.revisionId, languageCode: source.languageCode, audioRole: request.audioRole, textSnapshot: source.textSnapshot, pronunciationSnapshot: source.pronunciationSnapshot, audioInputHashMaterial };
   }
   async resolveRevision(revisionId: string): Promise<ContentRevisionView | null> { return this.reader.findRevision(revisionId); }

@@ -23,4 +23,8 @@ export class UnavailableObjectStorage implements ObjectStoragePort {
   async stat(_key: string): Promise<ObjectStorageStat | null> {
     throw providerUnavailable(this.context);
   }
+
+  async createSignedReadUrl(_key: string, _expiresInSeconds: number): Promise<string> {
+    throw providerUnavailable(this.context);
+  }
 }

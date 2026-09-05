@@ -115,7 +115,7 @@ Operations authorization/audit is consumed by Audio Admin; Audio public boundary
 
 ### Asset Infrastructure
 
-Audio stores Asset logical UUID only. Public consumers that need a playable signed URL must use the Asset delivery capability with the returned `assetId`; Audio does not expose storage facts.
+Audio stores Asset logical UUID only. Public consumers that need a playable signed URL must use [Asset Delivery Public Contracts](../asset/ASSET_DELIVERY_PUBLIC_CONTRACTS.md) with the returned `assetId`; Audio does not expose storage facts.
 
 ## 5. Content Dependency Contract
 

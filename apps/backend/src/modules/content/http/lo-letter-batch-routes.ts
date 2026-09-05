@@ -11,6 +11,7 @@ import type {
 import { ManageLaoLetterSelection } from '../application/use-cases/manage-lo-letter-selection.js';
 import type { ManageLaoLetterBatchTasks } from '../application/use-cases/manage-lo-letter-batch-tasks.js';
 import { QueryLaoLetterAdminList } from '../application/use-cases/query-lo-letter-admin-list.js';
+import type { AudioAdminProjection } from '../application/audio-admin-projection.js';
 import { getLaoLetterBatchActionPolicy, type LaoLetterBatchPermission } from '../domain/index.js';
 import type { OperationsAuthorizer } from '../../operations/public/index.js';
 
@@ -21,6 +22,7 @@ export type LaoLetterBatchRoutesOptions = Readonly<{
     'createTask' | 'listOwnedTasks' | 'getOwnedTask' | 'retryFailed'>;
   authentication: AuthenticationProvider;
   authorizer: OperationsAuthorizer;
+  audioProjection?: AudioAdminProjection;
 }>;
 
 const commaSeparated = z.string()
@@ -193,8 +195,16 @@ export const loLetterBatchRoutes: FastifyPluginAsync<LaoLetterBatchRoutesOptions
       permissions: await permittedActions(request, options.authorizer),
     });
 
+    const audioByContentId = options.audioProjection
+      ? await options.audioProjection.resolveMany(result.items.map((item) => ({ contentType: 'lo_letter', contentId: item.contentId })))
+      : new Map();
     return reply.code(200).send({
-      items: result.items.map(itemDto),
+      items: result.items.map((item) => ({
+        ...itemDto(item),
+        audio: item.letterType === 'tone_mark' || item.letterType === 'other'
+          ? { status: 'no_audio' }
+          : audioByContentId.get(item.contentId) ?? { status: 'unavailable' },
+      })),
       page: result.page,
       page_size: result.pageSize,
       total: result.total,

@@ -16,7 +16,8 @@ export type AppConfig = Readonly<{
   }>;
   identity: Readonly<{ otpHmacSecret: string | undefined; jwtHmacSecret: string | undefined; jwtIssuer: string; jwtAudience: string; otpProvider: 'console' | 'unavailable'; adminUsername: string; adminPassword: string }>;
   capabilities: Readonly<{
-    objectStorage: 'unavailable' | 'memory';
+    objectStorage: 'unavailable' | 'memory' | 'r2';
+    r2?: Readonly<{ endpoint: string; bucket: string; accessKeyId: string; secretAccessKey: string }>;
     translation: 'unavailable' | 'fake';
     tts: 'unavailable' | 'fake';
     media: 'unavailable' | 'fake';
@@ -27,6 +28,9 @@ export type AppConfig = Readonly<{
 
 export function loadConfig(source: NodeJS.ProcessEnv = process.env): AppConfig {
   const env = environmentSchema.parse(source);
+  const r2 = env.R2_ENDPOINT && env.R2_BUCKET && env.R2_ACCESS_KEY_ID && env.R2_SECRET_ACCESS_KEY
+    ? Object.freeze({ endpoint: env.R2_ENDPOINT, bucket: env.R2_BUCKET, accessKeyId: env.R2_ACCESS_KEY_ID, secretAccessKey: env.R2_SECRET_ACCESS_KEY })
+    : undefined;
   return Object.freeze({
     environment: env.APP_ENV,
     host: env.APP_HOST,
@@ -50,6 +54,7 @@ export function loadConfig(source: NodeJS.ProcessEnv = process.env): AppConfig {
     identity: Object.freeze({ otpHmacSecret: env.OTP_HMAC_SECRET, jwtHmacSecret: env.JWT_HMAC_SECRET, jwtIssuer: env.JWT_ISSUER, jwtAudience: env.JWT_AUDIENCE, otpProvider: env.IDENTITY_OTP_PROVIDER, adminUsername: env.ADMIN_USERNAME, adminPassword: env.ADMIN_PASSWORD }),
     capabilities: Object.freeze({
       objectStorage: env.OBJECT_STORAGE_PROVIDER,
+      ...(r2 === undefined ? {} : { r2 }),
       translation: env.TRANSLATION_PROVIDER,
       tts: env.TTS_PROVIDER,
       media: env.MEDIA_PROCESSING_PROVIDER,

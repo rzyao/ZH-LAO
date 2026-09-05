@@ -1,0 +1,45 @@
+version: 1
+feature: content-admin-audio-playback
+status: designing
+journeys:
+  - id: JRN-001
+    title: 在内容列表试听当前正式音频
+    actor: content_operator
+    preconditions:
+      - Operator has the page's Content read permission.
+      - A visible whitelisted entity has an active Slot and an approved, fresh official asset.
+    steps:
+      - Open one of the six in-scope content management list pages.
+      - Locate the row's 音频 column.
+      - Activate 播放.
+      - Activate 暂停 or select another row's 播放.
+    outcomes:
+      - Only one row plays at a time.
+      - The control exposes its current action to assistive technology.
+    covers: [FR-001, FR-002, FR-003, FR-004, FR-005]
+  - id: JRN-002
+    title: 识别并安全处理不可播放音频
+    actor: content_operator
+    preconditions:
+      - A visible row is either no-audio, unavailable, stale, or fails during playback.
+    steps:
+      - Open the relevant content management list.
+      - Inspect the 音频 column.
+      - If a playback attempt fails, retry it.
+      - Change filters or page while an item is playing.
+    outcomes:
+      - Historical or stale audio is never played.
+      - The row remains usable and the list does not fail.
+      - Leaving the row's visible dataset stops playback.
+    covers: [FR-006, FR-007, FR-008, FR-009]
+  - id: JRN-003
+    title: 拒绝越过音频边界的访问
+    actor: unauthorized_or_unsupported_request
+    preconditions:
+      - The requested entity is non-whitelisted or the caller lacks Content read permission.
+    steps:
+      - Request list audio projection.
+    outcomes:
+      - No internal Audio or Asset metadata is returned.
+      - No playable descriptor is returned for unsupported content.
+    covers: [FR-010, FR-011, FR-012]

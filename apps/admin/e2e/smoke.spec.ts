@@ -46,29 +46,29 @@ test.describe('Admin Foundation smoke', () => {
   test('all 11 domain entries are present in the sidebar', async ({ page }) => {
     await login(page)
     const sidebar = page.getByTestId('sidebar')
+    await expect(sidebar.getByRole('button', { name: '内容管理', exact: true })).toBeVisible()
+    await expect(sidebar.getByRole('link', { name: '学习系统', exact: true })).toBeVisible()
+    await expect(sidebar.getByRole('link', { name: '音频生产', exact: true })).toBeVisible()
     const directories = [
-      ['学习与内容', ['内容管理', '学习系统', '音频生产']],
-      ['用户与社交', ['身份认证', '社交关系', '实时聊天']],
-      ['商业与财务', ['交易商城', '奖励中心']],
-      ['安全治理', ['信任与风控']],
-      ['系统运维', ['运营权限', '平台控制台']],
+      ['用户与社交', [['link', '身份认证'], ['link', '社交关系'], ['link', '实时聊天']]],
+      ['商业与财务', [['link', '交易商城'], ['link', '奖励中心']]],
+      ['安全治理', [['link', '信任与风控']]],
+      ['系统运维', [['link', '运营权限'], ['link', '平台控制台']]],
     ]
-    for (const [directory, labels] of directories) {
+    for (const [directory, entries] of directories) {
       await sidebar.getByRole('button', { name: directory as string, exact: true }).click()
-      for (const label of labels as string[]) {
-        await expect(sidebar.getByRole('link', { name: label, exact: true })).toBeVisible()
+      for (const [role, label] of entries as Array<["button" | "link", string]>) {
+        await expect(sidebar.getByRole(role, { name: label, exact: true })).toBeVisible()
       }
     }
   })
 
   test('内容管理入口展开中老两种语言的类别导航', async ({ page }) => {
     await login(page)
-    await page.getByRole('button', { name: '学习与内容', exact: true }).click()
-    const contentEntry = page.getByRole('link', { name: '内容管理', exact: true })
+    const contentEntry = page.getByRole('button', { name: '内容管理', exact: true })
     await expect(contentEntry).toHaveAttribute('aria-expanded', 'false')
     await expect(page.getByText('中文内容', { exact: true })).not.toBeVisible()
     await contentEntry.click()
-    await expect(page).toHaveURL(/\/content$/)
     await expect(contentEntry).toHaveAttribute('aria-expanded', 'true')
     await page.getByRole('button', { name: '收起 内容管理', exact: true }).click()
     await expect(contentEntry).toHaveAttribute('aria-expanded', 'false')
@@ -87,7 +87,6 @@ test.describe('Admin Foundation smoke', () => {
 
   test('navigation works to a domain placeholder', async ({ page }) => {
     await login(page)
-    await page.getByRole('button', { name: '学习与内容', exact: true }).click()
     await page.getByRole('link', { name: '学习系统' }).click()
     await expect(page.getByText('学习系统 — 即将上线')).toBeVisible()
     await expect(page).toHaveURL(/\/learning$/)

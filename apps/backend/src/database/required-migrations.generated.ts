@@ -34,5 +34,8 @@ export const requiredMigrations = [
   { filename: '1360_admin_credentials_password_change_required.sql', sha256: '341ab4f9f16fbd20b37ae8c7080e6969bc78a7569bea5eed8c5bbc496c9ebdcb' },
   { filename: '1370_curriculum_lifecycle_idempotency.sql', sha256: '037fcce2b88210c5c7d61c478eaafdb24ab08ad7af7f76cef7ddf2acf917ac47' },
   { filename: '1380_operations_password_reset_permission.sql', sha256: '1acfed921185d0b3c595807c2bfa41b80c9d4ea1e45fa9740938f5d3fa407e37' },
+  { filename: '1390_dictionary_management_navigation.sql', sha256: 'd9376acebacf36d98d2c9e8ae94c861389c094e7dc1c8d73b0607a5188fd587b' },
+  { filename: '1400_dictionary_reference_candidates.sql', sha256: '5cd8a74ab6c3b351d16191fbf802bd8f4acbac99e9cf1296f2bf480089f3501c' },
   { filename: '1410_content_menu_directory.sql', sha256: '7b57733aab57ec62b70b1f5b12b5e38072ae660f7c60985ecc0a6f247107bf7d' },
+  { filename: '1420_promote_learning_content_menu_items.sql', sha256: 'a8a8ad3c006dd8a0fe2a3c538d4df352bb6d9c7a33cb82b667343507059e019b' },
 ] as const;
