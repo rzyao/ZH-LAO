@@ -53,7 +53,7 @@ export async function registerIdentityRoutes(app: FastifyInstance, dependencies:
       const body = parse(z.object({ username: z.string().trim().min(1).max(100), password: z.string().min(1).max(200) }).strict(), request.body);
       const result = await dependencies.adminAuth!.login(body.username, body.password, { ipAddress: request.ip, requestId: request.id });
       reply.headers(tokenHeaders);
-      return { user_id: result.userPublicId, access_token: result.accessToken, token_type: 'Bearer', expires_in: result.expiresIn, refresh_token: result.refreshToken, session_expires_at: result.sessionExpiresAt.toISOString() };
+      return { user_id: result.userPublicId, access_token: result.accessToken, token_type: 'Bearer', expires_in: result.expiresIn, refresh_token: result.refreshToken, session_expires_at: result.sessionExpiresAt.toISOString(), password_change_required: result.passwordChangeRequired };
     });
   }
   if (dependencies.adminCredentials) {

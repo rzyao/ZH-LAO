@@ -13,7 +13,7 @@ export interface AuthContextValue {
   /** Granted permission keys; may include wildcard patterns. */
   permissions: readonly string[]
   can: (permission: Permission) => boolean
-  login: (username: string, password: string) => Promise<void>
+  login: (username: string, password: string) => Promise<{ passwordChangeRequired: boolean }>
   setAuthenticated: (operator: CurrentOperator, permissions?: string[]) => void
   signOut: () => void
   refreshPermissions: () => Promise<void>
@@ -94,6 +94,13 @@ export function AuthProvider({ children, initialState }: AuthProviderProps) {
         try {
           const credentials = await loginAdmin(username, password)
           setAccessToken(credentials.access_token)
+          // A temporary password grants only the change-password endpoint. Do
+          // not fetch /operations/me or persist a restricted session: both
+          // would either be rejected by the server or make the token survive a
+          // browser restart unnecessarily.
+          if (credentials.password_change_required) {
+            return { passwordChangeRequired: true }
+          }
           const current = await getCurrentOperator()
           const session: AdminSession = {
             accessToken: credentials.access_token,
@@ -104,6 +111,7 @@ export function AuthProvider({ children, initialState }: AuthProviderProps) {
           writeAdminSession(session)
           setOperator(current.operator)
           setPermissions(current.permissions)
+          return { passwordChangeRequired: false }
         } catch (error) {
           setAccessToken(null)
           throw error

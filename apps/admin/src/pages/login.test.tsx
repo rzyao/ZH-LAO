@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event'
 import { LoginPage } from './login'
 import { ApiError } from '@/api/errors'
 
-const loginMock = vi.fn<() => Promise<void>>()
+const loginMock = vi.fn<() => Promise<{ passwordChangeRequired: boolean }>>()
 const navigateMock = vi.fn()
 
 vi.mock('@/auth/context/AuthContext', async (importOriginal) => {
@@ -47,7 +47,7 @@ beforeEach(() => {
 
 describe('LoginPage (US-001 / FR-002 / FR-004)', () => {
   it('trims the username before submitting and navigates on success', async () => {
-    loginMock.mockResolvedValue(undefined)
+    loginMock.mockResolvedValue({ passwordChangeRequired: false })
     render(<LoginPage />)
     await userEvent.type(screen.getByLabelText('账号'), '  admin  ')
     await userEvent.type(screen.getByLabelText('密码'), 'secret')
@@ -63,6 +63,15 @@ describe('LoginPage (US-001 / FR-002 / FR-004)', () => {
     await userEvent.type(screen.getByLabelText('密码'), 'wrong')
     await userEvent.click(screen.getByRole('button', { name: '登录' }))
     expect(await screen.findByRole('alert')).toHaveTextContent('账号或密码错误，请重试。')
+  })
+
+  it('routes a temporary-password login directly to the password-change page', async () => {
+    loginMock.mockResolvedValue({ passwordChangeRequired: true })
+    render(<LoginPage />)
+    await userEvent.type(screen.getByLabelText('账号'), 'admin')
+    await userEvent.type(screen.getByLabelText('密码'), 'temporary-password')
+    await userEvent.click(screen.getByRole('button', { name: '登录' }))
+    await waitFor(() => expect(navigateMock).toHaveBeenCalledWith({ to: '/change-password' }))
   })
 
   it('shows the rate-limit message on 429', async () => {

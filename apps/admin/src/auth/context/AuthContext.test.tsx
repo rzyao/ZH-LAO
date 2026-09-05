@@ -3,21 +3,23 @@ import { render, screen, act, waitFor } from '@testing-library/react'
 import { AuthProvider, useAuth } from './AuthContext'
 import { assertUuid } from '@/api/contracts'
 import { writeAdminSession, readAdminSession } from '../session-store'
+import { getAccessToken, setAccessToken } from '../token-store'
 
-const { getCurrentOperatorMock, changeAdminPasswordMock } = vi.hoisted(() => ({
+const { loginAdminMock, getCurrentOperatorMock, changeAdminPasswordMock } = vi.hoisted(() => ({
+  loginAdminMock: vi.fn(),
   getCurrentOperatorMock: vi.fn(),
   changeAdminPasswordMock: vi.fn(),
 }))
 
 vi.mock('../api', () => ({
-  loginAdmin: vi.fn(),
+  loginAdmin: loginAdminMock,
   logoutAdmin: vi.fn(),
   getCurrentOperator: getCurrentOperatorMock,
   changeAdminPassword: changeAdminPasswordMock,
 }))
 
 function TestConsumer() {
-  const { status, operator, permissions, refreshPermissions, changePassword } = useAuth()
+  const { status, operator, permissions, login, refreshPermissions, changePassword } = useAuth()
   return (
     <div>
       <span data-testid="status">{status}</span>
@@ -25,6 +27,9 @@ function TestConsumer() {
       <span data-testid="permissions">{permissions.join(',')}</span>
       <button data-testid="btn-refresh" onClick={() => void refreshPermissions()}>
         Refresh
+      </button>
+      <button data-testid="btn-login" onClick={() => void login('admin', 'temporary-password')}>
+        Login
       </button>
       <button
         data-testid="btn-change-password"
@@ -39,6 +44,8 @@ function TestConsumer() {
 describe('AuthContext - session restoration, 403 recovery & change password', () => {
   beforeEach(() => {
     window.localStorage.clear()
+    setAccessToken(null)
+    loginAdminMock.mockReset()
     getCurrentOperatorMock.mockReset()
     changeAdminPasswordMock.mockReset()
   })
@@ -115,6 +122,29 @@ describe('AuthContext - session restoration, 403 recovery & change password', ()
 
     expect(changeAdminPasswordMock).toHaveBeenCalledWith('old', 'new')
     expect(screen.getByTestId('status')).toHaveTextContent('anonymous')
+    expect(readAdminSession()).toBeNull()
+  })
+
+  it('keeps a temporary-password session in memory and does not request operator data', async () => {
+    loginAdminMock.mockResolvedValue({
+      user_id: '00000000-0000-4000-8000-000000000001',
+      access_token: 'restricted-access',
+      refresh_token: 'restricted-refresh',
+      password_change_required: true,
+    })
+
+    render(
+      <AuthProvider>
+        <TestConsumer />
+      </AuthProvider>,
+    )
+
+    await act(async () => {
+      screen.getByTestId('btn-login').click()
+    })
+
+    expect(getCurrentOperatorMock).not.toHaveBeenCalled()
+    expect(getAccessToken()).toBe('restricted-access')
     expect(readAdminSession()).toBeNull()
   })
 })

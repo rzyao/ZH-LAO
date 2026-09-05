@@ -33,7 +33,7 @@ function verifyAdminPassword(password: string, encoded: string): boolean {
   }
 }
 
-type CredentialRow = { user_id: string; public_id: string; password_hash: string; status: string };
+type CredentialRow = { user_id: string; public_id: string; password_hash: string; status: string; password_change_required: boolean };
 
 export type AdminLoginResult = Readonly<{
   userPublicId: UserPublicId;
@@ -41,6 +41,7 @@ export type AdminLoginResult = Readonly<{
   refreshToken: string;
   expiresIn: number;
   sessionExpiresAt: Date;
+  passwordChangeRequired: boolean;
 }>;
 
 export type AdminLoginContext = Readonly<{ ipAddress?: string; requestId?: string }>;
@@ -74,7 +75,7 @@ export class AdminAuthenticationService {
 
     const result = await this.transactions.run(async executor => {
       const credentials = await executor.query<CredentialRow>(
-        `SELECT c.user_id, u.public_id, c.password_hash, u.status
+        `SELECT c.user_id, u.public_id, c.password_hash, c.password_change_required, u.status
          FROM identity.admin_credentials c
          JOIN identity.users u ON u.id = c.user_id
          WHERE c.username = $1`,
@@ -106,6 +107,7 @@ export class AdminAuthenticationService {
         refreshToken: prepared.rawRefreshToken,
         expiresIn: 900,
         sessionExpiresAt: expiresAt,
+        passwordChangeRequired: row.password_change_required === true,
       };
     });
 

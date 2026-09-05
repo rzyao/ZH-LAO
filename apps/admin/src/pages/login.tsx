@@ -33,8 +33,8 @@ export function LoginPage() {
     }
     setLoading(true)
     try {
-      await login(normalizedUsername, password)
-      await navigate({ to: '/' })
+      const result = await login(normalizedUsername, password)
+      await navigate({ to: result.passwordChangeRequired ? '/change-password' : '/' })
     } catch (cause) {
       // FR-004: map all authentication failures to one message so the client
       // never reveals whether the username or password was wrong.

@@ -232,13 +232,13 @@ const routeTree = rootRoute.addChildren([
     platformAnnouncementsRoute,
     platformRegionsRoute,
     platformMenusRoute,
-    changePasswordRoute,
-    accountChangePasswordRoute,
     designSystemRoute,
     notFoundRoute,
   ]),
   loginRoute,
   unauthorizedRoute,
+  changePasswordRoute,
+  accountChangePasswordRoute,
 ])
 
 export const router = createRouter({ routeTree, defaultPreload: 'intent', scrollRestoration: true })

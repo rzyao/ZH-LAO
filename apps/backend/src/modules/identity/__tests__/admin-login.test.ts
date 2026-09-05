@@ -87,7 +87,7 @@ function buildService(options: {
   const { repositories } = fakeRepositories();
   const transactions = fakeTransactionManager(() => {
     return {
-      rows: [{ user_id: '1', public_id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', password_hash: hashAdminPassword(options.password ?? 'correct-password'), status: options.status ?? 'active' }],
+      rows: [{ user_id: '1', public_id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', password_hash: hashAdminPassword(options.password ?? 'correct-password'), password_change_required: false, status: options.status ?? 'active' }],
       rowCount: 1,
     } as unknown as QueryResult;
   });
@@ -106,7 +106,7 @@ describe('AdminAuthenticationService.login (US-001 / FR-001..006 / FR-017)', () 
   it('logs in with correct credentials, creates an active session, and issues tokens', async () => {
     let createdSession = false;
     const { repositories } = fakeRepositories({ createSession: () => { createdSession = true; return Promise.resolve({} as SessionRecord); } });
-    const transactions = fakeTransactionManager(() => ({ rows: [{ user_id: '1', public_id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', password_hash: hashAdminPassword('correct-password'), status: 'active' }] }) as unknown as QueryResult);
+    const transactions = fakeTransactionManager(() => ({ rows: [{ user_id: '1', public_id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', password_hash: hashAdminPassword('correct-password'), password_change_required: true, status: 'active' }] }) as unknown as QueryResult);
     const service = new AdminAuthenticationService(transactions, repositories, new AccessTokenService('s', 'i', 'a'), new RefreshTokenService(), () => new Date());
     const result = await service.login('admin', 'correct-password', { ipAddress: '127.0.0.1' });
     expect(result.accessToken).toBeTruthy();
@@ -114,6 +114,7 @@ describe('AdminAuthenticationService.login (US-001 / FR-001..006 / FR-017)', () 
     expect(result.expiresIn).toBe(900);
     expect(createdSession).toBe(true);
     expect(result.userPublicId).toBe('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa');
+    expect(result.passwordChangeRequired).toBe(true);
   });
 
   it('returns the same INVALID_CREDENTIAL for wrong password and unknown username (FR-004 anti-enumeration)', async () => {
@@ -172,7 +173,7 @@ describe('AdminAuthenticationService.login (US-001 / FR-001..006 / FR-017)', () 
     let queried = '';
     const transactions = fakeTransactionManager((text) => {
       if (text.includes('admin_credentials')) queried = text;
-      return { rows: [{ user_id: '1', public_id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', password_hash: hashAdminPassword('p'), status: 'active' }] } as unknown as QueryResult;
+      return { rows: [{ user_id: '1', public_id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', password_hash: hashAdminPassword('p'), password_change_required: false, status: 'active' }] } as unknown as QueryResult;
     });
     const { repositories } = fakeRepositories();
     const service = new AdminAuthenticationService(transactions, repositories, new AccessTokenService('s', 'i', 'a'), new RefreshTokenService(), () => new Date());

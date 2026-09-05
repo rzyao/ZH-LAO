@@ -5,6 +5,7 @@ interface LoginResponse {
   user_id: string
   access_token: string
   refresh_token: string
+  password_change_required: boolean
 }
 
 interface CurrentOperatorResponse {
