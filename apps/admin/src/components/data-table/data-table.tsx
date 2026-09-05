@@ -9,6 +9,7 @@ import {
 } from '@tanstack/react-table'
 import type {
   ColumnDef,
+  OnChangeFn,
   PaginationState,
   RowSelectionState,
   SortingState,
@@ -30,6 +31,15 @@ import { DataTablePagination } from './data-table-pagination'
 import { DataTableViewOptions } from './data-table-view-options'
 import { cn } from '@/lib/utils'
 
+export interface DataTableServerOptions {
+  pagination: PaginationState
+  sorting: SortingState
+  rowCount: number
+  pageCount: number
+  onPaginationChange: OnChangeFn<PaginationState>
+  onSortingChange: OnChangeFn<SortingState>
+}
+
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
@@ -46,7 +56,14 @@ interface DataTableProps<TData, TValue> {
   onRowClick?: (row: TData) => void
   getRowId?: (row: TData) => string
   enableRowSelection?: boolean
+  rowSelection?: RowSelectionState
+  onRowSelectionChange?: OnChangeFn<RowSelectionState>
+  onSelectedRowIdsChange?: (contentIds: readonly string[]) => void
   initialSorting?: SortingState
+  columnVisibility?: VisibilityState
+  onColumnVisibilityChange?: OnChangeFn<VisibilityState>
+  initialColumnVisibility?: VisibilityState
+  server?: DataTableServerOptions
   className?: string
 }
 
@@ -73,31 +90,57 @@ export function DataTable<TData, TValue>({
   onRowClick,
   getRowId,
   enableRowSelection = false,
+  rowSelection: controlledRowSelection,
+  onRowSelectionChange,
+  onSelectedRowIdsChange,
   initialSorting,
+  columnVisibility: controlledColumnVisibility,
+  onColumnVisibilityChange,
+  initialColumnVisibility,
+  server,
   className,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>(initialSorting ?? [])
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
+  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>(initialColumnVisibility ?? {})
   const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({})
   const [pagination, setPagination] = React.useState<PaginationState>({
     pageIndex: 0,
     pageSize: 10,
   })
 
+  const currentRowSelection = controlledRowSelection ?? rowSelection
+  const handleRowSelectionChange = React.useCallback<OnChangeFn<RowSelectionState>>((updater) => {
+    const next = typeof updater === 'function' ? updater(currentRowSelection) : updater
+    ;(onRowSelectionChange ?? setRowSelection)(updater)
+    onSelectedRowIdsChange?.(
+      Object.entries(next)
+        .filter(([, selected]) => selected)
+        .map(([contentId]) => contentId),
+    )
+  }, [currentRowSelection, onRowSelectionChange, onSelectedRowIdsChange])
+
   const table = useReactTable({
     data,
     columns,
-    state: { sorting, columnVisibility, rowSelection, pagination },
-    onSortingChange: setSorting,
-    onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
-    onPaginationChange: setPagination,
+    state: {
+      sorting: server?.sorting ?? sorting,
+      columnVisibility: controlledColumnVisibility ?? columnVisibility,
+      rowSelection: currentRowSelection,
+      pagination: server?.pagination ?? pagination,
+    },
+    onSortingChange: server?.onSortingChange ?? setSorting,
+    onColumnVisibilityChange: onColumnVisibilityChange ?? setColumnVisibility,
+    onRowSelectionChange: handleRowSelectionChange,
+    onPaginationChange: server?.onPaginationChange ?? setPagination,
     getRowId,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     enableRowSelection,
+    manualPagination: Boolean(server),
+    manualSorting: Boolean(server),
+    ...(server ? { rowCount: server.rowCount, pageCount: server.pageCount } : {}),
   })
 
   const columnCount = table.getVisibleLeafColumns().length
@@ -110,14 +153,14 @@ export function DataTable<TData, TValue>({
         {showViewOptions ? <DataTableViewOptions table={table} /> : null}
       </div>
 
-      <div className="rounded-md border">
+      <div className="overflow-x-auto rounded-md border" data-testid="data-table-scroll-container">
         <Table>
           <TableCaption className="sr-only">数据列表</TableCaption>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id} scope="col" colSpan={header.colSpan}>
+                  <TableHead key={header.id} scope="col" colSpan={header.colSpan} className={stickyColumnClass(header.column.columnDef.meta, true)}>
                     {header.isPlaceholder
                       ? null
                       : flexRender(header.column.columnDef.header, header.getContext())}
@@ -147,7 +190,7 @@ export function DataTable<TData, TValue>({
                   className={onRowClick ? 'cursor-pointer' : undefined}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell key={cell.id} className={stickyColumnClass(cell.column.columnDef.meta, false)}>
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}
@@ -171,8 +214,23 @@ export function DataTable<TData, TValue>({
       </div>
 
       {showPagination ? (
-        <DataTablePagination table={table} pageSizeOptions={pageSizeOptions} />
+        <DataTablePagination
+          table={table}
+          pageSizeOptions={pageSizeOptions}
+          totalRows={server?.rowCount}
+          currentPageRowCount={server ? rows.length : undefined}
+        />
       ) : null}
     </div>
+  )
+}
+
+function stickyColumnClass(meta: unknown, header: boolean): string | undefined {
+  const sticky = (meta as { sticky?: 'left' | 'right' } | undefined)?.sticky
+  if (!sticky) return undefined
+  return cn(
+    'sticky z-20 focus-within:outline-none focus-within:ring-2 focus-within:ring-inset focus-within:ring-ring',
+    sticky === 'right' ? 'right-0' : 'left-0',
+    header ? 'z-30 bg-secondary' : 'bg-background',
   )
 }

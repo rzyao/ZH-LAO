@@ -1,6 +1,6 @@
 ---
 status: frozen
-last_updated: 2026-09-03
+last_updated: 2026-09-05
 ---
 
 # 业务状态码词汇表 (Business Status Code Vocabulary)
@@ -65,6 +65,7 @@ last_updated: 2026-09-03
 | `IDENTITY_REFERENTIAL_CONFLICT` | 身份引用冲突 | 409 | 展示冲突提示 |
 | `IDENTITY_REPOSITORY_FAILURE` | 身份存储失败 | 500 | 展示通用错误 |
 | `LEARNING_DIRECTION_IMMUTABLE` | 学习方向不可变更 | 409 | 展示「学习方向不可更改」 |
+| `PASSWORD_CHANGE_REQUIRED` | 后台临时密码登录后必须先完成自己的密码修改 | 403 | 导向后台修改密码页，禁止其余受保护操作 |
 
 ## OTP 域 (Identity OTP)
 
@@ -104,6 +105,7 @@ last_updated: 2026-09-03
 | --- | --- | --- | --- |
 | `OPERATOR_ACCESS_DENIED` | 认证主体无有效操作员映射 | 403 | 展示「无操作员权限」 |
 | `OPERATOR_DISABLED` | 操作员已被禁用 | 403 | 展示「操作员已被禁用」 |
+| `OPERATOR_PASSWORD_RESET_NOT_ALLOWED` | 密码重置目标不满足自身、状态、凭证或特权 guard | 409 | 刷新目标状态并提示不可重置 |
 | `OPERATOR_NOT_FOUND` | 操作员不存在 | 404 | 展示「操作员不存在」 |
 | `OPERATOR_ALREADY_EXISTS` | 身份主体已映射为操作员 | 409 | 展示「操作员已存在」 |
 | `ADMIN_USERNAME_CONFLICT` | 后台登录用户名已被使用 | 409 | 展示「用户名已被使用」 |
@@ -126,6 +128,8 @@ last_updated: 2026-09-03
 | `UNICODE_CONFLICT` | 内容唯一键冲突（如 Unicode 归一冲突） | 409 | 展示冲突提示 |
 | `ACTIVE_WORK_CONFLICT` | 存在进行中的工作项 | 409 | 展示「存在进行中任务」 |
 | `ILLEGAL_STATE_TRANSITION` | 内容发布/审核状态流转非法 | 400 | 展示「状态不允许」 |
+| `BATCH_SELECTION_CHANGED` | 批量任务提交时的筛选范围或数量已变化 | 409 | 刷新列表、清空旧选择并要求重新确认 |
+| `BATCH_TASK_NOT_RETRYABLE` | 批量任务当前状态或结果不允许重试 | 409 | 刷新任务状态并禁用重试 |
 
 > 注：Content 域当前以内联 `{ error: 'XXX', message }` 形式返回（未走 `AppError` 体系）。
 > ADR-023 实施时统一为 `AppError` 信封并归入本词汇表；上表为现状登记。
@@ -136,7 +140,7 @@ last_updated: 2026-09-03
 
 ## 代码 → 词汇表交叉校验
 
-截至 **2026-09-03**，`apps/backend/src` 中枚举到的 `AppError.code` 已全部登记于上表
+截至 **2026-09-05**，`apps/backend/src` 中枚举到的 `AppError.code` 已全部登记于上表
 （通用 + Identity/OTP + Platform + Operations），无未登记码。Content 域内联错误码 3 个已登记为
 「现状内联」待统一。
 

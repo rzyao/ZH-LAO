@@ -12,19 +12,25 @@ import {
 interface DataTablePaginationProps<TData> {
   table: Table<TData>
   pageSizeOptions?: number[]
+  totalRows?: number
+  currentPageRowCount?: number
 }
 
 /** Server-agnostic pagination control bound to a TanStack Table instance. */
 export function DataTablePagination<TData>({
   table,
   pageSizeOptions = [10, 20, 50, 100],
+  totalRows: controlledTotalRows,
+  currentPageRowCount,
 }: DataTablePaginationProps<TData>) {
-  const totalRows = table.getFilteredRowModel().rows.length
+  const totalRows = controlledTotalRows ?? table.getFilteredRowModel().rows.length
   const selectedRows = table.getFilteredSelectedRowModel().rows.length
   const { pageIndex, pageSize } = table.getState().pagination
   const pageCount = Math.max(table.getPageCount(), 1)
   const startRow = totalRows === 0 ? 0 : pageIndex * pageSize + 1
-  const endRow = Math.min((pageIndex + 1) * pageSize, totalRows)
+  const endRow = currentPageRowCount === undefined
+    ? Math.min((pageIndex + 1) * pageSize, totalRows)
+    : Math.min(startRow + currentPageRowCount - 1, totalRows)
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-2 px-1 py-1 text-xs text-muted-foreground">

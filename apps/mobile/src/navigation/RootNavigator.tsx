@@ -8,6 +8,9 @@ import { LanguageSettingScreen } from '../screens/settings/LanguageSettingScreen
 import { LanguageSelectScreen } from '../screens/settings/LanguageSelectScreen';
 import { LoginScreen } from '../screens/auth/LoginScreen';
 import { OtpScreen } from '../screens/auth/OtpScreen';
+import { CourseCatalogScreen } from '../features/courses/screens/CourseCatalogScreen';
+import { CourseStructureScreen } from '../features/courses/screens/CourseStructureScreen';
+import { LessonContentScreen } from '../features/courses/screens/LessonContentScreen';
 import { useTheme } from '../theme/ThemeProvider';
 
 import { linking } from './linking';
@@ -50,6 +53,9 @@ export function RootNavigator({ onReady }: RootNavigatorProps) {
           options={{ animation: 'slide_from_bottom' }}
         />
         <Stack.Screen name="ResourceDetail" component={ResourceDetailScreen} />
+        <Stack.Screen name="CourseCatalog" component={CourseCatalogScreen} />
+        <Stack.Screen name="CourseStructure" component={CourseStructureScreen} />
+        <Stack.Screen name="LessonContent" component={LessonContentScreen} />
         <Stack.Screen name="NotFound" component={NotFoundScreen} />
       </Stack.Navigator>
     </NavigationContainer>

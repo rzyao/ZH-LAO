@@ -1,0 +1,111 @@
+openapi: 3.1.0
+info:
+  title: Curriculum authoring and publishing (derived contract)
+  version: 0.1.0
+  description: >-
+    Derived implementation contract only. Canonical API authority is
+    docs/docs/developer/reference/contracts/content/CONTENT_API.md; this file
+    must not introduce public API truth.
+  x-authority-source: docs/docs/developer/reference/contracts/content/CONTENT_API.md
+paths:
+  /api/v1/content/courses:
+    get:
+      operationId: runtimeCourseCatalog
+      parameters:
+        - $ref: '#/components/parameters/LearningLanguage'
+      responses:
+        '200': { description: Published course catalog, content: { application/json: { schema: { $ref: '#/components/schemas/EnvelopeCourseCatalog' } } } }
+  /api/v1/content/courses/{courseId}:
+    get:
+      operationId: runtimeCourse
+      parameters: [ { $ref: '#/components/parameters/CourseId' } ]
+      responses:
+        '200': { description: Published course detail, content: { application/json: { schema: { $ref: '#/components/schemas/EnvelopeCourse' } } } }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/v1/content/courses/{courseId}/structure:
+    get:
+      operationId: runtimeCourseStructure
+      parameters: [ { $ref: '#/components/parameters/CourseId' } ]
+      responses:
+        '200': { description: Pinned published course structure, content: { application/json: { schema: { $ref: '#/components/schemas/EnvelopeCourseStructure' } } } }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/v1/content/lessons/{lessonId}/content:
+    get:
+      operationId: runtimeLessonContent
+      parameters: [ { $ref: '#/components/parameters/LessonId' } ]
+      responses:
+        '200': { description: Pinned published lesson content, content: { application/json: { schema: { $ref: '#/components/schemas/EnvelopeLessonContent' } } } }
+        '404': { $ref: '#/components/responses/NotFound' }
+  /api/v1/admin/content/courses:
+    get:
+      operationId: adminCourseList
+      security: [ { operatorBearer: [] } ]
+      responses: { '200': { description: Course list including revision state } }
+    post:
+      operationId: createCourse
+      security: [ { operatorBearer: [] } ]
+      parameters: [ { $ref: '#/components/parameters/IdempotencyKey' } ]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/CurriculumDocument' } } } }
+      responses: { '201': { description: Draft course and revision UUIDs } }
+  /api/v1/admin/content/courses/{courseId}/structure:
+    put:
+      operationId: replaceCourseStructure
+      security: [ { operatorBearer: [] } ]
+      parameters: [ { $ref: '#/components/parameters/CourseId' }, { $ref: '#/components/parameters/IdempotencyKey' } ]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/CurriculumDocument' } } } }
+      responses: { '200': { description: Updated working revision } }
+  /api/v1/admin/content/courses/{courseId}/revisions/{revisionId}/submit:
+    post:
+      operationId: submitCourseRevision
+      security: [ { operatorBearer: [] } ]
+      parameters: [ { $ref: '#/components/parameters/CourseId' }, { $ref: '#/components/parameters/RevisionId' } ]
+      responses: { '200': { description: Revision pending review } }
+  /api/v1/admin/content/courses/{courseId}/revisions/{revisionId}/review:
+    post:
+      operationId: reviewCourseRevision
+      security: [ { operatorBearer: [] } ]
+      parameters: [ { $ref: '#/components/parameters/CourseId' }, { $ref: '#/components/parameters/RevisionId' } ]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/ReviewRequest' } } } }
+      responses: { '200': { description: Reviewed revision } }
+  /api/v1/admin/content/courses/{courseId}/revisions/{revisionId}/publish:
+    post:
+      operationId: publishCourseRevision
+      security: [ { operatorBearer: [] } ]
+      parameters: [ { $ref: '#/components/parameters/CourseId' }, { $ref: '#/components/parameters/RevisionId' }, { $ref: '#/components/parameters/IdempotencyKey' } ]
+      responses: { '200': { description: Atomically published revision } }
+  /api/v1/admin/content/lessons:
+    post:
+      operationId: createLesson
+      security: [ { operatorBearer: [] } ]
+      parameters: [ { $ref: '#/components/parameters/IdempotencyKey' } ]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: '#/components/schemas/CurriculumDocument' } } } }
+      responses: { '201': { description: Draft lesson and revision UUIDs } }
+components:
+  securitySchemes:
+    operatorBearer: { type: http, scheme: bearer }
+  parameters:
+    CourseId: { name: courseId, in: path, required: true, schema: { type: string, format: uuid } }
+    LessonId: { name: lessonId, in: path, required: true, schema: { type: string, format: uuid } }
+    RevisionId: { name: revisionId, in: path, required: true, schema: { type: string, format: uuid } }
+    LearningLanguage: { name: learningLanguage, in: query, schema: { type: string, enum: [zh, lo] } }
+    IdempotencyKey: { name: Idempotency-Key, in: header, required: true, schema: { type: string, minLength: 1, maxLength: 128 } }
+  responses:
+    NotFound: { description: Unified NOT_FOUND envelope }
+  schemas:
+    CurriculumDocument:
+      type: object
+      description: Authoring aggregate document; detailed validation remains the canonical Content API contract.
+      required: [expectedLockVersion]
+      properties:
+        expectedLockVersion: { type: integer, minimum: 0 }
+        expectedUpdatedAt: { type: string, format: date-time }
+    ReviewRequest:
+      type: object
+      required: [action]
+      properties:
+        action: { type: string, enum: [approve, reject] }
+        remark: { type: string }
+    EnvelopeCourseCatalog: { type: object }
+    EnvelopeCourse: { type: object }
+    EnvelopeCourseStructure: { type: object }
+    EnvelopeLessonContent: { type: object }

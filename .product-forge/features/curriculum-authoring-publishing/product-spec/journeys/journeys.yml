@@ -1,0 +1,58 @@
+schema_version: 1
+feature: "curriculum-authoring-publishing"
+journeys:
+  - id: "JRN-001"
+    title: "Create a course working revision"
+    actor: "authorized course operator"
+    stories: ["US-001"]
+    entry: "Admin Content → Courses"
+    success: "Draft course and working revision are visible to authorized staff"
+    preconditions: ["Operator has content.curriculum.write"]
+    steps:
+      - {id: "STEP-001", action: "Open course list and choose create", ui: "CMP-DataTable, CMP-Button", expect: "Course form opens", contracts: ["API-adminCourseList", "API-createCourse"]}
+      - {id: "STEP-002", action: "Enter language and basic information then save", ui: "CMP-EditPageLayout, CMP-Button", expect: "Course UUID and draft revision are returned", contracts: ["API-createCourse"]}
+    edges:
+      - {id: "EDGE-001", of: "STEP-002", case: "Invalid required field", given: "Required data is missing", when: "Operator saves", then: "Typed validation error is shown and no draft is created", priority: "P1"}
+    e2e: {runner: "playwright-cli", smoke: true}
+  - id: "JRN-002"
+    title: "Compose a course structure using published references"
+    actor: "authorized course operator"
+    stories: ["US-002"]
+    entry: "Course working revision editor"
+    success: "Ordered aggregate snapshot is saved as the working revision"
+    preconditions: ["Course has one editable working revision"]
+    steps:
+      - {id: "STEP-003", action: "Add and reorder Units, Lessons, Sections and Items", ui: "CMP-EditPageLayout, CMP-Button", expect: "Ordered structure is represented in the editor", contracts: ["API-replaceCourseStructure"]}
+      - {id: "STEP-004", action: "Select published content revisions and save", ui: "CMP-Button", expect: "Server validates every reference and updates the working snapshot", contracts: ["API-replaceCourseStructure"]}
+    edges:
+      - {id: "EDGE-002", of: "STEP-004", case: "Draft reference selected", given: "An Item points to a non-published revision", when: "Operator saves", then: "Save fails with the item position and no partial reorder", priority: "P0"}
+      - {id: "EDGE-003", of: "STEP-004", case: "Stale editor", given: "The working revision lock version changed", when: "Operator saves", then: "CONTENT_CONFLICT is shown and local changes are preserved for resolution", priority: "P1"}
+    e2e: {runner: "playwright-cli", smoke: true}
+  - id: "JRN-003"
+    title: "Review and publish a course revision"
+    actor: "authorized reviewer and publisher"
+    stories: ["US-003"]
+    entry: "Course revision history"
+    success: "Approved revision becomes the sole current published view"
+    preconditions: ["Reviewer has content.curriculum.review; publisher has content.curriculum.publish"]
+    steps:
+      - {id: "STEP-005", action: "Submit draft for review", ui: "CMP-Button, CMP-StatusBadge", expect: "Revision becomes pending_review", contracts: ["API-submitCourseRevision"]}
+      - {id: "STEP-006", action: "Approve revision", ui: "CMP-Button, CMP-StatusBadge", expect: "Revision becomes approved", contracts: ["API-reviewCourseRevision"]}
+      - {id: "STEP-007", action: "Confirm publication", ui: "CMP-ConfirmDialog", expect: "Atomic publish switches current pointer and records audit", contracts: ["API-publishCourseRevision"]}
+    edges:
+      - {id: "EDGE-004", of: "STEP-006", case: "Reject revision", given: "Reviewer finds a problem", when: "Reviewer rejects with remark", then: "Revision is rejected and can only return through re-edit", priority: "P1"}
+      - {id: "EDGE-005", of: "STEP-007", case: "Publish validation fails", given: "A referenced revision is no longer public", when: "Publisher confirms", then: "No pointer/status/audit partial update occurs", priority: "P0"}
+    e2e: {runner: "playwright-cli", smoke: true}
+  - id: "JRN-004"
+    title: "Read a published course on mobile"
+    actor: "learner"
+    stories: ["US-004"]
+    entry: "Mobile learning catalog"
+    success: "Learner sees only the current published course, structure and lesson snapshot"
+    preconditions: ["Course and referenced Lesson are published and visible"]
+    steps:
+      - {id: "STEP-008", action: "Open course catalog and select a course", ui: "CMP-EmptyState", expect: "Published course summary is displayed", contracts: ["API-runtimeCourseCatalog", "API-runtimeCourse"]}
+      - {id: "STEP-009", action: "Open course structure then a Lesson", ui: "CMP-Button", expect: "Ordered published snapshot is displayed without internal IDs", contracts: ["API-runtimeCourseStructure", "API-runtimeLessonContent"]}
+    edges:
+      - {id: "EDGE-006", of: "STEP-008", case: "Course is draft or archived", given: "Course lacks a legal published pointer or is archived", when: "Runtime resolves it", then: "It is omitted or returns the safe not-public outcome", priority: "P0"}
+    e2e: {runner: "playwright-cli", smoke: true}

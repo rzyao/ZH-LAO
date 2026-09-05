@@ -1,0 +1,12 @@
+# Release-readiness registry; this file does not create or enable a production flag.
+flags:
+  - key: "admin_lo_letter_batch_operations"
+    feature: "admin-data-table-enhancement"
+    default: false
+    owner: "Content"
+    rollout_plan: "internal-first"
+    cleanup_after: "2026-12-05"
+    kill_switch: true
+    experiment: false
+    status: "manual_registration_required"
+    notes: "The repository has Platform feature-flag management, but this feature is not yet wired to a flag. Registering the key alone does not gate traffic; Content must connect task admission and the admin affordance before release."

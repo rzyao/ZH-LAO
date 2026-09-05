@@ -3,6 +3,7 @@ import {
   createRootRoute,
   createRoute,
   createRouter,
+  defaultStringifySearch,
   lazyRouteComponent,
   Outlet,
   useRouterState,
@@ -18,6 +19,7 @@ import { NotFoundPage } from '@/pages/not-found'
 import { LoginPage } from '@/pages/login'
 import { UnauthorizedPage } from '@/pages/unauthorized'
 import { AuthGuard } from '@/auth/guards/AuthGuard'
+import { LaoLetterSearchSchema } from '@/features/content/structured/contracts'
 
 /* ---------- Lazy page components (route-level code splitting) ---------- */
 
@@ -38,8 +40,23 @@ const AlphabetPage = lazyRouteComponent(() =>
 const ContentCategoryPage = lazyRouteComponent(() =>
   import('@/features/content/pages/category').then((module) => ({ default: module.ContentCategoryPage })),
 )
+const LaoLetterPage = lazyRouteComponent(() =>
+  import('@/features/content/structured/lo-letter-page').then((module) => ({ default: module.LaoLetterPage })),
+)
 const ContentReviewPage = lazyRouteComponent(() =>
   import('@/features/content/pages/category').then((module) => ({ default: module.ContentReviewPage })),
+)
+const CourseListPage = lazyRouteComponent(() =>
+  import('@/features/content/courses/pages/course-list').then((module) => ({ default: module.CourseListPage })),
+)
+const CourseEditorPage = lazyRouteComponent(() =>
+  import('@/features/content/courses/pages/course-editor').then((module) => ({ default: module.CourseEditorPage })),
+)
+const CourseDetailPage = lazyRouteComponent(() =>
+  import('@/features/content/courses/pages/course-detail').then((module) => ({ default: module.CourseDetailPage })),
+)
+const LessonDetailPage = lazyRouteComponent(() =>
+  import('@/features/content/courses/pages/lesson-detail').then((module) => ({ default: module.LessonDetailPage })),
 )
 
 const PlatformLandingPage = lazyRouteComponent(() =>
@@ -140,9 +157,25 @@ const contentCategoryRoutes = [
 const generatedContentRoutes = contentCategoryRoutes.map(([path, contentType]) =>
   createRoute({ getParentRoute: () => shellRoute, path, component: () => <ContentCategoryPage contentType={contentType} /> }),
 )
-const contentLaoLettersRoute = createRoute({ getParentRoute: () => shellRoute, path: '/content/lo/letters', component: () => <ContentCategoryPage contentType="lo_letter" /> })
+function ContentLaoLettersRoute() {
+  const search = LaoLetterSearchSchema.parse(useRouterState({
+    select: (state) => state.location.search,
+  }))
+  return <LaoLetterPage search={search} />
+}
+
+const contentLaoLettersRoute = createRoute({
+  getParentRoute: () => shellRoute,
+  path: '/content/lo/letters',
+  validateSearch: zodSearch(LaoLetterSearchSchema),
+  component: ContentLaoLettersRoute,
+})
 const contentZhReviewRoute = createRoute({ getParentRoute: () => shellRoute, path: '/content/zh/review', component: () => <ContentReviewPage language="中文" /> })
 const contentLoReviewRoute = createRoute({ getParentRoute: () => shellRoute, path: '/content/lo/review', component: () => <ContentReviewPage language="老挝语" /> })
+const contentCoursesRoute = createRoute({ getParentRoute: () => shellRoute, path: '/content/courses', component: CourseListPage })
+const contentCourseNewRoute = createRoute({ getParentRoute: () => shellRoute, path: '/content/courses/new', component: CourseEditorPage })
+const contentCourseDetailRoute = createRoute({ getParentRoute: () => shellRoute, path: '/content/courses/$courseId', component: CourseDetailPage })
+const contentLessonDetailRoute = createRoute({ getParentRoute: () => shellRoute, path: '/content/lessons/$lessonId', component: LessonDetailPage })
 
 const learningRoute = makeDomainRoute('/learning', 'learning', '学习系统', '用户学习状态（Learning Domain）')
 const audioRoute = makeDomainRoute('/audio', 'audio', '音频生产', '音频生产流程（Audio Production Domain）')
@@ -212,6 +245,10 @@ const routeTree = rootRoute.addChildren([
     contentLaoLettersRoute,
     contentZhReviewRoute,
     contentLoReviewRoute,
+    contentCoursesRoute,
+    contentCourseNewRoute,
+    contentCourseDetailRoute,
+    contentLessonDetailRoute,
     ...generatedContentRoutes,
     learningRoute,
     audioRoute,
@@ -241,6 +278,30 @@ const routeTree = rootRoute.addChildren([
   accountChangePasswordRoute,
 ])
 
-export const router = createRouter({ routeTree, defaultPreload: 'intent', scrollRestoration: true })
+const laoLetterCsvSearchKeys = ['letter_type', 'letter_class', 'content_status', 'revision_status'] as const
+const laoLetterScalarDefaults = { sort: 'sort_order', order: 'asc', page: 1, page_size: 50 } as const
+
+function stringifyAdminSearch(search: Record<string, unknown>) {
+  const serialized = { ...search }
+  const current = typeof window === 'undefined' ? new URLSearchParams() : new URLSearchParams(window.location.search)
+  const isLaoLetterSearch = laoLetterCsvSearchKeys.some((key) => Array.isArray(serialized[key]))
+  for (const key of laoLetterCsvSearchKeys) {
+    const value = serialized[key]
+    if (Array.isArray(value)) serialized[key] = value.length > 0 ? value.join(',') : undefined
+  }
+  if (isLaoLetterSearch) {
+    for (const [key, defaultValue] of Object.entries(laoLetterScalarDefaults)) {
+      if (serialized[key] === defaultValue && !current.has(key)) serialized[key] = undefined
+    }
+  }
+  return defaultStringifySearch(serialized)
+}
+
+export const router = createRouter({
+  routeTree,
+  defaultPreload: 'intent',
+  scrollRestoration: true,
+  stringifySearch: stringifyAdminSearch,
+})
 
 export { designSystemSearchSchema, routeTree }

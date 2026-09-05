@@ -1,0 +1,230 @@
+schema_version: 3
+feature: "curriculum-authoring-publishing"
+created_at: "2026-09-05"
+last_updated: "2026-09-05T08:51:34+08:00"
+v2_native: true
+feature_mode: "standard"
+flow_mode: "gated"
+speckit_mode: "classic"
+scope:
+  primary: "课程编排与发布的最小可交付垂直切片"
+  paths:
+    - "backend"
+    - "admin"
+    - "mobile"
+    - "database"
+  cross_workspace: true
+phases:
+  problem_discovery:
+    status: "not_applicable"
+    skip_reason: "已有 Content 课程领域权威，用户明确确认问题已被验证；本 Feature 仅从 Phase 1 Research 开始。"
+  research:
+    status: "completed"
+    digest_path: "research/digest.md"
+  product_spec:
+    status: "completed"
+    digest_path: "product-spec/digest.md"
+  design_system_harvest:
+    status: "completed"
+    digest_path: "design-system/manifest.md"
+  revalidation:
+    status: "approved"
+  bridge:
+    status: "completed"
+  i18n_harvest: { status: "pending" }
+  plan:
+    status: "completed"
+    digest_path: "plan/digest.md"
+  tasks:
+    status: "completed"
+    digest_path: "tasks/digest.md"
+  migration_plan: { status: "pending" }
+  pre_impl_review: { status: "pending" }
+  implement: { status: "completed" }
+  code_review: { status: "completed" }
+  verify:
+    status: "completed"
+    digest_path: "verify/digest.md"
+  test_plan: { status: "pending" }
+  test_run: { status: "pending" }
+  release_readiness:
+    status: "completed"
+    digest_path: "release-readiness.md"
+  monitoring_setup: { status: "pending" }
+  experiment_design: { status: "pending" }
+  spec_merge: { status: "pending" }
+  retrospective: { status: "pending" }
+  api_docs: { status: "not_applicable" }
+  security_check: { status: "not_applicable" }
+  tracking_plan: { status: "not_applicable" }
+task_log:
+  - task: "T001"
+    status: "completed"
+    evidence:
+      - "database:test"
+      - "backend:manifest-check"
+  - task: "TC002"
+    status: "completed"
+    evidence:
+      - "backend:curriculum-revision.repository.integration.test.ts"
+  - task: "T003"
+    status: "completed"
+    evidence:
+      - "backend:typecheck"
+  - task: "TC004"
+    status: "completed"
+    evidence:
+      - "backend:curriculum-revision.state.test.ts"
+      - "backend:curriculum-revision.repository.integration.test.ts"
+  - task: "T005"
+    status: "completed"
+    evidence:
+      - "backend:curriculum-admin-routes.test.ts"
+      - "backend:typecheck"
+  - task: "T007"
+    status: "completed"
+    evidence:
+      - "backend:curriculum-admin-routes.test.ts"
+      - "backend:curriculum-revision.repository.integration.test.ts"
+  - task: "TC012"
+    status: "completed"
+    evidence:
+      - "mobile:__tests__/course-api.test.ts"
+      - "mobile:__tests__/course-screens.test.tsx"
+  - task: "T013"
+    status: "completed"
+    evidence:
+      - "mobile:typecheck"
+  - task: "T011"
+    status: "completed"
+    evidence:
+      - "admin:course component tests"
+      - "admin:typecheck"
+      - "admin:build"
+  - task: "TC008"
+    status: "completed"
+    evidence:
+      - "backend:curriculum-admin-routes.test.ts"
+      - "backend:http-routes.test.ts"
+  - task: "T009"
+    status: "completed"
+    evidence:
+      - "backend:typecheck"
+      - "backend:curriculum-admin-routes.test.ts"
+  - task: "TC006"
+    status: "completed"
+    evidence:
+      - "backend:curriculum-revision.repository.integration.test.ts"
+      - "database:temporary migrated PostgreSQL"
+  - task: "T015"
+    status: "completed"
+    evidence:
+      - "database:validate"
+      - "backend:scoped curriculum integration"
+      - "admin:build and e2e"
+      - "mobile:typecheck and test"
+  - task: "TC010"
+    status: "completed"
+    evidence:
+      - "admin:course-list.test.tsx"
+      - "admin:course-editor.test.tsx"
+      - "admin:revision-history.test.tsx"
+      - "backend:invalid reference integration coverage"
+  - task: "T014"
+    status: "completed"
+    evidence:
+      - "admin:curriculum-authoring-publishing.spec.ts"
+      - "backend:curriculum-revision.repository.integration.test.ts"
+      - "mobile:course-screens.test.tsx"
+gates:
+  - phase: "release_readiness"
+    decision: "revised"
+    timestamp: "2026-09-05T08:51:34+08:00"
+    notes: "用户选择修订：先补齐上线前的目标环境迁移、RBAC、监控、供应链与运行手册证据，再重跑发布就绪检查。"
+    action_items:
+      must: 5
+      must_completed: 0
+      should: 3
+      nice_to_have: 0
+  - phase: "verify"
+    decision: "approved_with_conditions"
+    timestamp: "2026-09-05T08:51:34+08:00"
+    notes: "用户批准验证结论并进入发布就绪检查；保留缺少内置追溯校验脚本及两个非本 Feature 的 Identity 全量测试失败警告。"
+    conditions:
+      - "发布门禁中继续记录验证警告，不能将其表述为全仓库验证通过。"
+    findings:
+      critical: 0
+      high: 0
+      medium: 0
+      low: 2
+  - phase: "code_review"
+    decision: "approved_with_conditions"
+    timestamp: "2026-09-05T00:00:00+08:00"
+    notes: "用户批准代码审查；接受 F-004 作为后续非阻断的课程工作台组件拆分建议。"
+    reviewed_by_model: null
+    cross_model_findings: 0
+    findings:
+      critical: 0
+      high: 0
+      medium: 1
+      low: 0
+      fixed: 0
+      acknowledged: 1
+  - phase: "research"
+    decision: "approved"
+    timestamp: "2026-09-05T00:00:00+08:00"
+    notes: "用户批准 Research；已确认 ADP-001/002 必须由相应 authority owner 接受。gated 流程不自动进入 Product Spec。"
+    conditions:
+      - "在启动 Product Spec 前，接受 ADP-001：Course/Lesson published pointer 或等价 current-view 模型。"
+      - "在启动 Product Spec 前，接受 ADP-002：LessonItem 的 published revision 固定位置与历史读取规则。"
+    sync_result: "clean"
+    rolled_back_to: null
+    reviewed_sha: "79feb6f7b82221da52e8f6bc1cd5f67d4694b415"
+    risk: "high"
+    reviewed_by_model: null
+    cross_model_findings: 0
+    skip_reason: null
+sync_runs:
+  last_run: "2026-09-05T08:51:34+08:00"
+  total_runs: 4
+  last_drift_count: 0
+  last_critical_count: 0
+  last_verdict: "CONSISTENT"
+change_requests: []
+research_dimensions:
+  competitors: "not_applicable"
+  ux_patterns: "not_applicable"
+  codebase: "completed"
+  tech_stack: "not_applicable"
+  metrics_roi: "not_applicable"
+input_richness_score: 8
+dependencies:
+  depends_on:
+    - "chinese-lao-content-hierarchy"
+  depended_on_by: []
+role_approvals:
+  solo_mode: true
+authority_decision_submission:
+  status: "accepted"
+  submitted_at: "2026-09-05T00:00:00+08:00"
+  package_path: "authority-decision-package.md"
+  required_decisions:
+    - "ADP-001"
+    - "ADP-002"
+  accepted_decisions:
+    - "ADP-001"
+    - "ADP-002"
+    - "ADP-003"
+    - "ADP-004"
+  pending_decisions: []
+release_readiness:
+  flag_registry_path: "flags/registry.yml"
+  monitoring_paths:
+    dashboard: "monitoring/dashboard.json"
+    alerts: "monitoring/alerts.yml"
+    slo: "monitoring/slo.md"
+  supply_chain_paths:
+    sbom: null
+    sca: null
+    licenses: null
+    record: "supply-chain/README.md"

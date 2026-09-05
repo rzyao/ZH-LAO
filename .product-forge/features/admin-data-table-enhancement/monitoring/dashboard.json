@@ -1,0 +1,6 @@
+{
+  "status": "provider_unavailable",
+  "feature": "admin-data-table-enhancement",
+  "provider": "none",
+  "note": "No telemetry dashboard provider is configured. Apply monitoring/alerts.yml and monitoring/slo.md through the production observability platform before broad rollout."
+}

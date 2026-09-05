@@ -262,14 +262,20 @@ GET   /api/v1/admin/content/courses/{courseId}
 POST  /api/v1/admin/content/courses
 PATCH /api/v1/admin/content/courses/{courseId}
 PUT   /api/v1/admin/content/courses/{courseId}/structure
-POST  /api/v1/admin/content/courses/{courseId}/publish
+POST  /api/v1/admin/content/courses/{courseId}/revisions/{revisionId}/submit
+POST  /api/v1/admin/content/courses/{courseId}/revisions/{revisionId}/review
+POST  /api/v1/admin/content/courses/{courseId}/revisions/{revisionId}/re-edit
+POST  /api/v1/admin/content/courses/{courseId}/revisions/{revisionId}/publish
 POST  /api/v1/admin/content/courses/{courseId}/archive
 
 GET   /api/v1/admin/content/lessons/{lessonId}
 POST  /api/v1/admin/content/lessons
 PATCH /api/v1/admin/content/lessons/{lessonId}
 PUT   /api/v1/admin/content/lessons/{lessonId}/structure
-POST  /api/v1/admin/content/lessons/{lessonId}/publish
+POST  /api/v1/admin/content/lessons/{lessonId}/revisions/{revisionId}/submit
+POST  /api/v1/admin/content/lessons/{lessonId}/revisions/{revisionId}/review
+POST  /api/v1/admin/content/lessons/{lessonId}/revisions/{revisionId}/re-edit
+POST  /api/v1/admin/content/lessons/{lessonId}/revisions/{revisionId}/publish
 POST  /api/v1/admin/content/lessons/{lessonId}/archive
 ```
 
@@ -280,7 +286,11 @@ No endpoints：
 /api/.../lesson-items/{bigint}
 ```
 
-Structure replace 使用 aggregate document，必须携带 `expectedUpdatedAt`。Server transaction：lock root -> compare -> validate complete structure -> reorder/update -> touch root updated_at -> create/update draft revision。
+Create / structure replace 使用 aggregate document；修改 working revision 必须携带 `expectedLockVersion`，根 aggregate 还必须携带 `expectedUpdatedAt`。Server transaction：lock root -> compare tokens -> validate complete structure and every referenced published revision -> reorder/update -> touch root -> create/update draft revision snapshot。`review` body 使用 `{ action: 'approve' | 'reject', remark?: string }`，reject 的非空 remark 是必填守卫。
+
+Course/Lesson revision 的 `submit`、`review`、`publish` 请求必须携带非空且最长 128 字符的 `Idempotency-Key` header。服务端以 operator UUID、aggregate 类型/UUID、命令、key 及规范化请求 fingerprint 建立 Content-owned 持久化收据：同一组合且 fingerprint 相同重放原成功响应；key 相同而 fingerprint 不同返回现有统一业务码 `CONFLICT`。收据、生命周期变更、发布 pointer（如适用）与成功 Operations 审计在一个本地事务中提交或回滚。该 header 不适用于 create 或 structure replace，除非其上游权威另行扩展。
+
+Course/Lesson current runtime view 只从 aggregate 的合法 `publishedRevisionId` 解析；公开结构 DTO 返回 UUID 与 `revisionId`，不返回 Unit/LessonItem 内部行 ID。Course revision snapshot 固定 Unit / Lesson revision，Lesson revision snapshot 固定 Section / Item 与被引用 Content/Exercise revision；不得通过当前主表或“最新 published revision”重算旧 snapshot。
 
 ## 6. Admin Practice API
 

@@ -1,5 +1,6 @@
 import * as React from 'react'
 import type { ColumnDef } from '@tanstack/react-table'
+import { useNavigate } from '@tanstack/react-router'
 import { Plus, RotateCcw } from 'lucide-react'
 import { useAuth } from '@/auth/context/AuthContext'
 import { Button } from '@/components/ui/button'
@@ -11,16 +12,20 @@ import { ListPageLayout } from '@/components/layout/list-page-layout'
 import { StatusBadge, type StatusTone } from '@/components/common/status-badge'
 import { ConfirmDialog } from '@/components/feedback/confirm-dialog'
 import { useToastApi } from '@/components/feedback/use-toast'
-import { CONTENT_CATEGORY_CONFIGS, type ContentCategoryConfig, type ManagedStructuredContent, type StructuredContentType } from '../structured/contracts'
+import { CONTENT_CATEGORY_CONFIGS, normalizeLaoLetterSearch, type ContentCategoryConfig, type LaoLetterSearch, type ManagedStructuredContent, type StructuredContentType } from '../structured/contracts'
 import { useCreateStructuredContent, useDeriveStructuredContent, usePublishStructuredContent, useReEditStructuredContent, useReviewStructuredContent, useStructuredContentHistory, useStructuredContentList, useStructuredContentReferences, useSubmitStructuredContent, useUpdateStructuredContent } from '../structured/queries'
 
-export interface ContentCategoryPageProps { contentType: StructuredContentType }
+export interface ContentCategoryPageProps {
+  contentType: StructuredContentType
+  laoLetterSearch?: LaoLetterSearch
+}
 
 const statusLabels: Record<string, string> = { draft: '草稿', pending_review: '待审核', approved: '已批准', published: '已发布', rejected: '已驳回', superseded: '历史版本' }
 const statusTones: Record<string, StatusTone> = { draft: 'muted', pending_review: 'warning', approved: 'info', published: 'success', rejected: 'danger', superseded: 'muted' }
 
-export function ContentCategoryPage({ contentType }: ContentCategoryPageProps) {
+export function ContentCategoryPage({ contentType, laoLetterSearch }: ContentCategoryPageProps) {
   const config = CONTENT_CATEGORY_CONFIGS[contentType]
+  const navigate = useNavigate()
   const query = useStructuredContentList(config)
   const { permissions } = useAuth()
   const canWrite = permissions.includes(`content.${config.permissionResource}.write`)
@@ -40,8 +45,25 @@ export function ContentCategoryPage({ contentType }: ContentCategoryPageProps) {
   const [publishing, setPublishing] = React.useState<ManagedStructuredContent | null>(null)
   const [rejectRemark, setRejectRemark] = React.useState('')
   const [inspecting, setInspecting] = React.useState<ManagedStructuredContent | null>(null)
-  const [search, setSearch] = React.useState('')
+  const [search, setSearch] = React.useState(laoLetterSearch?.q ?? '')
   const [statusFilter, setStatusFilter] = React.useState('all')
+  const isLaoLetterPage = contentType === 'lo_letter' && laoLetterSearch !== undefined
+  const updateLaoLetterSearch = React.useCallback((patch: Partial<LaoLetterSearch>) => {
+    if (!laoLetterSearch) return
+    const next = normalizeLaoLetterSearch({ ...laoLetterSearch, ...patch, page: 1 })
+    void navigate({ to: '/content/lo/letters', search: next, replace: true })
+  }, [laoLetterSearch, navigate])
+
+  React.useEffect(() => {
+    if (!isLaoLetterPage) return
+    setSearch(laoLetterSearch?.q ?? '')
+  }, [isLaoLetterPage, laoLetterSearch?.q])
+
+  React.useEffect(() => {
+    if (!isLaoLetterPage || search === (laoLetterSearch?.q ?? '')) return
+    const timer = window.setTimeout(() => updateLaoLetterSearch({ q: search }), 300)
+    return () => window.clearTimeout(timer)
+  }, [isLaoLetterPage, laoLetterSearch, search, updateLaoLetterSearch])
   const fail = React.useCallback((error: unknown) => toast.error({ title: `${config.categoryLabel}操作失败`, description: error instanceof Error ? error.message : '请稍后重试' }), [config.categoryLabel, toast])
 
   const columns = React.useMemo<ColumnDef<ManagedStructuredContent>[]>(() => [
@@ -68,13 +90,52 @@ export function ContentCategoryPage({ contentType }: ContentCategoryPageProps) {
   return <ListPageLayout title={`${config.categoryLabel}管理`} description={config.description} breadcrumb={[{ label: '内容管理', href: '/content' }, { label: `${config.languageLabel}内容` }, { label: `${config.categoryLabel}管理` }]} actions={<Button disabled={!canWrite} onClick={() => { setEditing(null); setEditorOpen(true) }}><Plus aria-hidden />新建{config.categoryLabel}</Button>}>
     <div className="p-4" data-testid={config.testId}>
       <p className="mb-3 text-xs text-muted-foreground">权限按当前类别独立校验；保存草稿不会影响已发布版本。</p>
-      <DataTable columns={columns} data={filteredItems} loading={query.isLoading} error={query.error} onRetry={() => query.refetch()} getRowId={(row) => row.id} toolbar={<div className="flex flex-wrap gap-2"><Input aria-label={`搜索${config.categoryLabel}`} className="max-w-xs" value={search} onChange={(event) => setSearch(event.target.value)} placeholder={`搜索${config.categoryLabel}`} /><select aria-label="筛选版本状态" className="h-9 rounded-md border bg-background px-3 text-sm" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}><option value="all">全部状态</option><option value="draft">草稿</option><option value="pending_review">待审核</option><option value="approved">已批准</option><option value="published">已发布</option><option value="rejected">已驳回</option></select></div>} emptyTitle={`暂无${config.categoryLabel}内容`} emptyDescription={`点击“新建${config.categoryLabel}”创建第一份草稿。`} />
+      <DataTable columns={columns} data={filteredItems} loading={query.isLoading} error={query.error} onRetry={() => query.refetch()} getRowId={(row) => row.id} showPagination={!isLaoLetterPage} toolbar={<div className="flex flex-wrap gap-2"><Input aria-label={`搜索${config.categoryLabel}`} className="max-w-xs" value={search} onChange={(event) => setSearch(event.target.value)} placeholder={`搜索${config.categoryLabel}`} />{isLaoLetterPage ? <LaoLetterQueryControls search={laoLetterSearch} onChange={updateLaoLetterSearch} /> : <select aria-label="筛选版本状态" className="h-9 rounded-md border bg-background px-3 text-sm" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)}><option value="all">全部状态</option><option value="draft">草稿</option><option value="pending_review">待审核</option><option value="approved">已批准</option><option value="published">已发布</option><option value="rejected">已驳回</option></select>}</div>} emptyTitle={`暂无${config.categoryLabel}内容`} emptyDescription={`点击“新建${config.categoryLabel}”创建第一份草稿。`} />
     </div>
     <ContentEditorDialog config={config} open={editorOpen} row={editing} pending={createMutation.isPending || updateMutation.isPending} onOpenChange={setEditorOpen} onSubmit={submitEditor} />
     <VersionReferenceDialog config={config} row={inspecting} onOpenChange={(open) => !open && setInspecting(null)} />
     <Dialog open={Boolean(rejecting)} onOpenChange={(open) => !open && setRejecting(null)}><DialogContent><DialogHeader><DialogTitle>驳回此版本</DialogTitle><DialogDescription>请说明需要修改的内容，原因将写入版本记录。</DialogDescription></DialogHeader><div className="space-y-2"><Label htmlFor="content-reject-remark">驳回原因</Label><Input id="content-reject-remark" value={rejectRemark} onChange={(event) => setRejectRemark(event.target.value)} /></div><DialogFooter><Button variant="outline" onClick={() => setRejecting(null)}>取消</Button><Button variant="destructive" disabled={!rejectRemark.trim() || reviewMutation.isPending} onClick={() => rejecting?.revisionId && reviewMutation.mutate({ contentId: rejecting.id, revisionId: rejecting.revisionId, action: 'reject', remark: rejectRemark }, { onSuccess: () => { setRejecting(null); toast.success({ title: '版本已驳回' }) }, onError: fail })}>确认驳回</Button></DialogFooter></DialogContent></Dialog>
     <ConfirmDialog open={Boolean(publishing)} onOpenChange={(open) => !open && setPublishing(null)} title={`确认发布${publishing ? `“${displayValue(config, publishing)}”` : ''}？`} description="系统将再次检查语言边界、组成顺序和所有下级依赖；通过后立即切换正式版本。" confirmLabel="确认发布" loading={publishMutation.isPending} onConfirm={() => publishing?.revisionId && publishMutation.mutate({ contentId: publishing.id, revisionId: publishing.revisionId }, { onSuccess: () => { setPublishing(null); toast.success({ title: '内容已正式发布' }) }, onError: fail })} />
   </ListPageLayout>
+}
+
+const laoLetterTypeLabels: Readonly<Record<string, string>> = {
+  consonant: '辅音', vowel: '元音', tone_mark: '声调符号', other: '其他标记',
+}
+
+function LaoLetterQueryControls({ search, onChange }: {
+  search: LaoLetterSearch
+  onChange: (patch: Partial<LaoLetterSearch>) => void
+}) {
+  const selectedTypes = search.letter_type.join(',')
+  const selectedTypeLabel = search.letter_type.length === 0
+    ? '全部字母类型'
+    : search.letter_type.map((value) => laoLetterTypeLabels[value]).join('、')
+  return <>
+    <select aria-label="字母类型" className="h-9 rounded-md border bg-background px-3 text-sm" value={selectedTypes} onChange={(event) => onChange({ letter_type: event.target.value ? [event.target.value as LaoLetterSearch['letter_type'][number]] : [] })}>
+      <option value="">全部字母类型</option>
+      {search.letter_type.length > 1 ? <option value={selectedTypes}>{selectedTypeLabel}</option> : null}
+      <option value="consonant">辅音</option><option value="vowel">元音</option><option value="tone_mark">声调符号</option><option value="other">其他标记</option>
+    </select>
+    <select aria-label="字母类别" className="h-9 rounded-md border bg-background px-3 text-sm" value={search.letter_class[0] ?? ''} onChange={(event) => onChange({ letter_class: event.target.value ? [event.target.value as LaoLetterSearch['letter_class'][number]] : [] })}>
+      <option value="">全部字母类别</option><option value="cons_low">低辅音</option><option value="cons_middle">中辅音</option><option value="cons_high">高辅音</option>
+    </select>
+    <select aria-label="内容状态" className="h-9 rounded-md border bg-background px-3 text-sm" value={search.content_status[0] ?? ''} onChange={(event) => onChange({ content_status: event.target.value ? [event.target.value as LaoLetterSearch['content_status'][number]] : [] })}>
+      <option value="">全部内容状态</option><option value="active">启用</option><option value="disabled">停用</option><option value="archived">归档</option>
+    </select>
+    <select aria-label="工作修订状态" className="h-9 rounded-md border bg-background px-3 text-sm" value={search.revision_status[0] ?? ''} onChange={(event) => onChange({ revision_status: event.target.value ? [event.target.value as LaoLetterSearch['revision_status'][number]] : [] })}>
+      <option value="">全部修订状态</option><option value="draft">草稿</option><option value="pending_review">待审核</option><option value="approved">已批准</option><option value="rejected">已驳回</option><option value="none">无工作修订</option>
+    </select>
+    <select aria-label="排序字段" className="h-9 rounded-md border bg-background px-3 text-sm" value={search.sort} onChange={(event) => onChange({ sort: event.target.value as LaoLetterSearch['sort'] })}>
+      <option value="sort_order">排序号</option><option value="character">字符</option><option value="name">名称</option><option value="romanization">罗马化</option><option value="updated_at">更新时间</option>
+    </select>
+    <select aria-label="排序方向" className="h-9 rounded-md border bg-background px-3 text-sm" value={search.order} onChange={(event) => onChange({ order: event.target.value as LaoLetterSearch['order'] })}>
+      <option value="asc">升序</option><option value="desc">降序</option>
+    </select>
+    <select aria-label="每页条数" className="h-9 rounded-md border bg-background px-3 text-sm" value={search.page_size} onChange={(event) => onChange({ page_size: Number(event.target.value) })}>
+      <option value={50}>50</option><option value={100}>100</option><option value={200}>200</option><option value={500}>500</option>
+    </select>
+  </>
 }
 
 function ContentRowActions({ row, canWrite, canReview, canPublish, onInspect, onEdit, onReject, onSubmit, onApprove, onReEdit, onPublish, onDerive }: { row: ManagedStructuredContent; canWrite: boolean; canReview: boolean; canPublish: boolean; onInspect: () => void; onEdit: () => void; onReject: () => void; onSubmit: () => void; onApprove: () => void; onReEdit: () => void; onPublish: () => void; onDerive: () => void }) {

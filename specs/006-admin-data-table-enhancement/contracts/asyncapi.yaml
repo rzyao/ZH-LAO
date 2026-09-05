@@ -1,0 +1,10 @@
+asyncapi: 3.0.0
+info:
+  title: ZH-LAO Admin Lao Letter Batch Messaging
+  version: 1.0.0
+  description: >-
+    This feature introduces no event-bus or message-broker contract. Asynchronous
+    execution is a Content-owned PostgreSQL task state machine claimed by workers.
+channels: {}
+operations: {}
+x-no-async-messaging: true

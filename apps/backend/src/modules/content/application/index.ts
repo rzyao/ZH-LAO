@@ -8,3 +8,6 @@ export * from './use-cases/publish-character.js';
 export * from './use-cases/get-published-alphabet.js';
 export * from './use-cases/list-managed-characters.js';
 export * from './use-cases/manage-structured-content.js';
+export * from './use-cases/query-lo-letter-admin-list.js';
+export * from './use-cases/manage-lo-letter-batch-tasks.js';
+export * from './use-cases/process-lo-letter-batch.js';

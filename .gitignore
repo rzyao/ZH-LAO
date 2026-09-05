@@ -42,6 +42,7 @@ Thumbs.db
 **/.env
 coverage/
 **/coverage/
+.product-forge/features/*/testing/env.md
 
 # ChatGPT share export script outputs & caches
 _session/

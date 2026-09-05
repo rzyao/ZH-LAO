@@ -1,0 +1,12 @@
+# No feature-flag predicate is wired into the curriculum admin or runtime paths.
+# Do not register a non-functional flag as a release control. The initial rollout
+# is instead constrained by the existing exact Operations permissions.
+flags: []
+manual_registration: false
+rollout_access_control:
+  mechanism: "Operations RBAC"
+  required_permissions:
+    - "content.curriculum.read"
+    - "content.curriculum.write"
+    - "content.curriculum.publish"
+  limitation: "RBAC limits authoring access but is not a runtime kill switch."

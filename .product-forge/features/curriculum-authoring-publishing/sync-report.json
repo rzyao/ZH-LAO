@@ -1,0 +1,17 @@
+{
+  "feature": "curriculum-authoring-publishing",
+  "date": "2026-09-05T08:51:34+08:00",
+  "mode": "quick",
+  "layers_checked": [7],
+  "verdict": "CONSISTENT",
+  "summary": { "critical": 0, "warning": 0, "info": 0 },
+  "follow_up": { "approved": true, "checked_markdown_files": 31, "broken_relative_links": 0 },
+  "findings": [
+    { "id": "DRIFT-001", "file": "authority-decision-package-002-transactional-curriculum-audit.md", "resolution": "../../../../docs -> ../../../docs" },
+    { "id": "DRIFT-002", "file": "authority-decision-package-003-curriculum-idempotency.md", "resolution": "../../../../docs -> ../../../docs" },
+    { "id": "DRIFT-003", "file": "authority-decision-package-003-curriculum-idempotency.md", "resolution": "../../../../docs -> ../../../docs" },
+    { "id": "DRIFT-004", "file": "authority-decision-package-003-curriculum-idempotency.md", "resolution": "../../../../docs -> ../../../docs" },
+    { "id": "DRIFT-005", "file": "product-spec/product-spec.md", "resolution": "../../../docs -> ../../../../docs" },
+    { "id": "DRIFT-006", "file": "spec.md", "resolution": "../../docs -> ../../../docs" }
+  ]
+}

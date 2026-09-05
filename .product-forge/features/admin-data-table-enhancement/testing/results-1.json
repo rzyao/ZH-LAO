@@ -1,0 +1,14 @@
+{
+  "run": 1,
+  "date": "2026-09-05",
+  "executor": "project-playwright-and-vitest-fallback",
+  "playwright_cli_available": false,
+  "browser_feature_flows": { "passed": 4, "failed": 0 },
+  "a11y_suite": { "passed": 1, "failed": 0 },
+  "admin_feature_vitest": { "passed": 51, "failed": 0 },
+  "backend_feature_vitest": { "passed": 103, "failed": 0 },
+  "known_limitations": [
+    "The live local API is reachable and login succeeds, but the supplied account lacks content.lo_letters.read; the target endpoint returns FORBIDDEN.",
+    "playwright-cli component/token runtime conformance was not run because playwright-cli is unavailable."
+  ]
+}

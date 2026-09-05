@@ -1,0 +1,55 @@
+schema_version: 1
+source:
+  components_path: "apps/admin/src/components"
+  tokens_path: "apps/admin/src/design-system/tokens/index.css"
+  framework: "react"
+  storybook: false
+tokens:
+  color:
+    primary: "var(--primary)"
+    surface: "var(--background)"
+    foreground: "var(--foreground)"
+  radius: ["var(--radius-sm)", "var(--radius-md)", "var(--radius-lg)"]
+components:
+  - id: "CMP-ListPageLayout"
+    import: "@/components/layout/list-page-layout"
+    props: ["title", "description", "breadcrumb", "actions"]
+    variants: ["default"]
+  - id: "CMP-Badge"
+    import: "@/components/ui/badge"
+    props: ["variant"]
+    variants: ["default", "secondary", "destructive"]
+  - id: "CMP-Dialog"
+    import: "@/components/ui/dialog"
+    props: ["open", "onOpenChange"]
+    variants: ["default"]
+  - id: "CMP-Button"
+    import: "@/components/ui/button"
+    props: ["variant", "size", "disabled", "onClick"]
+    variants: ["default", "outline", "ghost"]
+    selector: "[data-cmp='button']"
+  - id: "CMP-DataTable"
+    import: "@/components/data-table/data-table"
+    props: ["columns", "data", "serverOptions"]
+    variants: ["server"]
+    selector: "[data-cmp='data-table']"
+  - id: "CMP-StatusBadge"
+    import: "@/components/common/status-badge"
+    props: ["tone", "label", "dot"]
+    variants: ["default"]
+    selector: "[data-cmp='status-badge']"
+  - id: "CMP-ConfirmDialog"
+    import: "@/components/feedback/confirm-dialog"
+    props: ["open", "title", "description", "confirmLabel", "onConfirm"]
+    variants: ["default"]
+    selector: "[data-cmp='confirm-dialog']"
+  - id: "CMP-EditPageLayout"
+    import: "@/components/layout/edit-page-layout"
+    props: ["children"]
+    variants: ["default"]
+    selector: "[data-cmp='edit-page']"
+  - id: "CMP-EmptyState"
+    import: "@/components/feedback/empty-state"
+    props: ["title", "description", "action"]
+    variants: ["default"]
+    selector: "[data-cmp='empty-state']"

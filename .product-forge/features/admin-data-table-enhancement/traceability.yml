@@ -1,0 +1,350 @@
+schema_version: 1
+feature: "admin-data-table-enhancement"
+last_updated: "2026-09-05T06:10:11+08:00"
+spec_path: "../../../specs/006-admin-data-table-enhancement/spec.md"
+requirements:
+  - { id: "FR-010", stories: ["US-001"], journeys: ["JRN-001"], contracts: ["API-LettersQuery"] }
+  - { id: "FR-011", stories: ["US-001", "US-006"], journeys: ["JRN-001"], contracts: ["API-LettersQuery"] }
+  - { id: "FR-012", stories: ["US-002"], journeys: ["JRN-001"], contracts: [] }
+  - { id: "FR-013", stories: ["US-003"], journeys: ["JRN-002"], contracts: ["API-LettersQuery"] }
+  - { id: "FR-014", stories: ["US-003"], journeys: ["JRN-002"], contracts: ["API-LettersSelectionPreview", "API-LettersBatchStart"] }
+  - { id: "FR-015", stories: ["US-004"], journeys: ["JRN-003"], contracts: ["API-LettersQuery", "API-LettersBatchStart"] }
+  - { id: "FR-016", stories: ["US-004"], journeys: ["JRN-003"], contracts: ["API-LettersBatchStart"] }
+  - { id: "FR-017", stories: ["US-004", "US-005"], journeys: ["JRN-003"], contracts: ["API-LettersBatchStart", "API-LettersBatchTask"] }
+  - { id: "FR-018", stories: ["US-005"], journeys: ["JRN-003"], contracts: ["API-LettersBatchTaskList", "API-LettersBatchTask", "API-LettersBatchRetry"] }
+  - { id: "FR-019", stories: ["US-001", "US-005", "US-006"], journeys: ["JRN-001", "JRN-003"], contracts: [] }
+  - { id: "FR-020", stories: ["US-004", "US-005"], journeys: ["JRN-003"], contracts: ["API-LettersBatchStart", "API-LettersBatchTask"] }
+  - { id: "FR-021", stories: ["US-003", "US-005"], journeys: ["JRN-002", "JRN-003"], contracts: ["API-LettersSelectionPreview", "API-LettersBatchStart", "API-LettersBatchRetry"] }
+rows:
+  - req: "FR-010"
+    story: "US-001"
+    journeys: ["JRN-001"]
+    frs: ["FR-010"]
+    must_have: true
+    components: ["CMP-Input", "CMP-DataTable", "CMP-DataTablePagination"]
+    contracts: ["API-LettersQuery"]
+    tasks: ["T001", "T002", "T003", "T012", "T014", "T015", "T016", "T017", "T018", "T019", "T020", "T021", "T022", "T055", "T056", "T058"]
+    code:
+      - "backend:test/modules/content/lo-letter-batch-fixtures.ts"
+      - "admin:src/features/content/structured/lo-letter-test-fixtures.ts"
+      - "backend:src/modules/content/infrastructure/postgres-lo-letter-admin-repository.ts"
+      - "backend:src/modules/content/application/use-cases/query-lo-letter-admin-list.ts"
+      - "backend:src/modules/content/http/lo-letter-batch-routes.ts"
+      - "admin:src/components/data-table/data-table.tsx"
+      - "admin:src/components/data-table/data-table-pagination.tsx"
+      - "admin:src/features/content/structured/contracts.ts"
+      - "admin:src/features/content/structured/api.ts"
+      - "admin:src/features/content/structured/queries.ts"
+      - "admin:src/app/router/router.tsx"
+      - "admin:src/features/content/pages/category.tsx"
+      - "admin:src/features/content/structured/lo-letter-table.tsx"
+      - "admin:src/features/content/structured/lo-letter-page.tsx"
+    tests:
+      - "admin:src/features/content/structured/lo-letter-page.test.tsx"
+      - "admin:src/app/router/router.test.tsx"
+      - "admin:src/features/content/structured/contracts.test.ts"
+      - "backend:test/modules/content/lo-letter-query.integration.test.ts"
+      - "admin:e2e/content-management.spec.ts"
+    events: null
+    status: "tested"
+  - req: "FR-011"
+    story: "US-001"
+    journeys: ["JRN-001"]
+    frs: ["FR-011"]
+    must_have: true
+    components: ["CMP-Input", "CMP-DataTable", "CMP-DataTablePagination"]
+    contracts: ["API-LettersQuery"]
+    tasks: ["T012", "T014", "T016", "T017", "T018", "T020", "T021", "T022"]
+    code:
+      - "backend:src/modules/content/infrastructure/postgres-lo-letter-admin-repository.ts"
+      - "backend:src/modules/content/application/use-cases/query-lo-letter-admin-list.ts"
+      - "backend:src/modules/content/http/lo-letter-batch-routes.ts"
+      - "admin:src/features/content/structured/contracts.ts"
+      - "admin:src/features/content/structured/api.ts"
+      - "admin:src/features/content/structured/queries.ts"
+      - "admin:src/app/router/router.tsx"
+      - "admin:src/features/content/pages/category.tsx"
+      - "admin:src/features/content/structured/lo-letter-table.tsx"
+      - "admin:src/features/content/structured/lo-letter-page.tsx"
+    tests:
+      - "admin:src/features/content/structured/lo-letter-page.test.tsx"
+      - "admin:src/app/router/router.test.tsx"
+    events: null
+    status: "tested"
+  - req: "FR-012"
+    story: "US-002"
+    journeys: ["JRN-001"]
+    frs: ["FR-012"]
+    must_have: true
+    components: ["CMP-DataTable", "CMP-DropdownMenu", "CMP-Checkbox"]
+    contracts: []
+    tasks: ["T013", "T023", "T024", "T025", "T026"]
+    code:
+      - "admin:src/components/data-table/data-table.tsx"
+      - "admin:src/components/data-table/data-table-view-options.tsx"
+      - "admin:src/features/content/structured/lo-letter-columns.tsx"
+      - "admin:src/features/content/structured/lo-letter-column-preferences.ts"
+    tests:
+      - "admin:src/components/data-table/data-table.test.tsx"
+      - "admin:src/features/content/structured/lo-letter-page.test.tsx"
+    events: null
+    status: "tested"
+  - req: "FR-013"
+    story: "US-003"
+    journeys: ["JRN-002"]
+    frs: ["FR-013"]
+    must_have: true
+    components: ["CMP-DataTable", "CMP-Checkbox"]
+    contracts: ["API-LettersQuery"]
+    tasks: ["T028", "T029", "T032", "T033"]
+    code:
+      - "admin:src/components/data-table/data-table.tsx"
+      - "admin:src/components/data-table/data-table-column-header.tsx"
+      - "admin:src/features/content/structured/lo-letter-selection.ts"
+      - "admin:src/features/content/structured/lo-letter-batch-bar.tsx"
+      - "admin:src/features/content/pages/category.tsx"
+    tests:
+      - "admin:src/components/data-table/data-table.test.tsx"
+      - "admin:src/features/content/structured/lo-letter-selection.test.tsx"
+      - "admin:e2e/content-management.spec.ts"
+    events: null
+    status: "tested"
+  - req: "FR-014"
+    story: "US-003"
+    journeys: ["JRN-002"]
+    frs: ["FR-014"]
+    must_have: true
+    components: ["CMP-Checkbox", "CMP-Button"]
+    contracts: ["API-LettersSelectionPreview", "API-LettersBatchStart"]
+    tasks: ["T007", "T008", "T009", "T027", "T029", "T030", "T031", "T033", "T034", "T038", "T039"]
+    code:
+      - "backend:src/modules/content/domain/lo-letter-admin-query.ts"
+      - "backend:src/modules/content/domain/lo-letter-batch-task.ts"
+      - "backend:src/modules/content/application/ports/lo-letter-admin-repository.ts"
+      - "backend:src/modules/content/infrastructure/postgres-lo-letter-admin-repository.ts"
+      - "backend:src/modules/content/application/use-cases/manage-lo-letter-selection.ts"
+      - "backend:src/modules/content/http/lo-letter-batch-routes.ts"
+      - "admin:src/features/content/structured/lo-letter-selection.ts"
+      - "admin:src/features/content/structured/lo-letter-batch-bar.tsx"
+      - "admin:src/features/content/pages/category.tsx"
+      - "backend:src/modules/content/infrastructure/postgres-lo-letter-batch-repository.ts"
+      - "backend:src/modules/content/application/use-cases/manage-lo-letter-batch-tasks.ts"
+    tests:
+      - "backend:test/modules/content/lo-letter-selection.integration.test.ts"
+      - "backend:test/modules/content/lo-letter-admin-http.contract.test.ts"
+      - "admin:src/features/content/structured/lo-letter-selection.test.tsx"
+      - "admin:e2e/content-management.spec.ts"
+      - "backend:test/modules/content/lo-letter-batch-task.integration.test.ts"
+    events: null
+    status: "tested"
+  - req: "FR-015"
+    story: "US-004"
+    journeys: ["JRN-003"]
+    frs: ["FR-015"]
+    must_have: true
+    components: ["CMP-Button", "CMP-Dialog"]
+    contracts: ["API-LettersQuery", "API-LettersBatchStart"]
+    tasks: ["T035", "T037", "T039", "T043", "T044"]
+    code:
+      - "backend:src/modules/content/infrastructure/postgres-lo-letter-batch-repository.ts"
+      - "backend:src/modules/content/application/use-cases/manage-lo-letter-batch-tasks.ts"
+      - "backend:src/modules/content/http/lo-letter-batch-routes.ts"
+      - "admin:src/features/content/structured/lo-letter-batch-actions.tsx"
+      - "admin:src/features/content/structured/api.ts"
+      - "admin:src/features/content/structured/lo-letter-page.tsx"
+    tests:
+      - "backend:test/modules/content/lo-letter-admin-http.contract.test.ts"
+      - "admin:src/features/content/structured/lo-letter-batch-actions.test.tsx"
+    events: null
+    status: "tested"
+  - req: "FR-016"
+    story: "US-004"
+    journeys: ["JRN-003"]
+    frs: ["FR-016"]
+    must_have: true
+    components: ["CMP-Dialog", "CMP-Input"]
+    contracts: ["API-LettersBatchStart"]
+    tasks: ["T034", "T035", "T037", "T038", "T039", "T043", "T044"]
+    code:
+      - "backend:src/modules/content/infrastructure/postgres-lo-letter-batch-repository.ts"
+      - "backend:src/modules/content/application/use-cases/manage-lo-letter-batch-tasks.ts"
+      - "backend:src/modules/content/http/lo-letter-batch-routes.ts"
+      - "admin:src/features/content/structured/lo-letter-batch-actions.tsx"
+      - "admin:src/features/content/structured/api.ts"
+      - "admin:src/features/content/structured/lo-letter-page.tsx"
+    tests:
+      - "backend:test/modules/content/lo-letter-batch-task.integration.test.ts"
+      - "backend:test/modules/content/lo-letter-admin-http.contract.test.ts"
+      - "admin:src/features/content/structured/lo-letter-batch-actions.test.tsx"
+    events: null
+    status: "tested"
+  - req: "FR-017"
+    story: "US-004"
+    journeys: ["JRN-003"]
+    frs: ["FR-017"]
+    must_have: true
+    components: ["CMP-Button", "CMP-Dialog"]
+    contracts: ["API-LettersBatchStart", "API-LettersBatchTask"]
+    tasks: ["T004", "T005", "T006", "T010", "T011", "T034", "T036", "T038", "T039", "T040", "T041", "T042", "T043", "T045", "T046", "T049", "T050", "T051", "T053"]
+    code:
+      - "database:migrations/1340_content_letter_batch_tasks.sql"
+      - "database:checks/expected-schema.json"
+      - "backend:src/database/required-migrations.generated.ts"
+      - "backend:src/config/schema.ts"
+      - "backend:src/config/env.ts"
+      - "backend:src/modules/content/infrastructure/postgres-lo-letter-batch-repository.ts"
+      - "backend:src/modules/content/application/use-cases/manage-lo-letter-batch-tasks.ts"
+      - "backend:src/modules/operations/public/contracts.ts"
+      - "backend:src/modules/operations/public/permissions.ts"
+      - "backend:src/modules/operations/public/index.ts"
+      - "backend:src/modules/content/application/use-cases/process-lo-letter-batch.ts"
+      - "backend:src/bootstrap/build-worker.ts"
+      - "backend:src/modules/content/worker/composition.ts"
+      - "backend:src/modules/content/http/lo-letter-batch-routes.ts"
+      - "admin:src/features/content/structured/contracts.ts"
+      - "admin:src/features/content/structured/api.ts"
+      - "admin:src/features/content/structured/queries.ts"
+      - "admin:src/features/content/structured/lo-letter-batch-task-panel.tsx"
+      - "admin:src/features/content/structured/lo-letter-page.tsx"
+      - "backend:src/worker.ts"
+      - "admin:src/features/content/structured/lo-letter-batch-actions.tsx"
+      - "admin:src/features/content/structured/api.ts"
+      - "admin:src/features/content/structured/lo-letter-page.tsx"
+      - "backend:src/modules/content/application/use-cases/manage-lo-letter-batch-tasks.ts"
+      - "backend:src/modules/content/application/use-cases/process-lo-letter-batch.ts"
+      - "backend:src/modules/content/http/lo-letter-batch-routes.ts"
+    tests:
+      - "backend:test/modules/content/lo-letter-batch-task.integration.test.ts"
+      - "backend:test/modules/content/lo-letter-batch-worker.integration.test.ts"
+      - "backend:test/integration/operations-content-batch-audit.test.ts"
+      - "admin:e2e/content-management.spec.ts"
+    events: null
+    status: "tested"
+  - req: "FR-018"
+    story: "US-005"
+    journeys: ["JRN-003"]
+    frs: ["FR-018"]
+    must_have: true
+    components: ["CMP-DataTable", "CMP-Button"]
+    contracts: ["API-LettersBatchTaskList", "API-LettersBatchTask", "API-LettersBatchRetry"]
+    tasks: ["T045", "T046", "T047", "T048", "T049", "T050", "T051", "T052", "T053", "T054"]
+    code:
+      - "backend:src/modules/content/infrastructure/postgres-lo-letter-batch-repository.ts"
+      - "backend:src/modules/content/application/use-cases/manage-lo-letter-batch-tasks.ts"
+      - "backend:src/modules/content/application/use-cases/process-lo-letter-batch.ts"
+      - "backend:src/modules/content/http/lo-letter-batch-routes.ts"
+      - "admin:src/features/content/structured/contracts.ts"
+      - "admin:src/features/content/structured/api.ts"
+      - "admin:src/features/content/structured/queries.ts"
+      - "admin:src/features/content/structured/lo-letter-batch-task-panel.tsx"
+      - "admin:src/features/content/structured/lo-letter-page.tsx"
+    tests:
+      - "backend:test/modules/content/lo-letter-batch-task.integration.test.ts"
+      - "backend:test/modules/content/lo-letter-admin-http.contract.test.ts"
+      - "backend:test/modules/content/lo-letter-batch-worker.integration.test.ts"
+      - "backend:test/integration/operations-content-batch-audit.test.ts"
+      - "admin:src/features/content/structured/lo-letter-batch-task-panel.test.tsx"
+      - "admin:e2e/content-management.spec.ts"
+    events: null
+    status: "tested"
+  - req: "FR-019"
+    story: "US-001"
+    journeys: ["JRN-001", "JRN-003"]
+    frs: ["FR-019"]
+    must_have: true
+    components: ["CMP-DataTable"]
+    contracts: []
+    tasks: ["T014", "T021", "T022", "T047", "T052", "T053", "T054"]
+    code:
+      - "admin:src/features/content/structured/lo-letter-table.tsx"
+      - "admin:src/features/content/structured/lo-letter-page.tsx"
+      - "admin:src/features/content/structured/lo-letter-batch-task-panel.tsx"
+      - "admin:src/features/content/structured/queries.ts"
+    tests:
+      - "admin:src/features/content/structured/lo-letter-batch-task-panel.test.tsx"
+      - "admin:e2e/content-management.spec.ts"
+    events: null
+    status: "tested"
+  - req: "FR-020"
+    story: "US-004"
+    journeys: ["JRN-003"]
+    frs: ["FR-020"]
+    must_have: true
+    components: []
+    contracts: ["API-LettersBatchStart", "API-LettersBatchTask"]
+    tasks: ["T036", "T040", "T041", "T042", "T046", "T049", "T050", "T051", "T057"]
+    code:
+      - "backend:src/modules/operations/public/contracts.ts"
+      - "backend:src/modules/operations/public/permissions.ts"
+      - "backend:src/modules/operations/public/index.ts"
+      - "backend:src/modules/operations/application/services/operations-service.ts"
+      - "backend:src/modules/content/application/use-cases/process-lo-letter-batch.ts"
+      - "backend:src/modules/content/infrastructure/postgres-lo-letter-batch-repository.ts"
+      - "backend:src/bootstrap/build-worker.ts"
+      - "backend:src/modules/content/worker/composition.ts"
+      - "backend:src/worker.ts"
+    tests:
+      - "backend:test/modules/content/lo-letter-batch-worker.integration.test.ts"
+      - "backend:test/integration/operations-content-batch-audit.test.ts"
+      - "backend:test/modules/content/lo-letter-batch-worker.integration.test.ts"
+      - "admin:e2e/content-management.spec.ts"
+    events: null
+    status: "tested"
+  - req: "FR-021"
+    story: "US-003"
+    journeys: ["JRN-002", "JRN-003"]
+    frs: ["FR-021"]
+    must_have: true
+    components: ["CMP-Checkbox", "CMP-Dialog"]
+    contracts: ["API-LettersSelectionPreview", "API-LettersBatchStart", "API-LettersBatchRetry"]
+    tasks: ["T027", "T029", "T030", "T031", "T034", "T035", "T038", "T039", "T043", "T045", "T046", "T049", "T050", "T051", "T053"]
+    code:
+      - "backend:src/modules/content/infrastructure/postgres-lo-letter-admin-repository.ts"
+      - "backend:src/modules/content/application/use-cases/manage-lo-letter-selection.ts"
+      - "backend:src/modules/content/http/lo-letter-batch-routes.ts"
+      - "backend:src/errors/business-codes.ts"
+      - "admin:src/api/errors/api-error.ts"
+      - "admin:src/features/content/structured/lo-letter-page.tsx"
+    tests:
+      - "backend:test/modules/content/lo-letter-selection.integration.test.ts"
+      - "backend:test/modules/content/lo-letter-admin-http.contract.test.ts"
+      - "backend:test/modules/content/lo-letter-batch-worker.integration.test.ts"
+      - "admin:e2e/content-management.spec.ts"
+      - "admin:e2e/content-management.spec.ts"
+      - "backend:test/modules/content/lo-letter-batch-task.integration.test.ts"
+      - "backend:test/modules/content/lo-letter-admin-http.contract.test.ts"
+    events: null
+    status: "tested"
+contracts:
+  openapi: "../../../specs/006-admin-data-table-enhancement/contracts/openapi.yaml"
+  asyncapi: "../../../specs/006-admin-data-table-enhancement/contracts/asyncapi.yaml"
+journeys:
+  - id: "JRN-001"
+    title: "查询并浏览老挝字母审核列表"
+    stories: ["US-001", "US-002"]
+    steps: [{ id: "STEP-001", tests: ["TC-E2E-001"] }, { id: "STEP-002", tests: ["TC-E2E-001"] }, { id: "STEP-003", tests: ["TC-E2E-001"] }]
+    edges: [{ id: "EDGE-001", priority: "P1", tests: ["TC-E2E-001"] }, { id: "EDGE-002", priority: "P1", tests: ["TC-E2E-001"] }]
+    tests: ["TC-E2E-001"]
+  - id: "JRN-002"
+    title: "跨页选择当前筛选结果"
+    stories: ["US-003"]
+    steps: [{ id: "STEP-004", tests: ["TC-E2E-002"] }, { id: "STEP-005", tests: ["TC-E2E-002", "TC-E2E-003"] }]
+    edges: [{ id: "EDGE-003", priority: "P0", tests: ["TC-003", "TC-E2E-003"] }]
+    tests: ["TC-E2E-002", "TC-E2E-003"]
+  - id: "JRN-003"
+    title: "确认并跟踪异步批量审核"
+    stories: ["US-004", "US-005"]
+    steps: [{ id: "STEP-006", tests: ["TC-E2E-002"] }, { id: "STEP-007", tests: ["TC-007", "TC-E2E-002", "TC-E2E-003"] }, { id: "STEP-008", tests: ["TC-E2E-002", "TC-E2E-003"] }]
+    edges: [{ id: "EDGE-004", priority: "P1", tests: ["TC-007", "TC-E2E-003"] }, { id: "EDGE-005", priority: "P0", tests: ["TC-005", "TC-006", "TC-E2E-003"] }]
+    tests: ["TC-E2E-002", "TC-E2E-003"]
+dependencies:
+  - package: "@vitest/coverage-v8"
+    version: "4.1.11"
+    workspace: "apps/admin"
+    added_by_task: "F-010-remediation"
+    vetted: true
+  - package: "@vitest/coverage-v8"
+    version: "3.2.7"
+    workspace: "apps/backend"
+    added_by_task: "F-010-remediation"
+    vetted: true

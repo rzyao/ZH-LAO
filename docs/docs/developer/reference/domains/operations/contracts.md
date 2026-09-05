@@ -63,6 +63,7 @@ apps/backend/src/modules/operations/public/
 OperationsAuthorizer
 OperationsOperatorResolver
 OperationsAuditRecorder
+OperationsTransactionalAuditBoundary
 AuthorizedOperatorContext
 OperatorPermissionKey / Permission Catalog
 ```
@@ -73,10 +74,15 @@ Public Contract 不暴露：
 Repository
 Database Row
 SQL
-DB Executor
 TransactionManager
 Operations internal BIGINT / implementation detail
 ```
+
+### 事务内成功审计例外 [ADR-030]
+
+当 Owner Domain 的权威明确要求 canonical mutation 与成功审计同一数据库事务提交时，Operations 提供窄的 `OperationsTransactionalAuditBoundary`。该边界唯一接受 caller-owned `DatabaseExecutor` 来执行 Operations 自己的 append-only audit INSERT；它不暴露 Operations Repository、表、SQL 或 `TransactionManager`，也不授予 Operations 对 Owner Schema 的写入能力。
+
+输入 target 必须使用 stable logical UUID；当前获准的 Content target 仅为 `course` 与 `lesson`。审计失败必须回滚调用方事务。没有 ADR 级别要求的跨域动作继续使用通常的 authorize → Owner mutation → success audit 链路。
 
 ## 后台 HTTP 边界
 

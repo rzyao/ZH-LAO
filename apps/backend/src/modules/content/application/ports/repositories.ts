@@ -1,6 +1,8 @@
 import type { LaoCharacter } from '../../domain/lao-character.js';
 import type { LaoCharacterRevision } from '../../domain/lao-character-revision.js';
 export * from './structured-content-repository.js';
+export * from './lo-letter-admin-repository.js';
+export * from './curriculum-repository.js';
 
 export interface PublishedCharacterView {
   id: string;

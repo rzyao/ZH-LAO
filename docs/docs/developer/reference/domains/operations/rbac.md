@@ -121,6 +121,10 @@ NO role-code allow-all branch
 
 它不能被 Disable，也不能把 Permission Set 改成缺少当前 Catalog 必需权限的集合。
 
+## 后台操作员密码重置（ADR-031）
+
+`operations.operators.reset_password` 是专门 exact permission，不得以 `create`、`update` 或 role code 绕过。actor 与 target 都必须 active，actor 只能重置其他 Operator；target 为 active `super_admin` 时 actor 也必须为 active `super_admin`。Identity 拥有凭证和 Session，Operations 只负责后端授权与成功审计；前端按钮可见性不替代这些 guard。
+
 ## Last-admin 不变量
 
 任何可能减少 Active Super Admin 数量的操作都必须在事务中保护：

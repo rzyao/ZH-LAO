@@ -1,0 +1,46 @@
+schema_version: 1
+feature: "admin-data-table-enhancement"
+journeys:
+  - id: "JRN-001"
+    title: "查询并浏览老挝字母审核列表"
+    actor: "内容管理员"
+    stories: ["US-001", "US-002"]
+    entry: "/content/lo/letters"
+    success: "管理员看到符合条件、稳定排序的分页结果并保留可见列偏好"
+    preconditions: ["管理员已认证且拥有字母列表读取权限"]
+    steps:
+      - { id: "STEP-001", action: "打开字母列表", ui: "CMP-DataTable", expect: "显示加载态后呈现服务端分页结果", contracts: ["API-LettersQuery"] }
+      - { id: "STEP-002", action: "输入关键词并选择筛选和排序", ui: "CMP-Input, CMP-Select", expect: "URL 更新、页码重置且结果范围更新", contracts: ["API-LettersQuery"] }
+      - { id: "STEP-003", action: "调整非关键显示列并翻页", ui: "CMP-DropdownMenu, CMP-DataTablePagination", expect: "操作列保持显示且结果按分页浏览", contracts: ["API-LettersQuery"] }
+    edges:
+      - { id: "EDGE-001", of: "STEP-002", case: "无筛选结果", given: "查询没有匹配项", when: "结果返回", then: "显示无匹配状态并可清除筛选", priority: "P1" }
+      - { id: "EDGE-002", of: "STEP-003", case: "列表加载失败", given: "请求失败", when: "管理员重试", then: "保留条件并重新请求", priority: "P1" }
+    e2e: { runner: "playwright-cli", smoke: true }
+  - id: "JRN-002"
+    title: "跨页选择当前筛选结果"
+    actor: "内容管理员"
+    stories: ["US-003"]
+    entry: "/content/lo/letters?status=pending_review"
+    success: "管理员明确选择当前筛选结果全部并看到准确范围"
+    preconditions: ["当前查询至少跨两页", "管理员拥有字母列表读取权限"]
+    steps:
+      - { id: "STEP-004", action: "选择当前页全部记录", ui: "CMP-Checkbox", expect: "批量栏显示本页选择数量", contracts: ["API-LettersQuery"] }
+      - { id: "STEP-005", action: "选择当前筛选结果全部", ui: "CMP-Button", expect: "界面显示查询范围和全量选择数量", contracts: ["API-LettersSelectionPreview"] }
+    edges:
+      - { id: "EDGE-003", of: "STEP-005", case: "查询结果已变化", given: "选择范围已过期", when: "请求预览", then: "旧选择失效并要求重新选择", priority: "P0" }
+    e2e: { runner: "playwright-cli", smoke: true }
+  - id: "JRN-003"
+    title: "确认并跟踪异步批量审核"
+    actor: "内容管理员"
+    stories: ["US-004", "US-005"]
+    entry: "已选择当前筛选结果全部的字母列表"
+    success: "任务完成后显示逐项成功、失败和跳过结果"
+    preconditions: ["管理员拥有所选动作的 Content 权限", "选择范围有效"]
+    steps:
+      - { id: "STEP-006", action: "选择一个允许的批量动作", ui: "CMP-Button", expect: "显示动作、数量、范围和确认内容", contracts: ["API-LettersSelectionPreview"] }
+      - { id: "STEP-007", action: "填写驳回或删除原因（如适用）并确认", ui: "CMP-Dialog, CMP-Input, CMP-Button", expect: "提交异步任务并获得任务标识", contracts: ["API-LettersBatchStart"] }
+      - { id: "STEP-008", action: "查看任务进度和完成摘要", ui: "CMP-DataTable", expect: "显示逐项成功、失败和跳过原因并刷新列表", contracts: ["API-LettersBatchTask"] }
+    edges:
+      - { id: "EDGE-004", of: "STEP-007", case: "必要原因为空", given: "动作是驳回或删除", when: "管理员确认", then: "阻止提交并说明必须填写原因", priority: "P1" }
+      - { id: "EDGE-005", of: "STEP-008", case: "部分记录不再适用", given: "部分记录状态或权限已变化", when: "任务处理", then: "其他记录继续执行，并逐项报告跳过或失败原因", priority: "P0" }
+    e2e: { runner: "playwright-cli", smoke: true }

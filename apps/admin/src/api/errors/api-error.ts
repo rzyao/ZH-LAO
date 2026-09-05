@@ -98,6 +98,8 @@ export const BUSINESS_ERROR_MESSAGES: Readonly<Record<string, string>> = {
   LAST_SUPER_ADMIN_REQUIRED: '必须保留至少一个超级管理员，无法移除或禁用。',
   UNICODE_CONFLICT: '统一编码冲突。',
   ACTIVE_WORK_CONFLICT: '存在正在处理中的业务任务，无法执行该操作。',
+  BATCH_SELECTION_CHANGED: '目标集合已变化，请重新选择。',
+  BATCH_TASK_NOT_RETRYABLE: '当前任务没有可重试的失败项。',
 
   // rate_limit
   RATE_LIMITED: '请求过于频繁，请稍后再试。',

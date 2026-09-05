@@ -120,7 +120,7 @@ describe('Error foundation', () => {
   });
 
   it('maps HTTP 200 business error envelope to the corresponding AppError subclass by code', () => {
-    const cases: [string, new (...args: unknown[]) => InstanceType<typeof Error>][] = [
+    const cases: [string, new (...args: any[]) => Error][] = [
       ['UNAUTHENTICATED', UnauthorizedError],
       ['INVALID_CREDENTIAL', UnauthorizedError],
       ['SESSION_EXPIRED', UnauthorizedError],

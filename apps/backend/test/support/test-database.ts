@@ -5,12 +5,14 @@ import { promisify } from 'node:util';
 import path from 'node:path';
 import pg from 'pg';
 import { requiredMigrations } from '../../src/database/required-migrations.generated.js';
+import type { DatabaseExecutor } from '../../src/database/executor.js';
 
 const execFileAsync = promisify(execFile);
 const { Client } = pg;
 
 function quoteIdentifier(value: string): string { return `"${value.replaceAll('"', '""')}"`; }
 export type TestDatabase = { name: string; url: string; dispose(): Promise<void> };
+export type SeededTestDatabase<Fixture> = TestDatabase & { fixture: Fixture };
 
 export async function createEmptyTestDatabase(adminUrl: string, label = 'empty'): Promise<TestDatabase> {
   const name = `zh_lao_fnd_${label}_${Date.now()}_${randomUUID().replaceAll('-', '').slice(0, 8)}`;
@@ -26,8 +28,8 @@ export async function createEmptyTestDatabase(adminUrl: string, label = 'empty')
   } };
 }
 
-export async function createTestDatabase(adminUrl: string): Promise<TestDatabase> {
-  const database = await createEmptyTestDatabase(adminUrl, 'complete');
+export async function createTestDatabase(adminUrl: string, label = 'complete'): Promise<TestDatabase> {
+  const database = await createEmptyTestDatabase(adminUrl, label);
   const migrationScript = path.resolve(import.meta.dirname, '../../../../database/scripts/migrate.mjs');
   try {
     await execFileAsync(process.execPath, [migrationScript], { env: { ...process.env, DATABASE_URL: database.url } });
@@ -36,6 +38,32 @@ export async function createTestDatabase(adminUrl: string): Promise<TestDatabase
     throw new Error(`Failed to migrate integration database ${database.name}`, { cause: error });
   }
   return database;
+}
+
+/**
+ * Creates a fully migrated database, seeds it through one short-lived client,
+ * and disposes the database automatically when setup fails. The returned
+ * database keeps the normal explicit dispose contract so each integration
+ * suite remains in control of its own lifetime.
+ */
+export async function createSeededTestDatabase<Fixture>(
+  adminUrl: string,
+  label: string,
+  seed: (database: DatabaseExecutor) => Promise<Fixture>,
+): Promise<SeededTestDatabase<Fixture>> {
+  const database = await createTestDatabase(adminUrl, label);
+  const client = new Client({ connectionString: database.url });
+
+  try {
+    await client.connect();
+    const fixture = await seed(client);
+    return { ...database, fixture };
+  } catch (error) {
+    await database.dispose();
+    throw new Error(`Failed to seed integration database ${database.name}`, { cause: error });
+  } finally {
+    await client.end().catch(() => undefined);
+  }
 }
 
 export async function createPartialTestDatabase(adminUrl: string, migrationCount = 3): Promise<TestDatabase> {

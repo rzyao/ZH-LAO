@@ -17,7 +17,7 @@ export const alphabetApi = {
     const res = await httpClient.get<{ items: PublishedCharacter[]; total: number }>(
       '/api/v1/content/letters',
       {
-        params: classification ? { classification } : undefined,
+        query: classification ? { classification } : undefined,
       }
     );
     return res.data.items;

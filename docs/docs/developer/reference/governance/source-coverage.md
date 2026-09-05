@@ -1,6 +1,6 @@
 ---
 status: baseline
-last_updated: 2026-09-04
+last_updated: 2026-09-05
 ---
 
 # 会话覆盖清单
@@ -8,6 +8,17 @@ last_updated: 2026-09-04
 > 文档 authority 与根目录研究资产的分类、保留和引用方式见[研究分类](research-classification.md)。
 
 覆盖标准不是逐字复制对话，而是每条有效产品规则、边界、实体、字段、约束、反例和延期项都有唯一事实源。
+
+## “管理端通用数据表增强”Product Forge 会话
+
+来源：当前会话，2026-09-04 至 2026-09-05。用户选择 Product Forge 标准轨道，以内容管理员高频审核为核心场景，并在再验证中批准首期字母列表、批量动作、跨页选择、异步执行与持久化边界。
+
+| 会话结论 | 文档 |
+| --- | --- |
+| 首期页面为 `/content/lo/letters`；提供搜索、筛选、白名单排序、列设置、固定操作列与服务端分页，默认 50、最大 500 | [Content Language Admin API](/developer/reference/contracts/content/CONTENT_LANGUAGE_ADMIN_API.md)、[设计台账](design-register.md) D-167 |
+| 批量动作为提交审核、通过、驳回、正式发布、归档；不含上线/下线；全需二次确认，驳回/归档原因必填 | [ADR-028](/developer/reference/adr/ADR-028-content-letter-batch-operations.md)、[Content 版本复核](/developer/reference/domains/content/versioning-review.md) |
+| 支持页内选择升级为当前查询全部；提交时冻结 UUID 集合并拒绝陈旧选择；无产品数量上限 | [Content Language Admin API](/developer/reference/contracts/content/CONTENT_LANGUAGE_ADMIN_API.md)、[ADR-028](/developer/reference/adr/ADR-028-content-letter-batch-operations.md) |
+| Content 拥有异步任务与逐项结果，两表前向迁移；逐项事务、部分成功、失败项重试、不可取消、长期保留，Operations 只授权与成功审计 | [Content 数据库](/developer/reference/domains/content/database.md)、[Content 版本复核](/developer/reference/domains/content/versioning-review.md)、[设计台账](design-register.md) D-167 |
 
 ## “Content 路由挂载与审核状态机裁决”会话
 

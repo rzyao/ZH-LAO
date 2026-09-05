@@ -7,6 +7,13 @@ export type AppConfig = Readonly<{
   database: Readonly<{ url: string; poolMin: number; poolMax: number; connectionTimeoutMs: number; idleTimeoutMs: number }>;
   logLevel: Environment['LOG_LEVEL'];
   outbox: Readonly<{ pollIntervalMs: number; batchSize: number; leaseMs: number }>;
+  contentLetterBatch: Readonly<{
+    pollIntervalMs: number;
+    batchSize: number;
+    concurrency: number;
+    activeTaskLimit: number;
+    retryAfterSeconds: number;
+  }>;
   identity: Readonly<{ otpHmacSecret: string | undefined; jwtHmacSecret: string | undefined; jwtIssuer: string; jwtAudience: string; otpProvider: 'console' | 'unavailable'; adminUsername: string; adminPassword: string }>;
   capabilities: Readonly<{
     objectStorage: 'unavailable' | 'memory';
@@ -33,6 +40,13 @@ export function loadConfig(source: NodeJS.ProcessEnv = process.env): AppConfig {
     }),
     logLevel: env.LOG_LEVEL,
     outbox: Object.freeze({ pollIntervalMs: env.OUTBOX_POLL_INTERVAL_MS, batchSize: env.OUTBOX_BATCH_SIZE, leaseMs: env.OUTBOX_LEASE_MS }),
+    contentLetterBatch: Object.freeze({
+      pollIntervalMs: env.CONTENT_LETTER_BATCH_POLL_INTERVAL_MS,
+      batchSize: env.CONTENT_LETTER_BATCH_SIZE,
+      concurrency: env.CONTENT_LETTER_BATCH_CONCURRENCY,
+      activeTaskLimit: env.CONTENT_LETTER_BATCH_ACTIVE_TASK_LIMIT,
+      retryAfterSeconds: env.CONTENT_LETTER_BATCH_RETRY_AFTER_SECONDS,
+    }),
     identity: Object.freeze({ otpHmacSecret: env.OTP_HMAC_SECRET, jwtHmacSecret: env.JWT_HMAC_SECRET, jwtIssuer: env.JWT_ISSUER, jwtAudience: env.JWT_AUDIENCE, otpProvider: env.IDENTITY_OTP_PROVIDER, adminUsername: env.ADMIN_USERNAME, adminPassword: env.ADMIN_PASSWORD }),
     capabilities: Object.freeze({
       objectStorage: env.OBJECT_STORAGE_PROVIDER,

@@ -135,6 +135,6 @@ describe('Mobile httpClient unified envelope handling (ADR-023 / US1)', () => {
     expect(capturedHeaders).toBeDefined();
     expect(capturedHeaders!['X-Request-Id']).toBeDefined();
     expect(typeof capturedHeaders!['X-Request-Id']).toBe('string');
-    expect(capturedHeaders!['X-Request-Id'].length).toBeGreaterThan(0);
+    expect(capturedHeaders!['X-Request-Id']!.length).toBeGreaterThan(0);
   });
 });

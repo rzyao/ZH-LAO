@@ -7,3 +7,31 @@ export type AuditRequestContext=Readonly<{requestId?:string|undefined;ipAddress?
 export interface OperationsAuthorizer{requirePermission(authContext:AuthContext,permission:OperatorPermissionKey):Promise<AuthorizedOperatorContext>}
 export interface OperationsOperatorResolver{resolveCurrentOperator(authContext:AuthContext):Promise<OperatorSummary>}
 export interface OperationsAuditRecorder{recordSuccessfulAction(input:Readonly<{operator:AuthorizedOperatorContext;actionKey:string;target?:AuditTarget|undefined;requestContext?:AuditRequestContext|undefined;details?:Readonly<Record<string,unknown>>|undefined}>):Promise<void>}
+export interface OperationsTransactionalAuditBoundary {
+  recordSuccessfulActionInTransaction(
+    executor: import('../../../database/executor.js').DatabaseExecutor,
+    input: Readonly<{
+      operatorId: string;
+      actionKey: string;
+      target: Readonly<{ domain: 'content'; type: 'course' | 'lesson'; id: string }>;
+      requestContext?: AuditRequestContext | undefined;
+      details?: Readonly<Record<string, unknown>> | undefined;
+    }>,
+  ): Promise<void>;
+}
+export interface OperationsBatchWorkerBoundary {
+  requireOperatorPermissionInTransaction(
+    executor: import('../../../database/executor.js').DatabaseExecutor,
+    operatorId: string,
+    permission: OperatorPermissionKey,
+  ): Promise<void>;
+  recordBatchSuccessfulActionInTransaction(
+    executor: import('../../../database/executor.js').DatabaseExecutor,
+    input: Readonly<{
+      operatorId: string;
+      actionKey: string;
+      contentId: string;
+      batchTaskId: string;
+    }>,
+  ): Promise<void>;
+}

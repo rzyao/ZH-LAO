@@ -1,0 +1,15 @@
+schema_version: 1
+feature: "admin-data-table-enhancement"
+screens:
+  - screen: "letters-list"
+    regions:
+      - { region: "query toolbar", component: "CMP-Input", target_path: "apps/admin/src/components/data-table/data-table-toolbar.tsx", journeys: ["JRN-001"] }
+      - { region: "table", component: "CMP-DataTable", target_path: "apps/admin/src/components/data-table/data-table.tsx", journeys: ["JRN-001", "JRN-002"] }
+      - { region: "column chooser", component: "CMP-DropdownMenu", target_path: "apps/admin/src/components/data-table/data-table-view-options.tsx", journeys: ["JRN-001"] }
+      - { region: "selection", component: "CMP-Checkbox", target_path: "apps/admin/src/components/data-table/data-table.tsx", journeys: ["JRN-002"] }
+      - { region: "pagination", component: "CMP-DataTablePagination", target_path: "apps/admin/src/components/data-table/data-table-pagination.tsx", journeys: ["JRN-001"] }
+  - screen: "batch-confirm"
+    regions:
+      - { region: "bulk action bar", component: "CMP-Button", target_path: "apps/admin/src/features/content/structured/lo-letter-batch-bar.tsx", journeys: ["JRN-002", "JRN-003"] }
+      - { region: "confirmation", component: "CMP-Dialog", target_path: "apps/admin/src/features/content/structured/lo-letter-batch-actions.tsx", journeys: ["JRN-003"] }
+      - { region: "reason input", component: "CMP-Input", target_path: "apps/admin/src/features/content/structured/lo-letter-batch-actions.tsx", journeys: ["JRN-003"] }

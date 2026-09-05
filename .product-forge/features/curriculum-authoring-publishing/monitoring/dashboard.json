@@ -1,0 +1,12 @@
+{
+  "feature": "curriculum-authoring-publishing",
+  "provider": "unavailable",
+  "status": "not_provisioned",
+  "reason": "Product Forge telemetry.dashboards is configured as none; no provider-side dashboard can be created from this workspace.",
+  "recommended_panels": [
+    "Admin curriculum mutation outcomes by command and error code",
+    "Published curriculum runtime request rate, error rate, and p95 latency",
+    "Course/lesson publish success, rejection, and idempotency-replay counts",
+    "Operations audit persistence failures"
+  ]
+}

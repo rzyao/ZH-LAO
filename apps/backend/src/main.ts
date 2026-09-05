@@ -19,7 +19,9 @@ import { AdminOperatorWriter } from './modules/operations/application/services/i
 import { AdminAccountWriter } from './modules/identity/application/services/admin-account-writer.js';
 import { AdminOperatorProvisioningService } from './modules/admin-operator-provisioning/application/admin-operator-provisioning-service.js';
 import { ensureDefaultAdmin,AdminCredentialOperations } from './modules/identity/application/index.js';
-import { PostgresContentRepository, PostgresStructuredContentRepository } from './modules/content/infrastructure/index.js';
+import { PostgresContentRepository, PostgresCurriculumRepository, PostgresLaoLetterAdminRepository, PostgresLaoLetterBatchRepository, PostgresStructuredContentRepository } from './modules/content/infrastructure/index.js';
+import { ManageLaoLetterBatchTasks } from './modules/content/application/index.js';
+import { ManageLaoLetterSelection } from './modules/content/application/use-cases/manage-lo-letter-selection.js';
 import { registerContentRoutes } from './modules/content/http/composition.js';
 
 const config=loadConfig();
@@ -56,12 +58,29 @@ if(process.argv[2]==='--operations-bootstrap'){
   await identityModule.registerHttp(app,identityDependencies);
   await ensureDefaultAdmin({transactions:transactionManager,repositories:createIdentityRepositories,bootstrap:(subjectId,displayName)=>operations.service.bootstrap(subjectId,displayName),username:config.identity.adminUsername,password:config.identity.adminPassword});
   await operations.registerHttp(app);
+  const laoLetterAdminRepository=new PostgresLaoLetterAdminRepository(transactionManager);
+  const laoLetterBatchTaskManager=new ManageLaoLetterBatchTasks({
+    repository:new PostgresLaoLetterBatchRepository(transactionManager),
+    selection:new ManageLaoLetterSelection(laoLetterAdminRepository,transactionManager),
+    transactions:transactionManager,
+    authorization:{
+      requirePermission:(operatorId,permission)=>
+        operations.service.requireOperatorPermissionInTransaction(executor,operatorId,permission),
+    },
+    activeTaskLimit:config.contentLetterBatch.activeTaskLimit,
+    retryAfterSeconds:config.contentLetterBatch.retryAfterSeconds,
+  });
   await registerContentRoutes(app, {
     contentRepository: new PostgresContentRepository(executor, transactionManager),
     structuredContentRepository: new PostgresStructuredContentRepository(executor, transactionManager),
+    curriculumRepository: new PostgresCurriculumRepository(executor, transactionManager),
+    laoLetterAdminRepository,
+    laoLetterBatchTaskManager,
+    contentTransactions: transactionManager,
     authentication: identityDependencies.authentication,
     authorizer: operations.service,
     audit: operations.service,
+    transactionalAudit: operations.service,
   });
   const platform=buildPlatformModule({executor,transactionManager});
   await platformModule.registerHttp(app,{executor,featureFlagUseCases:platform.featureFlagUseCases,appVersionUseCases:platform.appVersionUseCases,announcementUseCases:platform.announcementUseCases,regionUseCases:platform.regionUseCases});

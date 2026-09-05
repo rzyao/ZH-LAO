@@ -1,0 +1,8 @@
+schema_version: 1
+feature: "curriculum-authoring-publishing"
+last_updated: "2026-09-05T08:42:00+08:00"
+journeys:
+  - {id: "JRN-001", title: "Create a course working revision", stories: ["US-001"], steps: ["STEP-001", "STEP-002"], edges: [{id: "EDGE-001", priority: "P1", tests: ["TC-ADMIN-COURSE-EDITOR"]}], tests: ["TC-E2E-CURRICULUM-001", "TC-ADMIN-COURSE-EDITOR"]}
+  - {id: "JRN-002", title: "Compose a course structure using published references", stories: ["US-002"], steps: ["STEP-003", "STEP-004"], edges: [{id: "EDGE-002", priority: "P0", tests: ["TC-BE-CURRICULUM-PIN-VALIDATION"]}, {id: "EDGE-003", priority: "P1", tests: ["TC-BE-CURRICULUM-LOCK"]}], tests: ["TC-E2E-CURRICULUM-001", "TC-BE-CURRICULUM-PIN-VALIDATION", "TC-ADMIN-COURSE-DETAIL"]}
+  - {id: "JRN-003", title: "Review and publish a course revision", stories: ["US-003"], steps: ["STEP-005", "STEP-006", "STEP-007"], edges: [{id: "EDGE-004", priority: "P1", tests: ["TC-BE-CURRICULUM-LIFECYCLE"]}, {id: "EDGE-005", priority: "P0", tests: ["TC-BE-CURRICULUM-ATOMIC-PUBLISH"]}], tests: ["TC-BE-CURRICULUM-LIFECYCLE", "TC-BE-CURRICULUM-ATOMIC-PUBLISH", "TC-ADMIN-REVISION-HISTORY"]}
+  - {id: "JRN-004", title: "Read a published course on mobile", stories: ["US-004"], steps: ["STEP-008", "STEP-009"], edges: [{id: "EDGE-006", priority: "P0", tests: ["TC-MOBILE-PUBLISHED-ONLY"]}], tests: ["TC-MOBILE-PUBLISHED-ONLY"]}

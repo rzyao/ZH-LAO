@@ -15,6 +15,7 @@ const catalog = [
   'content.lo_syllables.read','content.lo_syllables.write','content.lo_syllables.review','content.lo_syllables.publish',
   'content.lo_words.read','content.lo_words.write','content.lo_words.review','content.lo_words.publish',
   'content.lo_sentences.read','content.lo_sentences.write','content.lo_sentences.review','content.lo_sentences.publish',
+  'content.curriculum.read','content.curriculum.write','content.curriculum.publish',
 ] as const;
 
 export type OperatorPermissionKey = (typeof catalog)[number];

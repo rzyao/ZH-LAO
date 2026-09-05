@@ -1,3 +1,5 @@
+import { z } from 'zod'
+
 export type ContentLanguageCode = 'zh' | 'lo'
 export type StructuredContentType =
   | 'zh_pinyin_element' | 'zh_syllable' | 'zh_hanzi' | 'zh_word' | 'zh_sentence'
@@ -116,3 +118,162 @@ export interface ManagedStructuredContent {
 export interface ManagedStructuredContentList { items: ManagedStructuredContent[]; total: number }
 export interface StructuredRevisionItem { revisionId: string; revisionNumber: number; status: string; snapshot: { fields: Record<string, unknown>; composition: Array<{ contentId: string; position: number }> }; reviewRemark: string | null; reviewedAt: string | null; publishedAt: string | null; createdAt: string }
 export interface ContentReferenceItem { contentId: string; contentType: StructuredContentType; position: number | null }
+
+export const LaoLetterTypeSchema = z.enum(['consonant', 'vowel', 'tone_mark', 'other'])
+export const LaoLetterContentStatusSchema = z.enum(['active', 'disabled', 'archived'])
+export const LaoLetterRevisionStatusSchema = z.enum(['draft', 'pending_review', 'approved', 'rejected', 'none'])
+export const LaoLetterSortSchema = z.enum(['sort_order', 'character', 'name', 'romanization', 'updated_at'])
+export const LaoLetterOrderSchema = z.enum(['asc', 'desc'])
+export const LaoLetterBatchActionSchema = z.enum(['submit_review', 'approve', 'reject', 'publish', 'archive'])
+
+const commaSeparated = <const Values extends readonly [string, ...string[]]>(values: Values) => z.union([
+  z.string(),
+  z.array(z.string()),
+]).transform((value): Values[number][] => {
+  const entries = typeof value === 'string' ? value.split(',') : value
+  return z.array(z.enum(values)).parse(entries)
+}).transform((values) => [...new Set(values)].sort((left, right) => left.localeCompare(right, 'en')))
+
+const normalizedSearchText = z.string().max(128).transform((value) => value.normalize('NFC').trim())
+
+export const LaoLetterSearchSchema = z.object({
+  q: normalizedSearchText.optional(),
+  letter_type: commaSeparated(['consonant', 'vowel', 'tone_mark', 'other']).default([]),
+  letter_class: commaSeparated(['cons_low', 'cons_middle', 'cons_high']).default([]),
+  content_status: commaSeparated(['active', 'disabled', 'archived']).default([]),
+  revision_status: commaSeparated(['draft', 'pending_review', 'approved', 'rejected', 'none']).default([]),
+  sort: LaoLetterSortSchema.default('sort_order'),
+  order: LaoLetterOrderSchema.default('asc'),
+  page: z.coerce.number().int().min(1).default(1),
+  page_size: z.coerce.number().int().min(1).max(500).default(50),
+}).strict().transform((value) => ({
+  ...(value.q ? { q: value.q } : {}),
+  letter_type: value.letter_type,
+  letter_class: value.letter_class,
+  content_status: value.content_status,
+  revision_status: value.revision_status,
+  sort: value.sort,
+  order: value.order,
+  page: value.page,
+  page_size: value.page_size,
+}))
+
+export type LaoLetterSearch = z.output<typeof LaoLetterSearchSchema>
+export type LaoLetterSearchInput = Readonly<{
+  q?: string
+  letter_type?: readonly string[] | string
+  letter_class?: readonly string[] | string
+  content_status?: readonly string[] | string
+  revision_status?: readonly string[] | string
+  sort?: z.infer<typeof LaoLetterSortSchema>
+  order?: z.infer<typeof LaoLetterOrderSchema>
+  page?: number | string
+  page_size?: number | string
+}>
+
+export const LaoLetterListItemSchema = z.object({
+  content_id: z.uuid(),
+  character: z.string().min(1).max(16),
+  letter_type: LaoLetterTypeSchema,
+  letter_class: z.string().nullable(),
+  name: z.string().nullable(),
+  romanization: z.string().nullable(),
+  sort_order: z.number().int().nullable(),
+  content_status: LaoLetterContentStatusSchema,
+  working_revision_id: z.uuid().nullable(),
+  working_revision_status: LaoLetterRevisionStatusSchema.exclude(['none']).nullable(),
+  lock_version: z.number().int().min(0).nullable(),
+  updated_at: z.iso.datetime({ offset: true }),
+  available_actions: z.array(LaoLetterBatchActionSchema),
+}).strict()
+
+export const LaoLetterListDataSchema = z.object({
+  items: z.array(LaoLetterListItemSchema),
+  page: z.number().int().min(1),
+  page_size: z.number().int().min(1).max(500),
+  total: z.number().int().min(0),
+  batch_actions: z.array(LaoLetterBatchActionSchema),
+}).strict()
+
+export const LaoLetterSelectionQuerySchema = z.object({
+  q: normalizedSearchText.optional(),
+  letter_type: z.array(LaoLetterTypeSchema),
+  letter_class: z.array(z.enum(['cons_low', 'cons_middle', 'cons_high'])),
+  content_status: z.array(LaoLetterContentStatusSchema),
+  revision_status: z.array(LaoLetterRevisionStatusSchema),
+  sort: LaoLetterSortSchema,
+  order: LaoLetterOrderSchema,
+}).strict()
+
+export const LaoLetterSelectionPreviewSchema = z.object({
+  query: LaoLetterSelectionQuerySchema,
+  expected_count: z.number().int().min(0),
+  selection_hash: z.string().regex(/^[a-f0-9]{64}$/u),
+}).strict()
+
+export const LaoLetterBatchTaskStatusSchema = z.enum(['queued', 'running', 'completed', 'completed_with_issues', 'failed'])
+export const LaoLetterBatchItemStatusSchema = z.enum(['queued', 'running', 'succeeded', 'failed', 'skipped'])
+export const LaoLetterBatchTaskSummarySchema = z.object({
+  task_id: z.uuid(),
+  action: LaoLetterBatchActionSchema,
+  selection_mode: z.enum(['explicit_ids', 'query_all']),
+  status: LaoLetterBatchTaskStatusSchema,
+  target_count: z.number().int().positive(),
+  processed_count: z.number().int().min(0),
+  succeeded_count: z.number().int().min(0),
+  failed_count: z.number().int().min(0),
+  skipped_count: z.number().int().min(0),
+  last_error_code: z.string().nullable().optional(),
+  created_at: z.iso.datetime({ offset: true }),
+  started_at: z.iso.datetime({ offset: true }).nullable().optional(),
+  completed_at: z.iso.datetime({ offset: true }).nullable().optional(),
+}).strict()
+export const LaoLetterBatchTaskListSchema = z.object({
+  items: z.array(LaoLetterBatchTaskSummarySchema),
+  page: z.number().int().positive(),
+  page_size: z.number().int().min(1).max(100),
+  total: z.number().int().min(0),
+}).strict()
+export const LaoLetterBatchTaskItemSchema = z.object({
+  item_no: z.number().int().positive(),
+  content_id: z.uuid(),
+  revision_id: z.uuid().nullable().optional(),
+  status: LaoLetterBatchItemStatusSchema,
+  error_code: z.string().nullable().optional(),
+  error_message: z.string().nullable().optional(),
+  retry_count: z.number().int().min(0),
+  completed_at: z.iso.datetime({ offset: true }).nullable().optional(),
+}).strict()
+export const LaoLetterBatchTaskDetailSchema = z.object({
+  task: LaoLetterBatchTaskSummarySchema,
+  items: z.array(LaoLetterBatchTaskItemSchema),
+  page: z.number().int().positive(),
+  page_size: z.number().int().min(1).max(100),
+  total: z.number().int().min(0),
+}).strict()
+
+export type LaoLetterListItem = z.infer<typeof LaoLetterListItemSchema>
+export type LaoLetterListData = z.infer<typeof LaoLetterListDataSchema>
+export type LaoLetterSelectionQuery = z.infer<typeof LaoLetterSelectionQuerySchema>
+export type LaoLetterSelectionPreview = z.infer<typeof LaoLetterSelectionPreviewSchema>
+export type LaoLetterBatchTaskSummary = z.infer<typeof LaoLetterBatchTaskSummarySchema>
+export type LaoLetterBatchTaskList = z.infer<typeof LaoLetterBatchTaskListSchema>
+export type LaoLetterBatchTaskDetail = z.infer<typeof LaoLetterBatchTaskDetailSchema>
+export type LaoLetterBatchItemStatus = z.infer<typeof LaoLetterBatchItemStatusSchema>
+
+export function normalizeLaoLetterSearch(input: LaoLetterSearchInput): LaoLetterSearch {
+  return LaoLetterSearchSchema.parse(input)
+}
+
+export function laoLetterSelectionQuery(input: LaoLetterSearchInput): LaoLetterSelectionQuery {
+  const query = normalizeLaoLetterSearch(input)
+  return {
+    ...(query.q === undefined ? {} : { q: query.q }),
+    letter_type: query.letter_type,
+    letter_class: query.letter_class,
+    content_status: query.content_status,
+    revision_status: query.revision_status,
+    sort: query.sort,
+    order: query.order,
+  }
+}

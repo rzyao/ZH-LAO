@@ -5,6 +5,7 @@
     "identity": ["admin_credentials", "auth_identities", "basic_profiles", "devices", "learning_profiles", "otp_challenges", "sessions", "users"],
     "content": [
       "answer_rules", "content_equivalents", "content_relations", "content_tags", "contents",
+      "lo_letter_batch_task_items", "lo_letter_batch_tasks", "curriculum_command_receipts",
       "courses", "examples", "exercises", "lesson_items", "lesson_sections", "lessons",
       "lo_letters", "lo_sentence_words", "lo_sentences", "lo_syllable_letters", "lo_syllables", "lo_word_syllables",
       "lo_words", "meanings", "pronunciations", "question_contents", "question_options", "questions",
@@ -74,7 +75,11 @@
     "rewards.reward_grants.user_id", "rewards.reward_deliveries.target_reference_id",
     "trust.reports.reporter_user_id", "trust.reports.subject_id",
     "trust.moderation_evidence.asset_id", "content.content_revisions.entity_id",
-    "content.content_revisions.created_by_operator_id", "infrastructure.assets.id",
+    "content.content_revisions.created_by_operator_id",
+    "content.lo_letter_batch_tasks.public_id", "content.lo_letter_batch_tasks.requested_by_operator_id",
+    "content.lo_letter_batch_task_items.content_id", "content.lo_letter_batch_task_items.revision_id",
+    "content.curriculum_command_receipts.operator_id", "content.curriculum_command_receipts.aggregate_id",
+    "infrastructure.assets.id",
     "infrastructure.system_outbox_events.id", "infrastructure.system_outbox_events.event_id",
     "infrastructure.system_outbox_events.aggregate_id"
   ],

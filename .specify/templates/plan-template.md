@@ -4,7 +4,7 @@
 
 **Input**: Feature specification from `/specs/[###-feature-name]/spec.md`
 
-**Note**: This template is filled in by the `/speckit-plan` command; its definition describes the execution workflow.
+**Note**: This template is filled in by the `$speckit-plan` command; its definition describes the execution workflow.
 
 ## Summary
 
@@ -42,44 +42,18 @@
 
 [Gates determined based on constitution file]
 
-## Locked Decisions *(per Constitution Principle VII)*
-
-<!--
-  LOCKED decisions come from authoritative docs / ADR / frozen migration.
-  Implementation MUST NOT modify them. List every LOCKED decision this feature touches.
--->
-
-| Decision | Source | Why LOCKED |
-| --- | --- | --- |
-| [API / Public / DB contract / state transition / transaction boundary / error semantics / security-RBAC / cross-domain boundary] | [doc / ADR / migration] | [reason] |
-
-## Authority Snapshot
-
-<!--
-  Per Constitution Principle X (Grounding Gate). The plan is authoritative BELOW
-  its input authority. Record grounding context so a Gate PASS is reproducible.
--->
-
-- **Base Commit**: [current main commit at plan time]
-- **Scope Type / ID**: [domain:content | feature:login | ...]
-- **Referenced Authority Docs**:
-  - [docs/docs/developer/reference/domains/<domain>/...]
-  - [docs/docs/developer/reference/adr/ADR-0xx-...]
-  - [database/migrations/....sql]
-- **Existing Code / Schema / API / Contracts checked**: [summary of pre-plan scan; deltas only]
-
 ## Project Structure
 
 ### Documentation (this feature)
 
 ```text
 specs/[###-feature]/
-├── plan.md              # This file (/speckit-plan command output)
-├── research.md          # Phase 0 output (/speckit-plan command)
-├── data-model.md        # Phase 1 output (/speckit-plan command)
-├── quickstart.md        # Phase 1 output (/speckit-plan command)
-├── contracts/           # Phase 1 output (/speckit-plan command)
-└── tasks.md             # Phase 2 output (/speckit-tasks command - NOT created by /speckit-plan)
+├── plan.md              # This file ($speckit-plan command output)
+├── research.md          # Phase 0 output ($speckit-plan command)
+├── data-model.md        # Phase 1 output ($speckit-plan command)
+├── quickstart.md        # Phase 1 output ($speckit-plan command)
+├── contracts/           # Phase 1 output ($speckit-plan command)
+└── tasks.md             # Phase 2 output ($speckit-tasks command - NOT created by $speckit-plan)
 ```
 
 ### Source Code (repository root)

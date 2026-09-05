@@ -1,6 +1,6 @@
 ---
 status: active
-last_updated: 2026-09-04
+last_updated: 2026-09-05
 ---
 
 # Architecture Decision Records
@@ -34,5 +34,10 @@ last_updated: 2026-09-04
 | [ADR-025](ADR-025-admin-operator-account-provisioning.md) | 受控创建后台账号与操作员（随机一次性密码、同库原子编排） | `baseline` |
 | [ADR-026](ADR-026-unified-recursive-admin-menu-tree.md) | 后台菜单移除专门分组类型，统一为可自由嵌套的递归目录树（修订 ADR-022 / ADR-024） | `frozen` |
 | [ADR-027](ADR-027-navigable-directory-row-toggle.md) | 可导航目录点击菜单项目时同步伸缩，箭头保留纯伸缩操作（修订 ADR-026） | `frozen` |
+| [ADR-028](ADR-028-content-letter-batch-operations.md) | Content 字母异步批量操作（冻结目标、逐项事务、长期结果、失败重试、不可取消） | `baseline` |
+| [ADR-029](ADR-029-curriculum-revision-published-view.md) | Course/Lesson 以 published/working revision pointer 解析正式视图，snapshot 固定编排及被引用 revision，发布原子切换 | `frozen` |
+| [ADR-030](ADR-030-transactional-owner-domain-audit-boundary.md) | Owner Domain 通过窄 Operations 公共边界在其本地事务内写 append-only 成功审计 | `frozen` |
+| [ADR-031](ADR-031-admin-operator-password-reset.md) | 受控后台操作员密码重置（一次性临时密码、首次登录改密、会话撤销与原子审计） | `baseline` |
+| [ADR-032](ADR-032-curriculum-lifecycle-idempotency.md) | Course/Lesson 生命周期命令持久化幂等收据（同事务状态变更与成功审计） | `frozen` |
 
 ADR 记录长期取舍；字段和业务规格仍以对应领域文档为唯一事实源。

@@ -6,8 +6,8 @@ import type { IdentityPublicQueries } from '../../identity/public/index.js';
 import { OperationsService } from '../application/services/index.js';
 import { PostgresOperationsRepository } from '../infrastructure/index.js';
 import { registerOperationsRoutes } from './routes.js';
+import type { AdminOperatorProvisioningService } from '../../admin-operator-provisioning/public/index.js';
 import type { AdminCredentialOperations } from '../../identity/public/index.js';
-import type { AdminOperatorProvisioningService } from '../../admin-operator-provisioning/application/admin-operator-provisioning-service.js';
 
 export type OperationsModule = Readonly<{ service: OperationsService; registerHttp(app:FastifyInstance):Promise<void> }>;
 export function buildOperationsModule(options:{executor:DatabaseExecutor;transactionManager:TransactionManager;identity:IdentityPublicQueries;authentication:AuthenticationProvider;service?:OperationsService;provisioning?:AdminOperatorProvisioningService;credentials?:AdminCredentialOperations}):OperationsModule {

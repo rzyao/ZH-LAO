@@ -84,6 +84,12 @@ export function HomeScreen({ navigation }: HomeScreenProps) {
             onPress={() => navigation.navigate('ResourceDetail', { resourceId: DEMO_RESOURCE_ID })}
             testID="home-open-resource"
           />
+          <AppButton
+            title="浏览课程"
+            variant="secondary"
+            onPress={() => navigation.navigate('CourseCatalog')}
+            testID="home-open-courses"
+          />
         </View>
 
         <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.borderSoft }]}>

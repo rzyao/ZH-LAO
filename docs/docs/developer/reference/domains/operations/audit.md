@@ -68,7 +68,7 @@ COMMIT
 
 跨领域动作不能为了 Audit 原子性而让 Operations 直接写 Owner Schema。
 
-当前基本链路：
+默认链路：
 
 ```text
 Operations authorize
@@ -82,7 +82,7 @@ Operations success Audit
 
 V1 不引入跨领域 Distributed Transaction。
 
-这意味着 Owner Domain 已提交而后续 Audit 写入失败时存在可靠性交付缺口。未来如果要求强可靠后台审计，应通过正式的 Durable Audit / Outbox Contract 解决，而不是违反 Domain Ownership。
+这意味着 Owner Domain 已提交而后续 Audit 写入失败时存在可靠性交付缺口。对于 [ADR-030](../../adr/ADR-030-transactional-owner-domain-audit-boundary.md) 明确批准的同库本地事务动作，Owner Domain 通过 `OperationsTransactionalAuditBoundary` 在自己的事务中写入 Operations append-only Audit；审计失败则整个 Owner mutation 回滚。它不是 Operations 直接写 Owner Schema，也不是 Distributed Transaction。
 
 ## Audit Details 安全
 

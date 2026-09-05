@@ -47,6 +47,7 @@ export const NAV_ITEMS: NavItem[] = [
               { key: 'lo-review', label: '审核与发布', href: '/content/lo/review', icon: ShieldCheck, children: [] },
             ],
           },
+          { key: 'courses', label: '课程管理', href: '/content/courses', icon: GraduationCap, children: [] },
         ],
       },
       { key: 'learning', label: '学习系统', href: '/learning', icon: GraduationCap, domain: 'learning', placeholder: true, children: [] },

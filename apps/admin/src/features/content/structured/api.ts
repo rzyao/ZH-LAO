@@ -1,5 +1,19 @@
 import { apiClient } from '@/api/client'
-import type { ContentCategoryConfig, ContentReferenceItem, ManagedStructuredContentList, StructuredRevisionItem } from './contracts'
+import {
+  LaoLetterListDataSchema,
+  LaoLetterBatchTaskDetailSchema,
+  LaoLetterBatchTaskListSchema,
+  LaoLetterBatchTaskSummarySchema,
+  LaoLetterSelectionPreviewSchema,
+  laoLetterSelectionQuery,
+  normalizeLaoLetterSearch,
+  type ContentCategoryConfig,
+  type ContentReferenceItem,
+  type LaoLetterSearchInput,
+  type LaoLetterSelectionQuery,
+  type ManagedStructuredContentList,
+  type StructuredRevisionItem,
+} from './contracts'
 
 const base = '/api/v1/admin/content'
 const itemBase = (config: ContentCategoryConfig, contentId: string, revisionId: string) =>
@@ -35,5 +49,67 @@ export const structuredContentApi = {
   },
   async derive(config: ContentCategoryConfig, contentId: string) {
     return (await apiClient.post(`${base}/${config.apiPath}/${encodeURIComponent(contentId)}/derive-working`)).data
+  },
+}
+
+function laoLetterListPath(input: LaoLetterSearchInput): string {
+  const query = normalizeLaoLetterSearch(input)
+  const parameters = new URLSearchParams()
+  if (query.q) parameters.set('q', query.q)
+  if (query.letter_type.length > 0) parameters.set('letter_type', query.letter_type.join(','))
+  if (query.letter_class.length > 0) parameters.set('letter_class', query.letter_class.join(','))
+  if (query.content_status.length > 0) parameters.set('content_status', query.content_status.join(','))
+  if (query.revision_status.length > 0) parameters.set('revision_status', query.revision_status.join(','))
+  parameters.set('sort', query.sort)
+  parameters.set('order', query.order)
+  parameters.set('page', String(query.page))
+  parameters.set('page_size', String(query.page_size))
+  return `${base}/lo/letters?${parameters.toString()}`
+}
+
+export const laoLetterAdminApi = {
+  async list(input: LaoLetterSearchInput, signal?: AbortSignal) {
+    const response = await apiClient.get(laoLetterListPath(input), { signal })
+    return LaoLetterListDataSchema.parse(response.data)
+  },
+  async previewSelection(input: LaoLetterSearchInput, signal?: AbortSignal) {
+    const response = await apiClient.post(`${base}/lo/letters/selection-preview`, {
+      json: { query: laoLetterSelectionQuery(input) },
+      signal,
+    })
+    return LaoLetterSelectionPreviewSchema.parse(response.data)
+  },
+  async startBatch(input: Readonly<{
+    action: string
+    idempotencyKey: string
+    reason?: string
+    selection: Readonly<{ mode: 'explicit_ids'; content_ids: readonly string[]; expected_count: number }>
+      | Readonly<{ mode: 'query_all'; query: LaoLetterSelectionQuery; expected_count: number; selection_hash: string }>
+  }>) {
+    const response = await apiClient.post(`${base}/lo/letters/batch-tasks`, {
+      headers: { 'Idempotency-Key': input.idempotencyKey },
+      json: {
+        action: input.action,
+        selection: input.selection,
+        ...(input.reason === undefined ? {} : { reason: input.reason }),
+      },
+    })
+    return LaoLetterBatchTaskSummarySchema.parse(response.data)
+  },
+  async listBatchTasks(page: number, pageSize: number, signal?: AbortSignal) {
+    const response = await apiClient.get(`${base}/lo/letters/batch-tasks?page=${page}&page_size=${pageSize}`, { signal })
+    return LaoLetterBatchTaskListSchema.parse(response.data)
+  },
+  async getBatchTask(taskId: string, page: number, pageSize: number, status?: string, signal?: AbortSignal) {
+    const parameters = new URLSearchParams({ page: String(page), page_size: String(pageSize) })
+    if (status) parameters.set('status', status)
+    const response = await apiClient.get(`${base}/lo/letters/batch-tasks/${encodeURIComponent(taskId)}?${parameters}`, { signal })
+    return LaoLetterBatchTaskDetailSchema.parse(response.data)
+  },
+  async retryFailed(taskId: string) {
+    const response = await apiClient.post(`${base}/lo/letters/batch-tasks/${encodeURIComponent(taskId)}/retry-failed`, {
+      headers: { 'Idempotency-Key': globalThis.crypto.randomUUID() },
+    })
+    return LaoLetterBatchTaskSummarySchema.parse(response.data)
   },
 }

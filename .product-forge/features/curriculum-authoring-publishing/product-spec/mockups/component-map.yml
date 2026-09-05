@@ -1,0 +1,18 @@
+schema_version: 1
+feature: "curriculum-authoring-publishing"
+screens:
+  - screen: "course-list"
+    regions:
+      - {region: "course table", component: "CMP-DataTable", variant: "server", target_path: "admin:apps/admin/src/features/content/courses/pages/course-list.tsx", journeys: ["JRN-001"]}
+      - {region: "create action", component: "CMP-Button", variant: "default", target_path: "admin:apps/admin/src/features/content/courses/pages/course-list.tsx", journeys: ["JRN-001"]}
+  - screen: "course-editor"
+    regions:
+      - {region: "aggregate editor", component: "CMP-ListPageLayout", variant: "default", target_path: "admin:apps/admin/src/features/content/courses/pages/course-editor.tsx", journeys: ["JRN-001", "JRN-002"]}
+      - {region: "save action", component: "CMP-Button", variant: "default", target_path: "admin:apps/admin/src/features/content/courses/pages/course-editor.tsx", journeys: ["JRN-002"]}
+  - screen: "revision-review"
+    regions:
+      - {region: "revision state", component: "CMP-Badge", variant: "secondary", target_path: "admin:apps/admin/src/features/content/courses/components/revision-history.tsx", journeys: ["JRN-003"]}
+      - {region: "review confirmation", component: "CMP-Dialog", variant: "default", target_path: "admin:apps/admin/src/features/content/courses/pages/course-detail.tsx", journeys: ["JRN-003"]}
+  - screen: "mobile-course-reader"
+    regions:
+      - {region: "empty catalog", component: "CMP-EmptyState", variant: "default", target_path: "mobile:apps/mobile/src/features/courses/screens/course-catalog-screen.tsx", journeys: ["JRN-004"]}

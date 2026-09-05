@@ -1,6 +1,6 @@
 # V2 Database Baseline Report
 
-Generated from PostgreSQL catalog at: 2026-09-04T15:29:06.954Z
+Generated from PostgreSQL catalog at: 2026-09-05T00:32:41.924Z
 
 Final status: **PASS**
 
@@ -13,7 +13,7 @@ Final status: **PASS**
 | Role | postgres |
 | Business schemas | identity, content, learning, social, chat, audio, commerce, rewards, trust, operations, platform |
 | Infrastructure schemas | infrastructure |
-| Business tables | 129 core+revision / 121 original target |
+| Business tables | 132 core+revision / 121 original target |
 | Infrastructure tables | 2 |
 | Extensions | pg_trgm 1.6, plpgsql 1.0 |
 | Illegal cross-domain FK | 0 |
@@ -50,13 +50,18 @@ Only `pg_trgm` was added by V2. `plpgsql` is built in. The V2 baseline did not i
 | 1310_content_language_structures.sql | 3142fb45053a3d0c794286d03e4e4727632480dfda4cc2aa1fb732baeb7f0ab4 | 2026-09-04T13:54:56.255Z |
 | 1320_content_language_permissions.sql | 684994303405b9a0cbb07b8ccecab24eaabed8cc45aa049ecb5c316ab4a185c3 | 2026-09-04T13:54:56.297Z |
 | 1330_platform_menu_recursive_directories.sql | ce3abae555be0b7984a325ef3342a8ea0d5defd529dfcede6d6c712eec1b6a01 | 2026-09-04T15:29:05.772Z |
+| 1340_content_letter_batch_tasks.sql | d78597d7141b092b30975f35a6e82c20a459c9ce18cd3066f6bc22f6cefc88fc | 2026-09-04T17:36:26.731Z |
+| 1350_curriculum_revision_pointers.sql | 2e8b24b8ed285d7c0812868c7211b25e15529ce875f1bd74517b20da85aea346 | 2026-09-04T23:59:36.806Z |
+| 1360_admin_credentials_password_change_required.sql | 341ab4f9f16fbd20b37ae8c7080e6969bc78a7569bea5eed8c5bbc496c9ebdcb | 2026-09-04T23:59:36.823Z |
+| 1370_curriculum_lifecycle_idempotency.sql | 037fcce2b88210c5c7d61c478eaafdb24ab08ad7af7f76cef7ddf2acf917ac47 | 2026-09-04T23:59:36.826Z |
+| 1380_operations_password_reset_permission.sql | 1acfed921185d0b3c595807c2bfa41b80c9d4ea1e45fa9740938f5d3fa407e37 | 2026-09-05T00:06:31.101Z |
 
 ## Domain summary
 
 | Schema | Tables | PK | FK | UNIQUE constraints | CHECK | Indexes |
 | --- | --- | --- | --- | --- | --- | --- |
 | identity | 8 | 8 | 8 | 6 | 15 | 23 |
-| content | 36 | 36 | 49 | 29 | 54 | 76 |
+| content | 39 | 39 | 54 | 34 | 77 | 90 |
 | learning | 10 | 10 | 1 | 1 | 15 | 17 |
 | social | 19 | 19 | 26 | 10 | 26 | 43 |
 | chat | 7 | 7 | 9 | 6 | 14 | 15 |
@@ -161,6 +166,12 @@ Only `pg_trgm` was added by V2. `plpgsql` is built in. The V2 baseline did not i
 | trust.moderation_evidence.asset_id | uuid | PASS |
 | content.content_revisions.entity_id | uuid | PASS |
 | content.content_revisions.created_by_operator_id | uuid | PASS |
+| content.lo_letter_batch_tasks.public_id | uuid | PASS |
+| content.lo_letter_batch_tasks.requested_by_operator_id | uuid | PASS |
+| content.lo_letter_batch_task_items.content_id | uuid | PASS |
+| content.lo_letter_batch_task_items.revision_id | uuid | PASS |
+| content.curriculum_command_receipts.operator_id | uuid | PASS |
+| content.curriculum_command_receipts.aggregate_id | uuid | PASS |
 | infrastructure.assets.id | uuid | PASS |
 | infrastructure.system_outbox_events.id | uuid | PASS |
 | infrastructure.system_outbox_events.event_id | uuid | PASS |
@@ -196,6 +207,7 @@ Unresolved specification blockers: 0.
 | password_hash | character varying(255) | false | — | — |
 | created_at | timestamp with time zone | false | now() | — |
 | updated_at | timestamp with time zone | false | now() | — |
+| password_change_required | boolean | false | false | — |
 
 Constraints:
 
@@ -206,6 +218,7 @@ Constraints:
 | admin_credentials_user_id_fkey | f | FOREIGN KEY (user_id) REFERENCES identity.users(id) ON DELETE RESTRICT |
 | admin_credentials_created_at_not_null | n | NOT NULL created_at |
 | admin_credentials_id_not_null | n | NOT NULL id |
+| admin_credentials_password_change_required_not_null | n | NOT NULL password_change_required |
 | admin_credentials_password_hash_not_null | n | NOT NULL password_hash |
 | admin_credentials_updated_at_not_null | n | NOT NULL updated_at |
 | admin_credentials_user_id_not_null | n | NOT NULL user_id |
@@ -726,6 +739,8 @@ Indexes:
 | sort_order | integer | false | 0 | — |
 | created_at | timestamp with time zone | false | now() | — |
 | updated_at | timestamp with time zone | false | now() | — |
+| published_revision_id | bigint | true | — | — |
+| working_revision_id | bigint | true | — | — |
 
 Constraints:
 
@@ -733,6 +748,8 @@ Constraints:
 | --- | --- | --- |
 | courses_learning_language_check | c | CHECK (learning_language::text = ANY (ARRAY['zh'::character varying, 'lo'::character varying]::text[])) |
 | courses_status_check | c | CHECK (status::text = ANY (ARRAY['draft'::character varying, 'published'::character varying, 'archived'::character varying]::text[])) |
+| courses_published_revision_fk | f | FOREIGN KEY (published_revision_id) REFERENCES content.content_revisions(id) ON DELETE RESTRICT |
+| courses_working_revision_fk | f | FOREIGN KEY (working_revision_id) REFERENCES content.content_revisions(id) ON DELETE RESTRICT |
 | courses_created_at_not_null | n | NOT NULL created_at |
 | courses_id_not_null | n | NOT NULL id |
 | courses_learning_language_not_null | n | NOT NULL learning_language |
@@ -750,6 +767,52 @@ Indexes:
 | --- | --- | --- | --- |
 | courses_pkey | true | — | CREATE UNIQUE INDEX courses_pkey ON content.courses USING btree (id) |
 | courses_public_id_key | true | — | CREATE UNIQUE INDEX courses_public_id_key ON content.courses USING btree (public_id) |
+| idx_courses_published_revision | false | (published_revision_id IS NOT NULL) | CREATE INDEX idx_courses_published_revision ON content.courses USING btree (published_revision_id) WHERE (published_revision_id IS NOT NULL) |
+
+#### content.curriculum_command_receipts
+
+| Column | Type | Nullable | Default | Identity |
+| --- | --- | --- | --- | --- |
+| id | bigint | false | — | a |
+| operator_id | uuid | false | — | — |
+| aggregate_type | character varying(16) | false | — | — |
+| aggregate_id | uuid | false | — | — |
+| command | character varying(32) | false | — | — |
+| idempotency_key | character varying(128) | false | — | — |
+| request_fingerprint | character varying(64) | false | — | — |
+| response_payload | jsonb | false | '{}'::jsonb | — |
+| created_at | timestamp with time zone | false | now() | — |
+| updated_at | timestamp with time zone | false | now() | — |
+
+Constraints:
+
+| Name | Type | Definition |
+| --- | --- | --- |
+| curriculum_command_receipts_aggregate_type_check | c | CHECK (aggregate_type::text = ANY (ARRAY['course'::character varying, 'lesson'::character varying]::text[])) |
+| curriculum_command_receipts_command_check | c | CHECK (command::text = ANY (ARRAY['course.submit'::character varying, 'course.review'::character varying, 'course.publish'::character varying, 'lesson.submit'::character varying, 'lesson.review'::character varying, 'lesson.publish'::character varying]::text[])) |
+| curriculum_command_receipts_idempotency_key_check | c | CHECK (length(btrim(idempotency_key::text)) > 0) |
+| curriculum_command_receipts_request_fingerprint_check | c | CHECK (request_fingerprint::text ~ '^[0-9a-f]{64}$'::text) |
+| curriculum_command_receipts_response_payload_check | c | CHECK (jsonb_typeof(response_payload) = 'object'::text) |
+| curriculum_command_receipts_aggregate_id_not_null | n | NOT NULL aggregate_id |
+| curriculum_command_receipts_aggregate_type_not_null | n | NOT NULL aggregate_type |
+| curriculum_command_receipts_command_not_null | n | NOT NULL command |
+| curriculum_command_receipts_created_at_not_null | n | NOT NULL created_at |
+| curriculum_command_receipts_id_not_null | n | NOT NULL id |
+| curriculum_command_receipts_idempotency_key_not_null | n | NOT NULL idempotency_key |
+| curriculum_command_receipts_operator_id_not_null | n | NOT NULL operator_id |
+| curriculum_command_receipts_request_fingerprint_not_null | n | NOT NULL request_fingerprint |
+| curriculum_command_receipts_response_payload_not_null | n | NOT NULL response_payload |
+| curriculum_command_receipts_updated_at_not_null | n | NOT NULL updated_at |
+| curriculum_command_receipts_pkey | p | PRIMARY KEY (id) |
+| curriculum_command_receipts_idempotency_unique | u | UNIQUE (operator_id, aggregate_type, aggregate_id, command, idempotency_key) |
+
+Indexes:
+
+| Name | Unique | Predicate | Definition |
+| --- | --- | --- | --- |
+| curriculum_command_receipts_idempotency_unique | true | — | CREATE UNIQUE INDEX curriculum_command_receipts_idempotency_unique ON content.curriculum_command_receipts USING btree (operator_id, aggregate_type, aggregate_id, command, idempotency_key) |
+| curriculum_command_receipts_pkey | true | — | CREATE UNIQUE INDEX curriculum_command_receipts_pkey ON content.curriculum_command_receipts USING btree (id) |
+| idx_curriculum_command_receipts_aggregate | false | — | CREATE INDEX idx_curriculum_command_receipts_aggregate ON content.curriculum_command_receipts USING btree (aggregate_type, aggregate_id, created_at DESC) |
 
 #### content.examples
 
@@ -921,6 +984,8 @@ Indexes:
 | published_at | timestamp with time zone | true | — | — |
 | created_at | timestamp with time zone | false | now() | — |
 | updated_at | timestamp with time zone | false | now() | — |
+| published_revision_id | bigint | true | — | — |
+| working_revision_id | bigint | true | — | — |
 
 Constraints:
 
@@ -928,7 +993,9 @@ Constraints:
 | --- | --- | --- |
 | lessons_estimated_minutes_check | c | CHECK (estimated_minutes IS NULL OR estimated_minutes > 0) |
 | lessons_status_check | c | CHECK (status::text = ANY (ARRAY['draft'::character varying, 'published'::character varying, 'archived'::character varying]::text[])) |
+| lessons_published_revision_fk | f | FOREIGN KEY (published_revision_id) REFERENCES content.content_revisions(id) ON DELETE RESTRICT |
 | lessons_unit_id_fkey | f | FOREIGN KEY (unit_id) REFERENCES content.units(id) ON DELETE RESTRICT |
+| lessons_working_revision_fk | f | FOREIGN KEY (working_revision_id) REFERENCES content.content_revisions(id) ON DELETE RESTRICT |
 | lessons_created_at_not_null | n | NOT NULL created_at |
 | lessons_id_not_null | n | NOT NULL id |
 | lessons_public_id_not_null | n | NOT NULL public_id |
@@ -945,9 +1012,132 @@ Indexes:
 
 | Name | Unique | Predicate | Definition |
 | --- | --- | --- | --- |
+| idx_lessons_published_revision | false | (published_revision_id IS NOT NULL) | CREATE INDEX idx_lessons_published_revision ON content.lessons USING btree (published_revision_id) WHERE (published_revision_id IS NOT NULL) |
 | lessons_pkey | true | — | CREATE UNIQUE INDEX lessons_pkey ON content.lessons USING btree (id) |
 | lessons_public_id_key | true | — | CREATE UNIQUE INDEX lessons_public_id_key ON content.lessons USING btree (public_id) |
 | lessons_unit_id_sort_order_key | true | — | CREATE UNIQUE INDEX lessons_unit_id_sort_order_key ON content.lessons USING btree (unit_id, sort_order) |
+
+#### content.lo_letter_batch_task_items
+
+| Column | Type | Nullable | Default | Identity |
+| --- | --- | --- | --- | --- |
+| id | bigint | false | — | a |
+| task_id | bigint | false | — | — |
+| item_no | integer | false | — | — |
+| content_id | uuid | false | — | — |
+| revision_id | uuid | true | — | — |
+| status | character varying(16) | false | 'queued'::character varying | — |
+| error_code | character varying(64) | true | — | — |
+| error_message | text | true | — | — |
+| retry_count | integer | false | 0 | — |
+| last_attempt_at | timestamp with time zone | true | — | — |
+| completed_at | timestamp with time zone | true | — | — |
+| created_at | timestamp with time zone | false | now() | — |
+| updated_at | timestamp with time zone | false | now() | — |
+
+Constraints:
+
+| Name | Type | Definition |
+| --- | --- | --- |
+| lo_letter_batch_task_items_item_no_check | c | CHECK (item_no > 0) |
+| lo_letter_batch_task_items_lifecycle_time_check | c | CHECK (status::text = 'queued'::text AND last_attempt_at IS NULL AND completed_at IS NULL OR status::text = 'running'::text AND last_attempt_at IS NOT NULL AND completed_at IS NULL OR (status::text = ANY (ARRAY['succeeded'::character varying, 'failed'::character varying, 'skipped'::character varying]::text[])) AND last_attempt_at IS NOT NULL AND completed_at IS NOT NULL AND completed_at >= last_attempt_at) |
+| lo_letter_batch_task_items_result_check | c | CHECK ((status::text = ANY (ARRAY['queued'::character varying, 'running'::character varying, 'succeeded'::character varying]::text[])) AND error_code IS NULL AND error_message IS NULL OR (status::text = ANY (ARRAY['failed'::character varying, 'skipped'::character varying]::text[])) AND error_code IS NOT NULL) |
+| lo_letter_batch_task_items_retry_count_check | c | CHECK (retry_count >= 0) |
+| lo_letter_batch_task_items_status_check | c | CHECK (status::text = ANY (ARRAY['queued'::character varying, 'running'::character varying, 'succeeded'::character varying, 'failed'::character varying, 'skipped'::character varying]::text[])) |
+| lo_letter_batch_task_items_task_fk | f | FOREIGN KEY (task_id) REFERENCES content.lo_letter_batch_tasks(id) ON DELETE RESTRICT |
+| lo_letter_batch_task_items_content_id_not_null | n | NOT NULL content_id |
+| lo_letter_batch_task_items_created_at_not_null | n | NOT NULL created_at |
+| lo_letter_batch_task_items_id_not_null | n | NOT NULL id |
+| lo_letter_batch_task_items_item_no_not_null | n | NOT NULL item_no |
+| lo_letter_batch_task_items_retry_count_not_null | n | NOT NULL retry_count |
+| lo_letter_batch_task_items_status_not_null | n | NOT NULL status |
+| lo_letter_batch_task_items_task_id_not_null | n | NOT NULL task_id |
+| lo_letter_batch_task_items_updated_at_not_null | n | NOT NULL updated_at |
+| lo_letter_batch_task_items_pkey | p | PRIMARY KEY (id) |
+| lo_letter_batch_task_items_task_content_key | u | UNIQUE (task_id, content_id) |
+| lo_letter_batch_task_items_task_item_key | u | UNIQUE (task_id, item_no) |
+
+Indexes:
+
+| Name | Unique | Predicate | Definition |
+| --- | --- | --- | --- |
+| idx_lo_letter_batch_task_items_status | false | — | CREATE INDEX idx_lo_letter_batch_task_items_status ON content.lo_letter_batch_task_items USING btree (task_id, status, item_no) |
+| lo_letter_batch_task_items_pkey | true | — | CREATE UNIQUE INDEX lo_letter_batch_task_items_pkey ON content.lo_letter_batch_task_items USING btree (id) |
+| lo_letter_batch_task_items_task_content_key | true | — | CREATE UNIQUE INDEX lo_letter_batch_task_items_task_content_key ON content.lo_letter_batch_task_items USING btree (task_id, content_id) |
+| lo_letter_batch_task_items_task_item_key | true | — | CREATE UNIQUE INDEX lo_letter_batch_task_items_task_item_key ON content.lo_letter_batch_task_items USING btree (task_id, item_no) |
+
+#### content.lo_letter_batch_tasks
+
+| Column | Type | Nullable | Default | Identity |
+| --- | --- | --- | --- | --- |
+| id | bigint | false | — | a |
+| public_id | uuid | false | — | — |
+| action | character varying(24) | false | — | — |
+| selection_mode | character varying(16) | false | — | — |
+| selection_query | jsonb | true | — | — |
+| selection_hash | character varying(64) | false | — | — |
+| expected_count | integer | false | — | — |
+| target_count | integer | false | — | — |
+| reason | text | true | — | — |
+| requested_by_operator_id | uuid | false | — | — |
+| idempotency_key | character varying(128) | false | — | — |
+| status | character varying(32) | false | 'queued'::character varying | — |
+| processed_count | integer | false | 0 | — |
+| succeeded_count | integer | false | 0 | — |
+| failed_count | integer | false | 0 | — |
+| skipped_count | integer | false | 0 | — |
+| last_error_code | character varying(64) | true | — | — |
+| created_at | timestamp with time zone | false | now() | — |
+| updated_at | timestamp with time zone | false | now() | — |
+| started_at | timestamp with time zone | true | — | — |
+| completed_at | timestamp with time zone | true | — | — |
+
+Constraints:
+
+| Name | Type | Definition |
+| --- | --- | --- |
+| lo_letter_batch_tasks_action_check | c | CHECK (action::text = ANY (ARRAY['submit_review'::character varying, 'approve'::character varying, 'reject'::character varying, 'publish'::character varying, 'archive'::character varying]::text[])) |
+| lo_letter_batch_tasks_counter_sum_check | c | CHECK (processed_count = (succeeded_count + failed_count + skipped_count)) |
+| lo_letter_batch_tasks_counters_nonnegative_check | c | CHECK (processed_count >= 0 AND succeeded_count >= 0 AND failed_count >= 0 AND skipped_count >= 0) |
+| lo_letter_batch_tasks_counts_positive_check | c | CHECK (expected_count > 0 AND target_count > 0) |
+| lo_letter_batch_tasks_frozen_count_check | c | CHECK (target_count = expected_count) |
+| lo_letter_batch_tasks_lifecycle_time_check | c | CHECK (status::text = 'queued'::text AND started_at IS NULL AND completed_at IS NULL OR status::text = 'running'::text AND started_at IS NOT NULL AND completed_at IS NULL OR (status::text = ANY (ARRAY['completed'::character varying, 'completed_with_issues'::character varying, 'failed'::character varying]::text[])) AND started_at IS NOT NULL AND completed_at IS NOT NULL AND completed_at >= started_at) |
+| lo_letter_batch_tasks_processed_target_check | c | CHECK (processed_count <= target_count) |
+| lo_letter_batch_tasks_reason_check | c | CHECK ((action::text = ANY (ARRAY['reject'::character varying, 'archive'::character varying]::text[])) AND btrim(COALESCE(reason, ''::text)) <> ''::text OR (action::text <> ALL (ARRAY['reject'::character varying, 'archive'::character varying]::text[])) AND reason IS NULL) |
+| lo_letter_batch_tasks_selection_hash_check | c | CHECK (selection_hash::text ~ '^[0-9a-f]{64}$'::text) |
+| lo_letter_batch_tasks_selection_mode_check | c | CHECK (selection_mode::text = ANY (ARRAY['explicit_ids'::character varying, 'query_all'::character varying]::text[])) |
+| lo_letter_batch_tasks_selection_query_check | c | CHECK (selection_mode::text = 'query_all'::text AND selection_query IS NOT NULL AND jsonb_typeof(selection_query) = 'object'::text OR selection_mode::text = 'explicit_ids'::text AND selection_query IS NULL) |
+| lo_letter_batch_tasks_status_check | c | CHECK (status::text = ANY (ARRAY['queued'::character varying, 'running'::character varying, 'completed'::character varying, 'completed_with_issues'::character varying, 'failed'::character varying]::text[])) |
+| lo_letter_batch_tasks_terminal_count_check | c | CHECK ((status::text <> ALL (ARRAY['completed'::character varying, 'completed_with_issues'::character varying]::text[])) OR processed_count = target_count) |
+| lo_letter_batch_tasks_action_not_null | n | NOT NULL action |
+| lo_letter_batch_tasks_created_at_not_null | n | NOT NULL created_at |
+| lo_letter_batch_tasks_expected_count_not_null | n | NOT NULL expected_count |
+| lo_letter_batch_tasks_failed_count_not_null | n | NOT NULL failed_count |
+| lo_letter_batch_tasks_id_not_null | n | NOT NULL id |
+| lo_letter_batch_tasks_idempotency_key_not_null | n | NOT NULL idempotency_key |
+| lo_letter_batch_tasks_processed_count_not_null | n | NOT NULL processed_count |
+| lo_letter_batch_tasks_public_id_not_null | n | NOT NULL public_id |
+| lo_letter_batch_tasks_requested_by_operator_id_not_null | n | NOT NULL requested_by_operator_id |
+| lo_letter_batch_tasks_selection_hash_not_null | n | NOT NULL selection_hash |
+| lo_letter_batch_tasks_selection_mode_not_null | n | NOT NULL selection_mode |
+| lo_letter_batch_tasks_skipped_count_not_null | n | NOT NULL skipped_count |
+| lo_letter_batch_tasks_status_not_null | n | NOT NULL status |
+| lo_letter_batch_tasks_succeeded_count_not_null | n | NOT NULL succeeded_count |
+| lo_letter_batch_tasks_target_count_not_null | n | NOT NULL target_count |
+| lo_letter_batch_tasks_updated_at_not_null | n | NOT NULL updated_at |
+| lo_letter_batch_tasks_pkey | p | PRIMARY KEY (id) |
+| lo_letter_batch_tasks_operator_idempotency_key | u | UNIQUE (requested_by_operator_id, idempotency_key) |
+| lo_letter_batch_tasks_public_id_key | u | UNIQUE (public_id) |
+
+Indexes:
+
+| Name | Unique | Predicate | Definition |
+| --- | --- | --- | --- |
+| idx_lo_letter_batch_tasks_owned_history | false | — | CREATE INDEX idx_lo_letter_batch_tasks_owned_history ON content.lo_letter_batch_tasks USING btree (requested_by_operator_id, created_at DESC, id DESC) |
+| idx_lo_letter_batch_tasks_queue | false | ((status)::text = ANY ((ARRAY['queued'::character varying, 'running'::character varying])::text[])) | CREATE INDEX idx_lo_letter_batch_tasks_queue ON content.lo_letter_batch_tasks USING btree (status, created_at) WHERE ((status)::text = ANY ((ARRAY['queued'::character varying, 'running'::character varying])::text[])) |
+| lo_letter_batch_tasks_operator_idempotency_key | true | — | CREATE UNIQUE INDEX lo_letter_batch_tasks_operator_idempotency_key ON content.lo_letter_batch_tasks USING btree (requested_by_operator_id, idempotency_key) |
+| lo_letter_batch_tasks_pkey | true | — | CREATE UNIQUE INDEX lo_letter_batch_tasks_pkey ON content.lo_letter_batch_tasks USING btree (id) |
+| lo_letter_batch_tasks_public_id_key | true | — | CREATE UNIQUE INDEX lo_letter_batch_tasks_public_id_key ON content.lo_letter_batch_tasks USING btree (public_id) |
 
 #### content.lo_letters
 

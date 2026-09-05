@@ -57,6 +57,48 @@ describe('Content management list route', () => {
   });
 });
 
+describe('Curriculum public routes', () => {
+  it('returns UUID-only published snapshots and never returns an unpublished course', async () => {
+    const curriculumRepository = {
+      listPublishedCourses: async () => [{
+        id: '00000000-0000-4000-8000-000000000001', revisionId: '00000000-0000-4000-8000-000000000002', revisionNumber: 1,
+        snapshot: { title: '公开课程', sortOrder: 1, units: [] },
+      }],
+      listManagedCourses: async () => [],
+      findPublishedCourse: async (id: string) => id === '00000000-0000-4000-8000-000000000001' ? {
+        id, revisionId: '00000000-0000-4000-8000-000000000002', revisionNumber: 1,
+        snapshot: { title: '公开课程', sortOrder: 1, units: [] },
+      } : null,
+      findPublishedLesson: async () => null,
+      createCourseDraft: async () => ({ courseId: '00000000-0000-4000-8000-000000000001', revisionId: '00000000-0000-4000-8000-000000000002', lockVersion: 0 }),
+      createLessonDraft: async () => ({ lessonId: '00000000-0000-4000-8000-000000000003', revisionId: '00000000-0000-4000-8000-000000000004', lockVersion: 0 }),
+      replaceCourseStructure: async () => ({ lockVersion: 1, updatedAt: '2026-09-05T00:00:00.000Z' }), replaceLessonStructure: async () => ({ lockVersion: 1, updatedAt: '2026-09-05T00:00:00.000Z' }),
+      deriveCourseWorking: async () => ({ revisionId: '00000000-0000-4000-8000-000000000005', lockVersion: 0, updatedAt: '2026-09-05T00:00:00.000Z' }),
+      deriveLessonWorking: async () => ({ revisionId: '00000000-0000-4000-8000-000000000006', lockVersion: 0, updatedAt: '2026-09-05T00:00:00.000Z' }),
+      submitLessonRevision: async () => undefined,
+      reviewLessonRevision: async () => undefined,
+      publishLessonAtomic: async () => undefined,
+      submitCourseRevision: async () => undefined,
+      reviewCourseRevision: async () => undefined,
+      publishCourseAtomic: async () => undefined,
+    };
+    const app = buildApp({ logger: pino({ level: 'silent' }), database: {} as DatabaseExecutor });
+    await registerContentRoutes(app, {
+      contentRepository,
+      curriculumRepository,
+      authentication: { authenticate: async () => null },
+      authorizer: { requirePermission: async () => ({ operatorId: 'operator-1', authSubjectId: 'subject-1' }) },
+      audit: { recordSuccessfulAction: async () => undefined },
+    });
+    const catalog = await app.inject({ method: 'GET', url: '/api/v1/content/courses' });
+    expect(catalog.json()).toMatchObject({ data: { items: [{ id: '00000000-0000-4000-8000-000000000001', revisionId: '00000000-0000-4000-8000-000000000002' }] } });
+    expect(JSON.stringify(catalog.json())).not.toMatch(/published_revision_id|working_revision_id|"id":\d+/);
+    const unpublished = await app.inject({ method: 'GET', url: '/api/v1/content/courses/00000000-0000-4000-8000-000000000099' });
+    expect(unpublished.json()).toMatchObject({ code: 'NOT_FOUND' });
+    await app.close();
+  });
+});
+
 describe('中老内容类别管理路由', () => {
   it('九个类别路由逐项使用各自的读取权限', async () => {
     const permissions: string[] = [];

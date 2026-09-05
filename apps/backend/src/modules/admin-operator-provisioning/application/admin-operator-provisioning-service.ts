@@ -1,7 +1,7 @@
 import type { TransactionManager } from '../../../database/transaction-manager.js';
 import type { AuthorizedOperatorContext } from '../../operations/public/index.js';
-import { AdminAccountWriter } from '../../identity/application/services/admin-account-writer.js';
-import { AdminOperatorWriter } from '../../operations/application/services/admin-operator-writer.js';
+import { AdminAccountWriter } from '../../identity/public/admin-account-writer.js';
+import { AdminOperatorWriter } from '../../operations/public/index.js';
 
 export class AdminOperatorProvisioningService {
   constructor(

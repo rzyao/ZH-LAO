@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import {
   createMemoryHistory,
   createRouter,
@@ -40,7 +40,7 @@ function renderAt(initialEntry: string, authenticated = true) {
     routeTree,
     history: createMemoryHistory({ initialEntries: [initialEntry] }),
   })
-  return render(<RouterProvider router={testRouter} />)
+  return { ...render(<RouterProvider router={testRouter} />), router: testRouter }
 }
 
 describe('Router', () => {
@@ -81,6 +81,53 @@ describe('Router', () => {
     renderAt('/content/lo/letters')
     expect(await screen.findByTestId('content-lo-letters-page')).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: '字母管理' })).toBeInTheDocument()
+  })
+
+  it('严格解析 Lao-letter URL search 并在刷新入口恢复控件状态', async () => {
+    const view = renderAt('/content/lo/letters?q=%E0%BA%81&letter_type=vowel,consonant&letter_class=cons_middle&content_status=active&revision_status=none&sort=name&order=desc&page=4&page_size=100')
+    expect(await screen.findByTestId('content-lo-letters-page')).toBeInTheDocument()
+
+    await waitFor(() => expect(view.router.state.location.search).toEqual({
+      q: 'ກ',
+      letter_type: ['consonant', 'vowel'],
+      letter_class: ['cons_middle'],
+      content_status: ['active'],
+      revision_status: ['none'],
+      sort: 'name',
+      order: 'desc',
+      page: 4,
+      page_size: 100,
+    }))
+    expect(screen.getByRole('textbox', { name: '搜索字母' })).toHaveValue('ກ')
+    expect(screen.getByRole('combobox', { name: '字母类型' })).toHaveTextContent(/辅音.*元音|元音.*辅音/u)
+    expect(screen.getByRole('combobox', { name: '每页条数' })).toHaveTextContent('100')
+  })
+
+  it('搜索范围变化使用 URL 导航并把页码重置为第一页', async () => {
+    const view = renderAt('/content/lo/letters?q=%E0%BA%81&page=4&page_size=50')
+    const search = await screen.findByRole('textbox', { name: '搜索字母' })
+    fireEvent.change(search, { target: { value: 'ຂ' } })
+
+    await waitFor(() => {
+      expect(view.router.state.location.pathname).toBe('/content/lo/letters')
+      expect(view.router.state.location.search).toMatchObject({ q: 'ຂ', page: 1, page_size: 50 })
+    }, { timeout: 1_000 })
+  })
+
+  it('筛选、排序和页大小立即写回 URL 并重置页码', async () => {
+    const view = renderAt('/content/lo/letters?page=4&page_size=50')
+    await screen.findByTestId('content-lo-letters-page')
+
+    fireEvent.change(screen.getByRole('combobox', { name: '字母类型' }), { target: { value: 'vowel' } })
+    await waitFor(() => expect(view.router.state.location.search).toMatchObject({
+      letter_type: ['vowel'], page: 1, page_size: 50,
+    }))
+
+    fireEvent.change(screen.getByRole('combobox', { name: '排序字段' }), { target: { value: 'name' } })
+    await waitFor(() => expect(view.router.state.location.search).toMatchObject({ sort: 'name', page: 1 }))
+
+    fireEvent.change(screen.getByRole('combobox', { name: '每页条数' }), { target: { value: '100' } })
+    await waitFor(() => expect(view.router.state.location.search).toMatchObject({ page: 1, page_size: 100 }))
   })
 
   it('renders the 404 page for unknown routes', async () => {

@@ -4,11 +4,12 @@ import { ScreenContainer } from '../../../components/common/ScreenContainer';
 import { AppText } from '../../../components/common/AppText';
 import { CharacterCard } from '../components/CharacterCard';
 import { alphabetApi, type PublishedCharacter } from '../api/alphabetApi';
-import { audioService } from '../../../audio/audioService';
+import { useAudioPlayback } from '../../../audio';
 
 export const AlphabetScreen: React.FC = () => {
   const [sections, setSections] = useState<{ title: string; data: PublishedCharacter[] }[]>([]);
   const [loading, setLoading] = useState(true);
+  const playback = useAudioPlayback();
 
   useEffect(() => {
     loadAlphabet();
@@ -39,7 +40,7 @@ export const AlphabetScreen: React.FC = () => {
 
   const handlePlayAudio = async (char: PublishedCharacter) => {
     if (char.audioUrl) {
-      await audioService.play(char.audioUrl);
+      await playback.load(char.audioUrl);
     }
   };
 

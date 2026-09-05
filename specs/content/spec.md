@@ -57,6 +57,42 @@ Canonical fact owners:
 ### FR-009: C-end multi visibility guard
 客户端查询接口必须应用多重可见性过滤：仅当实体未软删除（`online_status != 'deleted'`）、处于上线状态（`online_status == 'online'`）且具有合法的 `published_revision_id` 时对外可见；仅当关联音频资产审核通过且哈希一致时投影真实播放地址。
 
+### FR-010: Lao letter administration query
+老挝语字母管理列表必须支持 Content API 白名单内的服务端搜索、筛选、稳定排序和 offset 分页，默认 50、最大 500。
+
+### FR-011: Query state recovery
+查询状态必须可由 URL 恢复，并在查询范围变化时重置无效页码和选择。
+
+### FR-012: Protected table columns
+操作列固定且不可隐藏；启用选择时选择列不可隐藏；其他显示列可设置。
+
+### FR-013: Current-page selection
+表头选择默认只作用于当前页，并以可访问三态复选框和准确数量反馈状态。
+
+### FR-014: Explicit query-all selection
+当前页选择可显式升级为当前查询全部，范围由服务端规范化 query、expected count 和 UUID 集合 hash 验证。
+
+### FR-015: Batch action eligibility
+批量动作可见性来自 Content 权限能力，服务端仍逐项执行授权和状态守卫。
+
+### FR-016: Permitted batch actions and confirmation
+仅支持 `submit_review`、`approve`、`reject`、`publish`、`archive`；全部二次确认，`reject` 和 `archive` 原因必填，不提供批量上线或下线。
+
+### FR-017: Durable asynchronous batch tasks
+Content 必须持久化无产品数量上限的异步批量任务，提交时冻结目标，Worker 分批逐项事务执行并允许部分成功。
+
+### FR-018: Batch task history and retry
+任务与逐项结果长期保留、不可取消、仅创建者可查看或重试，且只重试失败项。
+
+### FR-019: Distinct list and task states
+UI 必须明确区分加载、空数据、无匹配、错误、进行中、完成和部分完成状态。
+
+### FR-020: Batch action audit
+每个成功的逐项动作必须复用既有 Operations 成功审计并关联 batch task UUID。
+
+### FR-021: Batch API envelope and errors
+新接口必须遵守 ADR-023，并使用已登记的陈旧选择与不可重试任务业务码。
+
 ## Key Entities
 
 - **LaoCharacter (字母主实体)**:
@@ -151,3 +187,4 @@ Canonical fact owners:
 | Date | Source | FR-* Added | FR-* Modified | FR-* Removed |
 | --- | --- | --- | --- | --- |
 | 2026-09-02 | 002-lao-alphabet-management (initial baseline) | FR-001 ~ FR-009 | — | — |
+| 2026-09-05 | admin-data-table-enhancement（经人工例外批准合并） | FR-010 ~ FR-021 | — | — |

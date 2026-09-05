@@ -25,10 +25,17 @@ Course（课程）
                      └── LessonItem（课时项/挂载实体）
 ```
 
-### 1.2 挂载实体引用契约（Mounting Contract）[PA]
-- 课时项（LessonItem）通过受控的逻辑内容标识（`content_entity_type` + `content_entity_id`）关联具体词条。
+### 1.2 挂载实体引用契约（Mounting Contract）[PA, ADR-029]
+- 课时项（LessonItem）通过受控的内容 logical UUID 关联具体词条或练习；正式课程/课节 revision snapshot 同时固定该引用所对应的 **published Content Revision UUID**。
 - **只存引用，不复制本体**：课程结构只维护编排与排序元数据，不冗余复制词条文本或释义。
 - **生命周期解耦**：课程编排调整不产生新的词条版本；词条版本升级发布也不自动重排课程顺序。
+- Unit 与 LessonItem 是课程 aggregate 内部节点，不对客户端或跨域消费者暴露内部 BIGINT，也不伪造 public UUID。
+
+### 1.3 课程与课节正式视图 [PA, ADR-029]
+- Course 与 Lesson 都是独立 revisioned aggregate root；current published view 只由主实体的 `published_revision_id` 解析，working revision 由 `working_revision_id` 指向。
+- Course revision snapshot 固定 Unit 顺序与 Lesson UUID/revision UUID；Lesson revision snapshot 固定 Section/Item 顺序及每个挂载内容或练习的 published revision UUID。
+- 课程/课节已有 published view 时编辑必须派生新的 working revision；草稿、待审核、驳回或 approved revision 都不得作为学习端 current view。
+- Learning 保存的课程、课节或挂载内容 revision UUID 是历史快照引用；之后任何课程或词条发布不得改写它。
 
 ---
 
@@ -39,7 +46,7 @@ Course（课程）
 - **对话课（Dialogue Lesson）**：归属于特定场景的会话教学课时，包含角色定义（如角色 A/B）与会话句子流。
 
 ### 2.2 编排完整性校验规则
-- 页面挂载保存时，系统需进行全量引用有效性校验（内容存在、已上线）；
+- 页面挂载保存时，系统需进行全量引用有效性校验（内容存在、已上线且具有合法 published revision）；
 - 严禁静默丢弃错误挂载，保存失败需精准反馈具体非法项及位置。
 
 ---

@@ -21,7 +21,7 @@ source_share_url: https://chatgpt.com/share/6a937088-e570-83e9-912e-11cc3de27eba
 
 判断标准：**零用户时依然存在的数据 → Content；用户开始学习后才产生的数据 → Learning。**
 
-## Content 最终表清单（36 张，baseline）
+## Content 最终表清单（39 张，baseline + ADR-032 前向变更）
 
 ### Knowledge（21 张）
 
@@ -60,7 +60,7 @@ source_share_url: https://chatgpt.com/share/6a937088-e570-83e9-912e-11cc3de27eba
 
 （`dictionary_search_history` 是用户搜索行为事实，归 `learning.*`，见 [Learning 数据库](../learning/database.md)。）
 
-### Curriculum（5 张）
+### Curriculum（6 张）
 
 | # | 表 | 说明 |
 | ---: | --- | --- |
@@ -69,6 +69,38 @@ source_share_url: https://chatgpt.com/share/6a937088-e570-83e9-912e-11cc3de27eba
 | 28 | `lessons` | Lesson 定义与发布状态 |
 | 29 | `lesson_sections` | Lesson 分节 |
 | 30 | `lesson_items` | Lesson 内容项 |
+| 31 | `curriculum_command_receipts` | Course/Lesson 生命周期命令的持久化幂等收据（ADR-032） |
+
+### Curriculum revision published-view 前向变更（ADR-029，待实施）
+
+`0400_content.sql` 是冻结物理基线；下表是 **已接受但尚未实施** 的前向 migration 目标，不得写回或改写冻结 migration。
+
+| 表 | 新字段 / 规则 | 说明 |
+|---|---|---|
+| `courses` | `published_revision_id bigint NULL FK → content_revisions(id) RESTRICT`; `working_revision_id bigint NULL FK → content_revisions(id) RESTRICT` | 内部 current/working revision pointers；公开与跨域只使用 Course UUID / revision UUID。 |
+| `lessons` | 同 `courses` 两个 pointer 字段 | Lesson 可独立审核发布；不因所属 Course 的新 revision 失去自身历史。 |
+| `content_revisions.snapshot`（`entity_type=course`） | 固定 Unit 顺序、Lesson UUID 与 Lesson revision UUID | 课程正式编排快照。 |
+| `content_revisions.snapshot`（`entity_type=lesson`） | 固定 Section/Item 顺序，以及知识/练习 logical UUID 与 published revision UUID | 不复制 canonical 知识或答案；是 LessonItem revision pin 的唯一规范载体。 |
+
+应用服务在 root row lock 下校验 pointer 所指 revision 的 entity type/entity UUID/status，防止跨实体指针；数据库 FK 只保护 revision 行存在。`courses.status` / `lessons.status` 是 aggregate availability projection（draft/published/archived），不是 revision review state；有合法 `published_revision_id` 才可为 public current view。pointer、revision 状态、旧版本 supersede、availability projection、审计和事件必须在同一发布事务内更新。
+
+### Curriculum 生命周期幂等收据（ADR-032）
+
+`curriculum_command_receipts` 是 Content 所有的持久化收据，只覆盖 Course/Lesson revision 的 `submit`、`review`、`publish` 命令；必须通过新的前向 migration 创建，不得改写冻结 migration。
+
+| 字段 | 类型 | Null | 约束 | 说明 |
+| --- | --- | --- | --- | --- |
+| `id` | `bigint generated always as identity` | 否 | PK，仅域内使用 | 不可向 HTTP 输出。 |
+| `operator_id` | `uuid` | 否 | 无跨域物理 FK | Operations operator logical UUID。 |
+| `aggregate_type` | `varchar(16)` | 否 | CHECK `course/lesson` | Content aggregate 类型。 |
+| `aggregate_id` | `uuid` | 否 | — | Course/Lesson logical/public UUID。 |
+| `command` | `varchar(32)` | 否 | CHECK 六类 Course/Lesson submit/review/publish 命令 | 防止不同生命周期动作错误重放。 |
+| `idempotency_key` | `varchar(128)` | 否 | 非空 | 客户端提供的请求键。 |
+| `request_fingerprint` | `varchar(64)` | 否 | SHA-256 规范化请求摘要 | 同 key 的请求一致性判定。 |
+| `response_payload` | `jsonb` | 否 | object | 仅保存可公开重放的成功响应身份；不得含内部 BIGINT 或秘密。 |
+| `created_at, updated_at` | `timestamptz` | 否 | DEFAULT `now()` | 收据审计时间。 |
+
+唯一约束为 `UNIQUE(operator_id, aggregate_type, aggregate_id, command, idempotency_key)`。命令开始时先在调用方的 Content 本地事务中取得或创建 receipt；已存在 receipt 的 fingerprint 不同必须拒绝为 `CONFLICT`，一致时重放其成功 payload。新 receipt 与状态变更、发布 pointer、Operations 成功审计一起提交；任一失败整体回滚，不能留下成功可重放的 receipt。
 
 ### Revision（1 张）
 
@@ -98,6 +130,56 @@ source_share_url: https://chatgpt.com/share/6a937088-e570-83e9-912e-11cc3de27eba
 审核状态机与允许流转以 [Content 版本复核](versioning-review.md) 为唯一完整定义：`draft → pending_review → approved → published → superseded`；`pending_review → rejected → draft`，以及 `approved → draft`。严禁 `draft` 直接发布或批准。
 
 > **D-158 实施记录：**冻结的 `1240_content_revision.sql` 未被修改。前向迁移 `1290_content_revision_review_workflow.sql` 已实现上述字段、约束、索引及历史三状态数据兼容，并在目标 PostgreSQL 通过审计；Content 后端审核/发布链路已获得真实集成测试证据。
+
+### 字母批量任务（2 张，D-167 / ADR-028）
+
+以下为新增目标契约；必须通过新的前向 migration 实现，不得修改既有冻结 migration。
+
+#### `lo_letter_batch_tasks`
+
+| 字段 | 类型 | Null | 默认/约束 | 说明 |
+| --- | --- | --- | --- | --- |
+| `id` | `bigint generated always as identity` | 否 | PK | 域内任务 ID |
+| `public_id` | `uuid` | 否 | UNIQUE | API 使用的稳定任务 UUID |
+| `action` | `varchar(24)` | 否 | CHECK `submit_review/approve/reject/publish/archive` | 批量动作 |
+| `selection_mode` | `varchar(16)` | 否 | CHECK `explicit_ids/query_all` | 页内显式选择或当前查询全部 |
+| `selection_query` | `jsonb` | 是 | 必须为 object | `query_all` 的规范化查询快照；不允许任意字段或 SQL |
+| `selection_hash` | `varchar(64)` | 否 | — | 规范化查询与稳定有序 Content UUID 集合的 SHA-256 |
+| `expected_count` | `integer` | 否 | CHECK `> 0` | 管理员确认时看到的数量 |
+| `target_count` | `integer` | 否 | CHECK `> 0` | 提交事务实际冻结的数量，必须等于 expected_count |
+| `reason` | `text` | 是 | `reject/archive` 时 trim 后非空 | 驳回或归档原因 |
+| `requested_by_operator_id` | `uuid` | 否 | 无跨域 FK | Operations Operator logical UUID |
+| `idempotency_key` | `varchar(128)` | 否 | UNIQUE(`requested_by_operator_id`,`idempotency_key`) | 客户端提交幂等键 |
+| `status` | `varchar(32)` | 否 | DEFAULT `queued`; CHECK `queued/running/completed/completed_with_issues/failed` | 任务状态 |
+| `processed_count` | `integer` | 否 | DEFAULT 0, CHECK `>=0` | 已处理数量 |
+| `succeeded_count` | `integer` | 否 | DEFAULT 0, CHECK `>=0` | 成功数量 |
+| `failed_count` | `integer` | 否 | DEFAULT 0, CHECK `>=0` | 失败数量 |
+| `skipped_count` | `integer` | 否 | DEFAULT 0, CHECK `>=0` | 跳过数量 |
+| `last_error_code` | `varchar(64)` | 是 | — | 最近任务级安全错误码 |
+| `created_at, updated_at` | `timestamptz` | 否 | DEFAULT `now()` | 审计时间 |
+| `started_at, completed_at` | `timestamptz` | 是 | 与状态一致 | 执行时间 |
+
+同行不变量：`processed_count = succeeded_count + failed_count + skipped_count` 且 `processed_count <= target_count`；`completed*` 时 `processed_count = target_count`；`selection_mode='query_all'` 时 `selection_query IS NOT NULL`。任务长期保留，不提供物理删除或清理。
+
+队列索引：`(status, created_at)` WHERE `status IN ('queued','running')`；历史查询索引：`(requested_by_operator_id, created_at DESC)`。
+
+#### `lo_letter_batch_task_items`
+
+| 字段 | 类型 | Null | 默认/约束 | 说明 |
+| --- | --- | --- | --- | --- |
+| `id` | `bigint generated always as identity` | 否 | PK | 明细 ID |
+| `task_id` | `bigint` | 否 | FK → `lo_letter_batch_tasks(id)` ON DELETE RESTRICT | 所属任务 |
+| `item_no` | `integer` | 否 | CHECK `>0`; UNIQUE(`task_id`,`item_no`) | 稳定顺序 |
+| `content_id` | `uuid` | 否 | UNIQUE(`task_id`,`content_id`) | 冻结的 Content logical UUID |
+| `revision_id` | `uuid` | 是 | — | 提交时适用的 Revision UUID；`archive` 可空 |
+| `status` | `varchar(16)` | 否 | DEFAULT `queued`; CHECK `queued/running/succeeded/failed/skipped` | 逐项状态 |
+| `error_code` | `varchar(64)` | 是 | — | 失败/跳过业务码 |
+| `error_message` | `text` | 是 | — | 安全可展示原因 |
+| `retry_count` | `integer` | 否 | DEFAULT 0, CHECK `>=0` | 失败项重试次数 |
+| `last_attempt_at, completed_at` | `timestamptz` | 是 | — | 执行时间 |
+| `created_at, updated_at` | `timestamptz` | 否 | DEFAULT `now()` | 审计时间 |
+
+提交任务的单一 Content 事务必须创建任务、解析完整目标集合、写入全部 items 后才允许置 `queued`；目标集合为空，或实际数量/hash 与预览的 `expected_count/selection_hash` 不同则整体拒绝。Worker 使用 `FOR UPDATE SKIP LOCKED` 分批认领，逐项在独立事务中重取当前 Content/Revision 并执行状态、锁版本和权限检查。失败项重试只把 `failed` 明细恢复为 `queued`，并在同一事务内扣回相应 `processed_count/failed_count`；成功和跳过项不重复执行。
 
 ### Practice 定义（5 张）
 

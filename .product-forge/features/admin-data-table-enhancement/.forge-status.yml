@@ -1,0 +1,711 @@
+schema_version: 3
+feature: "admin-data-table-enhancement"
+created_at: "2026-09-04"
+v2_native: true
+feature_mode: "standard"
+flow_mode: "gated"
+speckit_mode: "classic"
+scope:
+  primary: "admin"
+  paths:
+    - "apps/admin"
+    - "apps/backend"
+    - "database"
+  cross_workspace: true
+phases:
+  problem_discovery: { status: "completed" }
+  research:
+    status: "completed"
+    digest_path: "research/digest.md"
+  product_spec:
+    status: "completed"
+    digest_path: "product-spec/digest.md"
+  design_system_harvest:
+    status: "completed"
+    digest_path: "design-system/manifest.md"
+  revalidation: { status: "approved" }
+  bridge: { status: "completed" }
+  i18n_harvest: { status: "pending" }
+  plan:
+    status: "completed"
+    digest_path: "plan/digest.md"
+  tasks:
+    status: "completed"
+    digest_path: "tasks/digest.md"
+  migration_plan:
+    status: "completed"
+    started_at: "2026-09-05T01:08:49+08:00"
+    completed_at: "2026-09-05T01:16:40+08:00"
+    digest_path: "migrations/digest.md"
+  pre_impl_review:
+    status: "skipped"
+    skip_reason: "用户明确要求直接进入代码实施。"
+  implement:
+    status: "completed"
+    started_at: "2026-09-05T01:18:34+08:00"
+    completed_at: "2026-09-05T03:56:59+08:00"
+    digest_path: "implement/digest.md"
+    red_gate:
+      status: "confirmed_failing"
+      tests: ["T004", "T007", "T010", "T012", "T013", "T014", "T015", "T023", "T027", "T028", "T029", "T034", "T035", "T036", "T037", "T045", "T046", "T047", "T048"]
+      skip_reason: null
+  code_review: { status: "completed" }
+  verify:
+    status: "completed"
+    digest_path: "verify/digest.md"
+  test_plan: { status: "completed", digest_path: "testing/test-plan.md" }
+  test_run: { status: "completed_with_known_issues", digest_path: "test-report.md" }
+  release_readiness: { status: "skipped", digest_path: "release-readiness.md", skip_reason: "用户明确跳过发布就绪门禁。" }
+  monitoring_setup: { status: "pending" }
+  experiment_design: { status: "pending" }
+  spec_merge: { status: "completed", merged_into: "specs/content/spec.md" }
+  retrospective: { status: "pending" }
+gates:
+  - phase: "problem_discovery"
+    decision: "approved"
+    reviewed_sha: "uncommitted"
+    risk: "low"
+    rationale: "继续进入研究阶段；问题严重度来自产品假设，需在研究中验证。"
+  - phase: "research"
+    decision: "approved"
+    reviewed_sha: "uncommitted"
+    risk: "low"
+    rationale: "研究已确认通用表格与领域批量审核契约必须分离，进入产品规格。"
+  - phase: "product_spec"
+    decision: "approved"
+    reviewed_sha: "uncommitted"
+    risk: "low"
+    rationale: "用户批准产品规格进入再验证；最终锁定仍受领域/API 权威接受约束。"
+  - phase: "revalidation"
+    decision: "approved"
+    reviewed_sha: "79feb6f7b82221da52e8f6bc1cd5f67d4694b415"
+    risk: "low"
+    rationale: "用户批准 v1.3；D-167、ADR-028、Content 数据库与 API 契约已收口，文档审计、生命周期审计和生产构建通过。"
+  - phase: "bridge"
+    decision: "approved"
+    timestamp: "2026-09-05T00:31:30+08:00"
+    notes: "用户批准 specs/006-admin-data-table-enhancement/spec.md，进入 Product Forge Phase 5 技术计划。"
+    conditions: []
+    sync_result: "clean"
+    skip_reason: null
+    rolled_back_to: null
+    reviewed_sha: "79feb6f7b82221da52e8f6bc1cd5f67d4694b415"
+    risk: "low"
+    reviewed_by_model: null
+    cross_model_findings: 0
+  - phase: "plan"
+    decision: "approved"
+    timestamp: "2026-09-05T00:53:09+08:00"
+    notes: "用户选择选项 1，明确批准跨 admin/backend/database 的技术计划并继续任务拆解。"
+    conditions: []
+    sync_result: "clean_with_expected_pre_tasks_warning"
+    skip_reason: null
+    rolled_back_to: null
+    reviewed_sha: "79feb6f7b82221da52e8f6bc1cd5f67d4694b415"
+    risk: "high"
+    signals:
+      cross_workspace: true
+      critical_findings: 0
+      high_findings: 0
+    reviewed_by_model: null
+    cross_model_findings: 0
+  - phase: "tasks"
+    decision: "approved"
+    timestamp: "2026-09-05T01:06:23+08:00"
+    notes: "用户选择选项 1，明确批准 58 项任务拆解，进入实施前流程。"
+    conditions: []
+    sync_result: "clean"
+    skip_reason: null
+    rolled_back_to: null
+    reviewed_sha: "79feb6f7b82221da52e8f6bc1cd5f67d4694b415"
+    risk: "high"
+    signals:
+      cross_workspace: true
+      task_count: 58
+      l_tasks: 31
+      xl_tasks: 0
+      critical_findings: 0
+      high_findings: 0
+    reviewed_by_model: null
+    cross_model_findings: 0
+  - phase: "code_review"
+    decision: "revised"
+    timestamp: "2026-09-05T05:57:16+08:00"
+    notes: "用户选择选项 1 后已完成修复与三维复审；CRITICAL/HIGH 为 0，等待用户批准代码审查门禁。"
+    conditions:
+      - "修复 F-004 至 F-010"
+      - "重新运行机器门禁与受影响测试"
+    sync_result: "clean"
+    skip_reason: null
+    rolled_back_to: "implement"
+    reviewed_sha: "79feb6f7b82221da52e8f6bc1cd5f67d4694b415"
+    risk: "high"
+    signals:
+      cross_workspace: true
+      critical_findings: 0
+      high_findings: 0
+    reviewed_by_model: null
+    cross_model_findings: 0
+  - phase: "verify"
+    decision: "approved_with_warnings"
+    timestamp: "2026-09-05T06:21:33+08:00"
+    notes: "用户确认接受 F-011、F-013 与 F-015 告警；Phase 7 验证完成。"
+    conditions:
+      - "F-011 作为后续吞吐优化保留"
+      - "F-013 等待 Content 契约负责人决定"
+      - "F-015 在后续治理状态变更时刷新下游 README"
+    sync_result: "pass_with_warnings"
+    skip_reason: null
+    rolled_back_to: null
+    reviewed_sha: "79feb6f7b82221da52e8f6bc1cd5f67d4694b415"
+    risk: "high"
+    signals:
+      critical_findings: 0
+      warning_findings: 3
+    reviewed_by_model: null
+    cross_model_findings: 0
+  - phase: "test_plan"
+    decision: "pending"
+    timestamp: "2026-09-05T06:42:00+08:00"
+    notes: "已生成标准范围测试计划；用户未提供真实测试环境或账号，真实环境执行前需补齐。"
+    conditions: []
+    sync_result: "clean"
+    skip_reason: null
+    rolled_back_to: null
+    reviewed_sha: "uncommitted"
+    risk: "high"
+    signals:
+      test_case_count: 43
+      critical_findings: 0
+      warning_findings: 1
+  - phase: "test_run"
+    decision: "skipped"
+    timestamp: "2026-09-05T06:53:00+08:00"
+    notes: "隔离自动化通过；真实本地登录已验证，但用户明确跳过缺少内容权限账号的真实业务路径测试，以及剩余交互式/人工检查。"
+    conditions:
+      - "发布前接受真实内容管理员路径未验证的风险"
+    sync_result: "pass_with_environment_warnings"
+    skip_reason: "用户明确要求跳过剩余测试。"
+    rolled_back_to: null
+    reviewed_sha: "uncommitted"
+    risk: "high"
+    signals:
+      feature_e2e_passed: 4
+      admin_tests_passed: 51
+      backend_tests_passed: 103
+      critical_findings: 0
+      warning_findings: 3
+  - phase: "release_readiness"
+    decision: "skipped"
+    timestamp: "2026-09-05T07:05:00+08:00"
+    notes: "用户明确跳过发布就绪门禁；有条件发布结论和未完成行动项保留在 release-readiness.md。"
+    conditions: []
+    sync_result: "conditional"
+    skip_reason: "用户选择跳过发布就绪检查。"
+    rolled_back_to: null
+    reviewed_sha: "uncommitted"
+    risk: "high"
+    action_items:
+      must: 5
+      must_completed: 0
+      should: 3
+  - phase: "spec_merge"
+    decision: "approved_with_conditions"
+    timestamp: "2026-09-05T07:15:00+08:00"
+    notes: "用户明确例外批准合并 FR-010 至 FR-021；发布就绪门禁仍为跳过状态。"
+    conditions:
+      - "合并不代表完成发布就绪、真实内容管理员路径验证或监控/SCA 行动项"
+    sync_result: "canonical_specs_updated"
+    skip_reason: null
+    rolled_back_to: null
+    reviewed_sha: "uncommitted"
+    risk: "high"
+archived: true
+archived_at: "2026-09-05T07:15:00+08:00"
+archive_reason: "Canonical spec merged by explicit user exception; feature artifacts retained in place for audit history."
+release_readiness:
+  flag_registry_path: "flags/registry.yml"
+  monitoring_paths: ["monitoring/dashboard.json", "monitoring/alerts.yml", "monitoring/slo.md"]
+  supply_chain_paths: ["supply-chain/README.md"]
+testing:
+  types: ["smoke", "e2e", "api", "regression", "unit", "integration"]
+  test_case_count: 43
+  playwright_files: 3
+  environment_url: "http://localhost:15173"
+  final_pass_rate: "100% isolated suite mapping"
+  bugs_found: 0
+  bugs_fixed: 0
+  bugs_deferred: 0
+  test_runs_total: 1
+migration:
+  db_kind: "postgres"
+  strategy: "additive_expand_only"
+  destructive_changes: false
+  rollback_destructive_after_writes: true
+  backfill_required: false
+  files:
+    plan: "migrations/migration-plan.md"
+    forward: "migrations/forward.sql"
+    rollback: "migrations/rollback.sql"
+    validation: "migrations/validation.sql"
+    risk_matrix: "migrations/risk-matrix.md"
+implement:
+  tasks_completed: 58
+  tasks_total: 58
+  progressive_checkpoints: 20
+  progressive_warnings: 9
+  progressive_critical: 0
+  dependencies:
+    added: 2
+    vetted: 2
+    warned: 0
+    blocked: 0
+    log_path: ".product-forge/features/admin-data-table-enhancement/dependency-log.md"
+change_requests:
+  - id: "CR-001"
+    title: "修正数据库派生表计数"
+    status: "accepted"
+    timestamp: "2026-09-05T01:35:07+08:00"
+    artifacts_affected: 6
+    tasks_added: 0
+    phase_rollback: null
+problem:
+  statement: "内容管理员在高频审核后台列表时，缺少统一的搜索、筛选、多选、批量审核与可扩展分页能力，因而无法高效地完成成批审核工作。"
+  severity: "10/10"
+  validation: "assumption_only"
+  go_decision: "investigate_further"
+tasks:
+  total: 58
+  groups: 8
+  story_coverage: "5/5"
+task_log:
+  - id: "T001"
+    status: "completed"
+    size: "S"
+    paths: []
+    started_at: "2026-09-05T01:17:20+08:00"
+    completed_at: "2026-09-05T01:18:34+08:00"
+    commit_sha: null
+  - id: "T002"
+    status: "completed"
+    size: "M"
+    paths: ["backend:test/support/test-database.ts", "backend:test/modules/content/lo-letter-batch-fixtures.ts"]
+    started_at: "2026-09-05T01:18:50+08:00"
+    completed_at: "2026-09-05T01:24:28+08:00"
+    commit_sha: null
+  - id: "T003"
+    status: "completed"
+    size: "S"
+    paths: ["admin:src/features/content/structured/lo-letter-test-fixtures.ts"]
+    started_at: "2026-09-05T01:18:50+08:00"
+    completed_at: "2026-09-05T01:24:28+08:00"
+    commit_sha: null
+  - id: "T004"
+    status: "completed"
+    size: "L"
+    paths: ["database:test/content-letter-batch-tasks.test.mjs", "database:test/validate.test.mjs"]
+    started_at: "2026-09-05T01:24:40+08:00"
+    completed_at: "2026-09-05T01:29:00+08:00"
+    commit_sha: null
+  - id: "T005"
+    status: "completed"
+    size: "L"
+    paths: ["database:migrations/1340_content_letter_batch_tasks.sql"]
+    started_at: "2026-09-05T01:29:15+08:00"
+    completed_at: "2026-09-05T01:37:14+08:00"
+    commit_sha: null
+  - id: "T006"
+    status: "completed"
+    size: "M"
+    paths: ["database:checks/expected-schema.json", "database:test/validate.test.mjs", "backend:src/database/required-migrations.generated.ts"]
+    started_at: "2026-09-05T01:29:15+08:00"
+    completed_at: "2026-09-05T01:37:14+08:00"
+    commit_sha: null
+  - id: "T007"
+    status: "completed"
+    size: "M"
+    paths: ["backend:test/modules/content/lo-letter-query.unit.test.ts", "backend:test/modules/content/lo-letter-batch-state.unit.test.ts"]
+    started_at: "2026-09-05T01:37:30+08:00"
+    completed_at: "2026-09-05T01:39:59+08:00"
+    commit_sha: null
+  - id: "T008"
+    status: "completed"
+    size: "L"
+    paths: ["backend:src/modules/content/domain/lo-letter-admin-query.ts", "backend:src/modules/content/domain/lo-letter-batch-task.ts", "backend:src/modules/content/domain/index.ts"]
+    started_at: "2026-09-05T01:40:10+08:00"
+    completed_at: "2026-09-05T01:44:04+08:00"
+    commit_sha: null
+  - id: "T009"
+    status: "completed"
+    size: "M"
+    paths: ["backend:src/modules/content/application/ports/lo-letter-admin-repository.ts", "backend:src/modules/content/application/ports/repositories.ts"]
+    started_at: "2026-09-05T01:40:10+08:00"
+    completed_at: "2026-09-05T01:44:04+08:00"
+    commit_sha: null
+  - id: "T010"
+    status: "completed"
+    size: "S"
+    paths: ["backend:test/unit/config.test.ts"]
+    started_at: "2026-09-05T01:44:15+08:00"
+    completed_at: "2026-09-05T01:45:39+08:00"
+    commit_sha: null
+  - id: "T011"
+    status: "completed"
+    size: "S"
+    paths: ["backend:src/config/schema.ts", "backend:src/config/env.ts"]
+    started_at: "2026-09-05T01:46:00+08:00"
+    completed_at: "2026-09-05T01:52:34+08:00"
+    commit_sha: null
+  - id: "T012"
+    status: "completed"
+    size: "L"
+    paths: ["backend:test/modules/content/lo-letter-query.integration.test.ts", "backend:test/modules/content/lo-letter-admin-http.contract.test.ts"]
+    started_at: "2026-09-05T01:48:00+08:00"
+    completed_at: "2026-09-05T01:52:34+08:00"
+    commit_sha: null
+  - id: "T013"
+    status: "completed"
+    size: "M"
+    paths: ["admin:src/components/data-table/data-table.test.tsx"]
+    started_at: "2026-09-05T01:52:45+08:00"
+    completed_at: "2026-09-05T01:58:31+08:00"
+    commit_sha: null
+  - id: "T014"
+    status: "completed"
+    size: "L"
+    paths: ["admin:src/features/content/structured/contracts.test.ts", "admin:src/features/content/structured/lo-letter-page.test.tsx", "admin:src/app/router/router.test.tsx"]
+    started_at: "2026-09-05T01:52:45+08:00"
+    completed_at: "2026-09-05T01:58:31+08:00"
+    commit_sha: null
+  - id: "T015"
+    status: "completed"
+    size: "M"
+    paths: ["admin:e2e/content-management.spec.ts"]
+    started_at: "2026-09-05T01:55:00+08:00"
+    completed_at: "2026-09-05T01:58:31+08:00"
+    commit_sha: null
+  - id: "T016"
+    status: "completed"
+    size: "L"
+    paths: ["backend:src/modules/content/infrastructure/postgres-lo-letter-admin-repository.ts", "backend:src/modules/content/infrastructure/index.ts"]
+    started_at: "2026-09-05T01:58:45+08:00"
+    completed_at: "2026-09-05T02:04:32+08:00"
+    commit_sha: null
+  - id: "T017"
+    status: "completed"
+    size: "M"
+    paths: ["backend:src/modules/content/application/use-cases/query-lo-letter-admin-list.ts", "backend:src/modules/content/application/index.ts"]
+    started_at: "2026-09-05T01:58:45+08:00"
+    completed_at: "2026-09-05T02:04:32+08:00"
+    commit_sha: null
+  - id: "T018"
+    status: "completed"
+    size: "M"
+    paths: ["backend:src/modules/content/http/lo-letter-batch-routes.ts", "backend:src/modules/content/http/composition.ts", "backend:src/modules/content/http/index.ts"]
+    started_at: "2026-09-05T01:58:45+08:00"
+    completed_at: "2026-09-05T02:04:32+08:00"
+    commit_sha: null
+  - id: "T019"
+    status: "completed"
+    size: "L"
+    paths: ["admin:src/components/data-table/data-table.tsx", "admin:src/components/data-table/data-table-pagination.tsx"]
+    started_at: "2026-09-05T02:05:00+08:00"
+    completed_at: "2026-09-05T02:14:36+08:00"
+    commit_sha: null
+  - id: "T020"
+    status: "completed"
+    size: "M"
+    paths: ["admin:src/features/content/structured/contracts.ts", "admin:src/features/content/structured/api.ts", "admin:src/features/content/structured/queries.ts"]
+    started_at: "2026-09-05T02:05:00+08:00"
+    completed_at: "2026-09-05T02:14:36+08:00"
+    commit_sha: null
+  - id: "T021"
+    status: "completed"
+    size: "M"
+    paths: ["admin:src/app/router/router.tsx", "admin:src/features/content/pages/category.tsx"]
+    started_at: "2026-09-05T02:05:00+08:00"
+    completed_at: "2026-09-05T02:14:36+08:00"
+    commit_sha: null
+  - id: "T022"
+    status: "completed"
+    size: "L"
+    paths: ["admin:src/features/content/structured/lo-letter-table.tsx", "admin:src/features/content/pages/category.tsx"]
+    started_at: "2026-09-05T02:14:45+08:00"
+    completed_at: "2026-09-05T02:24:13+08:00"
+    commit_sha: null
+  - id: "T023"
+    status: "completed"
+    size: "M"
+    paths: ["admin:src/components/data-table/data-table.test.tsx", "admin:src/features/content/structured/lo-letter-page.test.tsx"]
+    started_at: "2026-09-05T02:21:45+08:00"
+    completed_at: "2026-09-05T02:24:13+08:00"
+    commit_sha: null
+  - id: "T024"
+    status: "completed"
+    size: "M"
+    paths: ["admin:src/components/data-table/data-table.tsx", "admin:src/components/data-table/data-table-view-options.tsx"]
+    started_at: "2026-09-05T02:22:30+08:00"
+    completed_at: "2026-09-05T02:24:13+08:00"
+    commit_sha: null
+  - id: "T025"
+    status: "completed"
+    size: "M"
+    paths: ["admin:src/features/content/structured/lo-letter-columns.tsx", "admin:src/features/content/structured/lo-letter-column-preferences.ts"]
+    started_at: "2026-09-05T02:24:30+08:00"
+    completed_at: "2026-09-05T02:30:56+08:00"
+    commit_sha: null
+  - id: "T026"
+    status: "completed"
+    size: "S"
+    paths: ["admin:src/components/data-table/data-table.tsx", "admin:src/features/content/structured/lo-letter-columns.tsx"]
+    started_at: "2026-09-05T02:26:30+08:00"
+    completed_at: "2026-09-05T02:30:56+08:00"
+    commit_sha: null
+  - id: "T027"
+    status: "completed"
+    size: "L"
+    paths: ["backend:test/modules/content/lo-letter-selection.integration.test.ts", "backend:test/modules/content/lo-letter-admin-http.contract.test.ts"]
+    started_at: "2026-09-05T02:28:30+08:00"
+    completed_at: "2026-09-05T02:30:56+08:00"
+    commit_sha: null
+  - id: "T028"
+    status: "completed"
+    size: "L"
+    paths: ["admin:src/components/data-table/data-table.test.tsx", "admin:src/features/content/structured/lo-letter-selection.test.tsx"]
+    started_at: "2026-09-05T02:31:10+08:00"
+    completed_at: "2026-09-05T02:37:24+08:00"
+    commit_sha: null
+  - id: "T029"
+    status: "completed"
+    size: "M"
+    paths: ["admin:e2e/content-management.spec.ts"]
+    started_at: "2026-09-05T02:32:30+08:00"
+    completed_at: "2026-09-05T02:37:24+08:00"
+    commit_sha: null
+  - id: "T030"
+    status: "completed"
+    size: "L"
+    paths: ["backend:src/modules/content/infrastructure/postgres-lo-letter-admin-repository.ts", "backend:src/modules/content/application/use-cases/manage-lo-letter-selection.ts"]
+    started_at: "2026-09-05T02:34:30+08:00"
+    completed_at: "2026-09-05T02:37:24+08:00"
+    commit_sha: null
+  - id: "T031"
+    status: "completed"
+    size: "S"
+    paths: ["backend:src/modules/content/http/lo-letter-batch-routes.ts"]
+    started_at: "2026-09-05T02:37:35+08:00"
+    completed_at: "2026-09-05T02:46:02+08:00"
+    commit_sha: null
+  - id: "T032"
+    status: "completed"
+    size: "M"
+    paths: ["admin:src/components/data-table/data-table.tsx", "admin:src/components/data-table/data-table-column-header.tsx"]
+    started_at: "2026-09-05T02:39:00+08:00"
+    completed_at: "2026-09-05T02:46:02+08:00"
+    commit_sha: null
+  - id: "T033"
+    status: "completed"
+    size: "L"
+    paths: ["admin:src/features/content/structured/lo-letter-selection.ts", "admin:src/features/content/structured/lo-letter-batch-bar.tsx", "admin:src/features/content/pages/category.tsx"]
+    started_at: "2026-09-05T02:40:30+08:00"
+    completed_at: "2026-09-05T02:46:02+08:00"
+    commit_sha: null
+  - id: "T034"
+    status: "completed"
+    size: "L"
+    paths: ["backend:test/modules/content/lo-letter-batch-task.integration.test.ts"]
+    started_at: "2026-09-05T02:46:15+08:00"
+    completed_at: "2026-09-05T02:53:55+08:00"
+    commit_sha: null
+  - id: "T035"
+    status: "completed"
+    size: "L"
+    paths: ["backend:test/modules/content/lo-letter-admin-http.contract.test.ts"]
+    started_at: "2026-09-05T02:48:00+08:00"
+    completed_at: "2026-09-05T02:53:55+08:00"
+    commit_sha: null
+  - id: "T036"
+    status: "completed"
+    size: "L"
+    paths: ["backend:test/modules/content/lo-letter-batch-worker.integration.test.ts", "backend:test/integration/operations-content-batch-audit.test.ts"]
+    started_at: "2026-09-05T02:50:00+08:00"
+    completed_at: "2026-09-05T02:53:55+08:00"
+    commit_sha: null
+  - id: "T037"
+    status: "completed"
+    size: "L"
+    paths: ["admin:src/features/content/structured/lo-letter-batch-actions.test.tsx"]
+    started_at: "2026-09-05T02:54:10+08:00"
+    completed_at: "2026-09-05T03:00:39+08:00"
+    commit_sha: null
+  - id: "T038"
+    status: "completed"
+    size: "L"
+    paths: ["backend:src/modules/content/infrastructure/postgres-lo-letter-batch-repository.ts"]
+    started_at: "2026-09-05T02:55:45+08:00"
+    completed_at: "2026-09-05T03:00:39+08:00"
+    commit_sha: null
+  - id: "T039"
+    status: "completed"
+    size: "L"
+    paths: ["backend:src/modules/content/application/use-cases/manage-lo-letter-batch-tasks.ts", "backend:src/modules/content/application/index.ts"]
+    started_at: "2026-09-05T02:57:30+08:00"
+    completed_at: "2026-09-05T03:00:39+08:00"
+    commit_sha: null
+  - id: "T040"
+    status: "completed"
+    size: "L"
+    paths: ["backend:src/modules/operations/public/contracts.ts", "backend:src/modules/operations/public/permissions.ts", "backend:src/modules/operations/public/index.ts"]
+    started_at: "2026-09-05T03:00:50+08:00"
+    completed_at: "2026-09-05T03:11:09+08:00"
+    commit_sha: null
+  - id: "T041"
+    status: "completed"
+    size: "L"
+    paths: ["backend:src/modules/content/application/use-cases/process-lo-letter-batch.ts", "backend:src/modules/content/infrastructure/postgres-lo-letter-batch-repository.ts"]
+    started_at: "2026-09-05T03:02:00+08:00"
+    completed_at: "2026-09-05T03:11:09+08:00"
+    commit_sha: null
+  - id: "T042"
+    status: "completed"
+    size: "M"
+    paths: ["backend:src/bootstrap/build-worker.ts", "backend:src/modules/content/http/composition.ts"]
+    started_at: "2026-09-05T03:04:30+08:00"
+    completed_at: "2026-09-05T03:11:09+08:00"
+    commit_sha: null
+  - id: "T043"
+    status: "completed"
+    size: "M"
+    paths: ["backend:src/modules/content/http/lo-letter-batch-routes.ts"]
+    started_at: "2026-09-05T03:11:20+08:00"
+    completed_at: "2026-09-05T03:18:21+08:00"
+    commit_sha: null
+  - id: "T044"
+    status: "completed"
+    size: "L"
+    paths: ["admin:src/features/content/structured/lo-letter-batch-actions.tsx", "admin:src/features/content/structured/api.ts", "admin:src/features/content/pages/category.tsx"]
+    started_at: "2026-09-05T03:13:30+08:00"
+    completed_at: "2026-09-05T03:18:21+08:00"
+    commit_sha: null
+  - id: "T045"
+    status: "completed"
+    size: "L"
+    paths: ["backend:test/modules/content/lo-letter-batch-task.integration.test.ts", "backend:test/modules/content/lo-letter-admin-http.contract.test.ts"]
+    started_at: "2026-09-05T03:15:30+08:00"
+    completed_at: "2026-09-05T03:18:21+08:00"
+    commit_sha: null
+  - id: "T046"
+    status: "completed"
+    size: "L"
+    paths: ["backend:test/modules/content/lo-letter-batch-worker.integration.test.ts", "backend:test/integration/operations-content-batch-audit.test.ts"]
+    started_at: "2026-09-05T03:18:35+08:00"
+    completed_at: "2026-09-05T03:25:14+08:00"
+    commit_sha: null
+  - id: "T047"
+    status: "completed"
+    size: "L"
+    paths: ["admin:src/features/content/structured/lo-letter-batch-task-panel.test.tsx"]
+    started_at: "2026-09-05T03:20:30+08:00"
+    completed_at: "2026-09-05T03:25:14+08:00"
+    commit_sha: null
+  - id: "T048"
+    status: "completed"
+    size: "M"
+    paths: ["admin:e2e/content-management.spec.ts"]
+    started_at: "2026-09-05T03:22:00+08:00"
+    completed_at: "2026-09-05T03:25:14+08:00"
+    commit_sha: null
+  - id: "T049"
+    status: "completed"
+    size: "L"
+    paths: ["backend:src/modules/content/infrastructure/postgres-lo-letter-batch-repository.ts"]
+    started_at: "2026-09-05T03:25:30+08:00"
+    completed_at: "2026-09-05T03:30:11+08:00"
+    commit_sha: null
+  - id: "T050"
+    status: "completed"
+    size: "L"
+    paths: ["backend:src/modules/content/application/use-cases/manage-lo-letter-batch-tasks.ts", "backend:src/modules/content/application/use-cases/process-lo-letter-batch.ts"]
+    started_at: "2026-09-05T03:26:30+08:00"
+    completed_at: "2026-09-05T03:30:11+08:00"
+    commit_sha: null
+  - id: "T051"
+    status: "completed"
+    size: "L"
+    paths: ["backend:src/modules/content/http/lo-letter-batch-routes.ts"]
+    started_at: "2026-09-05T03:28:00+08:00"
+    completed_at: "2026-09-05T03:30:11+08:00"
+    commit_sha: null
+  - id: "T052"
+    status: "completed"
+    size: "M"
+    paths: ["admin:src/features/content/structured/contracts.ts", "admin:src/features/content/structured/api.ts", "admin:src/features/content/structured/queries.ts"]
+    started_at: "2026-09-05T03:30:25+08:00"
+    completed_at: "2026-09-05T03:35:20+08:00"
+    commit_sha: null
+  - id: "T053"
+    status: "completed"
+    size: "L"
+    paths: ["admin:src/features/content/structured/lo-letter-batch-task-panel.tsx", "admin:src/features/content/pages/category.tsx"]
+    started_at: "2026-09-05T03:31:30+08:00"
+    completed_at: "2026-09-05T03:35:20+08:00"
+    commit_sha: null
+  - id: "T054"
+    status: "completed"
+    size: "M"
+    paths: ["admin:src/features/content/structured/queries.ts", "admin:src/features/content/pages/category.tsx"]
+    started_at: "2026-09-05T03:33:00+08:00"
+    completed_at: "2026-09-05T03:35:20+08:00"
+    commit_sha: null
+  - id: "T055"
+    status: "completed"
+    size: "L"
+    paths: ["admin:e2e/content-management.spec.ts"]
+    started_at: "2026-09-05T03:35:35+08:00"
+    completed_at: "2026-09-05T03:47:48+08:00"
+    commit_sha: null
+  - id: "T056"
+    status: "completed"
+    size: "L"
+    paths: ["database:migrations/1340_content_letter_batch_tasks.sql", "database:test/content-letter-batch-tasks.test.mjs"]
+    started_at: "2026-09-05T03:40:00+08:00"
+    completed_at: "2026-09-05T03:47:48+08:00"
+    commit_sha: null
+  - id: "T057"
+    status: "completed"
+    size: "L"
+    paths: ["backend:test/modules/content/lo-letter-admin-http.contract.test.ts", "backend:test/modules/content/lo-letter-batch-worker.integration.test.ts", "backend:src/bootstrap/build-worker.ts"]
+    started_at: "2026-09-05T03:43:00+08:00"
+    completed_at: "2026-09-05T03:47:48+08:00"
+    commit_sha: null
+  - id: "T058"
+    status: "completed"
+    size: "M"
+    paths: ["database:test/", "backend:test/", "admin:src/", "admin:e2e/"]
+    started_at: "2026-09-05T03:48:00+08:00"
+    completed_at: "2026-09-05T03:56:59+08:00"
+    commit_sha: null
+research_dimensions:
+  competitors: "completed"
+  ux_patterns: "completed"
+  codebase: "completed"
+  tech_stack: "skipped"
+  metrics_roi: "skipped"
+input_richness_score: 5
+sync_runs:
+  last_run: "2026-09-05T01:35:07+08:00"
+  total_runs: 2
+  last_drift_count: 0
+  last_critical_count: 0
+  last_verdict: "CONSISTENT"
+last_updated: "2026-09-05T07:15:00+08:00"
+spec_path: "../../../specs/006-admin-data-table-enhancement/spec.md"
+delta_specs:
+  - "specs/content/spec.md"
+dependencies:
+  depends_on:
+    - "chinese-lao-content-hierarchy"
+  complements:
+    - "002-lao-alphabet-management"
+    - "005-unified-api-contract"
+  depended_on_by: []

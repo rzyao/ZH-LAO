@@ -128,7 +128,7 @@ type ContentPublicView = {
 
 ### Course/Lesson/Section
 
-Course/Lesson public view含 stable UUID、lifecycle、learning language/structure summary、current revision。Course structure可嵌入 Unit values，但 Unit没有跨域 identity。
+Course/Lesson public view含 stable UUID、lifecycle、learning language/structure summary、current revision。`public_current` 只从 Course/Lesson aggregate 的合法 published pointer 解析；`trusted_history` 必须提供 revision UUID，绝不按“最高 published revision”或当前可变关系重算。Course snapshot 固定 Unit 顺序与 Lesson UUID/revision UUID，Lesson snapshot 固定 Section/Item 顺序和所引用 Content/Exercise 的 published revision UUID。Course structure可嵌入 Unit values，但 Unit没有跨域 identity。
 
 Section public view存在是因为 `learning.lesson_progress.last_section_id` 保存 UUID logical reference。
 
@@ -156,7 +156,7 @@ type ContentRevisionView = {
 
 `translation` 的 `entityId` V1 定义为 parent `ContentPublicId`，表示该 Content 的 canonical translation set；不引用 `translations.id BIGINT`。
 
-Published revision immutable。下游保存 revision ID 后，Content 后续 publish/disable/archive不得改变该 revision snapshot。
+Published revision immutable。下游保存 revision ID 后，Content 后续 publish/disable/archive不得改变该 revision snapshot。Course/Lesson 的 `publishedRevisionId` 是 current view 的唯一入口，内部 pointer BIGINT 永不跨越 public contract。
 
 ## 7. Learning Contract
 

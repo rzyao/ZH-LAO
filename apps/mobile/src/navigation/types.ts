@@ -28,6 +28,9 @@ export type RootStackParamList = {
    * `NotFound` instead of rendering a broken screen.
    */
   ResourceDetail: { resourceId: string };
+  CourseCatalog: undefined;
+  CourseStructure: { courseId: string };
+  LessonContent: { lessonId: string };
 
   NotFound: { path?: string };
 };
