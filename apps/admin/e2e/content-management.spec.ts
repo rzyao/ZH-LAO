@@ -19,7 +19,7 @@ function envelope(data: unknown) {
   return JSON.stringify({ code: 'OK', data, request_id: '内容旅程测试' })
 }
 
-function item(input: { id: string; type: string; language: 'zh' | 'lo'; status: string; fields: Record<string, unknown>; composition?: Array<{ contentId: string; position: number }> }) {
+function item(input: { id: string; type: string; language: 'zh' | 'lo'; status: string; fields: Record<string, unknown>; composition?: Array<{ contentId: string; position: number }>; dictionary?: Record<string, unknown> }) {
   return {
     id: input.id,
     language: input.language,
@@ -29,7 +29,7 @@ function item(input: { id: string; type: string; language: 'zh' | 'lo'; status: 
     revisionNumber: 2,
     revisionStatus: input.status,
     lockVersion: 0,
-    snapshot: { fields: input.fields, composition: input.composition ?? [] },
+    snapshot: { fields: input.fields, composition: input.composition ?? [], ...(input.dictionary ? { dictionary: input.dictionary } : {}) },
   }
 }
 
@@ -70,6 +70,28 @@ async function prepare(page: Page, handler?: MockHandler) {
 }
 
 test.describe('中老语言内容管理旅程', () => {
+  test('dictionary JRN-001：Word 的词典资料通过父 Content UUID 聚合保存', async ({ page }) => {
+    const word = item({ id: '00000000-0000-4000-8000-000000000071', type: 'zh_word', language: 'zh', status: 'draft', fields: { simplified: '你好', difficultyLevel: 1 }, dictionary: { meanings: [], examples: [], equivalents: [], relations: [], tags: [] } })
+    const updates: Array<{ path: string; body: unknown; key: string | null }> = []
+    await prepare(page, async (route, pathname) => {
+      if (pathname.endsWith('/zh/words') && route.request().method() === 'GET') {
+        await route.fulfill({ status: 200, contentType: 'application/json', body: envelope({ items: [word], total: 1 }) }); return true
+      }
+      if (pathname.includes('/content/knowledge/') && route.request().method() === 'PUT') {
+        updates.push({ path: pathname, body: await route.request().postDataJSON(), key: route.request().headers()['idempotency-key'] ?? null })
+        await route.fulfill({ status: 200, contentType: 'application/json', body: envelope({ status: 'draft', lockVersion: updates.length }) }); return true
+      }
+      return false
+    })
+    await page.goto('/content/zh/words')
+    await page.getByRole('button', { name: '词典资料' }).click()
+    await page.getByLabel('释义').fill('[{"language":"lo","definition":"ສະບາຍດີ","senseOrder":1}]')
+    await page.getByRole('button', { name: '保存词典资料' }).click()
+    await expect.poll(() => updates.length).toBe(4)
+    expect(updates[0]).toMatchObject({ path: '/api/v1/admin/content/knowledge/00000000-0000-4000-8000-000000000071/meanings', body: { expectedLockVersion: 0, meanings: [{ definition: 'ສະບາຍດີ' }] } })
+    expect(updates.every((update) => Boolean(update.key))).toBe(true)
+  })
+
   test('十二个后台页面可直接访问并通过 WCAG-AA 自动检查', async ({ page }) => {
     await prepare(page)
     const routes = [
@@ -114,15 +136,15 @@ test.describe('中老语言内容管理旅程', () => {
   })
 
   test('JRN-002：中文词语可比较版本并查看反向引用', async ({ page }) => {
-    const word = item({ id: 'word-1', type: 'zh_word', language: 'zh', status: 'draft', fields: { simplified: '妈妈', difficultyLevel: 1 } })
+    const word = item({ id: 'word-1', type: 'zh_word', language: 'zh', status: 'draft', fields: { simplified: '妈妈', difficultyLevel: 1 }, dictionary: { meanings: [{ language: 'zh', definition: '母亲', senseOrder: 1 }], examples: [], equivalents: [], relations: [], tags: [] } })
     await prepare(page, async (route, pathname) => {
       if (pathname.endsWith('/zh/words')) {
         await route.fulfill({ status: 200, contentType: 'application/json', body: envelope({ items: [word], total: 1 }) }); return true
       }
       if (pathname.endsWith('/history')) {
         await route.fulfill({ status: 200, contentType: 'application/json', body: envelope({ items: [
-          { revisionId: 'word-1-revision', revisionNumber: 2, status: 'draft', snapshot: { fields: { simplified: '妈妈', difficultyLevel: 1 }, composition: [] }, reviewRemark: null, createdAt: '2026-09-04' },
-          { revisionId: 'word-1-old', revisionNumber: 1, status: 'published', snapshot: { fields: { simplified: '妈妈', difficultyLevel: 2 }, composition: [] }, reviewRemark: null, createdAt: '2026-09-03' },
+          { revisionId: 'word-1-revision', revisionNumber: 2, status: 'draft', snapshot: { fields: { simplified: '妈妈', difficultyLevel: 1 }, composition: [], dictionary: { meanings: [{ language: 'zh', definition: '母亲', senseOrder: 1 }], examples: [], equivalents: [], relations: [], tags: [] } }, reviewRemark: null, createdAt: '2026-09-04' },
+          { revisionId: 'word-1-old', revisionNumber: 1, status: 'published', snapshot: { fields: { simplified: '妈妈', difficultyLevel: 2 }, composition: [], dictionary: { meanings: [], examples: [], equivalents: [], relations: [], tags: [] } }, reviewRemark: null, createdAt: '2026-09-03' },
         ], total: 2 }) }); return true
       }
       if (pathname.endsWith('/references')) {
@@ -134,6 +156,7 @@ test.describe('中老语言内容管理旅程', () => {
     await page.getByRole('button', { name: '版本与引用' }).click()
     await expect(page.getByRole('heading', { name: '版本比较' })).toBeVisible()
     await expect(page.getByText('（有变化）').first()).toBeVisible()
+    await expect(page.getByText('词典聚合（有变化）').first()).toBeVisible()
     await expect(page.getByText(/汉字|句子/).last()).toBeVisible()
   })
 

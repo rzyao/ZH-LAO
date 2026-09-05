@@ -99,11 +99,13 @@ integration('Content HTTP route integration', () => {
       expect(response.json()).toMatchObject({ code: 'OK', data: { status: 'draft' } });
       return (response.json() as { data: { contentId: string; revisionId: string } }).data;
     };
+    let idempotencySequence = 0;
+    const commandHeaders = () => ({ 'idempotency-key': `content-http-${++idempotencySequence}` });
     const advance = async (path: string, item: { contentId: string; revisionId: string }) => {
       const base = `/api/v1/admin/content/${path}/${item.contentId}/revisions/${item.revisionId}`;
-      expect((await app.inject({ method: 'POST', url: `${base}/submit` })).json()).toMatchObject({ code: 'OK', data: { status: 'pending_review' } });
-      expect((await app.inject({ method: 'POST', url: `${base}/review`, payload: { action: 'approve' } })).json()).toMatchObject({ code: 'OK', data: { status: 'approved' } });
-      expect((await app.inject({ method: 'POST', url: `${base}/publish` })).json()).toMatchObject({ code: 'OK', data: { status: 'published' } });
+      expect((await app.inject({ method: 'POST', url: `${base}/submit`, headers: commandHeaders() })).json()).toMatchObject({ code: 'OK', data: { status: 'pending_review' } });
+      expect((await app.inject({ method: 'POST', url: `${base}/review`, payload: { action: 'approve' }, headers: commandHeaders() })).json()).toMatchObject({ code: 'OK', data: { status: 'approved' } });
+      expect((await app.inject({ method: 'POST', url: `${base}/publish`, headers: commandHeaders() })).json()).toMatchObject({ code: 'OK', data: { status: 'published' } });
     };
 
     const publishedPinyin = await create('zh/pinyin-elements', {
@@ -171,6 +173,7 @@ integration('Content HTTP route integration', () => {
     const blocked = await app.inject({
       method: 'POST',
       url: `/api/v1/admin/content/zh/syllables/${blockedSyllable.contentId}/revisions/${blockedSyllable.revisionId}/submit`,
+      headers: commandHeaders(),
     });
     expect(blocked.json()).toMatchObject({ code: 'INVALID_DATA' });
     expect(JSON.stringify(blocked.json())).toContain(unpublishedPinyin.contentId);
@@ -241,8 +244,8 @@ integration('Content HTTP route integration', () => {
       composition: [],
     });
     const rejectedBase = `/api/v1/admin/content/zh/pinyin-elements/${rejected.contentId}/revisions/${rejected.revisionId}`;
-    await app.inject({ method: 'POST', url: `${rejectedBase}/submit` });
-    expect((await app.inject({ method: 'POST', url: `${rejectedBase}/review`, payload: { action: 'reject', remark: '展示形式需要修订' } })).json()).toMatchObject({ code: 'OK', data: { status: 'rejected' } });
+    await app.inject({ method: 'POST', url: `${rejectedBase}/submit`, headers: commandHeaders() });
+    expect((await app.inject({ method: 'POST', url: `${rejectedBase}/review`, payload: { action: 'reject', remark: '展示形式需要修订' }, headers: commandHeaders() })).json()).toMatchObject({ code: 'OK', data: { status: 'rejected' } });
     expect((await app.inject({ method: 'POST', url: `${rejectedBase}/re-edit` })).json()).toMatchObject({ code: 'OK', data: { status: 'draft' } });
 
     await app.close();

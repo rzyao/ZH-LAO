@@ -1,0 +1,53 @@
+schema_version: 1
+feature: "dictionary-content-management"
+journeys:
+  - id: "JRN-001"
+    title: "编辑并保存 Word 字典工作版本"
+    actor: "具有 Word 写入权限的内容运营人员"
+    stories: ["US-001"]
+    entry: "中文或老挝语词语管理列表"
+    success: "完整字典草稿作为同一父 Content revision 保存，且返回新的父 revision lock version"
+    preconditions: ["操作员已认证且有目标类别 write 权限", "目标 Word 的 working revision 为 draft"]
+    steps:
+      - { id: "STEP-001", action: "选择 Word 并打开字典聚合编辑器", ui: "CMP-ContentList, CMP-Dialog", expect: "显示父 Word、revision 和五个 dictionary 分区，不显示内部行 ID", contracts: ["API-getWordRevision"] }
+      - { id: "STEP-002", action: "编辑所有 dictionary 分区并保存", ui: "CMP-DictionaryEditor, CMP-Button", expect: "聚合 PUT 使用 contentId 和 expected lock version，成功返回新 lock version", contracts: ["API-putMeanings", "API-putExamples", "API-putRelationships", "API-putTags"] }
+      - { id: "STEP-003", action: "刷新版本比较", ui: "CMP-VersionCompare, CMP-StatusBadge", expect: "同一草稿 revision 展示完整 aggregate 差异，子记录无独立状态", contracts: ["API-getWordRevisionHistory"] }
+    edges:
+      - { id: "EDGE-001", of: "STEP-002", case: "缺少 write 权限", given: "操作员没有目标类别 write 权限", when: "提交任一聚合 PUT", then: "请求被拒绝，不写 snapshot/规范表/成功审计", priority: "P1" }
+      - { id: "EDGE-002", of: "STEP-002", case: "乐观锁冲突", given: "另一位操作员已保存该 revision", when: "使用过期 lock version 保存", then: "返回 stale conflict，所有 dictionary section 均不部分写入", priority: "P0" }
+      - { id: "EDGE-003", of: "STEP-002", case: "重复或非法关系", given: "输入含重复 child、self-reference、语言方向错误或目标类型错误", when: "保存或提交审核", then: "返回安全校验错误且草稿保持原子不变", priority: "P1" }
+    e2e: { runner: "playwright-cli", smoke: true }
+  - id: "JRN-002"
+    title: "提交、审核、驳回和发布完整字典版本"
+    actor: "分别具有 write、review、publish 权限的内容运营人员"
+    stories: ["US-002"]
+    entry: "目标 Word 的已保存 draft revision"
+    success: "只有一个 approved aggregate revision 在同一 Content 事务中发布；成功提交后同步记录 Operations 审计"
+    preconditions: ["父 Word 为 active", "所有 target 可在提交和发布时重新解析"]
+    steps:
+      - { id: "STEP-004", action: "写入者提交完整 revision 审核", ui: "CMP-Button, CMP-StatusBadge", expect: "验证聚合规则后 revision 变为 pending_review", contracts: ["API-submitWordRevision"] }
+      - { id: "STEP-005", action: "审核者比较 revision 并批准或填写原因驳回", ui: "CMP-VersionCompare, CMP-ReviewDialog", expect: "批准为 approved；驳回以非空 remark 变为 rejected；成功操作审计", contracts: ["API-reviewWordRevision"] }
+      - { id: "STEP-006", action: "发布者确认发布前校验", ui: "CMP-PublishPreflight, CMP-ConfirmDialog", expect: "Content 事务原子切换 published revision 和公开物化投影；提交后同步记录 Operations 成功审计", contracts: ["API-publishWordRevision"] }
+    edges:
+      - { id: "EDGE-004", of: "STEP-004", case: "目标在提交前失效", given: "Example 或 relationship target 已 disable/archive 或无 published revision", when: "提交审核", then: "提交被拒绝，父 revision 保持 draft，未写成功审计", priority: "P0" }
+      - { id: "EDGE-005", of: "STEP-005", case: "审核权限或驳回原因无效", given: "操作员缺 review 权限或 remark 为空白", when: "审核", then: "状态不改变且不写成功审计", priority: "P1" }
+      - { id: "EDGE-006", of: "STEP-006", case: "发布预检或 Content 事务失败", given: "target 失效或 Content 事务内物化写入失败", when: "确认发布", then: "revision 和公开投影整体回滚，且不调用成功审计", priority: "P0" }
+      - { id: "EDGE-007", of: "STEP-006", case: "重复 Idempotency-Key", given: "同 key 与规范化请求指纹相同", when: "重放发布", then: "返回同一结果且不重复发布或审计；同 key 不同请求被拒绝", priority: "P1" }
+      - { id: "EDGE-012", of: "STEP-006", case: "Content 已提交但 Operations 审计失败", given: "Content publish transaction 已提交而后续同步成功审计失败", when: "发布请求返回", then: "不重复发布、不伪造 Content 回滚；返回稳定 internal error 并要求管理员刷新确认已提交状态", priority: "P0" }
+    e2e: { runner: "playwright-cli", smoke: true }
+  - id: "JRN-003"
+    title: "公开 lookup/search/detail 仅读取合法发布投影"
+    actor: "匿名或已认证的学习端客户端"
+    stories: ["US-003"]
+    entry: "Content Dictionary runtime API"
+    success: "客户端得到稳定分页的公开 Word 投影，且无内部 BIGINT 或不合格内容"
+    preconditions: ["language 为 zh 或 lo", "公开 endpoint 无 draft bypass"]
+    steps:
+      - { id: "STEP-007", action: "执行 exact lookup", ui: "CMP-DictionarySearch", expect: "返回 active 且合法 published 的 Word 和合格 target 投影", contracts: ["API-dictionaryLookup"] }
+      - { id: "STEP-008", action: "使用有界 query、limit 和 cursor 执行 search 并翻页", ui: "CMP-DictionarySearch, CMP-ContentList", expect: "返回稳定排序 items/opaque cursor，DTO 无内部 BIGINT", contracts: ["API-dictionarySearch"] }
+    edges:
+      - { id: "EDGE-008", of: "STEP-007", case: "无 exact 命中", given: "没有合格公开 Word", when: "执行 lookup", then: "返回冻结 not-found 语义且不泄露候选", priority: "P1" }
+      - { id: "EDGE-009", of: "STEP-008", case: "空搜索结果", given: "有效 query 无合格公开 Word", when: "执行 search", then: "返回空 items 与 null next cursor", priority: "P1" }
+      - { id: "EDGE-010", of: "STEP-008", case: "查询或 cursor 非法", given: "query 不在 1..128、limit 超过 50、language 非法或 cursor 不匹配筛选", when: "执行 search", then: "返回安全 validation error 且不无界扫描", priority: "P1" }
+      - { id: "EDGE-011", of: "STEP-007", case: "不合格公开投影", given: "父或 target 为 draft/rejected/disabled/archived 或无 published revision", when: "读取 lookup/search/detail", then: "对象及其内部 BIGINT 完全缺失", priority: "P0" }
+    e2e: { runner: "playwright-cli", smoke: true }

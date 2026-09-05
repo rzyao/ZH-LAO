@@ -9,7 +9,7 @@
       "lo_letters", "lo_sentence_words", "lo_sentences", "lo_syllable_letters", "lo_syllables", "lo_word_syllables",
       "lo_words", "meanings", "pronunciations", "question_contents", "question_options", "questions",
       "tags", "translations", "units", "zh_hanzi", "zh_hanzi_syllables", "zh_pinyin_elements",
-      "content_revisions",
+      "content_revisions", "idempotency_records",
       "zh_sentence_words", "zh_sentences", "zh_syllable_pinyin_elements", "zh_syllables", "zh_word_hanzi", "zh_words"
     ],
     "learning": [

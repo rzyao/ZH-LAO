@@ -2,7 +2,9 @@ import type { DatabaseExecutor } from '../../../database/executor.js';
 import type { TransactionManager } from '../../../database/transaction-manager.js';
 import type {
   ContentReferenceView,
+  ContentIdempotencyRecord,
   ManagedStructuredContentView,
+  PublishedDictionaryWordView,
   StructuredRevisionView,
   StructuredContentRepository,
 } from '../application/ports/structured-content-repository.js';
@@ -171,6 +173,149 @@ export class PostgresStructuredContentRepository implements StructuredContentRep
         publishedRevisionId: row['revision_public_id'] ? String(row['revision_public_id']) : null,
       };
     });
+  }
+
+  async findPublishedDictionaryWord(language: ContentLanguage, query: string): Promise<PublishedDictionaryWordView | null> {
+    const result = await this.db.query<Row>(
+      "SELECT c.public_id, c.language, r.revision_public_id, " +
+      "CASE WHEN c.language = 'zh' THEN zw.simplified ELSE lw.text END AS display, " +
+      "CASE WHEN c.language = 'zh' THEN zw.pinyin_text ELSE lw.romanization END AS romanization " +
+      "FROM content.contents c " +
+      "JOIN content.content_revisions r ON r.entity_id = c.public_id AND r.entity_type = 'content' AND r.status = 'published' " +
+      "LEFT JOIN content.zh_words zw ON zw.content_id = c.id LEFT JOIN content.lo_words lw ON lw.content_id = c.id " +
+      "WHERE c.status = 'active' AND c.language = $1 AND ((c.language = 'zh' AND c.content_type = 'zh_word' " +
+      "AND (zw.simplified = $2 OR zw.traditional = $2 OR zw.pinyin_text = $2)) OR " +
+      "(c.language = 'lo' AND c.content_type = 'lo_word' AND (lw.text = $2 OR lw.romanization = $2))) " +
+      "ORDER BY display, c.public_id LIMIT 1",
+      [language, query],
+    );
+    return result.rows[0] ? this.mapDictionaryWord(result.rows[0]) : null;
+  }
+
+  async findPublishedDictionaryWordById(contentId: string): Promise<PublishedDictionaryWordView | null> {
+    const result = await this.db.query<Row>(
+      "SELECT c.public_id, c.language, r.revision_public_id, " +
+      "CASE WHEN c.language = 'zh' THEN zw.simplified ELSE lw.text END AS display, " +
+      "CASE WHEN c.language = 'zh' THEN zw.pinyin_text ELSE lw.romanization END AS romanization " +
+      "FROM content.contents c " +
+      "JOIN content.content_revisions r ON r.entity_id = c.public_id AND r.entity_type = 'content' AND r.status = 'published' " +
+      "LEFT JOIN content.zh_words zw ON zw.content_id = c.id LEFT JOIN content.lo_words lw ON lw.content_id = c.id " +
+      "WHERE c.status = 'active' AND c.public_id = $1 AND c.content_type IN ('zh_word', 'lo_word') LIMIT 1",
+      [contentId],
+    );
+    if (!result.rows[0]) return null;
+    const word = this.mapDictionaryWord(result.rows[0]);
+    const meanings = await this.db.query<Row>(
+      "SELECT m.language, m.word_class, m.definition, m.sense_order FROM content.meanings m JOIN content.contents c ON c.id = m.content_id WHERE c.public_id = $1 AND m.status = 'active' ORDER BY m.language, m.sense_order",
+      [contentId],
+    );
+    const examples = await this.db.query<Row>(
+      "SELECT sentence.public_id AS sentence_public_id, CASE WHEN sentence.language = 'zh' THEN zsentence.text ELSE lsentence.text END AS display, " +
+      "CASE WHEN sentence.language = 'zh' THEN zsentence.pinyin_text ELSE lsentence.romanization END AS romanization, e.sort_order " +
+      "FROM content.examples e JOIN content.contents owner ON owner.id = e.content_id " +
+      "JOIN content.contents sentence ON sentence.id = e.sentence_content_id " +
+      "JOIN content.content_revisions published_sentence ON published_sentence.entity_id = sentence.public_id AND published_sentence.entity_type = 'content' AND published_sentence.status = 'published' " +
+      "LEFT JOIN content.zh_sentences zsentence ON zsentence.content_id = sentence.id LEFT JOIN content.lo_sentences lsentence ON lsentence.content_id = sentence.id " +
+      "WHERE owner.public_id = $1 AND sentence.status = 'active' ORDER BY e.sort_order, sentence.public_id",
+      [contentId],
+    );
+    const equivalents = await this.db.query<Row>(
+      "SELECT target.public_id AS target_public_id, CASE WHEN target.language = 'zh' THEN zw.simplified ELSE lw.text END AS display, " +
+      "CASE WHEN target.language = 'zh' THEN zw.pinyin_text ELSE lw.romanization END AS romanization, e.relation_type, e.confidence, e.is_primary " +
+      "FROM content.content_equivalents e JOIN content.contents owner ON owner.id = e.source_content_id " +
+      "JOIN content.contents target ON target.id = e.target_content_id " +
+      "JOIN content.content_revisions published_target ON published_target.entity_id = target.public_id AND published_target.entity_type = 'content' AND published_target.status = 'published' " +
+      "LEFT JOIN content.zh_words zw ON zw.content_id = target.id LEFT JOIN content.lo_words lw ON lw.content_id = target.id " +
+      "WHERE owner.public_id = $1 AND target.status = 'active' ORDER BY e.is_primary DESC, target.public_id",
+      [contentId],
+    );
+    const relations = await this.db.query<Row>(
+      "SELECT target.public_id AS target_public_id, CASE WHEN target.language = 'zh' THEN zw.simplified ELSE lw.text END AS display, " +
+      "CASE WHEN target.language = 'zh' THEN zw.pinyin_text ELSE lw.romanization END AS romanization, r.relation_type, r.sort_order " +
+      "FROM content.content_relations r JOIN content.contents owner ON owner.id = r.source_content_id " +
+      "JOIN content.contents target ON target.id = r.target_content_id " +
+      "JOIN content.content_revisions published_target ON published_target.entity_id = target.public_id AND published_target.entity_type = 'content' AND published_target.status = 'published' " +
+      "LEFT JOIN content.zh_words zw ON zw.content_id = target.id LEFT JOIN content.lo_words lw ON lw.content_id = target.id " +
+      "WHERE owner.public_id = $1 AND target.status = 'active' ORDER BY r.sort_order, target.public_id",
+      [contentId],
+    );
+    const tags = await this.db.query<Row>(
+      "SELECT t.code, t.name FROM content.content_tags ct JOIN content.contents owner ON owner.id = ct.content_id JOIN content.tags t ON t.id = ct.tag_id WHERE owner.public_id = $1 ORDER BY t.code",
+      [contentId],
+    );
+    return {
+      ...word,
+      meanings: meanings.rows.map((row) => ({
+        language: row['language'] as ContentLanguage,
+        wordClass: row['word_class'] === null ? null : String(row['word_class']),
+        definition: String(row['definition']),
+        senseOrder: Number(row['sense_order']),
+      })),
+      examples: examples.rows.map((row) => ({
+        sentenceId: String(row['sentence_public_id']), display: String(row['display']),
+        romanization: row['romanization'] === null ? null : String(row['romanization']), sortOrder: Number(row['sort_order']),
+      })),
+      equivalents: equivalents.rows.map((row) => ({
+        targetContentId: String(row['target_public_id']), display: String(row['display']),
+        romanization: row['romanization'] === null ? null : String(row['romanization']), relationType: String(row['relation_type']),
+        confidence: row['confidence'] === null ? null : Number(row['confidence']), isPrimary: Boolean(row['is_primary']),
+      })),
+      relations: relations.rows.map((row) => ({
+        targetContentId: String(row['target_public_id']), display: String(row['display']),
+        romanization: row['romanization'] === null ? null : String(row['romanization']), relationType: String(row['relation_type']), sortOrder: Number(row['sort_order']),
+      })),
+      tags: tags.rows.map((row) => ({ code: String(row['code']), name: String(row['name']) })),
+    };
+  }
+
+  async searchPublishedDictionaryWords(
+    language: ContentLanguage, query: string, limit: number,
+    after?: { tier: number; similarity: number; display: string; id: string },
+  ): Promise<PublishedDictionaryWordView[]> {
+    const params: unknown[] = [language, query, '%' + query + '%'];
+    const afterClause = after
+      ? ' WHERE (match_tier > $4 OR (match_tier = $4 AND (similarity_score < $5 OR (similarity_score = $5 AND (display, public_id) > ($6, $7::uuid)))))'
+      : '';
+    if (after) params.push(after.tier, after.similarity, after.display, after.id);
+    params.push(limit);
+    const result = await this.db.query<Row>(
+      "WITH candidates AS (SELECT c.public_id, c.language, r.revision_public_id, " +
+      "CASE WHEN c.language = 'zh' THEN zw.simplified ELSE lw.text END AS display, " +
+      "CASE WHEN c.language = 'zh' THEN zw.pinyin_text ELSE lw.romanization END AS romanization, " +
+      "CASE WHEN (c.language = 'zh' AND (zw.simplified = $2 OR zw.traditional = $2 OR zw.pinyin_text = $2)) OR (c.language = 'lo' AND (lw.text = $2 OR lw.romanization = $2)) THEN 0 " +
+      "WHEN (c.language = 'zh' AND (zw.simplified ILIKE $2 || '%' OR zw.traditional ILIKE $2 || '%' OR zw.pinyin_text ILIKE $2 || '%')) OR (c.language = 'lo' AND (lw.text ILIKE $2 || '%' OR lw.romanization ILIKE $2 || '%')) THEN 1 ELSE 2 END AS match_tier, " +
+      "GREATEST(similarity(COALESCE(zw.simplified, ''), $2), similarity(COALESCE(zw.traditional, ''), $2), similarity(COALESCE(zw.pinyin_text, ''), $2), similarity(COALESCE(lw.text, ''), $2), similarity(COALESCE(lw.romanization, ''), $2)) AS similarity_score " +
+      "FROM content.contents c " +
+      "JOIN content.content_revisions r ON r.entity_id = c.public_id AND r.entity_type = 'content' AND r.status = 'published' " +
+      "LEFT JOIN content.zh_words zw ON zw.content_id = c.id LEFT JOIN content.lo_words lw ON lw.content_id = c.id " +
+      "WHERE c.status = 'active' AND c.language = $1 AND ((c.language = 'zh' AND c.content_type = 'zh_word' " +
+      "AND (zw.simplified ILIKE $3 OR zw.traditional ILIKE $3 OR zw.pinyin_text ILIKE $3)) OR " +
+      "(c.language = 'lo' AND c.content_type = 'lo_word' AND (lw.text ILIKE $3 OR lw.romanization ILIKE $3)))) " +
+      "SELECT * FROM candidates" + afterClause + " ORDER BY match_tier, similarity_score DESC, display, public_id LIMIT $" + params.length,
+      params,
+    );
+    return result.rows.map((row) => this.mapDictionaryWord(row));
+  }
+
+  async findIdempotencyRecord(operatorId: string, idempotencyKey: string): Promise<ContentIdempotencyRecord | null> {
+    const result = await this.db.query<Row>(
+      'SELECT request_hash, response_payload FROM content.idempotency_records WHERE operator_id = $1 AND idempotency_key = $2',
+      [operatorId, idempotencyKey],
+    );
+    const row = result.rows[0];
+    return row ? { requestHash: String(row['request_hash']), response: this.parseJson(row['response_payload']) } : null;
+  }
+
+  async saveIdempotencyRecord(operatorId: string, idempotencyKey: string, requestHash: string, response: Record<string, unknown>): Promise<void> {
+    const result = await this.db.query(
+      `INSERT INTO content.idempotency_records (operator_id, idempotency_key, request_hash, response_payload)
+       VALUES ($1, $2, $3, $4::jsonb) ON CONFLICT (operator_id, idempotency_key) DO NOTHING`,
+      [operatorId, idempotencyKey, requestHash, JSON.stringify(response)],
+    );
+    if (result.rowCount === 0) {
+      const existing = await this.findIdempotencyRecord(operatorId, idempotencyKey);
+      if (!existing || existing.requestHash !== requestHash) throw new Error('Idempotency-Key 已用于不同请求');
+    }
   }
 
   async saveNew(content: StructuredContent, revision: StructuredContentRevision): Promise<void> {
@@ -344,6 +489,69 @@ export class PostgresStructuredContentRepository implements StructuredContentRep
         break;
     }
     await this.replaceComposition(executor, content.contentType, contentDbId, snapshot);
+    if (content.contentType === 'zh_word' || content.contentType === 'lo_word') {
+      await this.replaceDictionaryMaterialization(executor, contentDbId, snapshot);
+    }
+  }
+
+  private async replaceDictionaryMaterialization(
+    executor: DatabaseExecutor,
+    parentId: string,
+    snapshot: StructuredContentSnapshot,
+  ): Promise<void> {
+    const dictionary = snapshot.dictionary ?? { meanings: [], examples: [], equivalents: [], relations: [], tags: [] };
+    await executor.query('DELETE FROM content.examples WHERE content_id = $1', [parentId]);
+    await executor.query('DELETE FROM content.meanings WHERE content_id = $1', [parentId]);
+    await executor.query('DELETE FROM content.content_equivalents WHERE source_content_id = $1', [parentId]);
+    await executor.query('DELETE FROM content.content_relations WHERE source_content_id = $1', [parentId]);
+    await executor.query('DELETE FROM content.content_tags WHERE content_id = $1', [parentId]);
+
+    const meanings = new Map<string, string>();
+    for (const meaning of dictionary.meanings) {
+      const inserted = await executor.query<{ id: string }>(
+        'INSERT INTO content.meanings (content_id, language, word_class, definition, sense_order) VALUES ($1,$2,$3,$4,$5) RETURNING id',
+        [parentId, meaning.language, meaning.wordClass ?? null, meaning.definition, meaning.senseOrder],
+      );
+      meanings.set(meaning.language + ':' + meaning.senseOrder, inserted.rows[0]!.id);
+    }
+    for (const example of dictionary.examples) {
+      const sentenceId = await this.resolveContentDbId(executor, example.sentenceContentId);
+      const meaningId = example.meaningLanguage
+        ? meanings.get(example.meaningLanguage + ':' + example.meaningSenseOrder)
+        : null;
+      if (example.meaningLanguage && !meaningId) throw new Error('例句引用的释义不存在');
+      await executor.query(
+        'INSERT INTO content.examples (content_id, meaning_id, sentence_content_id, sort_order) VALUES ($1,$2,$3,$4)',
+        [parentId, meaningId, sentenceId, example.sortOrder],
+      );
+    }
+    for (const equivalent of dictionary.equivalents) {
+      await executor.query(
+        'INSERT INTO content.content_equivalents (source_content_id, target_content_id, relation_type, confidence, is_primary) VALUES ($1,$2,$3,$4,$5)',
+        [parentId, await this.resolveContentDbId(executor, equivalent.targetContentId), equivalent.relationType,
+          equivalent.confidence ?? null, equivalent.isPrimary ?? false],
+      );
+    }
+    for (const relation of dictionary.relations) {
+      await executor.query(
+        'INSERT INTO content.content_relations (source_content_id, target_content_id, relation_type, sort_order) VALUES ($1,$2,$3,$4)',
+        [parentId, await this.resolveContentDbId(executor, relation.targetContentId), relation.relationType, relation.sortOrder],
+      );
+    }
+    for (const tag of dictionary.tags) {
+      const tagResult = await executor.query<{ id: string }>(
+        'INSERT INTO content.tags (code, name) VALUES ($1,$2) ON CONFLICT (code) DO UPDATE SET name = EXCLUDED.name RETURNING id',
+        [tag.code, tag.name],
+      );
+      await executor.query('INSERT INTO content.content_tags (content_id, tag_id) VALUES ($1,$2)', [parentId, tagResult.rows[0]!.id]);
+    }
+  }
+
+  private async resolveContentDbId(executor: DatabaseExecutor, publicId: string): Promise<string> {
+    const result = await executor.query<{ id: string }>('SELECT id FROM content.contents WHERE public_id = $1', [publicId]);
+    const id = result.rows[0]?.id;
+    if (!id) throw new Error('词典目标不存在');
+    return id;
   }
 
   private async replaceComposition(
@@ -404,6 +612,20 @@ export class PostgresStructuredContentRepository implements StructuredContentRep
   private parseJson(value: unknown): Record<string, unknown> {
     if (typeof value === 'string') return JSON.parse(value) as Record<string, unknown>;
     return value as Record<string, unknown>;
+  }
+
+  private mapDictionaryWord(row: Row): PublishedDictionaryWordView {
+    const searchOrder = row['match_tier'] === undefined ? undefined : {
+      tier: Number(row['match_tier']), similarity: Number(row['similarity_score']),
+    };
+    return {
+      id: String(row['public_id']),
+      language: row['language'] as ContentLanguage,
+      revisionId: String(row['revision_public_id']),
+      display: String(row['display']),
+      romanization: row['romanization'] === null || row['romanization'] === undefined ? null : String(row['romanization']),
+      ...(searchOrder ? { searchOrder } : {}),
+    };
   }
 
   private async inTransaction<T>(callback: (executor: DatabaseExecutor) => Promise<T>): Promise<T> {

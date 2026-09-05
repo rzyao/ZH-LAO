@@ -1,6 +1,6 @@
 # V2 Database Baseline Report
 
-Generated from PostgreSQL catalog at: 2026-09-04T15:29:06.954Z
+Generated from PostgreSQL catalog at: 2026-09-05T01:10:25.465Z
 
 Final status: **PASS**
 
@@ -8,12 +8,12 @@ Final status: **PASS**
 
 | Item | Value |
 | --- | --- |
-| Database | zh_lao |
+| Database | postgres |
 | PostgreSQL | 18.6 |
 | Role | postgres |
 | Business schemas | identity, content, learning, social, chat, audio, commerce, rewards, trust, operations, platform |
 | Infrastructure schemas | infrastructure |
-| Business tables | 129 core+revision / 121 original target |
+| Business tables | 130 core+revision / 121 original target |
 | Infrastructure tables | 2 |
 | Extensions | pg_trgm 1.6, plpgsql 1.0 |
 | Illegal cross-domain FK | 0 |
@@ -24,39 +24,40 @@ Only `pg_trgm` was added by V2. `plpgsql` is built in. The V2 baseline did not i
 
 | Migration | SHA-256 | Applied at |
 | --- | --- | --- |
-| 0000_infrastructure.sql | 5d918e0280348c62b2f9ca1a8a7d57cf15a779f2da40c2f2cb0493ce70099e5a | 2026-09-04T02:09:12.748Z |
-| 0100_identity.sql | 0e6d17346ed339145b4cdc7dc0c6772262685169eca64f1b503ca2bedb183d36 | 2026-09-04T02:09:12.763Z |
-| 0200_operations.sql | c35fa48ff2bf841550cac0927879b999b827c23b84a01ebf9bd55b01986fc632 | 2026-09-04T02:09:12.779Z |
-| 0300_platform.sql | 42df6a8c3a78ab149f57e4bd28e6896aae1590e8349a0a9dc2e54b5fa4791183 | 2026-09-04T02:09:12.800Z |
-| 0400_content.sql | c722654def7a71079d98c355d046d8d6bc3a68f304f3998573d0862540a40986 | 2026-09-04T02:09:12.832Z |
-| 0500_learning.sql | 7f6007c313f684385a5dba4cf9ad134b49293468d7479cc7a415c5bfbabfb06c | 2026-09-04T02:09:12.975Z |
-| 0600_audio.sql | 42ca0d357babb1acf6b4ead5a500b16c096a8b8a1b3861b67e0ee3f4dddbc453 | 2026-09-04T02:09:13.014Z |
-| 0700_social.sql | b5853d01e9fecb129cf0d95f71e36d6d221dbec8a3c50d6ef0a3e8d93120b4a9 | 2026-09-04T02:09:13.102Z |
-| 0800_chat.sql | 32b0ab8f5e4f1c05a229c99fd6063fbfd4947e3f2014578ae6bc0a5cefeb8126 | 2026-09-04T02:09:13.229Z |
-| 0900_commerce.sql | 79c56da178e30e303955fa88837a7c735e707a04578a5cc9c56d9ea8d188282d | 2026-09-04T02:09:13.259Z |
-| 1000_rewards.sql | 86f4dc243a826481a51e37e595d90923d1e570f62923e69e13c6396b78c5a792 | 2026-09-04T02:09:13.370Z |
-| 1100_trust.sql | c08b1476e4ffe1736e135657dff0001ca92c57465e6236fbf645fd1f5c20964a | 2026-09-04T02:09:13.429Z |
-| 1200_asset_infrastructure.sql | d30944c818f6b39aa9bb1dd8b4584869991425d1c0df6d4067c8675ba402056d | 2026-09-04T02:09:13.466Z |
-| 1210_trust_evidence.sql | 5a5978b55b50c5aec09ed02542e72ecb11f6cc6f80cd44ca0a881fd865d0d930 | 2026-09-04T02:09:13.476Z |
-| 1220_identity_auth_runtime.sql | 37adee07f83b4b49499c4497b0c1fa9a9f76820273917169110cfdc0fa3755e8 | 2026-09-04T02:09:13.487Z |
-| 1230_system_outbox.sql | 69752dd12ec2f925c1ab86fefc3616040c13aa59828f11fbad34532bd5b331db | 2026-09-04T02:09:13.512Z |
-| 1240_content_revision.sql | e2f29697c5d328b938642f9393e0e0e356aa5df6a400c839b4c306cd0a9dbd77 | 2026-09-04T02:09:13.521Z |
-| 1250_platform_override_indexes.sql | 7365c2b163588aea63aa19a931b195e9c33a5115662582310207a7df28d9f7b1 | 2026-09-04T02:09:13.533Z |
-| 1260_admin_credentials.sql | a61edef0fc199688303852f7c73725e11b05b82ab3371d780fd5f33d9fbac96f | 2026-09-04T02:09:13.540Z |
-| 1270_platform_menus.sql | acb25a095c6a4d916d8fba71fd6c56b1d3e5fbf4caad7d78c1eb4d66ee1da35a | 2026-09-04T02:09:13.546Z |
-| 1280_content_letter_permissions.sql | 136b9abcf8d0e04f9c1cbf1b7ed11af15c4a1aa44ff092f9805da41fde6c56e4 | 2026-09-04T06:00:27.319Z |
-| 1290_content_revision_review_workflow.sql | 6d63133a6667c7bdd80459e5df888c77eb6a9b117e543c14cd81fac60bbf41c6 | 2026-09-04T06:18:04.607Z |
-| 1300_content_language_navigation.sql | 3b512b6ce3b31e9301e6e59669bac4ebb22acb3b3a7a3e833723ad65ff1b380d | 2026-09-04T13:32:27.308Z |
-| 1310_content_language_structures.sql | 3142fb45053a3d0c794286d03e4e4727632480dfda4cc2aa1fb732baeb7f0ab4 | 2026-09-04T13:54:56.255Z |
-| 1320_content_language_permissions.sql | 684994303405b9a0cbb07b8ccecab24eaabed8cc45aa049ecb5c316ab4a185c3 | 2026-09-04T13:54:56.297Z |
-| 1330_platform_menu_recursive_directories.sql | ce3abae555be0b7984a325ef3342a8ea0d5defd529dfcede6d6c712eec1b6a01 | 2026-09-04T15:29:05.772Z |
+| 0000_infrastructure.sql | 5d918e0280348c62b2f9ca1a8a7d57cf15a779f2da40c2f2cb0493ce70099e5a | 2026-09-05T01:08:37.203Z |
+| 0100_identity.sql | 0e6d17346ed339145b4cdc7dc0c6772262685169eca64f1b503ca2bedb183d36 | 2026-09-05T01:08:37.226Z |
+| 0200_operations.sql | c35fa48ff2bf841550cac0927879b999b827c23b84a01ebf9bd55b01986fc632 | 2026-09-05T01:08:37.246Z |
+| 0300_platform.sql | 42df6a8c3a78ab149f57e4bd28e6896aae1590e8349a0a9dc2e54b5fa4791183 | 2026-09-05T01:08:37.271Z |
+| 0400_content.sql | c722654def7a71079d98c355d046d8d6bc3a68f304f3998573d0862540a40986 | 2026-09-05T01:08:37.311Z |
+| 0500_learning.sql | 7f6007c313f684385a5dba4cf9ad134b49293468d7479cc7a415c5bfbabfb06c | 2026-09-05T01:08:37.483Z |
+| 0600_audio.sql | 42ca0d357babb1acf6b4ead5a500b16c096a8b8a1b3861b67e0ee3f4dddbc453 | 2026-09-05T01:08:37.524Z |
+| 0700_social.sql | b5853d01e9fecb129cf0d95f71e36d6d221dbec8a3c50d6ef0a3e8d93120b4a9 | 2026-09-05T01:08:37.596Z |
+| 0800_chat.sql | 32b0ab8f5e4f1c05a229c99fd6063fbfd4947e3f2014578ae6bc0a5cefeb8126 | 2026-09-05T01:08:37.687Z |
+| 0900_commerce.sql | 79c56da178e30e303955fa88837a7c735e707a04578a5cc9c56d9ea8d188282d | 2026-09-05T01:08:37.723Z |
+| 1000_rewards.sql | 86f4dc243a826481a51e37e595d90923d1e570f62923e69e13c6396b78c5a792 | 2026-09-05T01:08:37.841Z |
+| 1100_trust.sql | c08b1476e4ffe1736e135657dff0001ca92c57465e6236fbf645fd1f5c20964a | 2026-09-05T01:08:37.898Z |
+| 1200_asset_infrastructure.sql | d30944c818f6b39aa9bb1dd8b4584869991425d1c0df6d4067c8675ba402056d | 2026-09-05T01:08:37.940Z |
+| 1210_trust_evidence.sql | 5a5978b55b50c5aec09ed02542e72ecb11f6cc6f80cd44ca0a881fd865d0d930 | 2026-09-05T01:08:37.948Z |
+| 1220_identity_auth_runtime.sql | 37adee07f83b4b49499c4497b0c1fa9a9f76820273917169110cfdc0fa3755e8 | 2026-09-05T01:08:37.960Z |
+| 1230_system_outbox.sql | 69752dd12ec2f925c1ab86fefc3616040c13aa59828f11fbad34532bd5b331db | 2026-09-05T01:08:37.983Z |
+| 1240_content_revision.sql | e2f29697c5d328b938642f9393e0e0e356aa5df6a400c839b4c306cd0a9dbd77 | 2026-09-05T01:08:37.992Z |
+| 1250_platform_override_indexes.sql | 7365c2b163588aea63aa19a931b195e9c33a5115662582310207a7df28d9f7b1 | 2026-09-05T01:08:38.003Z |
+| 1260_admin_credentials.sql | a61edef0fc199688303852f7c73725e11b05b82ab3371d780fd5f33d9fbac96f | 2026-09-05T01:08:38.008Z |
+| 1270_platform_menus.sql | acb25a095c6a4d916d8fba71fd6c56b1d3e5fbf4caad7d78c1eb4d66ee1da35a | 2026-09-05T01:08:38.014Z |
+| 1280_content_letter_permissions.sql | 136b9abcf8d0e04f9c1cbf1b7ed11af15c4a1aa44ff092f9805da41fde6c56e4 | 2026-09-05T01:08:38.027Z |
+| 1290_content_revision_review_workflow.sql | 6d63133a6667c7bdd80459e5df888c77eb6a9b117e543c14cd81fac60bbf41c6 | 2026-09-05T01:08:38.028Z |
+| 1300_content_language_navigation.sql | 3b512b6ce3b31e9301e6e59669bac4ebb22acb3b3a7a3e833723ad65ff1b380d | 2026-09-05T01:08:38.034Z |
+| 1310_content_language_structures.sql | 3142fb45053a3d0c794286d03e4e4727632480dfda4cc2aa1fb732baeb7f0ab4 | 2026-09-05T01:08:38.036Z |
+| 1320_content_language_permissions.sql | 684994303405b9a0cbb07b8ccecab24eaabed8cc45aa049ecb5c316ab4a185c3 | 2026-09-05T01:08:38.068Z |
+| 1330_platform_menu_recursive_directories.sql | ce3abae555be0b7984a325ef3342a8ea0d5defd529dfcede6d6c712eec1b6a01 | 2026-09-05T01:08:38.070Z |
+| 1340_content_idempotency.sql | 3b1f79283d1f75151c0a3988658edee74adc370963da3af878db063ab7d3de10 | 2026-09-05T01:08:38.071Z |
 
 ## Domain summary
 
 | Schema | Tables | PK | FK | UNIQUE constraints | CHECK | Indexes |
 | --- | --- | --- | --- | --- | --- | --- |
 | identity | 8 | 8 | 8 | 6 | 15 | 23 |
-| content | 36 | 36 | 49 | 29 | 54 | 76 |
+| content | 37 | 37 | 49 | 29 | 54 | 77 |
 | learning | 10 | 10 | 1 | 1 | 15 | 17 |
 | social | 19 | 19 | 26 | 10 | 26 | 43 |
 | chat | 7 | 7 | 9 | 6 | 14 | 15 |
@@ -170,7 +171,7 @@ Only `pg_trgm` was added by V2. `plpgsql` is built in. The V2 baseline did not i
 
 - Content authoritative list is Curriculum 5 + Practice 5 = 31; the higher-level 6 + 4 grouping is treated as a non-blocking categorization mismatch.
 - Identity `users.public_id` is UUID and `basic_profiles.avatar_media_id` is UUID without FK, applying ADR-018/D-152 over the older Identity field page.
-- The original 121-table business inventory is complete; `content.content_revisions` is an additional Content-owned physical table required by the revision contract, so the final business count is 122.
+- The original 121-table inventory plus approved forward migrations currently yields 130 business tables. Content forward tables include revision history and the Content-owned idempotency replay ledger.
 
 ## Resolved blockers
 
@@ -179,6 +180,7 @@ Only `pg_trgm` was added by V2. `plpgsql` is built in. The V2 baseline did not i
 - Media/Asset Infrastructure is frozen as `infrastructure.assets`; business domains retain only UUID logical references.
 - The shared transactional outbox is frozen as `infrastructure.system_outbox_events` with UUID event/aggregate IDs and unpublished-event scanning indexes.
 - Content revisions are frozen as `content.content_revisions` with polymorphic Content logical UUIDs, monotonic revision numbers, lifecycle status, snapshots, and one published revision per entity.
+- Content request replay is stored in `content.idempotency_records`; it uses the operator UUID and transport key only and does not create public identities for aggregate children.
 
 Unresolved specification blockers: 0.
 
@@ -820,6 +822,33 @@ Indexes:
 | --- | --- | --- | --- |
 | exercises_pkey | true | — | CREATE UNIQUE INDEX exercises_pkey ON content.exercises USING btree (id) |
 | exercises_public_id_key | true | — | CREATE UNIQUE INDEX exercises_public_id_key ON content.exercises USING btree (public_id) |
+
+#### content.idempotency_records
+
+| Column | Type | Nullable | Default | Identity |
+| --- | --- | --- | --- | --- |
+| operator_id | uuid | false | — | — |
+| idempotency_key | character varying(128) | false | — | — |
+| request_hash | character(64) | false | — | — |
+| response_payload | jsonb | false | — | — |
+| created_at | timestamp with time zone | false | now() | — |
+
+Constraints:
+
+| Name | Type | Definition |
+| --- | --- | --- |
+| idempotency_records_created_at_not_null | n | NOT NULL created_at |
+| idempotency_records_idempotency_key_not_null | n | NOT NULL idempotency_key |
+| idempotency_records_operator_id_not_null | n | NOT NULL operator_id |
+| idempotency_records_request_hash_not_null | n | NOT NULL request_hash |
+| idempotency_records_response_payload_not_null | n | NOT NULL response_payload |
+| idempotency_records_pkey | p | PRIMARY KEY (operator_id, idempotency_key) |
+
+Indexes:
+
+| Name | Unique | Predicate | Definition |
+| --- | --- | --- | --- |
+| idempotency_records_pkey | true | — | CREATE UNIQUE INDEX idempotency_records_pkey ON content.idempotency_records USING btree (operator_id, idempotency_key) |
 
 #### content.lesson_items
 

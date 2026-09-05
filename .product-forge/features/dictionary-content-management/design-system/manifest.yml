@@ -1,0 +1,21 @@
+schema_version: 1
+source:
+  components_path: "apps/admin/src/components and apps/admin/src/features/content"
+  tokens_path: "apps/admin/src/index.css"
+  framework: "react"
+  storybook: false
+tokens:
+  color: { surface: "var(--background)", muted: "var(--muted)", destructive: "var(--destructive)" }
+  typography: { body: "var(--font-sans)" }
+  spacing: ["Tailwind spacing utilities"]
+  radius: ["rounded-md", "rounded-lg"]
+components:
+  - { id: "CMP-ContentList", import: "@/components/layout/list-page-layout + @tanstack/react-table", props: ["title", "actions", "columns"], variants: ["content-category"], selector: "[data-testid^='content-']" }
+  - { id: "CMP-Dialog", import: "@/components/ui/dialog", props: ["open", "onOpenChange"], variants: ["editor", "review"], selector: "[role='dialog']" }
+  - { id: "CMP-DictionaryEditor", import: "apps/admin/src/features/content/pages/category.tsx", props: ["snapshot", "pending", "onSubmit"], variants: ["word-aggregate"], selector: "#content-editor" }
+  - { id: "CMP-VersionCompare", import: "apps/admin/src/features/content/pages/category.tsx", props: ["revision", "other"], variants: ["two-version"], selector: "[role='dialog']" }
+  - { id: "CMP-StatusBadge", import: "@/components/common/status-badge", props: ["tone", "label"], variants: ["draft", "pending_review", "approved", "published", "rejected"], selector: "[data-testid='status-badge']" }
+  - { id: "CMP-ReviewDialog", import: "apps/admin/src/features/content/pages/category.tsx", props: ["remark", "onConfirm"], variants: ["approve", "reject"], selector: "#content-reject-remark" }
+  - { id: "CMP-PublishPreflight", import: "apps/admin/src/features/content/pages/category.tsx", props: ["blockers"], variants: ["pass", "blocked"], selector: "[aria-label='发布阻塞']" }
+  - { id: "CMP-ConfirmDialog", import: "@/components/feedback/confirm-dialog", props: ["open", "title", "onConfirm"], variants: ["publish"], selector: "[role='alertdialog']" }
+  - { id: "CMP-Button", import: "@/components/ui/button", props: ["variant", "loading", "disabled"], variants: ["default", "outline", "destructive"], selector: "button" }

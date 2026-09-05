@@ -1,0 +1,1 @@
+-- No standalone rollback script is authorized before a concrete forward migration exists.

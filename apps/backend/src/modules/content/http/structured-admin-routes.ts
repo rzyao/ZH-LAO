@@ -1,5 +1,6 @@
 import type { FastifyInstance, FastifyPluginAsync, FastifyRequest } from 'fastify';
 import { z } from 'zod';
+import { createHash } from 'node:crypto';
 import { ManageStructuredContentUseCases } from '../application/use-cases/manage-structured-content.js';
 import type { StructuredContentRepository } from '../application/ports/structured-content-repository.js';
 import {
@@ -12,6 +13,7 @@ import type { AuthenticationProvider } from '../../../auth/authentication-provid
 import { AppError } from '../../../errors/app-error.js';
 import {
   ACTIVE_WORK_CONFLICT,
+  INTERNAL_ERROR,
   ILLEGAL_STATE_TRANSITION,
   INVALID_ARGUMENT,
   INVALID_DATA,
@@ -52,6 +54,9 @@ const ReviewBodySchema = z.object({
   action: z.enum(['approve', 'reject']),
   remark: z.string().optional(),
 }).strict();
+const DictionarySectionBodySchema = z.object({
+  expectedLockVersion: z.number().int().min(0),
+}).passthrough();
 
 export const structuredAdminRoutes: FastifyPluginAsync<StructuredAdminRoutesOptions> = async (
   fastify: FastifyInstance,
@@ -96,6 +101,66 @@ export const structuredAdminRoutes: FastifyPluginAsync<StructuredAdminRoutesOpti
     });
   };
 
+  const auditAfterCommittedPublish = async (
+    request: FastifyRequest,
+    operator: AuthorizedOperatorContext,
+    contentType: StructuredContentType,
+    contentId: string,
+    revisionId: string,
+  ): Promise<void> => {
+    try {
+      await audit(request, operator, contentType, 'publish', contentId, { revision_id: revisionId });
+    } catch (cause) {
+      request.log.error(
+        { err: cause, requestId: request.id, operatorId: operator.operatorId, action: 'publish', target: contentId },
+        'Content publish committed but Operations audit failed',
+      );
+      throw new AppError({
+        code: INTERNAL_ERROR,
+        message: 'Content publish may already be committed; refresh before retrying.',
+        httpStatus: 500,
+        expose: true,
+        details: { contentCommitted: true, postCommitAuditFailure: true },
+        cause,
+      });
+    }
+  };
+
+  const idempotent = async <T extends Record<string, unknown>>(
+    request: FastifyRequest,
+    operator: AuthorizedOperatorContext,
+    operation: string,
+    execute: () => Promise<T>,
+  ): Promise<T> => {
+    const key = parseAdmin(z.string().trim().min(1).max(128), request.headers['idempotency-key'], 'Invalid Idempotency-Key');
+    const hash = createHash('sha256').update(stableJson({ operation, method: request.method, url: request.url.split('?')[0], body: request.body ?? null })).digest('hex');
+    const prior = await options.structuredContentRepository.findIdempotencyRecord(operator.operatorId, key);
+    if (prior) {
+      if (prior.requestHash !== hash) throw appError(INVALID_ARGUMENT, 'Idempotency-Key 已用于不同请求');
+      if (prior.response['__contentPostCommitAuditFailure'] === true) {
+        throw new AppError({
+          code: INTERNAL_ERROR,
+          message: 'Content publish may already be committed; refresh before retrying.',
+          httpStatus: 500,
+          expose: true,
+          details: { contentCommitted: true, postCommitAuditFailure: true },
+        });
+      }
+      return prior.response as T;
+    }
+    try {
+      const result = await execute();
+      await options.structuredContentRepository.saveIdempotencyRecord(operator.operatorId, key, hash, result);
+      return result;
+    } catch (error) {
+      if (error instanceof AppError && error.details && typeof error.details === 'object' &&
+        (error.details as { postCommitAuditFailure?: unknown }).postCommitAuditFailure === true) {
+        await options.structuredContentRepository.saveIdempotencyRecord(operator.operatorId, key, hash, { __contentPostCommitAuditFailure: true });
+      }
+      throw error;
+    }
+  };
+
   fastify.get('/:language/:category', { preHandler: authenticated }, async (request, reply) => {
     const resolved = resolve(request);
     await authorize(request, resolved.contentType, 'read');
@@ -119,7 +184,7 @@ export const structuredAdminRoutes: FastifyPluginAsync<StructuredAdminRoutesOpti
   fastify.post('/:language/:category', { preHandler: authenticated }, async (request, reply) => {
     const resolved = resolve(request);
     const operator = await authorize(request, resolved.contentType, 'write');
-    const body = z.object({ snapshot: z.unknown() }).strict().parse(request.body);
+    const body = parseAdmin(z.object({ snapshot: z.unknown() }).strict(), request.body);
     const result = await handle(() => service.create(resolved.language, resolved.contentType, body.snapshot, operator.operatorId));
     await audit(request, operator, resolved.contentType, 'create', result.contentId, { revision_id: result.revisionId });
     return reply.code(201).send(result);
@@ -138,7 +203,7 @@ export const structuredAdminRoutes: FastifyPluginAsync<StructuredAdminRoutesOpti
     const resolved = resolve(request);
     const { id, revisionId } = request.params as { id: string; revisionId: string };
     const operator = await authorize(request, resolved.contentType, 'write');
-    const body = UpdateBodySchema.parse(request.body);
+    const body = parseAdmin(UpdateBodySchema, request.body);
     const result = await handle(() => service.update(id, revisionId, body.snapshot, body.expectedLockVersion));
     await audit(request, operator, resolved.contentType, 'update', id, { revision_id: revisionId, lock_version: result.lockVersion });
     return reply.code(200).send(result);
@@ -148,8 +213,11 @@ export const structuredAdminRoutes: FastifyPluginAsync<StructuredAdminRoutesOpti
     const resolved = resolve(request);
     const { id, revisionId } = request.params as { id: string; revisionId: string };
     const operator = await authorize(request, resolved.contentType, 'write');
-    const result = await handle(() => service.submit(id, revisionId));
-    await audit(request, operator, resolved.contentType, 'submit_review', id, { revision_id: revisionId });
+    const result = await idempotent(request, operator, 'submit_review', async () => {
+      const submitted = await handle(() => service.submit(id, revisionId));
+      await audit(request, operator, resolved.contentType, 'submit_review', id, { revision_id: revisionId });
+      return submitted;
+    });
     return reply.code(200).send(result);
   });
 
@@ -157,9 +225,12 @@ export const structuredAdminRoutes: FastifyPluginAsync<StructuredAdminRoutesOpti
     const resolved = resolve(request);
     const { id, revisionId } = request.params as { id: string; revisionId: string };
     const operator = await authorize(request, resolved.contentType, 'review');
-    const body = ReviewBodySchema.parse(request.body);
-    const result = await handle(() => service.review(id, revisionId, body.action, operator.operatorId, body.remark));
-    await audit(request, operator, resolved.contentType, 'review', id, { revision_id: revisionId, action: body.action });
+    const body = parseAdmin(ReviewBodySchema, request.body);
+    const result = await idempotent(request, operator, 'review', async () => {
+      const reviewed = await handle(() => service.review(id, revisionId, body.action, operator.operatorId, body.remark));
+      await audit(request, operator, resolved.contentType, 'review', id, { revision_id: revisionId, action: body.action });
+      return reviewed;
+    });
     return reply.code(200).send(result);
   });
 
@@ -176,10 +247,43 @@ export const structuredAdminRoutes: FastifyPluginAsync<StructuredAdminRoutesOpti
     const resolved = resolve(request);
     const { id, revisionId } = request.params as { id: string; revisionId: string };
     const operator = await authorize(request, resolved.contentType, 'publish');
-    const result = await handle(() => service.publish(id, revisionId));
-    await audit(request, operator, resolved.contentType, 'publish', id, { revision_id: revisionId });
+    const result = await idempotent(request, operator, 'publish', async () => {
+      const published = await handle(() => service.publish(id, revisionId));
+      await auditAfterCommittedPublish(request, operator, resolved.contentType, id, revisionId);
+      return published;
+    });
     return reply.code(200).send(result);
   });
+
+  const replaceDictionarySection = async (
+    request: FastifyRequest,
+    reply: { code(statusCode: number): { send(payload: unknown): unknown } },
+    sections: readonly ('meanings' | 'examples' | 'equivalents' | 'relations' | 'tags')[],
+  ) => {
+    const { id } = request.params as { id: string };
+    const body = parseAdmin(DictionarySectionBodySchema, request.body);
+    if (sections.some((section) => !Object.prototype.hasOwnProperty.call(body, section))) {
+      throw appError(INVALID_ARGUMENT, '缺少词典聚合分区');
+    }
+    const content = await handle(() => service.dictionaryContext(id));
+    const operator = await authorize(request, content.contentType, 'write');
+    const replacement = Object.fromEntries(sections.map((section) => [section, body[section]]));
+    const result = await idempotent(request, operator, `update_dictionary:${sections.join(',')}`, async () => {
+      const updated = await handle(() => service.replaceDictionarySections(id, replacement, body.expectedLockVersion));
+      await audit(request, operator, content.contentType, 'update_dictionary', id, { lock_version: updated.lockVersion, sections });
+      return updated;
+    });
+    return reply.code(200).send(result);
+  };
+
+  fastify.put('/knowledge/:id/meanings', { preHandler: authenticated }, async (request, reply) =>
+    replaceDictionarySection(request, reply, ['meanings']));
+  fastify.put('/knowledge/:id/examples', { preHandler: authenticated }, async (request, reply) =>
+    replaceDictionarySection(request, reply, ['examples']));
+  fastify.put('/knowledge/:id/relationships', { preHandler: authenticated }, async (request, reply) =>
+    replaceDictionarySection(request, reply, ['equivalents', 'relations']));
+  fastify.put('/knowledge/:id/tags', { preHandler: authenticated }, async (request, reply) =>
+    replaceDictionarySection(request, reply, ['tags']));
 };
 
 async function handle<T>(operation: () => Promise<T>): Promise<T> {
@@ -201,4 +305,17 @@ async function handle<T>(operation: () => Promise<T>): Promise<T> {
 function appError(code: typeof INVALID_ARGUMENT | typeof NOT_FOUND | typeof ACTIVE_WORK_CONFLICT | typeof STALE_VERSION_CONFLICT | typeof ILLEGAL_STATE_TRANSITION | typeof INVALID_DATA, message: string, cause?: unknown): AppError;
 function appError(code: typeof INVALID_ARGUMENT | typeof NOT_FOUND | typeof ACTIVE_WORK_CONFLICT | typeof STALE_VERSION_CONFLICT | typeof ILLEGAL_STATE_TRANSITION | typeof INVALID_DATA, message: string, cause?: unknown): AppError {
   return new AppError({ code, message, httpStatus: 400, cause });
+}
+
+function stableJson(value: unknown): string {
+  if (value === null || typeof value !== 'object') return JSON.stringify(value);
+  if (Array.isArray(value)) return `[${value.map(stableJson).join(',')}]`;
+  const record = value as Record<string, unknown>;
+  return `{${Object.keys(record).sort().map((key) => `${JSON.stringify(key)}:${stableJson(record[key])}`).join(',')}}`;
+}
+
+function parseAdmin<T>(schema: z.ZodType<T>, value: unknown, message = 'Invalid content request'): T {
+  const parsed = schema.safeParse(value);
+  if (parsed.success) return parsed.data;
+  throw appError(INVALID_ARGUMENT, message, parsed.error);
 }

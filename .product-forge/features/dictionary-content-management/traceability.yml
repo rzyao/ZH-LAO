@@ -1,0 +1,42 @@
+schema_version: 1
+feature: dictionary-content-management
+last_updated: "2026-09-05"
+journeys:
+  - id: JRN-001
+    title: 编辑并保存 Word 字典工作版本
+    stories: [US-001]
+    steps:
+      - { id: STEP-001, tests: [TC-DICT-001] }
+      - { id: STEP-002, tests: [TC-DICT-002] }
+      - { id: STEP-003, tests: [TC-DICT-003] }
+    edges:
+      - { id: EDGE-001, priority: P1, tests: [TC-DICT-004] }
+      - { id: EDGE-002, priority: P0, tests: [TC-DICT-005] }
+      - { id: EDGE-003, priority: P1, tests: [TC-DICT-006] }
+    tests: [TC-DICT-001, TC-DICT-002, TC-DICT-003, TC-DICT-004, TC-DICT-005, TC-DICT-006]
+  - id: JRN-002
+    title: 提交、审核、驳回和发布完整字典版本
+    stories: [US-002]
+    steps:
+      - { id: STEP-004, tests: [TC-DICT-007] }
+      - { id: STEP-005, tests: [TC-DICT-008] }
+      - { id: STEP-006, tests: [TC-DICT-009] }
+    edges:
+      - { id: EDGE-004, priority: P0, tests: [TC-DICT-010] }
+      - { id: EDGE-005, priority: P1, tests: [TC-DICT-011] }
+      - { id: EDGE-006, priority: P0, tests: [TC-DICT-012] }
+      - { id: EDGE-007, priority: P1, tests: [TC-DICT-013] }
+      - { id: EDGE-012, priority: P0, tests: [TC-DICT-014] }
+    tests: [TC-DICT-007, TC-DICT-008, TC-DICT-009, TC-DICT-010, TC-DICT-011, TC-DICT-012, TC-DICT-013, TC-DICT-014]
+  - id: JRN-003
+    title: 公开 lookup/search/detail 仅读取合法发布投影
+    stories: [US-003]
+    steps:
+      - { id: STEP-007, tests: [TC-DICT-015] }
+      - { id: STEP-008, tests: [TC-DICT-016] }
+    edges:
+      - { id: EDGE-008, priority: P1, tests: [TC-DICT-017] }
+      - { id: EDGE-009, priority: P1, tests: [TC-DICT-018] }
+      - { id: EDGE-010, priority: P1, tests: [TC-DICT-019] }
+      - { id: EDGE-011, priority: P0, tests: [TC-DICT-020] }
+    tests: [TC-DICT-015, TC-DICT-016, TC-DICT-017, TC-DICT-018, TC-DICT-019, TC-DICT-020, TC-DICT-021]

@@ -40,3 +40,9 @@ export function usePublishStructuredContent(config: ContentCategoryConfig) {
 export function useDeriveStructuredContent(config: ContentCategoryConfig) {
   return useContentMutation<string>(config, (contentId) => structuredContentApi.derive(config, contentId))
 }
+export function useReplaceDictionarySection(config: ContentCategoryConfig) {
+  return useContentMutation<{ contentId: string; section: 'meanings' | 'examples' | 'relationships' | 'tags'; body: Record<string, unknown> }>(
+    config,
+    ({ contentId, section, body }) => structuredContentApi.replaceDictionarySection(contentId, section, body),
+  )
+}

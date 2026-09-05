@@ -78,9 +78,84 @@ export const SnapshotCompositionItemSchema = z.object({
 }).strict();
 export type SnapshotCompositionItem = z.infer<typeof SnapshotCompositionItemSchema>;
 
+const DictionaryMeaningSchema = z.object({
+  language: z.enum(['zh', 'lo']),
+  wordClass: z.string().trim().min(1).max(32).optional(),
+  definition: z.string().trim().min(1),
+  senseOrder: z.number().int().positive(),
+}).strict();
+
+const DictionaryExampleSchema = z.object({
+  sentenceContentId: z.uuid(),
+  meaningLanguage: z.enum(['zh', 'lo']).optional(),
+  meaningSenseOrder: z.number().int().positive().optional(),
+  sortOrder: z.number().int().positive(),
+}).strict().superRefine((value, context) => {
+  const pointsToMeaning = value.meaningLanguage !== undefined || value.meaningSenseOrder !== undefined;
+  if (pointsToMeaning && (value.meaningLanguage === undefined || value.meaningSenseOrder === undefined)) {
+    context.addIssue({ code: 'custom', message: '例句释义引用必须同时提供语言和序号' });
+  }
+});
+
+const DictionaryEquivalentSchema = z.object({
+  targetContentId: z.uuid(),
+  relationType: z.enum(['translation', 'equivalent', 'approximate']),
+  confidence: z.number().min(0).max(100).optional(),
+  isPrimary: z.boolean().optional(),
+}).strict();
+
+const DictionaryRelationSchema = z.object({
+  targetContentId: z.uuid(),
+  relationType: z.enum(['synonym', 'antonym', 'related', 'derived', 'variant']),
+  sortOrder: z.number().int().positive(),
+}).strict();
+
+const DictionaryTagSchema = z.object({
+  code: z.string().trim().min(1).max(64),
+  name: z.string().trim().min(1).max(64),
+}).strict();
+
+function rejectDuplicates<T>(
+  items: readonly T[],
+  keyOf: (item: T) => string,
+  label: string,
+  context: z.RefinementCtx,
+): void {
+  const seen = new Set<string>();
+  for (const item of items) {
+    const key = keyOf(item);
+    if (seen.has(key)) {
+      context.addIssue({ code: 'custom', message: '存在重复' + label });
+      return;
+    }
+    seen.add(key);
+  }
+}
+
+export const DictionarySnapshotSchema = z.object({
+  meanings: z.array(DictionaryMeaningSchema).default([]),
+  examples: z.array(DictionaryExampleSchema).default([]),
+  equivalents: z.array(DictionaryEquivalentSchema).default([]),
+  relations: z.array(DictionaryRelationSchema).default([]),
+  tags: z.array(DictionaryTagSchema).default([]),
+}).strict().superRefine((value, context) => {
+  rejectDuplicates(value.meanings, (item) => item.language + ':' + item.senseOrder, '释义', context);
+  rejectDuplicates(
+    value.examples,
+    (item) => item.sentenceContentId + ':' + (item.meaningLanguage ?? '') + ':' + (item.meaningSenseOrder ?? ''),
+    '例句',
+    context,
+  );
+  rejectDuplicates(value.equivalents, (item) => item.targetContentId + ':' + item.relationType, '对应关系', context);
+  rejectDuplicates(value.relations, (item) => item.targetContentId + ':' + item.relationType, '同语言关系', context);
+  rejectDuplicates(value.tags, (item) => item.code, '标签', context);
+});
+export type DictionarySnapshot = z.infer<typeof DictionarySnapshotSchema>;
+
 export interface StructuredContentSnapshot {
   fields: Record<string, unknown>;
   composition: SnapshotCompositionItem[];
+  dictionary?: DictionarySnapshot;
 }
 
 export function parseStructuredContentSnapshot(
@@ -90,9 +165,13 @@ export function parseStructuredContentSnapshot(
   const raw = z.object({
     fields: z.record(z.string(), z.unknown()),
     composition: z.array(SnapshotCompositionItemSchema).default([]),
+    dictionary: DictionarySnapshotSchema.optional(),
   }).strict().parse(input);
   const fields = fieldSchemas[contentType].parse(raw.fields) as Record<string, unknown>;
-  return { fields, composition: raw.composition };
+  if (raw.dictionary && contentType !== 'zh_word' && contentType !== 'lo_word') {
+    throw new Error('只有 Word 内容可以包含词典聚合');
+  }
+  return { fields, composition: raw.composition, ...(raw.dictionary ? { dictionary: raw.dictionary } : {}) };
 }
 
 export interface StructuredContentProps {

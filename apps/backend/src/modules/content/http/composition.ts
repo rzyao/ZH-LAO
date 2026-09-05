@@ -17,6 +17,9 @@ export async function registerContentRoutes(app: FastifyInstance, dependencies: 
   await app.register(publicContentRoutes, {
     prefix: '/api/v1/content',
     contentRepository: dependencies.contentRepository,
+    ...(dependencies.structuredContentRepository
+      ? { structuredContentRepository: dependencies.structuredContentRepository }
+      : {}),
   });
   await app.register(adminContentRoutes, {
     prefix: '/api/v1/admin/content',
