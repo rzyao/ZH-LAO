@@ -75,6 +75,7 @@ describe('AdminCredentialOperations - changePassword (US-004 / FR-011 / FR-015)'
     expect(updateQuery?.values?.[0]).toBe('1');
     expect(String(updateQuery?.values?.[1] ?? '')).toMatch(/^scrypt\$/);
     expect(updateQuery?.values?.[1]).not.toBe(currentHash);
+    expect(updateQuery?.text).toContain('password_change_required = false');
 
     // Audit verification
     expect(auditRecordMock).toHaveBeenCalledTimes(1);

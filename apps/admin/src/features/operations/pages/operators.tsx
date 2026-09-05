@@ -2,7 +2,7 @@ import * as React from 'react'
 import type { ColumnDef } from '@tanstack/react-table'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
-import { Check, Shield, UserPlus } from 'lucide-react'
+import { Check, KeyRound, Shield, UserPlus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
@@ -28,6 +28,7 @@ import {
   useOperatorRolesQuery,
   useOperatorsQuery,
   useRevokeOperatorRole,
+  useResetOperatorPassword,
   useRolesQuery,
   useUpdateOperator,
 } from '../queries'
@@ -49,16 +50,20 @@ export function OperatorsPage() {
   const canUpdate = useExactPermission(OPERATIONS_PERMISSIONS.operatorsUpdate)
   const canDisable = useExactPermission(OPERATIONS_PERMISSIONS.operatorsDisable)
   const canEnable = useExactPermission(OPERATIONS_PERMISSIONS.operatorsEnable)
+  const canResetPassword = useExactPermission(OPERATIONS_PERMISSIONS.operatorsResetPassword)
   const canAssignRole = useExactPermission(OPERATIONS_PERMISSIONS.operatorRolesAssign)
   const canRevokeRole = useExactPermission(OPERATIONS_PERMISSIONS.operatorRolesRevoke)
 
   const disableMutation = useDisableOperator()
   const enableMutation = useEnableOperator()
+  const resetPasswordMutation = useResetOperatorPassword()
 
   const [createOpen, setCreateOpen] = React.useState(false)
   const [editing, setEditing] = React.useState<OperatorSummary | null>(null)
   const [togglingStatus, setTogglingStatus] = React.useState<OperatorSummary | null>(null)
   const [managingRolesOperator, setManagingRolesOperator] = React.useState<OperatorSummary | null>(null)
+  const [resettingPassword, setResettingPassword] = React.useState<OperatorSummary | null>(null)
+  const [temporaryPassword, setTemporaryPassword] = React.useState<string | null>(null)
 
   const fail = (error: unknown) =>
     toast.error({ title: '操作员操作失败', description: mutationErrorMessage(error) })
@@ -125,6 +130,16 @@ export function OperatorsPage() {
               <Button
                 size="sm"
                 variant="outline"
+                disabled={!canResetPassword || !isActive || isSelf}
+                title={isSelf ? '请使用“修改密码”更新自己的密码' : !isActive ? '只能重置已激活操作员的密码' : undefined}
+                onClick={() => setResettingPassword(operator)}
+              >
+                <KeyRound className="mr-1 size-3.5" />
+                重置密码
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
                 disabled={!canAssignRole && !canRevokeRole}
                 onClick={() => setManagingRolesOperator(operator)}
               >
@@ -156,7 +171,7 @@ export function OperatorsPage() {
         },
       },
     ],
-    [canUpdate, canAssignRole, canRevokeRole, canDisable, canEnable, currentOperator?.id],
+    [canUpdate, canResetPassword, canAssignRole, canRevokeRole, canDisable, canEnable, currentOperator?.id],
   )
 
   return (
@@ -245,6 +260,33 @@ export function OperatorsPage() {
           }}
         />
       ) : null}
+
+      {resettingPassword ? (
+        <ConfirmDialog
+          open={Boolean(resettingPassword)}
+          onOpenChange={(open) => !open && setResettingPassword(null)}
+          title="确认重置操作员密码？"
+          description={`重置后，${resettingPassword.display_name} 的全部后台会话将立即失效。新临时密码只显示一次，且该操作员下次登录必须修改密码。`}
+          destructive
+          confirmLabel="确认重置"
+          loading={resetPasswordMutation.isPending}
+          onConfirm={async () => {
+            try {
+              const result = await resetPasswordMutation.mutateAsync(resettingPassword.operator_id)
+              setResettingPassword(null)
+              setTemporaryPassword(result.temporary_password)
+            } catch (err) { fail(err) }
+          }}
+        />
+      ) : null}
+
+      <Dialog open={Boolean(temporaryPassword)} onOpenChange={(open) => { if (!open) setTemporaryPassword(null) }}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>一次性临时密码</DialogTitle><DialogDescription>请立即安全传达。关闭此窗口后，系统无法再次显示或恢复该密码。</DialogDescription></DialogHeader>
+          {temporaryPassword ? <><code className="rounded border bg-muted p-3 break-all select-all">{temporaryPassword}</code><Button type="button" onClick={() => void navigator.clipboard.writeText(temporaryPassword)}>复制密码</Button></> : null}
+          <DialogFooter><Button onClick={() => setTemporaryPassword(null)}>我已安全保存</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Manage Roles Drawer/Modal */}
       {managingRolesOperator ? (

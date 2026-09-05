@@ -443,6 +443,7 @@ assertOperatorPermissionKey()
 ```text
 operations.operators.read
 operations.operators.create
+operations.operators.reset_password
 operations.operators.update
 operations.operators.disable
 operations.operators.enable
@@ -734,6 +735,7 @@ routine read-only list/detail            = no canonical Operator audit by defaul
 
 ```text
 operations.operators.create
+operations.operators.reset_password
 operations.operators.update
 operations.operators.disable
 operations.operators.enable

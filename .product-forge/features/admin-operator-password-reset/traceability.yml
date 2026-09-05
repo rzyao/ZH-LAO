@@ -1,0 +1,71 @@
+schema_version: 1
+feature: "admin-operator-password-reset"
+last_updated: "2026-09-05"
+requirements:
+  - id: "FR-001"
+    stories: ["US-001"]
+    tasks: ["T005", "T006", "T007", "T009", "T011", "T012"]
+    code: ["apps/backend/src/modules/operations/http/routes.ts", "apps/backend/src/modules/operations/public/permissions.ts", "apps/admin/src/features/operations/api.ts", "apps/admin/src/features/operations/pages/operators.tsx"]
+    tests: ["apps/admin/e2e/operator-password-reset.spec.ts"]
+    events: []
+  - id: "FR-002"
+    stories: ["US-002"]
+    tasks: ["T004", "T005", "T007", "T011", "T012"]
+    code: ["apps/backend/src/modules/operations/application/services/operations-service.ts"]
+    tests: ["apps/backend/test/integration/operations-core.test.ts"]
+    events: []
+  - id: "FR-003"
+    stories: ["US-001", "US-003"]
+    tasks: ["T001", "T003", "T012"]
+    code: ["apps/backend/src/modules/identity/application/use-cases/admin-credential-ops.ts", "database/migrations/1360_admin_credentials_password_change_required.sql"]
+    tests: ["apps/backend/src/modules/identity/__tests__/admin-change-password.test.ts"]
+    events: []
+  - id: "FR-004"
+    stories: ["US-001"]
+    tasks: ["T004", "T005", "T012"]
+    code: ["apps/backend/src/modules/operations/application/services/operations-service.ts"]
+    tests: ["apps/backend/test/integration/operations-core.test.ts"]
+    events: []
+  - id: "FR-005"
+    stories: ["US-001", "US-002"]
+    tasks: ["T005", "T006", "T008", "T009", "T011", "T012"]
+    code: ["apps/backend/src/modules/operations/http/routes.ts", "apps/admin/src/features/operations/queries.ts", "apps/admin/src/features/operations/pages/operators.tsx"]
+    tests: ["apps/admin/src/features/operations/api.test.ts", "apps/admin/e2e/operator-password-reset.spec.ts"]
+    events: []
+  - id: "FR-006"
+    stories: ["US-002"]
+    tasks: ["T008", "T009", "T010", "T012"]
+    code: ["apps/admin/src/features/operations/pages/operators.tsx"]
+    tests: ["apps/admin/e2e/operator-password-reset.spec.ts"]
+    events: []
+  - id: "FR-007"
+    stories: ["US-003"]
+    tasks: ["T001", "T002", "T003", "T007", "T009", "T011", "T012"]
+    code: ["apps/backend/src/auth/auth-hook.ts", "apps/backend/src/modules/identity/infrastructure/authentication-provider.ts", "apps/admin/src/auth/context/AuthContext.tsx"]
+    tests: ["apps/backend/src/modules/identity/__tests__/admin-login.test.ts", "apps/backend/src/modules/identity/__tests__/admin-change-password.test.ts"]
+    events: []
+journeys:
+  - id: "JRN-001"
+    title: "授权管理员成功重置其他操作员密码"
+    stories: ["US-001", "US-002", "US-003"]
+    steps: ["STEP-001", "STEP-002", "STEP-003", "STEP-004", "STEP-005"]
+    edges:
+      - { id: "EDGE-001", priority: "P0", tests: ["apps/admin/e2e/operator-password-reset.spec.ts"] }
+      - { id: "EDGE-002", priority: "P1", tests: ["apps/backend/test/integration/operations-core.test.ts"] }
+    tests: ["apps/admin/e2e/operator-password-reset.spec.ts", "apps/backend/test/integration/operations-core.test.ts"]
+  - id: "JRN-002"
+    title: "越权或不符合资格的重置被拒绝"
+    stories: ["US-001", "US-003"]
+    steps: ["STEP-006", "STEP-007"]
+    edges:
+      - { id: "EDGE-003", priority: "P0", tests: ["apps/backend/test/integration/operations-core.test.ts"] }
+      - { id: "EDGE-004", priority: "P0", tests: ["apps/backend/test/integration/operations-core.test.ts"] }
+      - { id: "EDGE-005", priority: "P0", tests: ["apps/backend/test/integration/operations-core.test.ts"] }
+    tests: ["apps/backend/test/integration/operations-core.test.ts"]
+  - id: "JRN-003"
+    title: "网络失败后不自动重试或恢复秘密"
+    stories: ["US-002", "US-003"]
+    steps: ["STEP-008", "STEP-009"]
+    edges:
+      - { id: "EDGE-006", priority: "P0", tests: ["apps/admin/e2e/operator-password-reset.spec.ts"] }
+    tests: ["apps/admin/e2e/operator-password-reset.spec.ts"]

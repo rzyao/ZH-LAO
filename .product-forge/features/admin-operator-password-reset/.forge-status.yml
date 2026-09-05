@@ -1,0 +1,155 @@
+schema_version: 3
+feature: "admin-operator-password-reset"
+created_at: "2026-09-05"
+last_updated: "2026-09-05T00:00:00Z"
+feature_mode: "standard"
+scope:
+  primary: "An authorized back-office administrator resets a selected back-office Operator password, revokes all of that account's sessions, reveals the new temporary password once, and records the action in the Operations audit log."
+  paths:
+    - "apps/admin/src/features/operations"
+    - "apps/backend/src/modules/identity"
+    - "apps/backend/src/modules/operations"
+    - "database"
+    - "docs"
+  cross_workspace: true
+phases:
+  problem_discovery:
+    status: "skipped"
+    skip_reason: "The user confirmed a concrete incident-driven need and a bounded administrator-only flow."
+  research:
+    status: "completed"
+    digest_path: "research/digest.md"
+  product_spec:
+    status: "completed"
+    digest_path: "product-spec/digest.md"
+  design_system_harvest:
+    status: "completed"
+    digest_path: "design-system/manifest.md"
+  revalidation:
+    status: "approved"
+    digest_path: "review.md"
+  bridge:
+    status: "completed"
+    digest_path: "spec.md"
+  i18n_harvest:
+    status: "pending"
+  plan:
+    status: "completed"
+    started_at: "2026-09-05T00:00:00Z"
+    completed_at: "2026-09-05T00:00:00Z"
+    digest_path: "plan/digest.md"
+  tasks:
+    status: "completed"
+    completed_at: "2026-09-05T00:00:00Z"
+    digest_path: "tasks/digest.md"
+  migration_plan:
+    status: "completed"
+    started_at: "2026-09-05T00:00:00Z"
+    completed_at: "2026-09-05T00:00:00Z"
+    digest_path: "migrations/digest.md"
+  pre_impl_review:
+    status: "skipped"
+    skip_reason: "Optional in project configuration; the approved migration plan and task review cover its pre-implementation inputs."
+  implement:
+    status: "completed"
+    completed_at: "2026-09-05T00:00:00Z"
+    digest_path: "implement/digest.md"
+    red_gate:
+      status: "confirmed_failing"
+      tests: ["T002", "T004", "T006", "T008"]
+      skip_reason: null
+  code_review:
+    status: "completed"
+    digest_path: "code-review.md"
+  verify:
+    status: "completed"
+    completed_at: "2026-09-05T00:00:00Z"
+    digest_path: "verify/digest.md"
+  test_plan:
+    status: "pending"
+  test_run:
+    status: "pending"
+  release_readiness:
+    status: "pending"
+  monitoring_setup:
+    status: "pending"
+  experiment_design:
+    status: "pending"
+  spec_merge:
+    status: "pending"
+gates:
+  - phase: "problem_discovery"
+    decision: "skipped"
+    timestamp: "2026-09-05T00:00:00Z"
+    notes: "User selected direct research."
+    skip_reason: "The user confirmed a concrete incident-driven need and a bounded administrator-only flow."
+    sync_result: "not_run"
+    reviewed_sha: null
+    risk: "medium"
+  - phase: "research"
+    decision: "approved"
+    timestamp: "2026-09-04T22:55:05Z"
+    notes: "User approved research and requested product specification."
+    sync_result: "clean"
+    reviewed_sha: null
+    risk: "low"
+  - phase: "product_spec"
+    decision: "approved"
+    timestamp: "2026-09-05T00:00:00Z"
+    notes: "User approved the product specification for revalidation."
+    sync_result: "clean"
+    reviewed_sha: null
+    risk: "low"
+  - phase: "revalidation"
+    decision: "approved"
+    timestamp: "2026-09-05T00:00:00Z"
+    notes: "User approved the locked specification and authority-promotion prerequisites."
+    sync_result: "clean"
+    reviewed_sha: null
+    risk: "low"
+  - phase: "bridge"
+    decision: "approved"
+    timestamp: "2026-09-05T00:00:00Z"
+    notes: "User approved the SpecKit classic bridge and requested technical planning."
+    sync_result: "clean"
+    reviewed_sha: null
+    risk: "medium"
+  - phase: "plan"
+    decision: "approved"
+    timestamp: "2026-09-05T00:00:00Z"
+    notes: "User approved the technical plan, including a forward PostgreSQL migration plan."
+    sync_result: "clean"
+    reviewed_sha: null
+    risk: "medium"
+  - phase: "tasks"
+    decision: "approved"
+    timestamp: "2026-09-05T00:00:00Z"
+    notes: "User approved the 12-task breakdown and authorized implementation."
+    sync_result: "clean"
+    reviewed_sha: null
+    risk: "medium"
+change_requests: []
+sync_runs:
+  last_run: null
+  total_runs: 0
+  last_drift_count: 0
+  last_critical_count: 0
+  last_verdict: null
+research_dimensions:
+  competitors: "completed"
+  ux_patterns: "completed"
+  codebase: "completed"
+  tech_stack: "not_applicable"
+  metrics_roi: "not_applicable"
+input_richness_score: 6
+role_approvals:
+  solo_mode: true
+migration:
+  db_kind: "postgres"
+  strategy: "expand"
+  destructive_changes: false
+  files:
+    plan: "migrations/migration-plan.md"
+    forward: "migrations/forward.sql"
+    rollback: "migrations/rollback.sql"
+    validation: "migrations/validation.sql"

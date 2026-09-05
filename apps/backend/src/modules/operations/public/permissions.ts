@@ -1,5 +1,5 @@
 const catalog = [
-  'operations.operators.read','operations.operators.create','operations.operators.update','operations.operators.disable','operations.operators.enable',
+  'operations.operators.read','operations.operators.create','operations.operators.update','operations.operators.disable','operations.operators.enable','operations.operators.reset_password',
   'operations.roles.read','operations.roles.create','operations.roles.update','operations.roles.disable','operations.roles.enable',
   'operations.operator_roles.read','operations.operator_roles.assign','operations.operator_roles.revoke',
   'operations.role_permissions.read','operations.role_permissions.set','operations.audit_logs.read',

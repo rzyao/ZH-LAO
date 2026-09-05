@@ -1,0 +1,36 @@
+schema_version: 1
+source:
+  components_path: "apps/admin/src/components"
+  tokens_path: "apps/admin/src/design-system/tokens/index.css"
+  framework: "react"
+  storybook: false
+tokens:
+  color:
+    primary: "var(--primary)"
+    destructive: "var(--destructive)"
+    surface: "var(--card)"
+    muted: "var(--muted-foreground)"
+  radius:
+    - "rounded-md"
+    - "rounded-xl"
+components:
+  - id: "CMP-Button"
+    import: "@/components/ui/button"
+    props: ["variant", "size", "disabled", "loading", "onClick"]
+    variants: ["default", "destructive", "outline", "secondary", "ghost", "link"]
+    selector: "button"
+  - id: "CMP-Dialog"
+    import: "@/components/ui/dialog"
+    props: ["open", "onOpenChange"]
+    variants: ["default"]
+    selector: "[role='dialog']"
+  - id: "CMP-ConfirmDialog"
+    import: "@/components/feedback/confirm-dialog"
+    props: ["open", "onOpenChange", "title", "description", "confirmLabel", "loading", "onConfirm"]
+    variants: ["default", "destructive"]
+    selector: "[role='alertdialog']"
+  - id: "CMP-Toast"
+    import: "@/components/feedback/use-toast"
+    props: ["title", "description", "variant"]
+    variants: ["success", "danger", "warning", "info"]
+    selector: "[role='status'], [role='alert']"

@@ -1,0 +1,15 @@
+openapi: 3.1.0
+info: { title: ZH-LAO Operations Password Reset, version: 1.0.0 }
+paths:
+  /api/v1/admin/operations/operators/{operator_id}/password-reset:
+    post:
+      operationId: API-RESET-OPERATOR-PASSWORD
+      summary: Reset a different eligible operator's back-office password
+      parameters:
+        - name: operator_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Unified business envelope; success contains one-time temporary_password.

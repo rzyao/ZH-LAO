@@ -6,6 +6,7 @@ export const OPERATIONS_PERMISSIONS = {
   operatorsUpdate: 'operations.operators.update',
   operatorsDisable: 'operations.operators.disable',
   operatorsEnable: 'operations.operators.enable',
+  operatorsResetPassword: 'operations.operators.reset_password',
   rolesRead: 'operations.roles.read',
   rolesCreate: 'operations.roles.create',
   rolesUpdate: 'operations.roles.update',

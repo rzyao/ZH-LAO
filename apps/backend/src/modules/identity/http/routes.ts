@@ -48,6 +48,7 @@ export type IdentityHttpDependencies = Readonly<{
 
 export async function registerIdentityRoutes(app: FastifyInstance, dependencies: IdentityHttpDependencies): Promise<void> {
   const protectedRoute = requireAuthentication(dependencies.authentication);
+  const passwordChangeRoute = requireAuthentication(dependencies.authentication, { allowPasswordChangeRequired: true });
   if (dependencies.adminAuth) {
     app.post('/api/v1/admin/auth/login', async (request, reply) => {
       const body = parse(z.object({ username: z.string().trim().min(1).max(100), password: z.string().min(1).max(200) }).strict(), request.body);
@@ -57,7 +58,7 @@ export async function registerIdentityRoutes(app: FastifyInstance, dependencies:
     });
   }
   if (dependencies.adminCredentials) {
-    app.post('/api/v1/admin/auth/change-password', { preHandler: protectedRoute }, async (request) => {
+    app.post('/api/v1/admin/auth/change-password', { preHandler: passwordChangeRoute }, async (request) => {
       const body = parse(z.object({ current_password: z.string().min(1).max(200), new_password: z.string().min(8).max(128) }).strict(), request.body);
       const result = await dependencies.adminCredentials!.changePassword(subject(request), body.current_password, body.new_password, { ipAddress: request.ip, requestId: request.id });
       return { status: result.changed ? 'changed' : 'unchanged', session_revoked: result.sessionRevoked };

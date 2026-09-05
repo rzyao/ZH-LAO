@@ -82,6 +82,7 @@ Backend 是最终安全边界。Admin frontend PermissionGuard/can() 只负责 U
 | GET | `/api/v1/admin/operations/operators` | `operations.operators.read` |
 | GET | `/api/v1/admin/operations/operators/:operator_id` | `operations.operators.read` |
 | POST | `/api/v1/admin/operations/operators` | `operations.operators.create` |
+| POST | `/api/v1/admin/operations/operators/:operator_id/password-reset` | `operations.operators.reset_password` |
 | PATCH | `/api/v1/admin/operations/operators/:operator_id` | `operations.operators.update` |
 | POST | `/api/v1/admin/operations/operators/:operator_id/disable` | `operations.operators.disable` |
 | POST | `/api/v1/admin/operations/operators/:operator_id/enable` | `operations.operators.enable` |
@@ -258,6 +259,16 @@ Success response：HTTP `200`，统一信封：
 ```
 
 Errors use the standard envelope: duplicate username → `ADMIN_USERNAME_CONFLICT`; caller without the exact permission → `FORBIDDEN`; validation or persistence failure creates neither account nor Operator. The response must never expose `auth_subject_id`.
+
+### 5.3A Reset Password
+
+```http
+POST /api/v1/admin/operations/operators/:operator_id/password-reset
+```
+
+No request body. Per ADR-031, the actor and target must be active and different; a `super_admin` target requires a `super_admin` actor. One PostgreSQL local transaction generates a temporary password, replaces the Identity hash, marks first-login password change required, revokes all target active sessions, and writes `operations.operators.reset_password` audit. Any failure rolls back all work.
+
+The success envelope returns `data.operator` and `data.temporary_password` exactly once, with `Cache-Control: no-store` and `Pragma: no-cache`. The secret is never exposed by reads, audit, logs, errors, URLs, or persistent client state; clients must not automatically retry a network failure.
 
 ### 5.4 Update
 
@@ -553,6 +564,7 @@ Operations：
 |---|---:|---|
 | `OPERATOR_ACCESS_DENIED` | 403 | authenticated Identity subject has no active Operator mapping |
 | `OPERATOR_DISABLED` | 403 | current Operator disabled |
+| `OPERATOR_PASSWORD_RESET_NOT_ALLOWED` | 409 | target violates the self, state, credential, or privileged-target reset guard |
 | `OPERATOR_NOT_FOUND` | 404 | managed Operator not found |
 | `OPERATOR_ALREADY_EXISTS` | 409 | auth_subject_id already mapped |
 | `OPERATOR_AUTH_SUBJECT_NOT_FOUND` | 400 | Identity subject does not exist |

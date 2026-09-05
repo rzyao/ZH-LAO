@@ -5,6 +5,7 @@ import type { AuthContext } from '../../../../auth/auth-context.js';
 import type { DatabaseExecutor } from '../../../../database/executor.js';
 import type { TransactionManager } from '../../../../database/transaction-manager.js';
 import type { IdentityPublicQueries, UserPublicId } from '../../../identity/public/index.js';
+import type { AdminCredentialOperations } from '../../../identity/public/index.js';
 import type { OperationsRepository } from '../ports/index.js';
 import { OPERATOR_PERMISSION_CATALOG,isOperatorPermissionKey,type AuthorizedOperatorContext,type OperatorPermissionKey,type OperationsAuditRecorder,type OperationsAuthorizer,type OperationsOperatorResolver,type OperatorSummary } from '../../public/index.js';
 
@@ -14,7 +15,7 @@ const name=(s:string)=>{const v=s.trim();if(!v||v.length>100)throw err('INVALID_
 const safe=(details:Readonly<Record<string,unknown>>={})=>{const text=JSON.stringify(details);if(text.length>8192)throw err('INVALID_ARGUMENT','Audit details too large',400);if(/password|token|authorization|secret|card|payment_credential/i.test(text))throw err('INVALID_ARGUMENT','Sensitive audit details are forbidden',400);return details;};
 
 export class OperationsService implements OperationsAuthorizer,OperationsOperatorResolver,OperationsAuditRecorder{
- constructor(private readonly tx:TransactionManager,private readonly db:DatabaseExecutor,private readonly repo:OperationsRepository,private readonly identity:IdentityPublicQueries){}
+ constructor(private readonly tx:TransactionManager,private readonly db:DatabaseExecutor,private readonly repo:OperationsRepository,private readonly identity:IdentityPublicQueries,private readonly credentials?:AdminCredentialOperations){}
  private async requireActiveIdentity(subjectId:string){const s=await this.identity.getIdentitySummary(subjectId as UserPublicId);if(!s)throw err('OPERATOR_AUTH_SUBJECT_NOT_FOUND','Identity subject not found',400);if(s.status!=='active')throw err('OPERATOR_AUTH_SUBJECT_INACTIVE','Identity subject is not active',409);}
  async resolveCurrentOperator(auth:AuthContext):Promise<OperatorSummary>{const o=await this.repo.findOperatorByAuthSubjectId(this.db,auth.subjectId);if(!o)throw err('OPERATOR_ACCESS_DENIED','No operator mapping',403);if(o.status!=='active')throw err('OPERATOR_DISABLED','Operator is disabled',403);return{operatorId:o.id,authSubjectId:o.authSubjectId,displayName:o.displayName,status:o.status};}
  async requirePermission(auth:AuthContext,p:OperatorPermissionKey):Promise<AuthorizedOperatorContext>{const snapshot=await this.repo.getAuthorizationSnapshot(this.db,auth.subjectId,p);if(!snapshot)throw err('OPERATOR_ACCESS_DENIED','No operator mapping',403);const o=snapshot.operator;if(o.status!=='active')throw err('OPERATOR_DISABLED','Operator is disabled',403);if(!snapshot.hasPermission)throw err('FORBIDDEN','Permission denied',403);return{operatorId:o.id,authSubjectId:o.authSubjectId};}
@@ -25,6 +26,20 @@ export class OperationsService implements OperationsAuthorizer,OperationsOperato
  async getOperator(id:string){const o=await this.repo.findOperatorById(this.db,id);if(!o)throw err('OPERATOR_NOT_FOUND','Operator not found',404);return o;}
  async createOperator(actor:AuthorizedOperatorContext,input:{authSubjectId:string;displayName:string},ctx?:{requestId?:string;ipAddress?:string}){await this.requireActiveIdentity(input.authSubjectId);try{return await this.tx.run(async db=>{const o=await this.repo.createOperator(db,{id:randomUUID(),authSubjectId:input.authSubjectId,displayName:name(input.displayName)});await this.localAudit(db,actor,'operations.operators.create',{domain:'operations',type:'operator',id:o.id},{auth_subject_id:o.authSubjectId},ctx);return o;});}catch(e){if(pgCode(e)==='23505')throw err('OPERATOR_ALREADY_EXISTS','Identity subject already mapped',409);throw e;}}
  async updateOperator(actor:AuthorizedOperatorContext,id:string,displayName:string,ctx?:{requestId?:string;ipAddress?:string}){return this.tx.run(async db=>{const current=await this.repo.findOperatorById(db,id,true);if(!current)throw err('OPERATOR_NOT_FOUND','Operator not found',404);const nextName=name(displayName);if(current.displayName===nextName)return current;const next=await this.repo.updateOperatorDisplayName(db,id,nextName);await this.localAudit(db,actor,'operations.operators.update',{domain:'operations',type:'operator',id},undefined,ctx);return next!;});}
+ async resetOperatorPassword(actor:AuthorizedOperatorContext,id:string,ctx?:{requestId?:string;ipAddress?:string}){
+  if(!this.credentials)throw err('INTERNAL_ERROR','Admin credential reset is unavailable',500);
+  if(actor.operatorId===id)throw err('OPERATOR_PASSWORD_RESET_NOT_ALLOWED','An operator cannot reset their own password',409);
+  return this.tx.run(async db=>{
+   const target=await this.repo.findOperatorById(db,id,true);if(!target)throw err('OPERATOR_NOT_FOUND','Operator not found',404);
+   if(target.status!=='active')throw err('OPERATOR_PASSWORD_RESET_NOT_ALLOWED','Target operator is not eligible for password reset',409);
+   await this.requireActiveIdentity(target.authSubjectId);
+   const superRole=await this.repo.findRoleByCode(db,'super_admin',true);
+   if(superRole&&await this.repo.hasOperatorRole(db,id,superRole.id)&&!await this.repo.hasOperatorRole(db,actor.operatorId,superRole.id))throw err('OPERATOR_PASSWORD_RESET_NOT_ALLOWED','Only a super-admin can reset another super-admin',409);
+   const reset=await this.credentials!.resetPasswordInTransaction(db,target.authSubjectId as UserPublicId);
+   await this.localAudit(db,actor,'operations.operators.reset_password',{domain:'operations',type:'operator',id},undefined,ctx);
+   return{operator:target,temporaryPassword:reset.temporaryPassword};
+  });
+ }
  async setOperatorStatus(actor:AuthorizedOperatorContext,id:string,status:'active'|'disabled',ctx?:{requestId?:string;ipAddress?:string}){return this.tx.run(async db=>{const superRole=status==='disabled'?await this.repo.findRoleByCode(db,'super_admin',true):null;const current=await this.repo.findOperatorById(db,id,true);if(!current)throw err('OPERATOR_NOT_FOUND','Operator not found',404);if(current.status===status)return current;if(status==='active')await this.requireActiveIdentity(current.authSubjectId);if(status==='disabled'&&superRole&&await this.repo.hasOperatorRole(db,id,superRole.id)){const count=await this.repo.countActiveOperatorsWithRole(db,superRole.id);if(count<=1)throw err('LAST_SUPER_ADMIN_REQUIRED','At least one active super-admin is required',409);}const next=await this.repo.updateOperatorStatus(db,id,status);await this.localAudit(db,actor,`operations.operators.${status==='active'?'enable':'disable'}`,{domain:'operations',type:'operator',id},undefined,ctx);return next!;});}
  async listRoles(input:{page:number;pageSize:number;status?:'active'|'disabled'|undefined}){return this.repo.listRoles(this.db,input);}
  async getRole(id:string){const r=await this.repo.findRoleById(this.db,id);if(!r)throw err('ROLE_NOT_FOUND','Role not found',404);return r;}

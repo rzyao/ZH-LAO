@@ -18,7 +18,7 @@ import { PostgresOperationsRepository } from './modules/operations/infrastructur
 import { AdminOperatorWriter } from './modules/operations/application/services/index.js';
 import { AdminAccountWriter } from './modules/identity/application/services/admin-account-writer.js';
 import { AdminOperatorProvisioningService } from './modules/admin-operator-provisioning/application/admin-operator-provisioning-service.js';
-import { ensureDefaultAdmin } from './modules/identity/application/index.js';
+import { ensureDefaultAdmin,AdminCredentialOperations } from './modules/identity/application/index.js';
 import { PostgresContentRepository, PostgresStructuredContentRepository } from './modules/content/infrastructure/index.js';
 import { registerContentRoutes } from './modules/content/http/composition.js';
 
@@ -50,7 +50,7 @@ if(process.argv[2]==='--operations-bootstrap'){
   const app=buildApp({logger,database:executor,readinessState});
   const identityPublic=createIdentityPublicQuery(createIdentityRepositories,executor);
   const provisioning=new AdminOperatorProvisioningService(transactionManager,new AdminAccountWriter(),new AdminOperatorWriter(new PostgresOperationsRepository()));
-  const operations=buildOperationsModule({executor,transactionManager,identity:identityPublic,authentication:new IdentityAuthenticationProvider(new AccessTokenService(config.identity.jwtHmacSecret??'',config.identity.jwtIssuer,config.identity.jwtAudience),createIdentityRepositories,executor),provisioning});
+  const operations=buildOperationsModule({executor,transactionManager,identity:identityPublic,authentication:new IdentityAuthenticationProvider(new AccessTokenService(config.identity.jwtHmacSecret??'',config.identity.jwtIssuer,config.identity.jwtAudience),createIdentityRepositories,executor),provisioning,credentials:new AdminCredentialOperations(transactionManager,createIdentityRepositories)});
   const adminAudit=new OperatorAuditAdapter(operations.service,operations.service);
   const identityDependencies=createIdentityHttpDependencies({transactionManager,repositories:createIdentityRepositories,executor,otpHmacSecret:config.identity.otpHmacSecret??'',jwtHmacSecret:config.identity.jwtHmacSecret??'',jwtIssuer:config.identity.jwtIssuer,jwtAudience:config.identity.jwtAudience,facebookVerifier:new UnavailableFacebookCredentialVerifier(),otpDelivery:config.identity.otpProvider==='console'?new ConsoleOtpDeliveryProvider({info:(message,fields)=>logger.info(fields,message)}):new UnavailableOtpDeliveryProvider(),adminAudit,securityLog:createSecurityLog(logger)});
   await identityModule.registerHttp(app,identityDependencies);

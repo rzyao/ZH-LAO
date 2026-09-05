@@ -58,12 +58,11 @@ export const operationsAdminApi = {
     const response = await apiClient.post(`${base}/operators`, {
       json: input,
     })
-    const parsed = z.object({
-      code: z.literal('OK'),
-      data: z.object({ operator: operatorSummarySchema, initial_password: z.string().min(1) }),
-      request_id: z.string(),
+    // ApiClient unwraps the canonical success envelope before feature APIs see it.
+    return z.object({
+      operator: operatorSummarySchema,
+      initial_password: z.string().min(1),
     }).parse(response.data)
-    return parsed.data
   },
 
   async updateOperator(operatorId: string, input: OperatorUpdateInput) {
@@ -84,6 +83,14 @@ export const operationsAdminApi = {
     const response = await apiClient.post(`${base}/operators/${encodeURIComponent(operatorId)}/disable`)
     const parsed = z.object({ operator: operatorSummarySchema }).parse(response.data)
     return parsed.operator
+  },
+
+  async resetOperatorPassword(operatorId: string) {
+    const response = await apiClient.post(`${base}/operators/${encodeURIComponent(operatorId)}/password-reset`)
+    return z.object({
+      operator: operatorSummarySchema,
+      temporary_password: z.string().min(1),
+    }).parse(response.data)
   },
 
   async listOperatorRoles(operatorId: string, signal?: AbortSignal) {

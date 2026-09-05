@@ -9,11 +9,14 @@ export function installAuthContext(app: FastifyInstance): void {
   app.decorateRequest('authContext', null);
 }
 
-export function requireAuthentication(provider?: AuthenticationProvider) {
+export function requireAuthentication(provider?: AuthenticationProvider, options: Readonly<{ allowPasswordChangeRequired?: boolean }> = {}) {
   return async (request: FastifyRequest): Promise<void> => {
     if (!provider) throw new AppError({ code: 'AUTHENTICATION_UNAVAILABLE', message: 'Authentication is unavailable', httpStatus: 503, expose: false });
     const context = await provider.authenticate(request);
     if (!context) throw new AppError({ code: 'UNAUTHENTICATED', message: 'Authentication required', httpStatus: 401 });
+    if (context.passwordChangeRequired && !options.allowPasswordChangeRequired) {
+      throw new AppError({ code: 'PASSWORD_CHANGE_REQUIRED', message: 'Password change is required', httpStatus: 403 });
+    }
     request.authContext = context;
   };
 }

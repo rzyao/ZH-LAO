@@ -1,0 +1,27 @@
+schema_version: 1
+feature: "admin-operator-password-reset"
+screens:
+  - screen: "confirm-reset"
+    regions:
+      - region: "irreversible-action confirmation"
+        component: "CMP-ConfirmDialog"
+        variant: "destructive"
+        target_path: "apps/admin/src/features/operations/pages/operators.tsx"
+        journeys: ["JRN-001", "JRN-002"]
+      - region: "confirm and cancel controls"
+        component: "CMP-Button"
+        variant: "destructive"
+        target_path: "apps/admin/src/features/operations/pages/operators.tsx"
+        journeys: ["JRN-001"]
+  - screen: "temporary-password-result"
+    regions:
+      - region: "one-time secret result"
+        component: "CMP-Dialog"
+        variant: "default"
+        target_path: "apps/admin/src/features/operations/pages/operators.tsx"
+        journeys: ["JRN-001"]
+      - region: "copy feedback"
+        component: "CMP-Toast"
+        variant: "success"
+        target_path: "apps/admin/src/features/operations/pages/operators.tsx"
+        journeys: ["JRN-001", "JRN-003"]

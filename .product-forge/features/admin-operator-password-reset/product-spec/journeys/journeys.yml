@@ -1,0 +1,24 @@
+schema_version: 1
+feature: "admin-operator-password-reset"
+journeys:
+  - id: "JRN-001"
+    title: "授权管理员成功重置其他操作员密码"
+    stories: ["US-001", "US-002", "US-003"]
+    smoke: true
+    runner: "playwright-cli"
+    steps: ["STEP-001", "STEP-002", "STEP-003", "STEP-004", "STEP-005"]
+    edges: ["EDGE-001", "EDGE-002"]
+  - id: "JRN-002"
+    title: "越权或不符合资格的重置被拒绝"
+    stories: ["US-001", "US-003"]
+    smoke: true
+    runner: "playwright-cli"
+    steps: ["STEP-006", "STEP-007"]
+    edges: ["EDGE-003", "EDGE-004", "EDGE-005"]
+  - id: "JRN-003"
+    title: "网络失败后不自动重试或恢复秘密"
+    stories: ["US-002", "US-003"]
+    smoke: false
+    runner: "playwright-cli"
+    steps: ["STEP-008", "STEP-009"]
+    edges: ["EDGE-006"]

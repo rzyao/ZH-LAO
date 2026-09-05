@@ -97,6 +97,18 @@ export function useDisableOperator() {
   })
 }
 
+export function useResetOperatorPassword() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: (operatorId: string) => operationsAdminApi.resetOperatorPassword(operatorId),
+    retry: false,
+    onSuccess: (_data, operatorId) => {
+      queryClient.invalidateQueries({ queryKey: operationsQueryKeys.operatorDetail(operatorId) })
+      queryClient.invalidateQueries({ queryKey: [...operationsQueryKeys.root, 'audit-logs'] })
+    },
+  })
+}
+
 export function useAssignOperatorRole() {
   const queryClient = useQueryClient()
   return useMutation({

@@ -122,7 +122,7 @@ CHECK 只允许 `(native_language='lo' AND learning_language='zh')` 或 `(native
 
 索引：`(user_id, last_seen_at DESC)`、`(push_token) WHERE push_token IS NOT NULL AND revoked_at IS NULL`。用途包括推送、登录安全、Session 关联、多设备管理、风控和版本统计（列与约束已冻结）。
 
-## admin_credentials — frozen（迁移 `1260_admin_credentials.sql`）
+## admin_credentials — frozen base + ADR-031 forward extension
 
 后台登录凭据表；密码以 scrypt hash 存储，明文密码永不落库（Stage 1/5 三方漂移修复补齐，此前 `domains/` 未收录）。
 
@@ -134,6 +134,9 @@ CHECK 只允许 `(native_language='lo' AND learning_language='zh')` 或 `(native
 | `password_hash` | `varchar(255)` | 否 | CHECK `btrim(password_hash) <> ''` | scrypt 密码 hash |
 | `created_at` | `timestamptz` | 否 | DEFAULT `now()` | 创建时间 |
 | `updated_at` | `timestamptz` | 否 | DEFAULT `now()` | 更新时间 |
+| `password_change_required` | `boolean` | 否 | DEFAULT `false`; 后续前向迁移新增 | `true` 时后台认证仅允许完成密码修改；成功修改后原子置回 `false` |
+
+`password_change_required` 不改写冻结 `1260_admin_credentials.sql`。ADR-031 批准以向前 migration 加入该状态；管理员重置写入临时密码 hash 时置为 `true`，目标强制改密成功时置回 `false`。明文密码永不持久化。
 
 ## 关系总览
 

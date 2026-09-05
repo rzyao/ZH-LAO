@@ -15,6 +15,11 @@ function hashAdminPassword(password: string): string {
   return `${HASH_PREFIX}$${salt}$${derived}`;
 }
 
+function temporaryPassword(): string {
+  // base64url has a high-entropy mix of letters and digits and is never persisted or logged.
+  return randomBytes(24).toString('base64url');
+}
+
 function verifyAdminPassword(password: string, encoded: string): boolean {
   const [prefix, salt, expectedEncoded] = encoded.split('$');
   if (prefix !== HASH_PREFIX || !salt || !expectedEncoded) return false;
@@ -29,6 +34,7 @@ function verifyAdminPassword(password: string, encoded: string): boolean {
 
 export type ChangeAdminPasswordResult = Readonly<{ changed: boolean; sessionRevoked: boolean }>;
 export type ChangeAdminPasswordContext = Readonly<{ requestId?: string; ipAddress?: string }>;
+export type ResetAdminPasswordResult = Readonly<{ temporaryPassword: string; sessionRevoked: boolean }>;
 
 /**
  * Admin password lifecycle operations (FR-011 / US-004).
@@ -71,7 +77,7 @@ export class AdminCredentialOperations {
       }
 
       await executor.query(
-        `UPDATE identity.admin_credentials SET password_hash = $2, updated_at = now() WHERE user_id = $1`,
+        `UPDATE identity.admin_credentials SET password_hash = $2, password_change_required = false, updated_at = now() WHERE user_id = $1`,
         [user.id.toString(), hashAdminPassword(newPassword)],
       );
       const revoked = await this.repositories(executor).sessions.revokeAllByUserId(user.id, new Date(), 'password_changed');
@@ -87,5 +93,25 @@ export class AdminCredentialOperations {
       });
     }
     return result;
+  }
+
+  /** Narrow cross-domain port: caller owns the surrounding transaction and audit. */
+  async resetPasswordInTransaction(executor: DatabaseExecutor, subjectId: UserPublicId): Promise<ResetAdminPasswordResult> {
+    const user = await this.repositories(executor).users.findByPublicId(subjectId);
+    if (!user || user.status !== 'active') {
+      throw new AppError({ code: 'OPERATOR_AUTH_SUBJECT_INACTIVE', message: 'Identity subject is not active', httpStatus: 409 });
+    }
+    const secret = temporaryPassword();
+    const updated = await executor.query(
+      `UPDATE identity.admin_credentials
+       SET password_hash = $2, password_change_required = true, updated_at = now()
+       WHERE user_id = $1`,
+      [user.id.toString(), hashAdminPassword(secret)],
+    );
+    if (updated.rowCount !== 1) {
+      throw new AppError({ code: 'OPERATOR_AUTH_SUBJECT_NOT_FOUND', message: 'Admin credentials not found', httpStatus: 400 });
+    }
+    const revoked = await this.repositories(executor).sessions.revokeAllByUserId(user.id, new Date(), 'password_reset');
+    return { temporaryPassword: secret, sessionRevoked: revoked > 0 };
   }
 }
