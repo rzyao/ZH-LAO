@@ -7,6 +7,8 @@ export interface ListPageLayoutProps {
   description?: string
   breadcrumb?: BreadcrumbItem[]
   actions?: React.ReactNode
+  /** Contextual controls kept with the sticky page introduction. */
+  toolbar?: React.ReactNode
   children: React.ReactNode
 }
 
@@ -16,11 +18,12 @@ export function ListPageLayout({
   description,
   breadcrumb,
   actions,
+  toolbar,
   children,
 }: ListPageLayoutProps) {
   return (
     <div className="flex h-full flex-col">
-      <PageHeader title={title} description={description} breadcrumb={breadcrumb} actions={actions} />
+      <PageHeader title={title} description={description} breadcrumb={breadcrumb} actions={actions} toolbar={toolbar} />
       <div className="min-h-0 flex-1 overflow-auto px-4 py-6 sm:px-8">{children}</div>
     </div>
   )

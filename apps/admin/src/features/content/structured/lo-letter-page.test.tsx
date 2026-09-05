@@ -9,7 +9,8 @@ type LaoLetterPageModule = Readonly<{
   LaoLetterPageView: ComponentType<{
     state: { kind: string; data?: typeof laoLetterListFixture; querySummary?: string; error?: Error }
     onRetry?: () => void
-    onRowAction?: (row: (typeof laoLetterListFixture.items)[number]) => void
+    onRowEdit?: (row: (typeof laoLetterListFixture.items)[number]) => void
+    onRowArchive?: (row: (typeof laoLetterListFixture.items)[number]) => void
   }>
   nearestValidLaoLetterPage: (input: {
     page: number; pageSize: number; total: number; itemCount: number
@@ -135,16 +136,25 @@ describe('Lao-letter column preferences and fixed columns', () => {
     expect(laoLetterColumns.find((column) => column.id === 'actions')?.enableHiding).toBe(false)
   })
 
-  it('keeps the operation column sticky and its action keyboard-focusable while horizontally scrolling', async () => {
+  it('keeps the operation column sticky and deletes directly without selecting the row', async () => {
     const { LaoLetterPageView } = await loadPageModule()
-    const onRowAction = vi.fn()
-    render(<LaoLetterPageView state={{ kind: 'ready', data: laoLetterListFixture }} onRowAction={onRowAction} />)
+    const onRowArchive = vi.fn()
+    render(<LaoLetterPageView state={{ kind: 'ready', data: laoLetterListFixture }} onRowArchive={onRowArchive} />)
     expect(screen.getByTestId('data-table-scroll-container')).toHaveClass('overflow-x-auto')
-    const action = screen.getAllByRole('button', { name: /操作/u })[0]
+    const action = screen.getAllByRole('button', { name: '删除 ກ' })[0]
     action.focus()
     expect(action).toHaveFocus()
     expect(action.closest('td')).toHaveClass('sticky', 'right-0')
     fireEvent.click(action)
-    expect(onRowAction).toHaveBeenCalledWith(laoLetterListFixture.items[0])
+    expect(onRowArchive).toHaveBeenCalledWith(laoLetterListFixture.items[0])
+  })
+
+  it('offers separate edit and delete affordances', async () => {
+    const { LaoLetterPageView } = await loadPageModule()
+    const onRowEdit = vi.fn()
+    render(<LaoLetterPageView state={{ kind: 'ready', data: laoLetterListFixture }} onRowEdit={onRowEdit} />)
+    fireEvent.click(screen.getAllByRole('button', { name: '编辑 ກ' })[0])
+    expect(onRowEdit).toHaveBeenCalledWith(laoLetterListFixture.items[0])
+    expect(screen.getAllByRole('button', { name: '删除 ກ' })[0]).toBeEnabled()
   })
 })

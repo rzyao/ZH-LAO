@@ -10,7 +10,7 @@ export type LaoLetterPageState = Readonly<{
   error?: Error
 }>
 
-export function LaoLetterPageView({
+export const LaoLetterPageView = React.memo(function LaoLetterPageView({
   state,
   onRetry,
   onClearFilters,
@@ -18,10 +18,15 @@ export function LaoLetterPageView({
   columnVisibility,
   onColumnVisibilityChange,
   toolbar,
+  toolbarActions,
   rowSelection,
   onRowSelectionChange,
   onSelectedRowIdsChange,
-  onRowAction,
+  onRowEdit,
+  onRowArchive,
+  rowHoverClassName,
+  stickyCellStateClassName,
+  className,
 }: {
   state: LaoLetterPageState
   onRetry?: () => void
@@ -30,12 +35,17 @@ export function LaoLetterPageView({
   columnVisibility?: React.ComponentProps<typeof DataTable<LaoLetterListItem, unknown>>['columnVisibility']
   onColumnVisibilityChange?: React.ComponentProps<typeof DataTable<LaoLetterListItem, unknown>>['onColumnVisibilityChange']
   toolbar?: React.ReactNode
+  toolbarActions?: React.ReactNode
   rowSelection?: React.ComponentProps<typeof DataTable<LaoLetterListItem, unknown>>['rowSelection']
   onRowSelectionChange?: React.ComponentProps<typeof DataTable<LaoLetterListItem, unknown>>['onRowSelectionChange']
   onSelectedRowIdsChange?: React.ComponentProps<typeof DataTable<LaoLetterListItem, unknown>>['onSelectedRowIdsChange']
-  onRowAction?: (row: LaoLetterListItem) => void
+  onRowEdit?: (row: LaoLetterListItem) => void
+  onRowArchive?: (row: LaoLetterListItem) => void
+  rowHoverClassName?: React.ComponentProps<typeof DataTable<LaoLetterListItem, unknown>>['rowHoverClassName']
+  stickyCellStateClassName?: React.ComponentProps<typeof DataTable<LaoLetterListItem, unknown>>['stickyCellStateClassName']
+  className?: React.ComponentProps<typeof DataTable<LaoLetterListItem, unknown>>['className']
 }) {
-  const columns = React.useMemo(() => createLaoLetterColumns(onRowAction ?? (() => undefined)), [onRowAction])
+  const columns = React.useMemo(() => createLaoLetterColumns(onRowEdit, onRowArchive), [onRowArchive, onRowEdit])
   const table = (
     <DataTable
       columns={columns}
@@ -54,6 +64,10 @@ export function LaoLetterPageView({
       columnVisibility={columnVisibility}
       onColumnVisibilityChange={onColumnVisibilityChange}
       toolbar={toolbar}
+      toolbarActions={toolbarActions}
+      rowHoverClassName={rowHoverClassName}
+      stickyCellStateClassName={stickyCellStateClassName}
+      className={className}
       emptyTitle={state.kind === 'no-results' ? '没有匹配结果' : '暂无字母内容'}
       emptyDescription={state.kind === 'no-results'
         ? state.querySummary ? `当前条件：${state.querySummary}` : '请调整搜索或筛选条件。'
@@ -72,4 +86,4 @@ export function LaoLetterPageView({
       {table}
     </div>
   )
-}
+})

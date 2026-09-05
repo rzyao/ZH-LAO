@@ -12,6 +12,8 @@ export interface PageHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
   breadcrumb?: BreadcrumbItem[]
   /** Primary/secondary action buttons rendered on the right. */
   actions?: React.ReactNode
+  /** Contextual controls that remain visible with the page introduction. */
+  toolbar?: React.ReactNode
 }
 
 /**
@@ -23,11 +25,13 @@ export function PageHeader({
   description,
   breadcrumb,
   actions,
+  toolbar,
   className,
   ...props
 }: PageHeaderProps) {
   return (
     <div className={cn('sticky top-0 z-10 flex flex-col gap-3 border-b bg-card/95 px-4 py-4 backdrop-blur sm:px-8', className)} {...props}>
+      {toolbar ? <div className="absolute inset-x-0 top-0 z-20 border-b bg-card/95 px-4 py-3 shadow-md backdrop-blur sm:px-8">{toolbar}</div> : null}
       {breadcrumb && breadcrumb.length > 0 ? (
         <nav aria-label="面包屑" className="text-xs text-muted-foreground">
           <ol className="flex flex-wrap items-center gap-1">

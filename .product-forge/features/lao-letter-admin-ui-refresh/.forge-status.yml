@@ -1,0 +1,127 @@
+schema_version: 3
+feature: "lao-letter-admin-ui-refresh"
+created_at: "2026-09-05"
+v2_native: true
+feature_mode: "express"
+flow_mode: "gated"
+scope:
+  primary: "admin"
+  paths:
+    - "apps/admin"
+  cross_workspace: false
+phases:
+  problem_discovery: { status: "not_applicable" }
+  research: { status: "not_applicable" }
+  product_spec:
+    status: "completed"
+    digest_path: "product-spec/digest.md"
+  design_system_harvest:
+    status: "completed"
+    digest_path: "design-system/manifest.md"
+  revalidation: { status: "not_applicable" }
+  bridge: { status: "not_applicable" }
+  i18n_harvest: { status: "not_applicable" }
+  plan:
+    status: "completed"
+    digest_path: "plan/digest.md"
+  tasks: { status: "not_applicable" }
+  migration_plan: { status: "not_applicable" }
+  pre_impl_review: { status: "not_applicable" }
+  implement:
+    status: "completed"
+    digest_path: "implement/digest.md"
+    red_gate:
+      status: "skipped"
+      tests: []
+      skip_reason: "Express 轨道没有 tasks.md 或 Test-first 标记任务；新增页面概览测试已先失败后通过。"
+  code_review: { status: "not_applicable" }
+  verify:
+    status: "pending"
+    digest_path: "verify/digest.md"
+  test_plan: { status: "not_applicable" }
+  test_run: { status: "not_applicable" }
+  release_readiness: { status: "not_applicable" }
+  monitoring_setup: { status: "not_applicable" }
+  experiment_design: { status: "not_applicable" }
+  spec_merge: { status: "not_applicable" }
+gates:
+  - phase: "product_spec"
+    decision: "approved"
+    timestamp: "2026-09-05T00:00:00+08:00"
+    notes: "用户批准简洁规格、两条旅程、详细线框和项目风格原型，进入 Express 实施计划。"
+    reviewed_sha: "uncommitted"
+    risk: "low"
+  - phase: "plan"
+    decision: "approved"
+    timestamp: "2026-09-05T00:00:00+08:00"
+    notes: "用户批准 Express 内联实施计划，开始前端局部 UI 优化。"
+    reviewed_sha: "uncommitted"
+    risk: "low"
+  - phase: "implement"
+    decision: "approved"
+    timestamp: "2026-09-05T00:00:00+08:00"
+    notes: "用户批准前端局部实现进入验证；全量 lint 与测试的既有失败保留为验证条件。"
+    reviewed_sha: "uncommitted"
+    risk: "low"
+  - phase: "verify"
+    decision: "approved"
+    timestamp: "2026-09-05T00:00:00+08:00"
+    notes: "用户确认接受 Express 轨道未运行 E2E、非标准 rows 追溯结构，以及未触及的项目级 lint/测试失败。"
+    reviewed_sha: "uncommitted"
+    risk: "low"
+  - phase: "product_spec"
+    decision: "revised"
+    timestamp: "2026-09-05T00:00:00+08:00"
+    notes: "用户明确移除无现有契约支撑的新建入口；规格改为仅优化当前列表、选择和批量任务体验。"
+    reviewed_sha: "uncommitted"
+    risk: "low"
+  - phase: "product_spec"
+    decision: "approved"
+    timestamp: "2026-09-05T00:00:00+08:00"
+    notes: "用户批准移除新建入口后的修订规格，允许进入 Express 内联实施计划。"
+    reviewed_sha: "uncommitted"
+    risk: "low"
+last_updated: "2026-09-05T00:00:00+08:00"
+implement:
+  tasks_completed: 2
+  tasks_total: 2
+  progressive_checkpoints: 1
+  progressive_warnings: 2
+  progressive_critical: 0
+  dependencies:
+    added: 0
+    vetted: 0
+    warned: 0
+    blocked: 0
+    log_path: null
+task_log:
+  - id: "EXP-001"
+    status: "completed"
+    size: "S"
+    paths: ["admin:src/features/content/structured/lo-letter-page.test.tsx"]
+    commit_sha: null
+  - id: "EXP-002"
+    status: "completed"
+    size: "S"
+    paths: ["admin:src/features/content/structured/lo-letter-page.tsx"]
+    commit_sha: null
+  - id: "CR-002-001"
+    status: "completed"
+    size: "M"
+    paths: ["admin:src/features/content/structured/lo-letter-page.tsx", "admin:src/features/content/structured/lo-letter-editor-dialog.tsx", "admin:src/features/content/structured/lo-letter-columns.tsx", "admin:src/features/content/structured/lo-letter-page.test.tsx"]
+    commit_sha: null
+change_requests:
+  - id: "CR-001"
+    title: "移除首页默认批量任务历史"
+    status: "accepted"
+    timestamp: "2026-09-05T00:00:00+08:00"
+    artifacts_affected: 4
+    tasks_added: 1
+    phase_rollback: "implement"
+  - id: "CR-002"
+    title: "补齐后台老挝字母增删改查"
+    status: "accepted"
+    timestamp: "2026-09-05T00:00:00+08:00"
+    artifacts_affected: 7
+    tasks_added: 1
+    phase_rollback: "implement"

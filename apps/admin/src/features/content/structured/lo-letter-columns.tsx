@@ -1,4 +1,5 @@
 import type { ColumnDef } from '@tanstack/react-table'
+import { Pencil, Trash2 } from 'lucide-react'
 import { DataTableColumnHeader } from '@/components/data-table/data-table-column-header'
 import { StatusBadge, type StatusTone } from '@/components/common/status-badge'
 import { Button } from '@/components/ui/button'
@@ -23,7 +24,8 @@ export const LAO_LETTER_HIDEABLE_COLUMN_IDS = [
 ] as const
 
 export function createLaoLetterColumns(
-  onRowAction: (row: LaoLetterListItem) => void,
+  onRowEdit: (row: LaoLetterListItem) => void = () => undefined,
+  onRowArchive: (row: LaoLetterListItem) => void = () => undefined,
 ): ColumnDef<LaoLetterListItem>[] {
   return [
   {
@@ -58,12 +60,21 @@ export function createLaoLetterColumns(
   { accessorKey: 'name', header: ({ column }) => <DataTableColumnHeader column={column} title="名称" />, cell: ({ row }) => row.original.name ?? '—' },
   {
     id: 'actions',
-    header: '操作',
+      header: '编辑与删除',
     enableHiding: false,
     meta: { sticky: 'right' },
-    cell: ({ row }) => <Button aria-label={`操作 ${row.original.character}`} size="sm" variant="ghost" onClick={() => onRowAction(row.original)}>操作</Button>,
+    cell: ({ row }) => (
+      <div className="flex gap-1">
+        <Button aria-label={`编辑 ${row.original.character}`} size="icon-sm" variant="outline" onClick={() => onRowEdit(row.original)}>
+          <Pencil />
+        </Button>
+        <Button aria-label={`删除 ${row.original.character}`} className="text-muted-foreground hover:text-destructive" disabled={!row.original.available_actions.includes('archive')} size="icon-sm" variant="ghost" onClick={() => onRowArchive(row.original)}>
+          <Trash2 />
+        </Button>
+      </div>
+    ),
   },
   ]
 }
 
-export const laoLetterColumns = createLaoLetterColumns(() => undefined)
+export const laoLetterColumns = createLaoLetterColumns()

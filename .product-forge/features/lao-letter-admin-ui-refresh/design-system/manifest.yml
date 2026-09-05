@@ -1,0 +1,54 @@
+schema_version: 1
+source:
+  components_path: "apps/admin/src/components/ui"
+  tokens_path: "apps/admin/src/design-system/tokens/index.css"
+  framework: "React 19 + Tailwind CSS 4"
+  storybook: false
+tokens:
+  color:
+    background: "var(--background)"
+    surface: "var(--card)"
+    primary: "var(--primary)"
+    muted: "var(--muted)"
+    muted_foreground: "var(--muted-foreground)"
+    border: "var(--border)"
+    success: "var(--success)"
+    warning: "var(--warning)"
+    destructive: "var(--destructive)"
+  typography:
+    sans: "var(--font-sans)"
+    mono: "var(--font-mono)"
+  spacing: ["Tailwind spacing utilities"]
+  radius: ["var(--radius-sm)", "var(--radius-md)", "var(--radius-lg)"]
+  shadow: ["var(--shadow-xs)", "var(--shadow-sm)", "var(--shadow-md)"]
+components:
+  - id: "CMP-Button"
+    import: "@/components/ui/button"
+    props: ["variant", "size", "loading", "disabled", "onClick"]
+    variants: ["default", "outline", "secondary", "ghost", "destructive", "link"]
+    selector: "button"
+  - id: "CMP-Input"
+    import: "@/components/ui/input"
+    props: ["value", "placeholder", "onChange", "aria-label"]
+    variants: ["default"]
+    selector: "input"
+  - id: "CMP-Badge"
+    import: "@/components/ui/badge"
+    props: ["variant"]
+    variants: ["default", "secondary", "outline", "success", "warning", "destructive", "info", "muted"]
+    selector: "span"
+  - id: "CMP-Table"
+    import: "@/components/ui/table"
+    props: ["className"]
+    variants: ["responsive"]
+    selector: "table"
+  - id: "CMP-Skeleton"
+    import: "@/components/ui/skeleton"
+    props: ["className"]
+    variants: ["default"]
+    selector: "[class*='animate-pulse']"
+  - id: "CMP-Dialog"
+    import: "@/components/ui/dialog"
+    props: ["open", "onOpenChange"]
+    variants: ["default"]
+    selector: "[role='dialog']"

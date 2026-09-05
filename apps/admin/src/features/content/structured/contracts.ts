@@ -128,7 +128,7 @@ export interface ManagedStructuredContent {
 }
 
 export interface ManagedStructuredContentList { items: ManagedStructuredContent[]; total: number }
-export interface StructuredRevisionItem { revisionId: string; revisionNumber: number; status: string; snapshot: { fields: Record<string, unknown>; composition: Array<{ contentId: string; position: number }>; dictionary?: ManagedStructuredContent['snapshot'] extends infer T ? T extends { dictionary?: infer D } ? D : never : never }; reviewRemark: string | null; reviewedAt: string | null; publishedAt: string | null; createdAt: string }
+export interface StructuredRevisionItem { revisionId: string; revisionNumber: number; status: string; snapshot: { fields: Record<string, unknown>; composition: Array<{ contentId: string; position: number }>; dictionary?: ManagedStructuredContent['snapshot'] extends infer T ? T extends { dictionary?: infer D } ? D : never : never }; lockVersion: number; reviewRemark: string | null; reviewedAt: string | null; publishedAt: string | null; createdAt: string }
 export interface ContentReferenceItem { contentId: string; contentType: StructuredContentType; position: number | null }
 
 export const LaoLetterTypeSchema = z.enum(['consonant', 'vowel', 'tone_mark', 'other'])

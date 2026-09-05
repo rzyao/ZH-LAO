@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { cn } from '@/lib/utils'
 
 export type LaoLetterBatchAction = 'submit_review' | 'approve' | 'reject' | 'publish' | 'archive'
 export type LaoLetterBatchSubmitInput = Readonly<{
@@ -26,12 +27,13 @@ const labels: Readonly<Record<LaoLetterBatchAction, readonly [string, string]>> 
   archive: ['批量归档', '确认归档'],
 }
 
-export function LaoLetterBatchActions({ actions, selection, onSubmit, onSelectionStale }: {
+export function LaoLetterBatchActions({ actions, selection, onSubmit, onSelectionStale, className }: {
   actions: readonly LaoLetterBatchAction[]
   selection: Readonly<{ mode: 'page_ids'; contentIds: readonly string[] }>
     | Readonly<{ mode: 'query_all'; expectedCount: number; selectionHash: string }>
   onSubmit: (input: LaoLetterBatchSubmitInput) => Promise<void>
   onSelectionStale?: () => void
+  className?: string
 }) {
   const [active, setActive] = React.useState<LaoLetterBatchAction | null>(null)
   const [reason, setReason] = React.useState('')
@@ -73,7 +75,7 @@ export function LaoLetterBatchActions({ actions, selection, onSubmit, onSelectio
   }
 
   return <>
-    <div className="flex flex-wrap gap-2" aria-label="批量操作">
+    <div className={cn('flex flex-wrap gap-2', className)} aria-label="批量操作">
       {actions.map((action) => <Button key={action} size="sm" variant={action === 'archive' ? 'destructive' : 'outline'} onClick={() => { setActive(action); setReason(''); setRetryInput(null); setSubmissionError('') }}>{labels[action][0]}</Button>)}
     </div>
     <Dialog open={active !== null} onOpenChange={(open) => { if (!open && !pending) setActive(null) }}>

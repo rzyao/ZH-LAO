@@ -1,0 +1,70 @@
+schema_version: 1
+feature: lao-letter-admin-ui-refresh
+last_updated: "2026-09-05"
+journeys:
+  - id: JRN-001
+    title: 查找与筛选字母
+    stories: [US-001, US-002]
+    steps: [STEP-001, STEP-002, STEP-003]
+    edges:
+      - { id: EDGE-001, priority: P1, tests: [] }
+      - { id: EDGE-002, priority: P1, tests: [] }
+    tests: []
+    code:
+      - "apps/admin/src/features/content/structured/lo-letter-page.tsx"
+      - "apps/admin/src/features/content/structured/lo-letter-page.test.tsx"
+  - id: JRN-002
+    title: 选择字母并跟踪批量任务
+    stories: [US-003, US-004]
+    steps: [STEP-001, STEP-002]
+    edges:
+      - { id: EDGE-003, priority: P1, tests: [] }
+    tests: []
+    code:
+      - "apps/admin/src/features/content/structured/lo-letter-page.tsx"
+  - id: JRN-003
+    title: 新建与编辑字母草稿
+    stories: [US-005]
+    steps: [STEP-001, STEP-002]
+    edges:
+      - { id: EDGE-004, priority: P1, tests: ["TC-CR002-001"] }
+    tests: ["TC-CR002-001"]
+    code:
+      - "apps/admin/src/features/content/structured/lo-letter-page.tsx"
+      - "apps/admin/src/features/content/structured/lo-letter-editor-dialog.tsx"
+      - "apps/admin/src/features/content/structured/lo-letter-columns.tsx"
+      - "apps/admin/src/features/content/structured/contracts.ts"
+  - id: JRN-004
+    title: 归档字母
+    stories: [US-006]
+    steps: [STEP-001, STEP-002]
+    edges:
+      - { id: EDGE-005, priority: P1, tests: ["TC-CR002-002"] }
+    tests: ["TC-CR002-002"]
+    code:
+      - "apps/admin/src/features/content/structured/lo-letter-page.tsx"
+      - "apps/admin/src/features/content/structured/lo-letter-batch-actions.tsx"
+      - "apps/admin/src/features/content/structured/lo-letter-page.test.tsx"
+rows:
+  - story: "US-005"
+    req: "FR-007"
+    frs: ["FR-007", "FR-008"]
+    must_have: true
+    journeys: ["JRN-003"]
+    components: ["CMP-Button", "CMP-Dialog", "CMP-Input", "CMP-Label"]
+    contracts: ["POST /api/v1/admin/content/lo/letters", "PUT /api/v1/admin/content/lo/letters/{contentId}/revisions/{revisionId}", "POST /api/v1/admin/content/lo/letters/{contentId}/derive-working"]
+    tasks: ["CR-002-001"]
+    code: ["apps/admin/src/features/content/structured/lo-letter-page.tsx", "apps/admin/src/features/content/structured/lo-letter-editor-dialog.tsx", "apps/admin/src/features/content/structured/lo-letter-columns.tsx"]
+    tests: ["TC-CR002-001"]
+    status: "implemented"
+  - story: "US-006"
+    req: "FR-009"
+    frs: ["FR-009"]
+    must_have: true
+    journeys: ["JRN-004"]
+    components: ["CMP-Button", "CMP-Dialog"]
+    contracts: ["POST /api/v1/admin/content/lo/letters/batch-tasks"]
+    tasks: ["CR-002-001"]
+    code: ["apps/admin/src/features/content/structured/lo-letter-page.tsx", "apps/admin/src/features/content/structured/lo-letter-batch-actions.tsx"]
+    tests: ["TC-CR002-002"]
+    status: "implemented"

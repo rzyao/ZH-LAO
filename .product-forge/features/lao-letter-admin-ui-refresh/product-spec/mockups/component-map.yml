@@ -1,0 +1,25 @@
+schema_version: 1
+feature: lao-letter-admin-ui-refresh
+screens:
+  - screen: lao-letter-management
+    regions:
+      - region: search and filter toolbar
+        component: CMP-Input
+        variant: default
+        target_path: apps/admin/src/features/content/structured/lo-letter-page.tsx
+        journeys: [JRN-001]
+      - region: list workspace
+        component: CMP-Table
+        variant: responsive
+        target_path: apps/admin/src/features/content/structured/lo-letter-table.tsx
+        journeys: [JRN-001]
+      - region: list loading state
+        component: CMP-Skeleton
+        variant: default
+        target_path: apps/admin/src/features/content/structured/lo-letter-table.tsx
+        journeys: [JRN-001]
+      - region: selection and batch-task context
+        component: CMP-Button
+        variant: outline
+        target_path: apps/admin/src/features/content/structured/lo-letter-page.tsx
+        journeys: [JRN-002]

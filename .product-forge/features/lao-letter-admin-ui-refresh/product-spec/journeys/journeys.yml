@@ -1,0 +1,58 @@
+schema_version: 1
+feature: lao-letter-admin-ui-refresh
+journeys:
+  - id: JRN-001
+    title: 查找与筛选字母
+    actor: 内容管理员
+    stories: [US-001, US-002]
+    smoke: true
+    runner: playwright-cli
+    entry_state: 已进入 /content/lo/letters
+    success_state: 列表与筛选结果一致，操作员能继续操作
+    steps:
+      - id: STEP-001
+        action: 查看页面概览与结果区域
+        expected: 标题、说明、结果上下文和主操作入口清晰可见
+        component: CMP-Table
+      - id: STEP-002
+        action: 输入搜索词或选择既有筛选项
+        expected: 工具栏表现活跃条件，URL 和列表结果维持既有同步行为
+        component: CMP-Input
+      - id: STEP-003
+        action: 清除筛选或恢复默认列
+        expected: 列表回到默认查询状态，控件继续可操作
+        component: CMP-Button
+    edges:
+      - id: EDGE-001
+        priority: P1
+        given: 查询没有匹配记录
+        when: 页面呈现筛选结果
+        then: 显示无结果说明和既有清除筛选入口
+      - id: EDGE-002
+        priority: P1
+        given: 列表请求失败
+        when: 页面呈现错误状态
+        then: 显示可理解的错误与重试入口
+  - id: JRN-002
+    title: 选择字母并跟踪批量任务
+    actor: 内容管理员
+    stories: [US-003, US-004]
+    smoke: true
+    runner: playwright-cli
+    entry_state: 已进入 /content/lo/letters
+    success_state: 已选范围清晰，操作员能查看既有批量任务进度
+    steps:
+      - id: STEP-001
+        action: 选择一个或多个列表记录
+        expected: 已选范围和既有批量操作区出现且不遮挡列表上下文
+        component: CMP-Button
+      - id: STEP-002
+        action: 查看已有批量任务详情或历史
+        expected: 任务状态、完成进度和重试入口保持清晰可辨认
+        component: CMP-Table
+    edges:
+      - id: EDGE-003
+        priority: P1
+        given: 批量任务历史加载失败
+        when: 页面呈现任务历史
+        then: 显示既有错误状态与重试入口

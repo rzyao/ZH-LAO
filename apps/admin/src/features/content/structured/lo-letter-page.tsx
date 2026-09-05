@@ -2,7 +2,9 @@ import * as React from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useQueryClient } from '@tanstack/react-query'
 import type { OnChangeFn, PaginationState, RowSelectionState, SortingState, VisibilityState } from '@tanstack/react-table'
-import { RotateCcw } from 'lucide-react'
+import { Plus, RotateCcw } from 'lucide-react'
+import { useAuth } from '@/auth/context/AuthContext'
+import { useToastApi } from '@/components/feedback/use-toast'
 import { ListPageLayout } from '@/components/layout/list-page-layout'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -11,7 +13,7 @@ import {
   type LaoLetterSearch,
   type LaoLetterSearchInput,
 } from './contracts'
-import { laoLetterBatchTaskKeys, laoLetterQueryKeys, useLaoLetterBatchStart, useLaoLetterBatchTaskList, useLaoLetterList, useLaoLetterSelectionPreview } from './queries'
+import { laoLetterBatchTaskKeys, laoLetterQueryKeys, useLaoLetterBatchStart, useLaoLetterList, useLaoLetterSelectionPreview } from './queries'
 import { laoLetterAdminApi } from './api'
 import { LaoLetterPageView, type LaoLetterPageState } from './lo-letter-table'
 import { LAO_LETTER_HIDEABLE_COLUMN_IDS } from './lo-letter-columns'
@@ -32,6 +34,8 @@ import { LaoLetterSelectionBanner } from './lo-letter-batch-bar'
 import { LaoLetterBatchActions, type LaoLetterBatchAction } from './lo-letter-batch-actions'
 import { LaoLetterBatchTaskPanel } from './lo-letter-batch-task-panel'
 import { TableAudioPlaybackProvider } from './audio-playback-button'
+import { LaoLetterEditorDialog } from './lo-letter-editor-dialog'
+import { LaoLetterArchiveDialog } from './lo-letter-archive-dialog'
 
 export { LaoLetterPageView } from './lo-letter-table'
 
@@ -67,6 +71,8 @@ export function nearestValidLaoLetterPage(input: {
 export function LaoLetterPage({ search }: { search: LaoLetterSearch }) {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const { permissions } = useAuth()
+  const toast = useToastApi()
   const query = useLaoLetterList(search)
   const previewSelection = useLaoLetterSelectionPreview()
   const batchStart = useLaoLetterBatchStart()
@@ -81,10 +87,11 @@ export function LaoLetterPage({ search }: { search: LaoLetterSearch }) {
     rowSelection: RowSelectionState
   }>(() => ({ queryKey: currentSelectionQueryKey, state: NO_LAO_LETTER_SELECTION, rowSelection: {} }))
   const [activeTaskId, setActiveTaskId] = React.useState<string | null>(null)
-  const [taskHistoryPage, setTaskHistoryPage] = React.useState(1)
-  const taskHistory = useLaoLetterBatchTaskList(taskHistoryPage, 20)
   const [selectionNotice, setSelectionNotice] = React.useState('')
   const [rowActionFilter, setRowActionFilter] = React.useState<readonly LaoLetterBatchAction[] | null>(null)
+  const [editorTarget, setEditorTarget] = React.useState<null | { mode: 'create' } | { mode: 'edit'; row: NonNullable<typeof query.data>['items'][number] }>(null)
+  const [archiveTarget, setArchiveTarget] = React.useState<NonNullable<typeof query.data>['items'][number] | null>(null)
+  const canWrite = permissions.includes('content.lo_letters.write')
   const activeSelection = selectionSnapshot.queryKey === currentSelectionQueryKey
     ? selectionSnapshot
     : { queryKey: currentSelectionQueryKey, state: NO_LAO_LETTER_SELECTION, rowSelection: {} }
@@ -157,15 +164,19 @@ export function LaoLetterPage({ search }: { search: LaoLetterSearch }) {
       ),
     }))
   }, [allPageSelected, currentSelectionQueryKey, previewSelection, search])
-  const openRowActions = React.useCallback((row: { content_id: string; character: string; available_actions: readonly LaoLetterBatchAction[] }) => {
-    setSelectionSnapshot({
-      queryKey: currentSelectionQueryKey,
-      state: createPageSelection([row.content_id]),
-      rowSelection: { [row.content_id]: true },
-    })
-    setRowActionFilter(row.available_actions)
-    setSelectionNotice(`已选择 ${row.character}，请在批量操作栏中选择动作`)
-  }, [currentSelectionQueryKey])
+  const openRowEditor = React.useCallback((row: NonNullable<typeof query.data>['items'][number]) => {
+    setEditorTarget({ mode: 'edit', row })
+  }, [])
+  const retryList = React.useCallback(() => { void query.refetch() }, [query.refetch])
+  const clearFilters = React.useCallback(() => replaceSearch({
+    q: undefined,
+    letter_type: [],
+    letter_class: [],
+    content_status: [],
+    revision_status: [],
+    sort: 'sort_order',
+    order: 'asc',
+  }), [replaceSearch])
 
   React.useEffect(() => setSearchText(search.q ?? ''), [search.q])
   React.useEffect(() => {
@@ -190,7 +201,7 @@ export function LaoLetterPage({ search }: { search: LaoLetterSearch }) {
     || search.letter_class.length > 0
     || search.content_status.length > 0
     || search.revision_status.length > 0
-  const state: LaoLetterPageState = query.isPending
+  const state = React.useMemo<LaoLetterPageState>(() => query.isPending
     ? { kind: 'initial-loading' }
     : query.isError && !query.data
       ? { kind: 'error', error: query.error instanceof Error ? query.error : new Error('request failed') }
@@ -200,11 +211,11 @@ export function LaoLetterPage({ search }: { search: LaoLetterSearch }) {
           : { kind: 'first-empty' }
         : query.isFetching
           ? { kind: 'background-refresh', data: query.data }
-          : { kind: 'ready', data: query.data }
+          : { kind: 'ready', data: query.data }, [hasFilters, query.data, query.error, query.isError, query.isFetching, query.isPending, search])
 
-  const sorting: SortingState = [{ id: search.sort, desc: search.order === 'desc' }]
+  const sorting = React.useMemo<SortingState>(() => [{ id: search.sort, desc: search.order === 'desc' }], [search.order, search.sort])
   const total = query.data?.total ?? 0
-  const server = {
+  const server = React.useMemo(() => ({
     pagination: { pageIndex: search.page - 1, pageSize: search.page_size },
     sorting,
     rowCount: total,
@@ -221,58 +232,62 @@ export function LaoLetterPage({ search }: { search: LaoLetterSearch }) {
       const first = next[0]
       if (first) replaceSearch({ sort: first.id as LaoLetterSearch['sort'], order: first.desc ? 'desc' : 'asc' })
     },
-  }
+  }), [replaceSearch, search.order, search.page, search.page_size, search.sort, sorting, total])
+  const visibleRowIds = React.useMemo(() => query.data?.items.map((item) => item.content_id) ?? [], [query.data?.items])
+  const queryToolbar = React.useMemo(() => <LaoLetterQueryControls search={search} searchText={searchText} showPageSize={query.isPending || query.isError} onSearchTextChange={setSearchText} onChange={replaceSearch} />, [query.isError, query.isPending, replaceSearch, search, searchText])
+  const columnReset = React.useMemo(() => <Button aria-label="恢复默认列" size="sm" variant="outline" onClick={restoreDefaultColumns}><RotateCcw aria-hidden />恢复默认列</Button>, [restoreDefaultColumns])
 
   return (
     <ListPageLayout
       title="字母管理"
       description="维护老挝语字母、声调符号及其他正字法标记。"
-      breadcrumb={[{ label: '内容管理' }, { label: '老挝语内容' }, { label: '字母管理' }]}
+      actions={<Button disabled={!canWrite} onClick={() => setEditorTarget({ mode: 'create' })}><Plus aria-hidden />新建字母</Button>}
+      toolbar={actionableSelection === null ? null : <section className="flex flex-wrap items-center gap-3" aria-label="批量操作栏">
+        <LaoLetterSelectionBanner
+          state={activeSelection.state}
+          total={total}
+          allPageSelected={allPageSelected}
+          upgrading={previewSelection.isPending}
+          onUpgrade={() => { void upgradeSelection() }}
+          className="border-0 bg-transparent p-0"
+        />
+        <div className="hidden h-5 w-px bg-border sm:block" aria-hidden />
+        {selectionNotice ? <p className="text-sm text-muted-foreground" role="alert">{selectionNotice}</p> : null}
+        <LaoLetterBatchActions
+          actions={rowActionFilter ?? query.data?.batch_actions ?? []}
+          selection={actionableSelection}
+          onSelectionStale={() => {
+            setSelectionSnapshot({ queryKey: currentSelectionQueryKey, state: NO_LAO_LETTER_SELECTION, rowSelection: {} })
+            setRowActionFilter(null)
+            setSelectionNotice('目标集合已变化，请重新选择')
+          }}
+          onSubmit={({ action, idempotencyKey, reason }) => batchStart.mutateAsync({
+            action,
+            idempotencyKey,
+            ...(reason === undefined ? {} : { reason }),
+            selection: actionableSelection.mode === 'query_all'
+              ? {
+                  mode: 'query_all',
+                  query: selectionQueryFromSearch(search),
+                  expected_count: actionableSelection.expectedCount,
+                  selection_hash: actionableSelection.selectionHash,
+                }
+              : {
+                  mode: 'explicit_ids',
+                  content_ids: actionableSelection.contentIds,
+                  expected_count: actionableSelection.contentIds.length,
+                },
+          }).then((task) => {
+            setActiveTaskId(task.task_id)
+            setSelectionNotice('')
+            setRowActionFilter(null)
+            setSelectionSnapshot({ queryKey: currentSelectionQueryKey, state: NO_LAO_LETTER_SELECTION, rowSelection: {} })
+          })}
+        />
+      </section>}
     >
-      <div className="p-4" data-testid="content-lo-letters-page">
-        <div className="space-y-2">
-          <LaoLetterSelectionBanner
-            state={activeSelection.state}
-            total={total}
-            allPageSelected={allPageSelected}
-            upgrading={previewSelection.isPending}
-            onUpgrade={() => { void upgradeSelection() }}
-          />
-          {selectionNotice ? <div className="rounded-md border px-3 py-2 text-sm">
-            <p role="alert">{selectionNotice}</p>
-            <span className="sr-only" aria-live="polite" role="status">{selectionNotice}</span>
-          </div> : null}
-          {actionableSelection === null ? null : <LaoLetterBatchActions
-            actions={rowActionFilter ?? query.data?.batch_actions ?? []}
-            selection={actionableSelection}
-            onSelectionStale={() => {
-              setSelectionSnapshot({ queryKey: currentSelectionQueryKey, state: NO_LAO_LETTER_SELECTION, rowSelection: {} })
-              setRowActionFilter(null)
-              setSelectionNotice('目标集合已变化，请重新选择')
-            }}
-            onSubmit={({ action, idempotencyKey, reason }) => batchStart.mutateAsync({
-              action,
-              idempotencyKey,
-              ...(reason === undefined ? {} : { reason }),
-              selection: actionableSelection.mode === 'query_all'
-                ? {
-                    mode: 'query_all',
-                    query: selectionQueryFromSearch(search),
-                    expected_count: actionableSelection.expectedCount,
-                    selection_hash: actionableSelection.selectionHash,
-                  }
-                : {
-                    mode: 'explicit_ids',
-                    content_ids: actionableSelection.contentIds,
-                    expected_count: actionableSelection.contentIds.length,
-                  },
-            }).then((task) => {
-              setActiveTaskId(task.task_id)
-              setSelectionNotice('')
-              setRowActionFilter(null)
-              setSelectionSnapshot({ queryKey: currentSelectionQueryKey, state: NO_LAO_LETTER_SELECTION, rowSelection: {} })
-            })}
-          />}
+      <div className="space-y-3" data-testid="content-lo-letters-page">
+        <div className="space-y-3">
           {activeTaskId ? <LaoLetterBatchTaskPanel
             visible
             taskId={activeTaskId}
@@ -280,37 +295,31 @@ export function LaoLetterPage({ search }: { search: LaoLetterSearch }) {
             retryFailed={retryBatchTask}
             onTaskListInvalidated={invalidateBatchViews}
           /> : null}
-          <section className="space-y-2 rounded-md border p-3" aria-label="批量任务历史">
-            <div className="flex items-center justify-between gap-2"><h2 className="font-medium">批量任务历史</h2><Button size="sm" variant="outline" onClick={() => { void taskHistory.refetch() }}>刷新历史</Button></div>
-            {taskHistory.isPending ? <p className="text-sm text-muted-foreground">正在加载任务历史…</p> : taskHistory.isError
-              ? <div role="alert" className="text-sm text-destructive"><p>{taskHistory.error instanceof Error ? taskHistory.error.message : '任务历史加载失败'}</p><Button size="sm" variant="outline" onClick={() => { void taskHistory.refetch() }}>重试加载历史</Button></div>
-              : taskHistory.data.items.length === 0 ? <p className="text-sm text-muted-foreground">暂无批量任务。</p>
-                : <ul className="space-y-1">{taskHistory.data.items.map((task) => <li className="flex flex-wrap items-center justify-between gap-2 rounded bg-muted/50 px-3 py-2 text-sm" key={task.task_id}><span>{task.action} · {task.status} · {task.processed_count}/{task.target_count}</span><Button size="sm" variant="ghost" onClick={() => setActiveTaskId(task.task_id)}>查看详情</Button></li>)}</ul>}
-            <div className="flex gap-2"><Button disabled={taskHistoryPage <= 1} size="sm" variant="outline" onClick={() => setTaskHistoryPage((page) => page - 1)}>上一页历史</Button><Button disabled={!taskHistory.data || taskHistoryPage * 20 >= taskHistory.data.total} size="sm" variant="outline" onClick={() => setTaskHistoryPage((page) => page + 1)}>下一页历史</Button></div>
-          </section>
-          <TableAudioPlaybackProvider visibleRowIds={query.data?.items.map((item) => item.content_id) ?? []}><LaoLetterPageView
+          {/* CR-001: 历史任务仍由服务端保留；首页只在刚发起操作后展示当前任务详情。 */}
+          <section className="rounded-lg border bg-card p-4 shadow-xs [&_thead_button]:text-sm [&_thead_button]:font-semibold [&_thead_th]:text-sm [&_thead_th]:font-semibold" aria-label="字母数据表">
+          <TableAudioPlaybackProvider visibleRowIds={visibleRowIds}><LaoLetterPageView
             state={state}
             server={server}
             rowSelection={activeSelection.rowSelection}
             onRowSelectionChange={changeRowSelection}
             onSelectedRowIdsChange={changeSelectedIds}
-            onRowAction={openRowActions}
+            onRowEdit={openRowEditor}
+            onRowArchive={setArchiveTarget}
+            rowHoverClassName="hover:bg-primary/5"
+            stickyCellStateClassName="group-hover:bg-primary/5 group-data-[state=selected]:bg-[var(--primary-light)] focus-within:ring-0"
+            className="space-y-4"
             columnVisibility={columnVisibility}
             onColumnVisibilityChange={changeColumnVisibility}
-            onRetry={() => { void query.refetch() }}
-            onClearFilters={() => replaceSearch({
-              q: undefined,
-              letter_type: [],
-              letter_class: [],
-              content_status: [],
-              revision_status: [],
-              sort: 'sort_order',
-              order: 'asc',
-            })}
-            toolbar={<div className="flex flex-wrap items-center gap-2"><LaoLetterQueryControls search={search} searchText={searchText} showPageSize={query.isPending || query.isError} onSearchTextChange={setSearchText} onChange={replaceSearch} /><Button aria-label="恢复默认列" size="sm" variant="outline" onClick={restoreDefaultColumns}><RotateCcw aria-hidden />恢复默认列</Button></div>}
+            onRetry={retryList}
+            onClearFilters={clearFilters}
+            toolbar={queryToolbar}
+            toolbarActions={columnReset}
           /></TableAudioPlaybackProvider>
+          </section>
         </div>
       </div>
+      <LaoLetterEditorDialog target={editorTarget} onClose={() => setEditorTarget(null)} onSaved={(message) => toast.success({ title: message })} onError={(error) => toast.error({ title: '字母草稿操作失败', description: error instanceof Error ? error.message : '请稍后重试' })} />
+      <LaoLetterArchiveDialog row={archiveTarget} onClose={() => setArchiveTarget(null)} onCreated={(taskId) => { setActiveTaskId(taskId); toast.success({ title: '归档任务已创建' }) }} onError={(error) => toast.error({ title: '归档任务创建失败', description: error instanceof Error ? error.message : '请稍后重试' })} />
     </ListPageLayout>
   )
 }

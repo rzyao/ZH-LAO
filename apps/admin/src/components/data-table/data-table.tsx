@@ -48,12 +48,18 @@ interface DataTableProps<TData, TValue> {
   onRetry?: () => void
   /** Extra content rendered above the table, left of the view options. */
   toolbar?: React.ReactNode
+  /** Optional actions rendered immediately before the column-view control. */
+  toolbarActions?: React.ReactNode
   showViewOptions?: boolean
   showPagination?: boolean
   pageSizeOptions?: number[]
   emptyTitle?: string
   emptyDescription?: string
   onRowClick?: (row: TData) => void
+  /** Optional page-specific hover treatment for body rows. */
+  rowHoverClassName?: string
+  /** Optional state treatment for sticky cells, such as a fixed action column. */
+  stickyCellStateClassName?: string
   getRowId?: (row: TData) => string
   enableRowSelection?: boolean
   rowSelection?: RowSelectionState
@@ -82,12 +88,15 @@ export function DataTable<TData, TValue>({
   error,
   onRetry,
   toolbar,
+  toolbarActions,
   showViewOptions = true,
   showPagination = true,
   pageSizeOptions,
   emptyTitle = '暂无数据',
   emptyDescription,
   onRowClick,
+  rowHoverClassName,
+  stickyCellStateClassName,
   getRowId,
   enableRowSelection = false,
   rowSelection: controlledRowSelection,
@@ -150,7 +159,10 @@ export function DataTable<TData, TValue>({
     <div className={cn('space-y-2', className)}>
       <div className="flex items-center justify-between gap-2">
         <div className="min-w-0 flex-1">{toolbar}</div>
-        {showViewOptions ? <DataTableViewOptions table={table} /> : null}
+        <div className="flex shrink-0 items-center gap-2">
+          {toolbarActions}
+          {showViewOptions ? <DataTableViewOptions table={table} /> : null}
+        </div>
       </div>
 
       <div className="overflow-x-auto rounded-md border" data-testid="data-table-scroll-container">
@@ -187,10 +199,10 @@ export function DataTable<TData, TValue>({
                   key={row.id}
                   data-state={row.getIsSelected() ? 'selected' : undefined}
                   onClick={onRowClick ? () => onRowClick(row.original) : undefined}
-                  className={onRowClick ? 'cursor-pointer' : undefined}
+                  className={cn('group', rowHoverClassName, onRowClick ? 'cursor-pointer' : undefined)}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className={stickyColumnClass(cell.column.columnDef.meta, false)}>
+                    <TableCell key={cell.id} className={cn(stickyColumnClass(cell.column.columnDef.meta, false), stickyCellStateClassName)}>
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}
