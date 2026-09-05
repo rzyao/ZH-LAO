@@ -60,4 +60,15 @@ integration('AudioAttemptService PostgreSQL', () => {
       { attempt_no: 2, status: 'dead_letter', transport_retry_count: 0 }
     ]);
   });
+
+  it('serializes simultaneous request-id replays without creating a second attempt', async () => {
+    const service = new AudioAttemptService(
+      { query: (text, values) => pool.query(text, values as unknown[]) },
+      new TransactionManager(pool, pino({ level: 'silent' }))
+    );
+    const taskId = await createTtsTask();
+    const results = await Promise.all([service.startAttempt(taskId, 'same-request'), service.startAttempt(taskId, 'same-request')]);
+    expect(results[0]).toEqual(results[1]);
+    expect((await pool.query(`SELECT id FROM audio.audio_generation_attempts WHERE task_id=$1`, [taskId])).rows).toHaveLength(1);
+  });
 });

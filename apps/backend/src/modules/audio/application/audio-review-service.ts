@@ -14,6 +14,8 @@ export class AudioReviewService {
       if (prior.rows[0]) return { id: prior.rows[0].id, replayed: true };
       const asset = await tx.query<{ task_id: string; review_status: string }>(`SELECT task_id,review_status FROM audio.audio_asset_versions WHERE id=$1 FOR UPDATE`, [input.assetVersionId]);
       if (!asset.rows[0]) throw new Error('AUDIO_ASSET_VERSION_NOT_FOUND');
+      const lockedPrior = await tx.query<{ id: string }>(`SELECT id FROM audio.audio_reviews WHERE request_id=$1`, [input.requestId]);
+      if (lockedPrior.rows[0]) return { id: lockedPrior.rows[0].id, replayed: true };
       const a = asset.rows[0];
       if (input.decision === 'approval_revoked' && a.review_status !== 'approved') throw new Error('AUDIO_REVIEW_NOT_APPROVED');
       if (input.decision !== 'approval_revoked' && a.review_status !== 'pending_review') throw new Error('AUDIO_REVIEW_NOT_PENDING');

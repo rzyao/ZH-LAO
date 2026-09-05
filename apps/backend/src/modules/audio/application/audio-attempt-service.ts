@@ -15,16 +15,16 @@ export class AudioAttemptService {
       );
       if (replay.rows[0]) return { id: replay.rows[0].id, attemptNo: replay.rows[0].attempt_no };
 
-      // Locking the task serializes attempt-number allocation for this task.
-      const task = await tx.query<{ id: string }>(
-        `UPDATE audio.audio_tasks
-         SET status = 'producing', started_at = COALESCE(started_at, now()), updated_at = now(), lock_version = lock_version + 1
-         WHERE id = $1 AND production_method = 'tts'
-           AND status IN ('pending_assignment', 'assigned', 'production_failed', 'producing')
-         RETURNING id`,
-        [taskId]
+      // Locking the task serializes both request-id replays and attempt allocation.
+      const task = await tx.query<{ id: string; production_method: string; status: string }>(
+        `SELECT id, production_method, status FROM audio.audio_tasks WHERE id = $1 FOR UPDATE`, [taskId]
       );
-      if (!task.rows[0]) throw new Error('AUDIO_TASK_NOT_TTS_STARTABLE');
+      if (!task.rows[0] || task.rows[0].production_method !== 'tts' || !['pending_assignment', 'assigned', 'production_failed', 'producing'].includes(task.rows[0].status)) throw new Error('AUDIO_TASK_NOT_TTS_STARTABLE');
+      const lockedReplay = await tx.query<{ id: string; attempt_no: number }>(
+        `SELECT id, attempt_no FROM audio.audio_generation_attempts WHERE request_id = $1`, [requestId]
+      );
+      if (lockedReplay.rows[0]) return { id: lockedReplay.rows[0].id, attemptNo: lockedReplay.rows[0].attempt_no };
+      await tx.query(`UPDATE audio.audio_tasks SET status='producing',started_at=COALESCE(started_at,now()),updated_at=now(),lock_version=lock_version+1 WHERE id=$1`, [taskId]);
 
       const next = await tx.query<{ attempt_no: number }>(
         `SELECT COALESCE(MAX(attempt_no), 0) + 1 AS attempt_no

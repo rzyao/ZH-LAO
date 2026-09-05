@@ -10,6 +10,8 @@ export class AudioPublishService {
       const asset = await tx.query<{ slot_id: string; task_id: string }>(`SELECT slot_id,task_id FROM audio.audio_asset_versions WHERE id=$1 AND review_status='approved' FOR UPDATE`, [assetVersionId]);
       if (!asset.rows[0]) throw new Error('AUDIO_ASSET_NOT_APPROVED');
       const a = asset.rows[0];
+      const lockedReplay = await tx.query<{ task_id: string }>(`SELECT task_id FROM audio.audio_task_events WHERE request_id=$1 AND event_type='published'`, [requestId]);
+      if (lockedReplay.rows[0]) return { taskId: lockedReplay.rows[0].task_id, replayed: true };
       const task = await tx.query<{ id: string }>(`SELECT id FROM audio.audio_tasks WHERE id=$1 AND status='approved' FOR UPDATE`, [a.task_id]);
       if (!task.rows[0]) throw new Error('AUDIO_TASK_NOT_APPROVED');
       await tx.query(`UPDATE audio.audio_asset_versions SET first_published_at=COALESCE(first_published_at,now()),updated_at=now() WHERE id=$1`, [assetVersionId]);
