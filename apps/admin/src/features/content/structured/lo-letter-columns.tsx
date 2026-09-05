@@ -60,7 +60,7 @@ export function createLaoLetterColumns(
   { accessorKey: 'name', header: ({ column }) => <DataTableColumnHeader column={column} title="名称" />, cell: ({ row }) => row.original.name ?? '—' },
   {
     id: 'actions',
-      header: '编辑与删除',
+      header: '操作',
     enableHiding: false,
     meta: { sticky: 'right' },
     cell: ({ row }) => (
