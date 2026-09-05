@@ -1,0 +1,16 @@
+schema_version: 1
+feature: "dictionary-content-management"
+screens:
+  - screen: "word-dictionary-editor"
+    regions:
+      - { region: "Word list", component: "CMP-ContentList", target_path: "apps/admin/src/features/content/pages/category.tsx", journeys: ["JRN-001"] }
+      - { region: "Aggregate editor", component: "CMP-DictionaryEditor", target_path: "apps/admin/src/features/content/pages/category.tsx", journeys: ["JRN-001"] }
+      - { region: "Save action", component: "CMP-Button", variant: "default", target_path: "apps/admin/src/components/ui/button.tsx", journeys: ["JRN-001"] }
+  - screen: "dictionary-review"
+    regions:
+      - { region: "Version comparison", component: "CMP-VersionCompare", target_path: "apps/admin/src/features/content/pages/category.tsx", journeys: ["JRN-002"] }
+      - { region: "Reject reason", component: "CMP-ReviewDialog", target_path: "apps/admin/src/features/content/pages/category.tsx", journeys: ["JRN-002"] }
+  - screen: "dictionary-publish-preflight"
+    regions:
+      - { region: "Preflight blockers", component: "CMP-PublishPreflight", target_path: "apps/admin/src/features/content/pages/category.tsx", journeys: ["JRN-002"] }
+      - { region: "Confirmation", component: "CMP-ConfirmDialog", target_path: "apps/admin/src/components/feedback/confirm-dialog.tsx", journeys: ["JRN-002"] }

@@ -27,6 +27,7 @@ export const requiredMigrations = [
   { filename: '1310_content_language_structures.sql', sha256: '3142fb45053a3d0c794286d03e4e4727632480dfda4cc2aa1fb732baeb7f0ab4' },
   { filename: '1320_content_language_permissions.sql', sha256: '684994303405b9a0cbb07b8ccecab24eaabed8cc45aa049ecb5c316ab4a185c3' },
   { filename: '1330_platform_menu_recursive_directories.sql', sha256: 'ce3abae555be0b7984a325ef3342a8ea0d5defd529dfcede6d6c712eec1b6a01' },
+  { filename: '1340_content_idempotency.sql', sha256: '3b1f79283d1f75151c0a3988658edee74adc370963da3af878db063ab7d3de10' },
   { filename: '1340_content_letter_batch_tasks.sql', sha256: 'd78597d7141b092b30975f35a6e82c20a459c9ce18cd3066f6bc22f6cefc88fc' },
   { filename: '1350_curriculum_revision_pointers.sql', sha256: '2e8b24b8ed285d7c0812868c7211b25e15529ce875f1bd74517b20da85aea346' },
   { filename: '1360_admin_credentials_password_change_required.sql', sha256: '341ab4f9f16fbd20b37ae8c7080e6969bc78a7569bea5eed8c5bbc496c9ebdcb' },

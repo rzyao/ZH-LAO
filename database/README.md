@@ -6,13 +6,12 @@ the frozen ZH-LAO Domain documentation dated 2026-08-30.
 ## Status
 
 **Baseline status: PASS.** The executable baseline creates all 11 business
-schemas and 125 business tables (the original 121-table business inventory,
-plus the Content-owned `content.content_revisions` table required by the
-now-frozen revision contract, plus `identity.admin_credentials` and the two
-ADR-022 menu-configuration tables `platform.menus` /
-`platform.menu_permissions`). The shared infrastructure schema contains the
-canonical `assets` table and transactional `system_outbox_events` table
-(2 infrastructure tables, 127 tables in total).
+schemas and 130 business tables after approved forward migrations. The Content
+schema includes the revision history table and the Content-owned
+`content.idempotency_records` replay ledger; neither creates public child
+identities. The shared infrastructure schema contains the canonical `assets`
+table and transactional `system_outbox_events` table (2 infrastructure tables,
+132 tables in total).
 
 The catalog inventory is checked against `checks/expected-schema.json`, which
 must be kept in sync whenever a migration adds or removes a table.

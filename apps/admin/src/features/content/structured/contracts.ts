@@ -112,11 +112,21 @@ export interface ManagedStructuredContent {
   revisionNumber: number | null
   revisionStatus: 'draft' | 'pending_review' | 'approved' | 'published' | 'rejected' | 'superseded' | null
   lockVersion: number | null
-  snapshot: { fields: Record<string, unknown>; composition: Array<{ contentId: string; position: number; role?: string; surfaceForm?: string }> } | null
+  snapshot: {
+    fields: Record<string, unknown>
+    composition: Array<{ contentId: string; position: number; role?: string; surfaceForm?: string }>
+    dictionary?: {
+      meanings: Array<{ language: 'zh' | 'lo'; wordClass?: string; definition: string; senseOrder: number }>
+      examples: Array<{ sentenceContentId: string; meaningLanguage?: 'zh' | 'lo'; meaningSenseOrder?: number; sortOrder: number }>
+      equivalents: Array<{ targetContentId: string; relationType: 'translation' | 'equivalent' | 'approximate'; confidence?: number; isPrimary?: boolean }>
+      relations: Array<{ targetContentId: string; relationType: 'synonym' | 'antonym' | 'related' | 'derived' | 'variant'; sortOrder: number }>
+      tags: Array<{ code: string; name: string }>
+    }
+  } | null
 }
 
 export interface ManagedStructuredContentList { items: ManagedStructuredContent[]; total: number }
-export interface StructuredRevisionItem { revisionId: string; revisionNumber: number; status: string; snapshot: { fields: Record<string, unknown>; composition: Array<{ contentId: string; position: number }> }; reviewRemark: string | null; reviewedAt: string | null; publishedAt: string | null; createdAt: string }
+export interface StructuredRevisionItem { revisionId: string; revisionNumber: number; status: string; snapshot: { fields: Record<string, unknown>; composition: Array<{ contentId: string; position: number }>; dictionary?: ManagedStructuredContent['snapshot'] extends infer T ? T extends { dictionary?: infer D } ? D : never : never }; reviewRemark: string | null; reviewedAt: string | null; publishedAt: string | null; createdAt: string }
 export interface ContentReferenceItem { contentId: string; contentType: StructuredContentType; position: number | null }
 
 export const LaoLetterTypeSchema = z.enum(['consonant', 'vowel', 'tone_mark', 'other'])

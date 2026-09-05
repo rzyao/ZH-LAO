@@ -187,7 +187,7 @@ export class ApiClient {
     path: string,
     options: RequestOptions,
   ): Promise<ApiResponse<T>> {
-    const { query, json, timeoutMs: requestTimeoutMs, skipAuth, signal: externalSignal, body: rawBody, ...fetchOptions } = options
+    const { query, json, timeoutMs: requestTimeoutMs, skipAuth, signal: externalSignal, body: rawBody, headers: requestHeaders, ...fetchOptions } = options
     const url = `${joinUrl(this.baseUrl, path)}${serializeQuery(query)}`
     const requestId = createRequestId()
     const timeoutMs = requestTimeoutMs ?? this.timeoutMs
@@ -208,6 +208,7 @@ export class ApiClient {
 
     const buildHeaders = (): Headers => {
       const headers = new Headers(this.defaultHeaders)
+      new Headers(requestHeaders).forEach((value, key) => headers.set(key, value))
       headers.set('Accept', 'application/json')
       headers.set('X-Request-Id', requestId)
       const token = skipAuth ? null : this.getAccessToken?.() ?? null

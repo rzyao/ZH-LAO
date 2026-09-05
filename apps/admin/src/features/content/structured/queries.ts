@@ -112,3 +112,10 @@ export function useLaoLetterBatchRetry() {
     },
   })
 }
+
+export function useReplaceDictionarySection(config: ContentCategoryConfig) {
+  return useContentMutation<{ contentId: string; section: 'meanings' | 'examples' | 'relationships' | 'tags'; body: Record<string, unknown> }>(
+    config,
+    ({ contentId, section, body }) => structuredContentApi.replaceDictionarySection(contentId, section, body),
+  )
+}

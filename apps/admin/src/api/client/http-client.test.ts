@@ -170,6 +170,14 @@ describe('ApiClient', () => {
     expect(headers.get('X-Request-Id')).toBeTruthy()
   })
 
+  it('preserves a caller-supplied idempotency key on the request', async () => {
+    const fetchImpl = vi.fn().mockResolvedValue(jsonResponse(200, {}))
+    const client = makeClient(fetchImpl)
+    await client.post('/content/publish', { headers: { 'Idempotency-Key': 'publish-001' } })
+    const [, init] = fetchImpl.mock.calls[0] as [string, RequestInit]
+    expect(new Headers(init.headers).get('Idempotency-Key')).toBe('publish-001')
+  })
+
   it('serializes JSON bodies and query parameters', async () => {
     const fetchImpl = vi.fn().mockResolvedValue(jsonResponse(200, {}))
     const client = makeClient(fetchImpl)

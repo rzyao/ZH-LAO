@@ -33,6 +33,9 @@ export async function registerContentRoutes(app: FastifyInstance, dependencies: 
     ...(dependencies.curriculumRepository === undefined
       ? {}
       : { curriculumRepository: dependencies.curriculumRepository }),
+    ...(dependencies.structuredContentRepository
+      ? { structuredContentRepository: dependencies.structuredContentRepository }
+      : {}),
   });
   await app.register(adminContentRoutes, {
     prefix: '/api/v1/admin/content',

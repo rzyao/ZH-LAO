@@ -18,6 +18,7 @@ import {
 const base = '/api/v1/admin/content'
 const itemBase = (config: ContentCategoryConfig, contentId: string, revisionId: string) =>
   `${base}/${config.apiPath}/${encodeURIComponent(contentId)}/revisions/${encodeURIComponent(revisionId)}`
+const idempotencyHeaders = () => ({ 'Idempotency-Key': crypto.randomUUID() })
 
 export const structuredContentApi = {
   async list(config: ContentCategoryConfig, signal?: AbortSignal) {
@@ -36,19 +37,26 @@ export const structuredContentApi = {
     return (await apiClient.put(itemBase(config, contentId, revisionId), { json: { snapshot, expectedLockVersion } })).data
   },
   async submit(config: ContentCategoryConfig, contentId: string, revisionId: string) {
-    return (await apiClient.post(`${itemBase(config, contentId, revisionId)}/submit`)).data
+    return (await apiClient.post(`${itemBase(config, contentId, revisionId)}/submit`, { headers: idempotencyHeaders() })).data
   },
   async review(config: ContentCategoryConfig, contentId: string, revisionId: string, action: 'approve' | 'reject', remark?: string) {
-    return (await apiClient.post(`${itemBase(config, contentId, revisionId)}/review`, { json: { action, remark } })).data
+    return (await apiClient.post(`${itemBase(config, contentId, revisionId)}/review`, { json: { action, remark }, headers: idempotencyHeaders() })).data
   },
   async reEdit(config: ContentCategoryConfig, contentId: string, revisionId: string) {
     return (await apiClient.post(`${itemBase(config, contentId, revisionId)}/re-edit`)).data
   },
   async publish(config: ContentCategoryConfig, contentId: string, revisionId: string) {
-    return (await apiClient.post(`${itemBase(config, contentId, revisionId)}/publish`)).data
+    return (await apiClient.post(`${itemBase(config, contentId, revisionId)}/publish`, { headers: idempotencyHeaders() })).data
   },
   async derive(config: ContentCategoryConfig, contentId: string) {
     return (await apiClient.post(`${base}/${config.apiPath}/${encodeURIComponent(contentId)}/derive-working`)).data
+  },
+  async replaceDictionarySection(
+    contentId: string,
+    section: 'meanings' | 'examples' | 'relationships' | 'tags',
+    body: Record<string, unknown>,
+  ) {
+    return (await apiClient.put(`${base}/knowledge/${encodeURIComponent(contentId)}/${section}`, { json: body, headers: idempotencyHeaders() })).data
   },
 }
 
